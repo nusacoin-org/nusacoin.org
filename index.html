@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nusacoin (NUX) — Blockchain Milik Rakyat</title>
+<meta name="description" content="Nusacoin (NUX) — jaringan pembayaran peer-to-peer terdesentralisasi berbasis algoritma X11. Aman, privat, dan sepenuhnya milik Anda.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+/* ============================================================
+   NUSACOIN — DESIGN TOKENS
+   Signature: "chained block" motif — sections read like linked
+   ledger blocks (mono eyebrows, dotted chain connectors).
+   ============================================================ */
+:root{
+  --nux-green:#27ae60;
+  --nux-green-dark:#1e8449;
+  --nux-green-deep:#0f3d26;
+  --gold:#d4a017;
+
+  --bg:#f7f5ef;
+  --surface:#ffffff;
+  --surface-2:#f0efe6;
+  --ink:#16231c;
+  --ink-soft:#56645c;
+  --border:#e3ded0;
+  --shadow: 0 10px 30px -12px rgba(15,61,38,0.18);
+
+  --font-display:'Sora',sans-serif;
+  --font-body:'Inter',sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+
+  --radius:14px;
+  --transition: 0.35s cubic-bezier(.22,.9,.32,1.24);
+}
+
+html[data-theme="dark"]{
+  --bg:#0d1712;
+  --surface:#142219;
+  --surface-2:#182a1e;
+  --ink:#eef3ec;
+  --ink-soft:#9db3a4;
+  --border:#24382c;
+  --shadow: 0 10px 34px -10px rgba(0,0,0,0.55);
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:var(--font-body);
+  background:var(--bg);
+  color:var(--ink);
+  line-height:1.65;
+  overflow-x:hidden;
+  transition:background var(--transition), color var(--transition);
+}
+img{max-width:100%;display:block;}
+a{color:inherit;}
+h1,h2,h3,h4{font-family:var(--font-display);letter-spacing:-0.01em;}
+.mono{font-family:var(--font-mono);}
+:focus-visible{outline:2px solid var(--nux-green);outline-offset:3px;border-radius:4px;}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important; scroll-behavior:auto !important;}
+}
+
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px;}
+.eyebrow{
+  font-family:var(--font-mono);
+  font-size:0.72rem;
+  letter-spacing:0.14em;
+  text-transform:uppercase;
+  color:var(--nux-green);
+  font-weight:700;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+}
+.eyebrow::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--nux-green);box-shadow:0 0 0 3px rgba(39,174,96,0.18);}
+
+/* ---------- Hover-animated media (requested: kursor -> animasi) ---------- */
+.hoverpic{
+  overflow:hidden;
+  border-radius:var(--radius);
+  background:var(--surface-2);
+  border:1px solid var(--border);
+}
+.hoverpic img{
+  transition: transform 0.5s cubic-bezier(.22,.9,.32,1.24), filter 0.5s ease;
+  will-change:transform;
+}
+.hoverpic:hover img{
+  transform:scale(1.06) rotate(-0.6deg);
+  filter:saturate(1.12);
+}
+.icon-tile{transition:transform var(--transition), box-shadow var(--transition), border-color var(--transition);}
+.icon-tile:hover{transform:translateY(-6px) rotate(-1deg);}
+
+/* ---------- Announcement bar ---------- */
+.top-bar{
+  background:linear-gradient(90deg,var(--nux-green-deep),var(--nux-green));
+  color:#eafff2;
+  text-align:center;
+  padding:9px 16px;
+  font-size:0.82rem;
+  font-weight:600;
+}
+.top-bar a{color:#fff;text-decoration:underline;text-underline-offset:3px;}
+
+/* ---------- Header ---------- */
+header{
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:1000;
+  transition:background var(--transition), border-color var(--transition);
+}
+.nav-container{
+  max-width:1180px;margin:0 auto;padding:0 24px;
+  display:flex;align-items:center;height:72px;gap:28px;
+}
+.logo-area{display:flex;align-items:center;gap:10px;text-decoration:none;font-family:var(--font-display);font-weight:800;font-size:1.25rem;color:var(--ink);flex-shrink:0;}
+.logo-mark{
+  width:34px;height:34px;border-radius:9px;
+  background:linear-gradient(135deg,var(--nux-green),var(--nux-green-deep));
+  display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.95rem;font-weight:800;
+}
+.logo-area .accent{color:var(--nux-green);}
+
+.nav-menu{display:flex;list-style:none;height:100%;align-items:center;gap:2px;}
+.nav-item{position:relative;height:100%;display:flex;align-items:center;}
+.nav-link{
+  text-decoration:none;color:var(--ink-soft);font-size:0.87rem;font-weight:600;
+  padding:0 13px;height:100%;display:flex;align-items:center;gap:6px;
+  transition:color 0.2s;white-space:nowrap;
+}
+.nav-link:hover{color:var(--nux-green);}
+.dropdown{
+  position:absolute;top:100%;left:0;background:var(--surface);min-width:230px;
+  box-shadow:var(--shadow);border:1px solid var(--border);border-radius:0 0 12px 12px;
+  display:none;padding:8px 0;list-style:none;
+}
+.dropdown a{display:block;padding:9px 18px;text-decoration:none;color:var(--ink-soft);font-size:0.82rem;transition:0.2s;}
+.dropdown a:hover{background:var(--surface-2);color:var(--nux-green);padding-left:22px;}
+.nav-item:hover .dropdown{display:block;}
+
+.nav-tools{display:flex;align-items:center;gap:8px;margin-left:auto;}
+.tool-btn{
+  display:flex;align-items:center;gap:6px;
+  background:var(--surface-2);border:1px solid var(--border);color:var(--ink);
+  padding:8px 12px;border-radius:9px;font-size:0.78rem;font-weight:700;cursor:pointer;
+  font-family:var(--font-mono);transition:border-color 0.2s, color 0.2s, transform 0.2s;
+}
+.tool-btn:hover{border-color:var(--nux-green);color:var(--nux-green);transform:translateY(-1px);}
+.menu-toggle{display:none;font-size:1.3rem;cursor:pointer;background:none;border:none;color:var(--ink);}
+
+@media (max-width:1080px){
+  .menu-toggle{display:block;}
+  .nav-menu{
+    display:none;flex-direction:column;position:absolute;top:100%;left:0;width:100%;
+    background:var(--surface);height:auto;padding:16px 0;border-bottom:3px solid var(--nux-green);
+    box-shadow:var(--shadow);
+  }
+  .nav-menu.active{display:flex;}
+  .nav-item{width:100%;height:auto;flex-direction:column;align-items:flex-start;}
+  .nav-link{width:100%;padding:13px 24px;border-bottom:1px solid var(--border);}
+  .dropdown{position:static;width:100%;box-shadow:none;border:none;background:var(--surface-2);display:none;border-radius:0;}
+  .nav-item.open .dropdown{display:block;}
+}
+
+/* ---------- Buttons ---------- */
+.btn{
+  padding:13px 26px;border-radius:9px;text-decoration:none;font-weight:700;font-size:0.88rem;
+  display:inline-flex;align-items:center;gap:8px;transition:transform 0.2s, box-shadow 0.2s, background 0.2s;
+  border:1px solid transparent;cursor:pointer;
+}
+.btn-green{background:var(--nux-green);color:#fff;box-shadow:0 8px 20px -6px rgba(39,174,96,0.55);}
+.btn-green:hover{background:var(--nux-green-dark);transform:translateY(-2px);}
+.btn-outline{border-color:var(--border);color:var(--ink);background:var(--surface);}
+.btn-outline:hover{border-color:var(--nux-green);color:var(--nux-green);transform:translateY(-2px);}
+
+/* ---------- Hero ---------- */
+.hero{padding:88px 0 60px;}
+.hero-grid{display:grid;grid-template-columns:1.15fr 0.85fr;gap:56px;align-items:center;}
+.hero h1{font-size:3rem;font-weight:800;line-height:1.08;margin:18px 0 20px;}
+.hero h1 .accent{color:var(--nux-green);}
+.hero p{font-size:1.05rem;color:var(--ink-soft);max-width:520px;margin-bottom:32px;}
+.hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:30px;}
+.hero-links{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;max-width:440px;}
+.hero-links a{
+  border:1px solid var(--border);background:var(--surface);color:var(--ink-soft);
+  padding:11px 8px;text-decoration:none;text-align:center;font-size:0.68rem;font-weight:700;
+  letter-spacing:0.04em;text-transform:uppercase;border-radius:8px;transition:0.2s;
+  font-family:var(--font-mono);
+}
+.hero-links a:hover{border-color:var(--nux-green);color:var(--nux-green);transform:translateY(-2px);}
+
+.hero-visual{display:flex;flex-direction:column;align-items:center;gap:26px;}
+.coin-ring{
+  width:280px;height:280px;border-radius:50%;position:relative;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--surface);border:1px solid var(--border);box-shadow:var(--shadow);
+}
+.coin-ring::before{
+  content:"";position:absolute;inset:-1px;border-radius:50%;
+  border:1px dashed var(--nux-green);opacity:0.35;animation:spin 40s linear infinite;
+}
+.coin-ring img{width:62%;height:62%;object-fit:contain;position:relative;z-index:2;transition:transform 0.6s cubic-bezier(.22,.9,.32,1.24);}
+.coin-ring:hover img{transform:scale(1.07) rotate(4deg);}
+@keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+
+.community-row{display:flex;gap:22px;}
+.community-row a{
+  text-decoration:none;color:var(--ink-soft);font-size:0.78rem;font-weight:600;
+  display:flex;align-items:center;gap:8px;transition:color 0.2s;
+}
+.community-row a:hover{color:var(--nux-green);}
+.community-row span{
+  width:32px;height:32px;border-radius:50%;background:var(--surface-2);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+}
+
+@media (max-width:900px){
+  .hero-grid{grid-template-columns:1fr;text-align:center;}
+  .hero p{margin-left:auto;margin-right:auto;}
+  .hero-actions,.hero-links{justify-content:center;margin-left:auto;margin-right:auto;}
+  .hero h1{font-size:2.2rem;}
+}
+
+/* ---------- Price strip ---------- */
+.price-strip{
+  background:linear-gradient(90deg,var(--nux-green-deep),var(--nux-green));
+  color:#fff;padding:20px 28px;border-radius:16px;
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;
+  margin:0 auto 60px;box-shadow:0 14px 34px -14px rgba(15,61,38,0.55);
+}
+.price-strip .coin-id{display:flex;align-items:center;gap:14px;}
+.price-strip .coin-id img{width:38px;height:38px;}
+.price-val{font-family:var(--font-mono);font-size:1.5rem;font-weight:700;}
+.price-strip .btn-green{background:#fff;color:var(--nux-green-deep);box-shadow:none;}
+.price-strip .btn-green:hover{background:#eafff2;}
+
+/* ---------- Section shell ---------- */
+section{padding:70px 0;}
+.section-head{max-width:640px;margin:0 auto 44px;text-align:center;}
+.section-head h2{font-size:2.1rem;margin:14px 0 12px;}
+.section-head p{color:var(--ink-soft);font-size:1rem;}
+
+/* ---------- Block spec card (signature) ---------- */
+.spec-block{
+  background:var(--surface);border:1px solid var(--border);border-radius:20px;
+  padding:34px;box-shadow:var(--shadow);position:relative;overflow:hidden;
+}
+.spec-block::before{
+  content:"";position:absolute;top:0;left:0;right:0;height:4px;
+  background:repeating-linear-gradient(90deg,var(--nux-green) 0 14px, transparent 14px 22px);
+}
+.spec-block-head{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap;margin-bottom:26px;}
+.spec-block-head p{color:var(--ink-soft);font-size:0.9rem;max-width:340px;}
+.spec-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;}
+.spec-card{
+  background:var(--surface-2);border:1px solid var(--border);border-radius:12px;
+  padding:18px;text-align:center;transition:transform 0.25s,border-color 0.25s,box-shadow 0.25s;
+}
+.spec-card:hover{transform:translateY(-4px);border-color:var(--nux-green);box-shadow:0 12px 24px -10px rgba(39,174,96,0.3);}
+.spec-card .k{font-family:var(--font-mono);font-size:0.66rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-soft);background:var(--surface);padding:3px 9px;border-radius:20px;display:inline-block;margin-bottom:10px;}
+.spec-card .v{font-weight:700;font-size:1rem;font-family:var(--font-mono);}
+
+/* ---------- Chained steps (how it works) ---------- */
+.chain{position:relative;max-width:980px;margin:0 auto;}
+.chain::before{
+  content:"";position:absolute;left:34px;top:12px;bottom:12px;width:2px;
+  background:repeating-linear-gradient(var(--nux-green) 0 6px, transparent 6px 12px);
+  opacity:0.5;
+}
+@media (max-width:760px){.chain::before{left:22px;}}
+.chain-step{
+  display:grid;grid-template-columns:70px 1fr;gap:26px;margin-bottom:44px;position:relative;
+}
+@media (max-width:760px){.chain-step{grid-template-columns:44px 1fr;gap:16px;}}
+.chain-step:last-child{margin-bottom:0;}
+.chain-index{
+  width:70px;height:70px;border-radius:50%;background:var(--surface);border:2px solid var(--nux-green);
+  display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;
+  color:var(--nux-green);font-size:0.95rem;z-index:2;position:relative;
+}
+@media (max-width:760px){.chain-index{width:44px;height:44px;font-size:0.7rem;}}
+.chain-body{
+  background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:26px;
+  display:grid;grid-template-columns:1.2fr 1fr;gap:26px;align-items:center;transition:border-color 0.25s;
+}
+.chain-body:hover{border-color:var(--nux-green);}
+@media (max-width:760px){.chain-body{grid-template-columns:1fr;}}
+.chain-body h3{font-size:1.15rem;margin-bottom:10px;}
+.chain-body p{color:var(--ink-soft);font-size:0.94rem;}
+.chain-body p a{color:var(--nux-green);text-decoration:underline;text-underline-offset:2px;}
+.chain-body .hoverpic img{width:100%;aspect-ratio:4/3;object-fit:cover;}
+
+/* ---------- Download core CTA ---------- */
+.cta-block{
+  background:var(--surface);border:1px solid var(--border);border-radius:22px;
+  padding:56px 30px;text-align:center;box-shadow:var(--shadow);
+}
+.cta-block h2{font-size:1.9rem;margin-bottom:14px;}
+.cta-block p{color:var(--ink-soft);max-width:520px;margin:0 auto 26px;}
+
+/* ---------- Faucet grid ---------- */
+.faucet-panel{
+  background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px;box-shadow:var(--shadow);
+}
+.faucet-panel-head{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;
+  border-bottom:1px solid var(--border);padding-bottom:20px;margin-bottom:24px;}
+.faucet-brand{display:flex;align-items:center;gap:14px;}
+.faucet-brand-icon{width:46px;height:46px;border-radius:11px;background:var(--nux-green);display:flex;align-items:center;justify-content:center;padding:8px;}
+.faucet-brand-icon img{width:100%;}
+.faucet-panel-head h3{font-size:1.2rem;}
+.faucet-panel-head .status{font-size:0.72rem;font-weight:700;color:var(--nux-green);letter-spacing:0.06em;font-family:var(--font-mono);}
+.faucet-panel-head .desc{font-size:0.85rem;color:var(--ink-soft);max-width:280px;text-align:right;}
+.faucet-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:14px;}
+.faucet-card{
+  background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:18px;text-align:center;
+  display:flex;flex-direction:column;justify-content:space-between;gap:10px;transition:transform 0.25s,border-color 0.25s;
+}
+.faucet-card:hover{transform:translateY(-4px);border-color:var(--nux-green);}
+.faucet-card .badge{font-family:var(--font-mono);font-size:0.62rem;font-weight:700;color:var(--ink-soft);background:var(--surface);padding:4px 8px;border-radius:20px;margin:0 auto;}
+.faucet-card .name{font-weight:700;font-size:0.95rem;}
+.claim-link{text-decoration:none;font-size:0.76rem;font-weight:700;color:#fff;background:var(--nux-green);padding:8px 12px;border-radius:7px;transition:background 0.2s;}
+.claim-link:hover{background:var(--nux-green-dark);}
+@media (max-width:760px){
+  .faucet-panel-head{flex-direction:column;text-align:center;}
+  .faucet-panel-head .desc{text-align:center;max-width:100%;}
+  .faucet-grid{display:flex;overflow-x:auto;padding-bottom:10px;scroll-snap-type:x mandatory;}
+  .faucet-card{min-width:160px;scroll-snap-align:center;}
+  .faucet-grid::-webkit-scrollbar{display:none;}
+}
+
+/* ---------- Features ---------- */
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;}
+.feature-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;
+  transition:transform 0.25s,border-color 0.25s,box-shadow 0.25s;
+}
+.feature-card:hover{border-color:var(--nux-green);box-shadow:0 14px 26px -12px rgba(39,174,96,0.28);transform:translateY(-5px);}
+.feature-icon{width:44px;height:44px;border-radius:11px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-size:1.2rem;margin-bottom:14px;}
+.feature-card h3{font-size:1.05rem;margin-bottom:10px;border-left:3px solid var(--nux-green);padding-left:12px;}
+.feature-card p{color:var(--ink-soft);font-size:0.92rem;}
+.feature-card p a{color:var(--nux-green);text-decoration:underline;text-underline-offset:2px;}
+
+/* ---------- Footer ---------- */
+footer{background:var(--surface-2);border-top:1px solid var(--border);padding:60px 0 30px;transition:background var(--transition);}
+.footer-grid{display:grid;grid-template-columns:1.5fr 1fr 1fr 1.2fr;gap:36px;margin-bottom:40px;}
+@media (max-width:900px){.footer-grid{grid-template-columns:1fr 1fr;}}
+@media (max-width:560px){.footer-grid{grid-template-columns:1fr;text-align:center;}}
+.footer-brand h2{color:var(--nux-green);font-size:1.4rem;margin-bottom:14px;font-family:var(--font-display);}
+.footer-brand p{color:var(--ink-soft);font-size:0.9rem;max-width:280px;}
+@media (max-width:560px){.footer-brand p{margin:0 auto;}}
+.footer-col h3{font-size:0.78rem;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:18px;color:var(--ink-soft);font-family:var(--font-mono);}
+.footer-col ul{list-style:none;}
+.footer-col li{margin-bottom:11px;}
+.footer-col a{color:var(--ink-soft);text-decoration:none;font-size:0.87rem;font-weight:500;transition:0.2s;}
+.footer-col a:hover{color:var(--nux-green);padding-left:5px;}
+.social-icons{display:flex;gap:12px;margin-top:16px;flex-wrap:wrap;}
+@media (max-width:560px){.social-icons{justify-content:center;}}
+.social-box{
+  width:42px;height:42px;border:1.5px solid var(--border);border-radius:10px;display:flex;align-items:center;
+  justify-content:center;color:var(--ink-soft);text-decoration:none;background:var(--surface);
+  transition:all var(--transition);
+}
+.social-box:hover{border-color:var(--nux-green);color:#fff;background:var(--nux-green);transform:translateY(-4px);box-shadow:0 10px 18px -8px rgba(39,174,96,0.4);}
+.footer-bottom{border-top:1px solid var(--border);padding-top:24px;text-align:center;color:var(--ink-soft);font-size:0.82rem;}
+.footer-bottom .mono{opacity:0.7;}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <span data-i18n="topbar"> </span> <a href="#faucet" data-i18n="topbarLink"> </a>
+</div>
+
+<header>
+  <div class="nav-container">
+    <a href="#beranda" class="logo-area">
+      <img src="https://iili.io/Cr21Nx2.th.png" alt="Nusacoin Logo">
+      NUSA<span class="accent">COIN</span>
+    </a>
+
+    <button class="menu-toggle" id="mobile-btn" aria-label="Buka menu"><i class="fas fa-bars"></i></button>
+
+    <ul class="nav-menu" id="nav-list">
+      <li class="nav-item"><a href="#beranda" class="nav-link" data-i18n="nav.home">Beranda</a></li>
+      
+      <li class="nav-item">
+  		<a href="#" class="nav-link" data-i18n="nav.Introduction">Perkenalan <i class="fa fa-caret-down"></i></a>
+ 		<ul class="dropdown">
+		  <li><a class="dropdown-item" href="/Pages/Individu.html" data-i18n="nav.individu">Individu</a></li>
+		  <li><a class="dropdown-item" href="/Pages/Bisnis.html" data-i18n="nav.businesses">Bisnis</a></li>
+ 	      <li><a class="dropdown-item" href="/Pages/Developer.html">Developer</a></li>
+   	      <li><a class="dropdown-item" href="/Pages/Memulai.html" data-i18n="nav.started">Memulai</a></li>
+    	  <li><a class="dropdown-item" href="/Pages/Visi-Misi.html">Roadmap</a></li>
+    	  <li><a class="dropdown-item" href="/Pages/Cara-Kerja.html" data-i18n="nav.how">Cara Kerja</a></li>
+    	  <li><a class="dropdown-item" href="/Pages/Whitepaper_Nusacoin_in.pdf">Whitepaper IN</a></li>
+    	  <li><a class="dropdown-item" href="/Pages/Whitepaper_Nusacoin_en.pdf">Whitepaper EN</a></li>
+        </ul>
+      </li>
+
+     <li class="nav-item">
+  	   <a href="#" class="nav-link" data-i18n="nav.resources">Sumber Daya <i class="fa fa-caret-down"></i></a>
+       <ul class="dropdown">
+	    <li><a href="https://github.com/TaobotX11/nusacoin/releases/download/0.26.60/nusacoin-0.26.60-win64-setup.exe">Nusacoin Core Win</a></li>
+	    <li><a href="https://github.com/TaobotX11/nusacoin/releases/download/0.26.60/nusacoin-0.26.60-x86_64-linux-gnu.tar.gz">Nusacoin Core Linux</a></li>
+	    <li><a href="https://dompet.nusacoin.org" target="_blank" data-i18n="res.webwallet">Nusacoin Web Wallet</a></li>
+	    <li><a href="https://paper.nusacoin.org" target="_blank" data-i18n="res.paperwallet">Nusacoin Paper Wallet</a></li>
+	    <li><a href="https://green.nusacoin.org" target="_blank" data-i18n="res.greenwallet">Nusacoin Green Wallet</a></li>
+	    <li><a href="https://t.me/rdnmesin_bot">Nusacard RDN</a></li>
+	    <li><a href="https://github.com/TaobotX11/nusacoin/releases/download/0.26.60/app-arm64-v8a-release.apk">Taobot Wallet Apk</a></li>
+	    <li><a href="https://pool.nusacoin.org" target="_blank" data-i18n="res.pool">Mining Pool</a></li>
+	    <li><a href="/Pages/Kosa-Kata.html" target="_blank" data-i18n="res.glossary">Kosa Kata</a></li>
+	  </ul>
+	</li>
+
+    <li class="nav-item">
+       <a href="#" class="nav-link" data-i18n="nav.explorer">Explorer </a>
+       <ul class="dropdown">
+         <li><a href="https://scan.nusacoin.org">Explorer 1</a></li>
+	     <li><a href="https://explorer.taobot.org">Explorer 2</a></li>
+	     <li><a href="https://chain.nusacoin.org">Explorer 3</a></li>
+	     <li><a href="https://explorer.nusacoin.org">Explorer 4</a></li>
+	     <li><a href="https://book.taobot.org">Explorer 5</a></li>
+	     <li><a href="https://www.nusascan.site">Explorer 6</a></li>
+	     <li><a href="https://block.nusascan.site">Explorer 7</a></li>
+	     <li><a href="https://testnet.nusacoin.org">Testnet Explorer</a></li>
+	   </ul>
+	 </li>
+      
+
+      <li class="nav-item">
+        <a href="#" class="nav-link" data-i18n="nav.community">Komunitas <i class="fa fa-caret-down"></i></a>
+        <ul class="dropdown">
+          <li><a href="https://x.com/Nusacoin_chain" target="_blank"><i class="fab fa-twitter"></i> Twitter / X</a></li>
+          <li><a href="https://telegram.me/NusacoinX11" target="_blank"><i class="fab fa-telegram"></i> Telegram</a></li>
+          <li><a href="https://discord.gg/NcKKZFBzJ" target="_blank"><i class="fab fa-discord"></i> Discord</a></li>
+          <li><a href="https://www.instagram.com/nusa_coin" target="_blank"><i class="fab fa-instagram"></i> Instagram</a></li>
+          <li><a href="https://www.youtube.com/@NusaCoin" target="_blank"><i class="fab fa-youtube"></i> YouTube</a></li>
+          <li><a href="https://www.reddit.com/r/Nusacoin" target="_blank"><i class="fab fa-reddit"></i> Reddit</a></li>
+        </ul>
+      </li>
+
+      <li class="nav-item"><a href="http://www.nusacoin.org/p/faq.html" target="_blank" class="nav-link">FAQ</a></li>
+    </ul>
+
+    <div class="nav-tools">
+      <button class="tool-btn" id="lang-toggle" aria-label="Ganti bahasa">ID / EN</button>
+      <button class="tool-btn" id="theme-toggle" aria-label="Ganti tema"><i class="fas fa-moon"></i></button>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ============ HERO ============ -->
+  <section class="hero" id="beranda">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="eyebrow mono" data-i18n="hero.eyebrow">JARINGAN X11 · DESENTRALISASI</span>
+        <h1 data-i18n="hero.title">Uang Digital Milik <span class="accent">Rakyat Nusantara</span></h1>
+        <p data-i18n="hero.desc">Nusacoin (NUX) memungkinkan Anda mengirim uang secara instan ke mana saja tanpa perantara bank. Aman, privat, dan sepenuhnya milik Anda.</p>
+        <div class="hero-actions">
+          <a href="#cara-kerja" class="btn btn-green"><span data-i18n="hero.cta1">Mulai Gunakan NUX</span> <i class="fas fa-arrow-right"></i></a>
+          <a href="#faucet" class="btn btn-outline" data-i18n="hero.cta2">Klaim Faucet Gratis</a>
+        </div>
+        <div class="hero-links">
+          <a href="https://explorer.nusacoin.org" target="_blank" data-i18n="quick.explorer">🔍 Explorer</a>
+          <a href="https://dompet.nusacoin.org" target="_blank" data-i18n="quick.wallet">💰 Web Wallet</a>
+          <a href="https://pool.nusacoin.org" target="_blank" data-i18n="quick.pool">📊 Pool</a>
+          <a href="/Pages/Visi-Misi.html" target="_blank" data-i18n="quick.roadmap">📈 Roadmap</a>
+          <a href="/Pages/Whitepaper_Nusacoin_in.pdf" target="_blank" data-i18n="quick.whitepaper">📄 Whitepaper</a>
+          <a href="https://github.com/TaobotX11/nusacoin" target="_blank" data-i18n="quick.build">⚒️ Build</a>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <div class="coin-ring">
+          <img src="https://iili.io/Cr2g55x.md.png" alt="Logo Nusacoin">
+        </div>
+        <div style="text-align:center;">
+          <p class="mono" style="font-size:0.68rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:14px;" data-i18n="hero.joinlabel">Bergabung Komunitas</p>
+          <div class="community-row">
+            <a href="https://telegram.me/NusacoinX11" target="_blank"><span><i class="fab fa-telegram"></i></span> Telegram</a>
+            <a href="https://x.com/Nusacoin_chain" target="_blank"><span><i class="fab fa-twitter"></i></span> Twitter/X</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="wrap">
+      <div class="price-strip">
+        <div class="coin-id">
+          <img src="https://iili.io/fgxtOHF.png" alt="NUX">
+          <div><b style="font-size:1.1rem;">$NUX</b><br><small style="opacity:0.85;">Nusacoin</small></div>
+        </div>
+        <div style="text-align:center;">
+          <div id="nux-price-val" class="price-val" data-i18n="price.loading">Memuat...</div>
+          <div id="nux-price-change" class="mono">--</div>
+        </div>
+        <a href="https://qutrade.io/en/?market=nux_usdt" target="_blank" class="btn btn-green" data-i18n="price.trade">Trade Now</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SPEC BLOCK ============ -->
+  <section>
+    <div class="wrap">
+      <div class="spec-block">
+        <div class="spec-block-head">
+          <div>
+            <span class="eyebrow mono" data-i18n="spec.eyebrow">PARAMETER JARINGAN</span>
+            <h2 style="font-size:1.5rem;margin-top:10px;" data-i18n="spec.title">Spesifikasi Nusacoin</h2>
+          </div>
+          <p data-i18n="spec.desc">NUX memiliki sejumlah spesifikasi teknis yang membedakannya dari cryptocurrency lain. Berikut fitur-fitur kuncinya:</p>
+        </div>
+        <div class="spec-grid">
+          <div class="spec-card"><span class="k" data-i18n="spec.codelabel">Name Code</span><div class="v">NUX</div></div>
+          <div class="spec-card"><span class="k" data-i18n="spec.algolabel">Algoritma</span><div class="v">X11</div></div>
+          <div class="spec-card"><span class="k" data-i18n="spec.rewardlabel">Reward</span><div class="v">30 NUX / 6 min</div></div>
+          <div class="spec-card"><span class="k" data-i18n="spec.halvinglabel">Halving</span><div class="v">300.000 block</div></div>
+          <div class="spec-card"><span class="k" data-i18n="spec.difflabel">Diff Adjustment</span><div class="v">3.360 block</div></div>
+          <div class="spec-card"><span class="k" data-i18n="spec.supplylabel">Supply Max</span><div class="v">18.000.000</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ HOW IT WORKS (chained steps) ============ -->
+  <section id="cara-kerja">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow mono" data-i18n="how.eyebrow">CARA KERJA</span>
+        <h2 data-i18n="how.title">Dari wallet hingga rantai-blok</h2>
+        <p data-i18n="how.desc">Ringkasan singkat bagaimana Nusacoin bekerja, langkah demi langkah, seperti blok yang saling terhubung.</p>
+      </div>
+
+      <div class="chain">
+        <div class="chain-step">
+          <div class="chain-index mono">01</div>
+          <div class="chain-body">
+            <div>
+              <h3 data-i18n="how1.title">Dasar untuk pengguna baru</h3>
+              <p data-i18n="how1.desc">Sebagai pengguna baru, Anda dapat mulai menggunakan Nusacoin tanpa harus memahami detail teknisnya. Setelah menginstal wallet Nusacoin di komputer atau ponsel, alamat Nusacoin pertama Anda otomatis dibuat.</p>
+            </div>
+            <div class="hoverpic"><img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhHuK3BGJwHTuh36gAyoNwVNIIYyMuJ5ovABiI5A4BrNM52VoO2csIPcp37e0smlvrDlR5T1DIRUud2Z2-EiJChZWacGI7pXNR3GtbGouXPOeHkiKRX9NCJRoyi3E-aUw1hCLPpJ7j1GbdFQxs8KSqz7ADhxGSiy03Ue1BQc_ENL-csB567F7Sv8qgvnAU/s320/1.png" alt="Wallet Nusacoin"></div>
+          </div>
+        </div>
+
+        <div class="chain-step">
+          <div class="chain-index mono">02</div>
+          <div class="chain-body">
+            <div>
+              <h3 data-i18n="how2.title">Saldo — rantai-blok</h3>
+              <p data-i18n="how2.desc">Rantai-blok (blockchain) adalah catatan transaksi publik tempat jaringan Nusacoin bersandar. Semua transaksi terkonfirmasi tersimpan di dalamnya, sehingga wallet dapat menghitung saldo yang bisa dibelanjakan dan memverifikasi transaksi baru. Integritas dan urutan kronologisnya dijaga menggunakan <a href="https://www.nusacoin.org/p/kosa-kata.html" target="_blank">kriptografi</a>.</p>
+            </div>
+            <div class="hoverpic"><img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhltd93Z9-s-9NWfqmGI_PUM7wXNAIZRqx6J42q753vQfpcZ8aeubFVxj2sBTVEtnpXCl7ku0nvGYv8oQeUrKJGBFDX8J2FfnODnUGRT1FRJ2Bq5xbxKNb2N_fK8q96EjNwl99oLWS-s8UgHSVr8kwzUIpDfNfSizQjAuoMRthSu6IvhonvlGp_MrZc7kQ/s320/2.png" alt="Blockchain Nusacoin"></div>
+          </div>
+        </div>
+
+        <div class="chain-step">
+          <div class="chain-index mono">03</div>
+          <div class="chain-body">
+            <div>
+              <h3 data-i18n="how3.title">Transaksi — private keys</h3>
+              <p data-i18n="how3.desc">Transaksi adalah transfer nilai antar wallet Nusacoin yang dimasukkan ke rantai-blok. Wallet menyimpan data rahasia berupa <a href="https://www.nusacoin.org/p/kosa-kata.html" target="_blank">kunci pribadi</a> (seed) untuk menandatangani transaksi sebagai bukti kepemilikan. Transaksi lalu disiarkan ke jaringan dan mulai terkonfirmasi dalam 6–12 menit lewat proses <a href="https://www.nusacoin.org/p/kosa-kata.html" target="_blank">pertambangan</a>.</p>
+            </div>
+            <div class="hoverpic"><img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiu0zrYGVRhL9u3-twGHwx4zzaGtDqk65yKHRc4sV8nvK7HIGlCd88R4OStTNbfHDd3LUAthqP5WSeSORi5Fa4g6EgiCn9Hjer3HG_plweCMUtQIcnz-F9Zz7UMyIfDEK31vimSAxQzCjdBoyhGHmnUgsBWruDqPWRzYa2I0kbWqJUDuJzwOqNGQfCmfjI/s320/3.png" alt="Transaksi Nusacoin"></div>
+          </div>
+        </div>
+
+        <div class="chain-step">
+          <div class="chain-index mono">04</div>
+          <div class="chain-body">
+            <div>
+              <h3 data-i18n="how4.title">Memproses — pertambangan</h3>
+              <p data-i18n="how4.desc">Pertambangan adalah sistem konsensus terdistribusi untuk mengonfirmasi antrian transaksi ke dalam rantai-blok. Proses ini menjaga urutan kronologis, melindungi netralitas jaringan, dan memungkinkan komputer lain menyetujui keadaan sistem sesuai aturan kriptografi yang ketat.</p>
+            </div>
+            <div class="hoverpic"><img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhYV-ryhDGJvelHX76JXZ1JDvV8g_7ilvYpyrEca1MSzxN-UjtFu_UlN3G2MsGMTZ2nv7TysRm2_vzunCNy87aJ7r6rGpuZtfNFmLLtr7S8xrZNC8ZALecfgHvAkHJ0bq1GAdLe_ZjJCdvGuEZGX-qq5goPgQViuyQBfzgqi_aez0Aes4rW-AlzlYCF8lo/s320/4.png" alt="Pertambangan Nusacoin"></div>
+          </div>
+        </div>
+
+        <div class="chain-step">
+          <div class="chain-index mono">05</div>
+          <div class="chain-body">
+            <div>
+              <h3 data-i18n="how5.title">Menjelajahi lebih dalam</h3>
+              <p data-i18n="how5.desc">Ini hanyalah ringkasan singkat tentang Nusacoin. Jika ingin mempelajari detail lebih lanjut, Anda dapat membaca whitepaper asli yang menjelaskan desain jaringannya.</p>
+            </div>
+            <div class="hoverpic"><img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj9hPb0s8ec4FcKfkIIOcT0MOc9gsXX9BfdNpUr5zyrz0SUCnGzyIcQOuszylKulLa2flzlx-A3bypMEVmITVRCnp69VFcneo2vEtMwnL-aQ9uB-qzg1y6PEDrGl0x1QNBN1kxwMb8OGwFHJq3IGBipubt3sfKSsTSwWMUPBevmyX6Kz95FP3E37QBaao4/s320/5.png" alt="Whitepaper Nusacoin"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ DOWNLOAD CORE ============ -->
+  <section>
+    <div class="wrap">
+      <div class="cta-block">
+        <span class="eyebrow mono" data-i18n="core.eyebrow">FULL NODE</span>
+        <h2 style="margin-top:14px;" data-i18n="core.title">Unduh Nusacoin Core</h2>
+        <p data-i18n="core.desc">Nusacoin Core memungkinkan Anda menjalankan node penuh dan mengirim uang secara instan ke mana saja tanpa perantara bank. Aman, privat, dan sepenuhnya milik Anda.</p>
+        <a href="https://github.com/TaobotX11/nusacoin" target="_blank" class="btn btn-green" data-i18n="core.cta">Unduh Nusacoin Core</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FAUCET & AIRDROP ============ -->
+  <section id="faucet">
+    <div class="wrap">
+      <div class="faucet-panel">
+        <div class="faucet-panel-head">
+          <div class="faucet-brand">
+            <div class="faucet-brand-icon"><img src="https://iili.io/fgxtOHF.png" alt="NUX"></div>
+            <div>
+              <h3 data-i18n="faucet.title">Free $NUX</h3>
+              <span class="status" data-i18n="faucet.status">FAUCET &amp; AIRDROP AKTIF</span>
+            </div>
+          </div>
+          <p class="desc" data-i18n="faucet.desc">Dapatkan koin gratis melalui jaringan mitra komunitas kami.</p>
+        </div>
+
+        <div class="faucet-grid">
+          <div class="faucet-card">
+            <span class="badge" data-i18n="f1.badge">Faucet Every 5 Min</span>
+            <div class="name">QuTrade</div>
+            <a href="https://qutrade.io/en/?faucet" target="_blank" class="claim-link" data-i18n="f1.cta">Klaim Faucet</a>
+          </div>
+          <div class="faucet-card">
+            <span class="badge" data-i18n="f2.badge">Telegram Bot</span>
+            <div class="name" data-i18n="f2.name">Earn Money</div>
+            <a href="https://t.me/earnmny_bot" target="_blank" class="claim-link" data-i18n="f2.cta">Buka Bot</a>
+          </div>
+          <div class="faucet-card">
+            <span class="badge" data-i18n="f3.badge">Airdrop</span>
+            <div class="name" data-i18n="f3.name">Join To Pay</div>
+            <a href="https://t.me/NusacoinX11" target="_blank" class="claim-link" data-i18n="f3.cta">Ikuti Airdrop</a>
+          </div>
+          <div class="faucet-card">
+            <span class="badge" data-i18n="f4.badge">Giveaway NUX</span>
+            <div class="name" data-i18n="f4.name">Chat Group</div>
+            <a href="https://t.me/NusacoinX11" target="_blank" class="claim-link" data-i18n="f4.cta">Kirim Alamat</a>
+          </div>
+          <div class="faucet-card">
+            <span class="badge" data-i18n="f5.badge">Task &amp; Mining</span>
+            <div class="name">KMTB Mini</div>
+            <a href="https://t.me/kmtbmini_bot" target="_blank" class="claim-link" data-i18n="f5.cta">Mulai Tugas</a>
+          </div>
+          <div class="faucet-card">
+            <span class="badge" data-i18n="f6.badge">Mining</span>
+            <div class="name">KMTB Java</div>
+            <a href="https://t.me/javakmks_bot" target="_blank" class="claim-link" data-i18n="f6.cta">Mulai Mining</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FEATURES ============ -->
+  <section id="fitur">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow mono" data-i18n="feat.eyebrow">KENAPA NUSACOIN</span>
+        <h2 data-i18n="feat.title">Dibangun untuk kebebasan finansial</h2>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card icon-tile">
+          <div class="feature-icon">💰</div>
+          <h3 data-i18n="feat1.title">Pilih Sendiri Biaya Anda</h3>
+          <p data-i18n="feat1.desc">Tidak ada biaya untuk menerima Nusacoin, dan banyak wallet memungkinkan Anda mengontrol besarnya biaya saat mengirim, dengan biaya <i>default</i> yang wajar untuk konfirmasi lebih cepat.</p>
+        </div>
+        <div class="feature-card icon-tile">
+          <div class="feature-icon">🛡️</div>
+          <h3 data-i18n="feat2.title">Perlindungan Penipuan</h3>
+          <p data-i18n="feat2.desc">Pembayaran melalui Nusacoin tidak bisa dibatalkan, sehingga kerugian akibat <i>chargeback</i> tidak lagi menjadi beban penjual seperti pada kartu kredit atau PayPal.</p>
+        </div>
+        <div class="feature-card icon-tile">
+          <div class="feature-icon">⚡</div>
+          <h3 data-i18n="feat3.title">Pembayaran Internasional Cepat</h3>
+          <p data-i18n="feat3.desc">Mengirim Nusacoin lintas negara semudah mengirimnya ke seberang jalan — tanpa menunggu 3 hari kerja bank dan tanpa biaya transfer internasional.</p>
+        </div>
+        <div class="feature-card icon-tile">
+          <div class="feature-icon">✅</div>
+          <h3 data-i18n="feat4.title">Tanpa Kepatuhan PCI</h3>
+          <p data-i18n="feat4.desc">Menerima Nusacoin tidak memerlukan pemeriksaan keamanan standar PCI. Anda tetap perlu <a href="https://www.nusacoin.org/p/amankan-wallet-anda.html" target="_blank">mengamankan wallet</a>, namun tak perlu memproses data kartu kredit pelanggan.</p>
+        </div>
+        <div class="feature-card icon-tile">
+          <div class="feature-icon">📊</div>
+          <h3 data-i18n="feat5.title">Visibilitas Gratis</h3>
+          <p data-i18n="feat5.desc">Nusacoin adalah pasar yang terus berkembang. Menerimanya sebagai metode pembayaran adalah cara bagus mendapat pelanggan baru secara organik.</p>
+        </div>
+        <div class="feature-card icon-tile">
+          <div class="feature-icon">🔑</div>
+          <h3 data-i18n="feat6.title">Multi-signature</h3>
+          <p data-i18n="feat6.desc">Memungkinkan pengeluaran dana hanya jika disetujui oleh kelompok tertentu — berguna untuk menghindari penyalahgunaan dan melacak setiap persetujuan pembayaran.</p>
+        </div>
+        <div class="feature-card icon-tile">
+          <div class="feature-icon">📈</div>
+          <h3 data-i18n="feat7.title">Transparansi Akuntansi</h3>
+          <p data-i18n="feat7.desc">Rantai-blok memberi transparansi tinggi. Organisasi nirlaba dapat memverifikasi saldo dan transaksi secara terbuka kepada publik atau donatur.</p>
+        </div>
+        <div class="feature-card icon-tile">
+          <div class="feature-icon">🌏</div>
+          <h3 data-i18n="feat8.title">Dijalankan Komunitas</h3>
+          <p data-i18n="feat8.desc">Node, pool, dan wallet Nusacoin dikembangkan serta dijalankan oleh komunitas — bukan satu entitas tunggal yang mengendalikan jaringan.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <h2>Nusacoin Network</h2>
+        <p data-i18n="footer.desc">Blockchain milik rakyat dengan prinsip crypto yang adil. Terdesentralisasi, aman, dan dapat diakses semua orang.</p>
+        <div class="social-icons">
+          <a href="https://x.com/Nusacoin_chain" target="_blank" class="social-box" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+          <a href="https://discord.gg/NcKKZFBzJ" target="_blank" class="social-box" aria-label="Discord"><i class="fab fa-discord"></i></a>
+          <a href="https://telegram.me/NusacoinX11" target="_blank" class="social-box" aria-label="Telegram"><i class="fab fa-telegram-plane"></i></a>
+          <a href="https://www.reddit.com/r/Nusacoin" target="_blank" class="social-box" aria-label="Reddit"><i class="fab fa-reddit-alien"></i></a>
+          <a href="https://github.com/TaobotX11/nusacoin" target="_blank" class="social-box" aria-label="GitHub"><i class="fab fa-github"></i></a>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <h3 data-i18n="footer.quick">Tautan Cepat</h3>
+        <ul>
+          <li><a href="https://explorer.nusacoin.org" target="_blank" data-i18n="res.explorer">Explorer</a></li>
+          <li><a href="https://dompet.nusacoin.org" target="_blank" data-i18n="res.webwallet">Nusacoin Web Wallet</a></li>
+          <li><a href="https://github.com/TaobotX11/nusacoin" target="_blank" data-i18n="res.core">Nusacoin Core</a></li>
+          <li><a href="https://green.nusacoin.org" target="_blank" data-i18n="res.greenwallet">Nusacoin Green Wallet</a></li>
+          <li><a href="/Pages/Visi-Misi.html" target="_blank" data-i18n="quick.roadmap2">Roadmap</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h3 data-i18n="footer.res">Sumber Daya</h3>
+        <ul>
+          <li><a href="https://paper.nusacoin.org" target="_blank" data-i18n="res.paperwallet">Paper Wallet</a></li>
+          <li><a href="https://pool.nusacoin.org" target="_blank" data-i18n="footer.pool">Mining Pool</a></li>
+          <li><a href="https://ijol.nusacoin.org" target="_blank" data-i18n="footer.ijol">Ijol Nusacoin (P2P)</a></li>
+          <li><a href="https://t.me/rdnmesin_bot" target="_blank" data-i18n="footer.rdn">Nusacard RDN Bot</a></li>
+          <li><a href="/Pages/Kosa-Kata.html" target="_blank" data-i18n="res.glossary">Kosa Kata</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h3 data-i18n="footer.docs">Dokumen &amp; Keamanan</h3>
+        <ul>
+          <li><a href="/Pages/Whitepaper_Nusacoin_in.pdf">Whitepaper IN</a></li>
+          <li><a href="/Pages/Whitepaper_Nusacoin_en.pdf">Whitepaper EN</a></li>
+          <li><a href="/Pages/Amankan-Wallet.html">Amankan Wallet</a></li>
+          <li><a href="/Pages/Lindungi-Privasi-Anda.html">Lindungi Privasi</a></li>
+          <li><a href="/Pages/FAQ.html">FAQ</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span data-i18n="footer.copyright">© 2026 Nusacoin Project. Dibangun untuk desentralisasi.</span>
+      <span class="mono"> · NUX / X11</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  /* ---------------- THEME (state disimpan di memori sesi;
+     tambahkan localStorage sendiri saat file ini dihost permanen
+     jika ingin preferensi tema tersimpan antar kunjungan) ---------------- */
+  const root = document.documentElement;
+  const themeBtn = document.getElementById('theme-toggle');
+  function applyTheme(t){
+    root.setAttribute('data-theme', t);
+    themeBtn.innerHTML = t === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+  }
+  let theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  applyTheme(theme);
+  themeBtn.addEventListener('click', () => {
+    theme = theme === 'dark' ? 'light' : 'dark';
+    applyTheme(theme);
+  });
+
+  /* ---------------- MOBILE MENU ---------------- */
+  const mobileBtn = document.getElementById('mobile-btn');
+  const navList = document.getElementById('nav-list');
+  mobileBtn.addEventListener('click', () => {
+    navList.classList.toggle('active');
+    const icon = mobileBtn.querySelector('i');
+    icon.classList.toggle('fa-bars');
+    icon.classList.toggle('fa-times');
+  });
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+      if (window.innerWidth < 1080) item.classList.toggle('open');
+    });
+  });
+
+  /* ---------------- HARGA NUX ---------------- */
+  async function getPrice(){
+    try{
+      const res = await fetch('https://api.coinpaprika.com/v1/tickers/nux-nusacoin');
+      const data = await res.json();
+      const price = data.quotes.USD.price;
+      const change = data.quotes.USD.percent_change_24h;
+      document.getElementById('nux-price-val').innerText = '$' + price.toFixed(4);
+      const changeEl = document.getElementById('nux-price-change');
+      changeEl.innerText = (change > 0 ? '▲ ' : '▼ ') + change.toFixed(2) + '%';
+      changeEl.style.color = change >= 0 ? '#ccff00' : '#ffcccc';
+    }catch(e){
+      document.getElementById('nux-price-val').innerText = 'NUX/USDT';
+    }
+  }
+  getPrice();
+  setInterval(getPrice, 60000);
+
+  /* ---------------- BAHASA ID / EN ---------------- */
+  const dict = {
+    id: {
+      topbar: "Nusacoin.org membutuhkan bantuan anda!",
+      "nav.home":"Beranda","nav.Introduction":"Perkenalan","nav.how":"Cara Kerja","nav.features":"Fitur","nav.resources":"Sumber Daya","nav.started":"Memulai","nav.businesses":"Bisnis","nav.individu":"Individu",
+      "nav.faucet":"Faucet & Airdrop","nav.community":"Komunitas",
+      "res.explorer":"Explorer","res.webwallet":"Nusacoin Web Wallet","res.paperwallet":"Nusacoin Paper Wallet",
+      "res.greenwallet":"Nusacoin Green Wallet","res.core":"Nusacoin Core (GitHub)","res.pool":"Mining Pool","res.glossary":"Kosa Kata",
+      "hero.eyebrow":"JARINGAN X11 · DESENTRALISASI",
+      "hero.title":'Uang Digital Milik <span class="accent">Rakyat Nusantara</span>',
+      "hero.desc":"Nusacoin (NUX) memungkinkan Anda mengirim uang secara instan ke mana saja tanpa perantara bank. Aman, privat, dan sepenuhnya milik Anda.",
+      "hero.cta1":"Mulai Gunakan NUX","hero.cta2":"Klaim Faucet Gratis","hero.joinlabel":"Bergabung Komunitas",
+      "quick.explorer":"🔍 Explorer","quick.wallet":"💰 Web Wallet","quick.pool":"📊 Pool","quick.roadmap":"📈 Roadmap",
+      "quick.roadmap2":"Roadmap","quick.whitepaper":"📄 Whitepaper","quick.build":"⚒️ Build",
+      "price.loading":"Memuat...","price.trade":"Trade Now",
+      "spec.eyebrow":"PARAMETER JARINGAN","spec.title":"Spesifikasi Nusacoin",
+      "spec.desc":"NUX memiliki sejumlah spesifikasi teknis yang membedakannya dari cryptocurrency lain. Berikut fitur-fitur kuncinya:",
+      "spec.codelabel":"Name Code","spec.algolabel":"Algoritma","spec.rewardlabel":"Reward","spec.halvinglabel":"Halving",
+      "spec.difflabel":"Diff Adjustment","spec.supplylabel":"Supply Max",
+      "how.eyebrow":"CARA KERJA","how.title":"Dari wallet hingga rantai-blok",
+      "how.desc":"Ringkasan singkat bagaimana Nusacoin bekerja, langkah demi langkah, seperti blok yang saling terhubung.",
+      "how1.title":"Dasar untuk pengguna baru",
+      "how1.desc":"Sebagai pengguna baru, Anda dapat mulai menggunakan Nusacoin tanpa harus memahami detail teknisnya. Setelah menginstal wallet Nusacoin di komputer atau ponsel, alamat Nusacoin pertama Anda otomatis dibuat.",
+      "how2.title":"Saldo — rantai-blok",
+      "how2.desc":'Rantai-blok (blockchain) adalah catatan transaksi publik tempat jaringan Nusacoin bersandar. Semua transaksi terkonfirmasi tersimpan di dalamnya, sehingga wallet dapat menghitung saldo yang bisa dibelanjakan dan memverifikasi transaksi baru. Integritas dan urutan kronologisnya dijaga menggunakan <a href="https://www.nusacoin.org/p/kosa-kata.html" target="_blank">kriptografi</a>.',
+      "how3.title":"Transaksi — private keys",
+      "how3.desc":'Transaksi adalah transfer nilai antar wallet Nusacoin yang dimasukkan ke rantai-blok. Wallet menyimpan data rahasia berupa <a href="https://www.nusacoin.org/p/kosa-kata.html" target="_blank">kunci pribadi</a> (seed) untuk menandatangani transaksi sebagai bukti kepemilikan. Transaksi lalu disiarkan ke jaringan dan mulai terkonfirmasi dalam 6–12 menit lewat proses <a href="https://www.nusacoin.org/p/kosa-kata.html" target="_blank">pertambangan</a>.',
+      "how4.title":"Memproses — pertambangan",
+      "how4.desc":"Pertambangan adalah sistem konsensus terdistribusi untuk mengonfirmasi antrian transaksi ke dalam rantai-blok. Proses ini menjaga urutan kronologis, melindungi netralitas jaringan, dan memungkinkan komputer lain menyetujui keadaan sistem sesuai aturan kriptografi yang ketat.",
+      "how5.title":"Menjelajahi lebih dalam",
+      "how5.desc":"Ini hanyalah ringkasan singkat tentang Nusacoin. Jika ingin mempelajari detail lebih lanjut, Anda dapat membaca whitepaper asli yang menjelaskan desain jaringannya.",
+      "core.eyebrow":"FULL NODE","core.title":"Unduh Nusacoin Core",
+      "core.desc":"Nusacoin Core memungkinkan Anda menjalankan node penuh dan mengirim uang secara instan ke mana saja tanpa perantara bank. Aman, privat, dan sepenuhnya milik Anda.",
+      "core.cta":"Unduh Nusacoin Core",
+      "faucet.title":"Free $NUX","faucet.status":"FAUCET & AIRDROP AKTIF","faucet.desc":"Dapatkan koin gratis melalui jaringan mitra komunitas kami.",
+      "f1.badge":"Faucet Every 5 Min","f1.cta":"Klaim Faucet",
+      "f2.badge":"Telegram Bot","f2.name":"Earn Money","f2.cta":"Buka Bot",
+      "f3.badge":"Airdrop","f3.name":"Join To Pay","f3.cta":"Ikuti Airdrop",
+      "f4.badge":"Giveaway NUX","f4.name":"Chat Group","f4.cta":"Kirim Alamat",
+      "f5.badge":"Task & Mining","f5.cta":"Mulai Tugas",
+      "f6.badge":"Mining","f6.cta":"Mulai Mining",
+      "feat.eyebrow":"KENAPA NUSACOIN","feat.title":"Dibangun untuk kebebasan finansial",
+      "feat1.title":"Pilih Sendiri Biaya Anda",
+      "feat1.desc":"Tidak ada biaya untuk menerima Nusacoin, dan banyak wallet memungkinkan Anda mengontrol besarnya biaya saat mengirim, dengan biaya <i>default</i> yang wajar untuk konfirmasi lebih cepat.",
+      "feat2.title":"Perlindungan Penipuan",
+      "feat2.desc":"Pembayaran melalui Nusacoin tidak bisa dibatalkan, sehingga kerugian akibat <i>chargeback</i> tidak lagi menjadi beban penjual seperti pada kartu kredit atau PayPal.",
+      "feat3.title":"Pembayaran Internasional Cepat",
+      "feat3.desc":"Mengirim Nusacoin lintas negara semudah mengirimnya ke seberang jalan — tanpa menunggu 3 hari kerja bank dan tanpa biaya transfer internasional.",
+      "feat4.title":"Tanpa Kepatuhan PCI",
+      "feat4.desc":'Menerima Nusacoin tidak memerlukan pemeriksaan keamanan standar PCI. Anda tetap perlu <a href="https://www.nusacoin.org/p/amankan-wallet-anda.html" target="_blank">mengamankan wallet</a>, namun tak perlu memproses data kartu kredit pelanggan.',
+      "feat5.title":"Visibilitas Gratis",
+      "feat5.desc":"Nusacoin adalah pasar yang terus berkembang. Menerimanya sebagai metode pembayaran adalah cara bagus mendapat pelanggan baru secara organik.",
+      "feat6.title":"Multi-signature",
+      "feat6.desc":"Memungkinkan pengeluaran dana hanya jika disetujui oleh kelompok tertentu — berguna untuk menghindari penyalahgunaan dan melacak setiap persetujuan pembayaran.",
+      "feat7.title":"Transparansi Akuntansi",
+      "feat7.desc":"Rantai-blok memberi transparansi tinggi. Organisasi nirlaba dapat memverifikasi saldo dan transaksi secara terbuka kepada publik atau donatur.",
+      "feat8.title":"Dijalankan Komunitas",
+      "feat8.desc":"Node, pool, dan wallet Nusacoin dikembangkan serta dijalankan oleh komunitas — bukan satu entitas tunggal yang mengendalikan jaringan.",
+      "footer.desc":"Blockchain milik rakyat dengan prinsip crypto yang adil. Terdesentralisasi, aman, dan dapat diakses semua orang.",
+      "footer.quick":"Tautan Cepat","footer.res":"Sumber Daya","footer.docs":"Dokumen & Keamanan",
+      "footer.pool":"Mining Pool","footer.ijol":"Ijol Nusacoin (P2P)","footer.rdn":"Nusacard RDN Bot",
+      "footer.wpid":"Whitepaper (ID)","footer.wpen":"Whitepaper (EN)","footer.secure":"Amankan Wallet","footer.privacy":"Lindungi Privasi",
+      "footer.copyright":"© 2026 Nusacoin Project. Dibangun untuk desentralisasi."
+    },
+    en: {
+      topbar: "Nusacoin.org needs your help!",
+      "nav.home":"Home","nav.Introduction":"Introduction","nav.how":"How It Works","nav.features":"Features","nav.resources":"Resources","nav.started":"Getting Started","nav.businesses":"Businesses","nav.individu":"Individuals",
+      "nav.faucet":"Faucet & Airdrop","nav.community":"Community",
+      "res.explorer":"Explorer","res.webwallet":"Nusacoin Web Wallet","res.paperwallet":"Nusacoin Paper Wallet",
+      "res.greenwallet":"Nusacoin Green Wallet","res.core":"Nusacoin Core (GitHub)","res.pool":"Mining Pool","res.glossary":"Glossary",
+      "hero.eyebrow":"X11 NETWORK · DECENTRALIZED",
+      "hero.title":'Digital Money for <span class="accent">The People</span>',
+      "hero.desc":"Nusacoin (NUX) lets you send money instantly, anywhere, without a bank in between. Secure, private, and entirely yours.",
+      "hero.cta1":"Start Using NUX","hero.cta2":"Claim Free Faucet","hero.joinlabel":"Join The Community",
+      "quick.explorer":"🔍 Explorer","quick.wallet":"💰 Web Wallet","quick.pool":"📊 Pool","quick.roadmap":"📈 Roadmap",
+      "quick.roadmap2":"Roadmap","quick.whitepaper":"📄 Whitepaper","quick.build":"⚒️ Build",
+      "price.loading":"Loading...","price.trade":"Trade Now",
+      "spec.eyebrow":"NETWORK PARAMETERS","spec.title":"Nusacoin Specifications",
+      "spec.desc":"NUX has a number of technical specifications that set it apart from other cryptocurrencies. Here are the key features:",
+      "spec.codelabel":"Name Code","spec.algolabel":"Algorithm","spec.rewardlabel":"Reward","spec.halvinglabel":"Halving",
+      "spec.difflabel":"Diff Adjustment","spec.supplylabel":"Max Supply",
+      "how.eyebrow":"HOW IT WORKS","how.title":"From wallet to blockchain",
+      "how.desc":"A short walkthrough of how Nusacoin works, step by step, like blocks linked in a chain.",
+      "how1.title":"Basics for new users",
+      "how1.desc":"As a new user, you can start using Nusacoin without understanding the technical details. Once you install a Nusacoin wallet on your computer or phone, your first Nusacoin address is created automatically.",
+      "how2.title":"Balances — the blockchain",
+      "how2.desc":'The blockchain is a public ledger that the Nusacoin network relies on. All confirmed transactions are included, so wallets can calculate a spendable balance and new transactions can be verified as authentic. The integrity and chronological order of the chain is enforced with <a href="https://www.nusacoin.org/p/kosa-kata.html" target="_blank">cryptography</a>.',
+      "how3.title":"Transactions — private keys",
+      "how3.desc":'A transaction is a transfer of value between Nusacoin wallets that gets included in the blockchain. Wallets keep a secret piece of data called a <a href="https://www.nusacoin.org/p/kosa-kata.html" target="_blank">private key</a> or seed, used to sign transactions as mathematical proof of ownership. Transactions are then broadcast to the network and typically begin confirming within 6–12 minutes through a process called <a href="https://www.nusacoin.org/p/kosa-kata.html" target="_blank">mining</a>.',
+      "how4.title":"Processing — mining",
+      "how4.desc":"Mining is a distributed consensus system used to confirm pending transactions by including them in the blockchain. It enforces chronological order, protects the neutrality of the network, and lets different computers agree on the state of the system under strict cryptographic rules.",
+      "how5.title":"Going further",
+      "how5.desc":"This is only a brief summary of Nusacoin. If you'd like to learn more, you can read the original whitepaper that explains the network's design.",
+      "core.eyebrow":"FULL NODE","core.title":"Download Nusacoin Core",
+      "core.desc":"Nusacoin Core lets you run a full node and send money instantly, anywhere, without a bank in between. Secure, private, and entirely yours.",
+      "core.cta":"Download Nusacoin Core",
+      "faucet.title":"Free $NUX","faucet.status":"FAUCET & AIRDROP LIVE","faucet.desc":"Get free coins through our network of community partners.",
+      "f1.badge":"Faucet Every 5 Min","f1.cta":"Claim Faucet",
+      "f2.badge":"Telegram Bot","f2.name":"Earn Money","f2.cta":"Open Bot",
+      "f3.badge":"Airdrop","f3.name":"Join To Pay","f3.cta":"Join Airdrop",
+      "f4.badge":"Giveaway NUX","f4.name":"Chat Group","f4.cta":"Submit Address",
+      "f5.badge":"Task & Mining","f5.cta":"Start Tasks",
+      "f6.badge":"Mining","f6.cta":"Start Mining",
+      "feat.eyebrow":"WHY NUSACOIN","feat.title":"Built for financial freedom",
+      "feat1.title":"Choose Your Own Fees",
+      "feat1.desc":"There's no fee to receive Nusacoin, and many wallets let you control how much fee you pay when sending, with a reasonable <i>default</i> for faster confirmation.",
+      "feat2.title":"Fraud Protection",
+      "feat2.desc":"Nusacoin payments are irreversible and secure, meaning losses from <i>chargeback</i> fraud are no longer a burden for merchants the way they are with credit cards or PayPal.",
+      "feat3.title":"Fast International Payments",
+      "feat3.desc":"Sending Nusacoin across borders is as easy as sending it across the street — no 3-day bank waits and no international transfer fees.",
+      "feat4.title":"No PCI Compliance",
+      "feat4.desc":'Accepting Nusacoin doesn\'t require extensive PCI security checks. You still need to <a href="https://www.nusacoin.org/p/amankan-wallet-anda.html" target="_blank">secure your wallet</a>, but you never have to handle customers\' sensitive card data.',
+      "feat5.title":"Free Advertising",
+      "feat5.desc":"Nusacoin is a growing market. Accepting it as payment is a great way to win new customers and build organic awareness for your business.",
+      "feat6.title":"Multi-signature",
+      "feat6.desc":"Allows funds to be spent only when approved by a group — useful for preventing misuse and tracking approvals for every payment.",
+      "feat7.title":"Accounting Transparency",
+      "feat7.desc":"The blockchain provides a high degree of transparency. Non-profits can openly verify balances and transactions to the public or their donors.",
+      "feat8.title":"Community Run",
+      "feat8.desc":"Nusacoin's nodes, pools, and wallets are built and run by the community — not controlled by a single central entity.",
+      "footer.desc":"The people's blockchain, built on fair crypto principles. Decentralized, secure, and accessible to everyone.",
+      "footer.quick":"Quick Links","footer.res":"Resources","footer.docs":"Docs & Security",
+      "footer.pool":"Mining Pool","footer.ijol":"Ijol Nusacoin (P2P)","footer.rdn":"Nusacard RDN Bot",
+      "footer.wpid":"Whitepaper (ID)","footer.wpen":"Whitepaper (EN)","footer.secure":"Secure Your Wallet","footer.privacy":"Protect Your Privacy",
+      "footer.copyright":"© 2026 Nusacoin Project. Built for decentralization."
+    }
+  };
+
+  let lang = 'id';
+  const langBtn = document.getElementById('lang-toggle');
+  function applyLang(l){
+    document.documentElement.lang = l;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      const val = dict[l][key];
+      if (val === undefined) return;
+      if (/<[a-z][\s\S]*>/i.test(val)) el.innerHTML = val;
+      else el.textContent = val;
+    });
+    langBtn.textContent = l === 'id' ? 'ID / EN' : 'EN / ID';
+  }
+  applyLang(lang);
+  langBtn.addEventListener('click', () => {
+    lang = lang === 'id' ? 'en' : 'id';
+    applyLang(lang);
+  });
+})();
+</script>
+
+</body>
+</html>
