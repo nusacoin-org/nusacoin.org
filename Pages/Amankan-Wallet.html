@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nusacoin (NUX) - Amankan Wallet Anda</title>
+    
+    <!-- Google Fonts & FontAwesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Titillium+Web:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- CSS Styling -->
+    <style>
+        /* --- RESET & HAPUS NAVBAR BLOGGER --- */
+        #navbar-iframe, .navbar, .navbar-ghost { 
+            display: none !important; 
+            height: 0 !important; 
+            visibility: hidden !important; 
+        }
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+
+        /* Variables Tema Light & Dark Mode */
+        :root {
+            --primary: #27ae60;
+            --primary-dark: #1e8449;
+            --bg-body: #ffffff;
+            --bg-card: #ffffff;
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --bg-light: #f8fafc;
+            --border: #e2e8f0;
+            --title-green: #38761d;
+            --highlight-green: #6aa84f;
+        }
+
+        /* Mode Dark */
+        body.dark-mode {
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --bg-light: #1e293b;
+            --border: #334155;
+            --title-green: #4ade80;
+            --highlight-green: #86efac;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            color: var(--text-main); 
+            line-height: 1.6; 
+            overflow-x: hidden;
+            background-color: var(--bg-body);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background-color: var(--primary);
+            color: white;
+            padding: 8px 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .top-bar-container {
+            max-width: 1250px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .top-bar-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Tombol Pilihan Bahasa */
+        .lang-switch {
+            display: flex;
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 4px;
+            padding: 2px;
+        }
+
+        .lang-btn {
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.75);
+            padding: 2px 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: all 0.2s;
+        }
+
+        .lang-btn.active, .lang-btn:hover {
+            background: #ffffff;
+            color: var(--primary);
+        }
+
+        /* Tombol Tema (Hanya Simbol) */
+        .theme-toggle-btn {
+            background: rgba(0, 0, 0, 0.15);
+            border: none;
+            color: #ffffff;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        .theme-toggle-btn:hover {
+            background: rgba(0, 0, 0, 0.3);
+            transform: scale(1.08);
+        }
+
+        /* Main Content Styling */
+        main {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        p.summarytxt {
+            font-family: 'Titillium Web', Arial, sans-serif;
+            line-height: 1.6em;
+            margin: 15px auto;
+            color: var(--text-main);
+            font-size: 1rem;
+            text-align: justify;
+        }
+
+        h2 {
+            font-family: 'Titillium Web', Arial, sans-serif;
+            line-height: 1.4em;
+            margin: 30px auto 10px;
+            font-size: 1.5rem;
+            color: var(--title-green);
+            font-weight: 600;
+            text-align: left;
+        }
+
+        h3 {
+            font-family: 'Titillium Web', Arial, sans-serif;
+            margin: 20px auto 8px;
+            font-size: 1.2rem;
+            color: var(--title-green);
+            font-weight: 600;
+            text-align: left;
+        }
+
+        ul {
+            margin: 15px 0 15px 25px;
+            color: var(--text-main);
+        }
+
+        ul li {
+            margin-bottom: 8px;
+            text-align: justify;
+        }
+
+        /* Tombol Download Wrapper */
+        .wrapper-tombol {
+            text-align: center;
+            margin-top: 35px;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        .btn-nusacoin {
+            display: inline-block;
+            padding: 14px 28px;
+            background-color: #28a745;
+            color: #ffffff !important;
+            text-decoration: none;
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            font-size: 16px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-nusacoin:hover {
+            background-color: #218838;
+            color: #ffffff !important;
+        }
+
+        /* Footer Styling */
+        footer {
+            background-color: var(--bg-light);
+            border-top: 1px solid var(--border);
+            padding: 60px 20px 20px;
+            margin-top: 60px;
+        }
+
+        .footer-grid {
+            max-width: 1250px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 40px;
+        }
+
+        .footer-brand h2 {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .footer-brand p {
+            color: var(--text-sub);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .footer-col h3 {
+            font-size: 1.1rem;
+            color: var(--text-main);
+            margin-bottom: 15px;
+        }
+
+        .footer-col ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .footer-col ul li {
+            margin-bottom: 10px;
+        }
+
+        .footer-col ul li a {
+            color: var(--text-sub);
+            text-decoration: none;
+            transition: color 0.2s;
+            font-size: 0.95rem;
+        }
+
+        .footer-col ul li a:hover {
+            color: var(--primary);
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .social-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-main);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .social-box:hover {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .footer-bottom {
+            max-width: 1250px;
+            margin: 40px auto 0;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-sub);
+            font-size: 0.85rem;
+        }
+
+        .mono {
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <div class="top-bar-container">
+            <span id="topBarHelp">Nusacoin.org membutuhkan bantuan anda!</span>
+            
+            <div class="top-bar-controls">
+                <!-- Pilihan Bahasa IN / EN -->
+                <div class="lang-switch">
+                    <button class="lang-btn active" id="btnIN" onclick="switchLanguage('id')">IN</button>
+                    <button class="lang-btn" id="btnEN" onclick="switchLanguage('en')">EN</button>
+                </div>
+
+                <!-- Tombol Tema (Hanya Simbol Ikon) -->
+                <button class="theme-toggle-btn" id="themeToggle" onclick="toggleTheme()" aria-label="Ganti Tema" title="Ganti Tema">
+                    <i class="fa-solid fa-moon" id="themeIcon"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main>
+        <p class="summarytxt" id="introTxt">Dalam dunia nyata, wallet anda haruslah diamankan. Nusacoin memungkinkan untuk melakukan transfer ke mana saja dengan cara yang sangat mudah serta memungkinkan untuk mengendalikan uang anda. Fitur hebat itu juga datang bersama dengan perhatian yang tinggi atas keamanan. Nusacoin menyediakan tingkat keamanan yang cukup tinggi jika digunakan secara benar. <b id="rememberTxt">Selalu ingat bahwa merupakan tanggung jawab anda untuk melakukan langkah-langkah pengamanan yang baik dalam rangka melindungi uang anda</b>.</p>
+
+        <h2 id="title1">Berhati-hati dengan layanan online</h2>
+        <p class="summarytxt" id="desc1">Anda sebaiknya memahami berbagai jenis layanan yang didesain untuk menyimpan uang anda secara online. Banyak tempat penukaran dan dompet online yang pernah mengalami kebocoran keamanan di masa lalu. Pada umumnya mereka masih belum menyediakan kepastian dan keamanan yang memadai untuk digunakan sebagai sarana penyimpanan layaknya bank. Sebaiknya, anda menggunakan layanan <b>wallet Nusacoin</b> lainnya. Jika tidak, sebaiknya memilih jenis layanan semacam ini dengan lebih berhati-hati. Sebagai tambahan, sangat disarankan memilih layanan yang menggunakan otentikasi dua-faktor.</p>
+
+        <h2 id="title2">Jumlah kecil untuk penggunaan sehari-hari</h2>
+        <p class="summarytxt" id="desc2">Sebuah wallet Nusacoin layaknya sebuah dompet sungguhan dengan uang tunai di dalamnya. Jika tidak ingin menyimpan ribuan dolar di dalam dompet, anda mungkin juga memiliki pertimbangan yang sama untuk wallet Nusacoin anda. Secara umum, sebaiknya menyimpan uang nusacoin dalam jumlah kecil di komputer, ponsel, ataupun server untuk penggunaan sehari-hari dan menyimpan sebagian uang pada tempat yang lebih aman.</p>
+
+        <h2 id="title3">Buat cadangan wallet anda</h2>
+        <p class="summarytxt" id="desc3">Dengan disimpan di tempat yang aman, cadangan wallet dapat melindungi dari kerusakan komputer dan kesalahan manusia lainnya. Pencadangan juga memungkinkan untuk memulihkan wallet setelah ponsel atau komputer dicuri jika telah mengenskripsi dompet anda.</p>
+
+        <h2 id="title4">Buat cadangan seluruh wallet</h2>
+        <p class="summarytxt" id="desc4">Beberapa jenis wallet menggunakan banyak kunci pribadi yang tersembunyi di dalamnya. Jika anda hanya memiliki cadangan kunci pribadi untuk alamat Nusacoin anda yang tampak, anda mungkin tidak bisa mengembalikan sebagian besar uang dengan cadangan anda tersebut.</p>
+
+        <h2 id="title5">Enkripsi pencadangan online</h2>
+        <p class="summarytxt" id="desc5">Cadangan apapun yang tersimpan secara online sangat rentan terhadap pencurian. Bahkan sebuah komputer yang terhubung dengan Internet rentan akan perangkat lunak berbahaya. Dengan demikian, mengenkripsi cadangan apapun yang terekspos ke jaringan adalah sebuah langkah pengamanan yang baik.</p>
+
+        <h2 id="title6">Gunakan banyak lokasi aman</h2>
+        <p class="summarytxt" id="desc6">Satu poin kegagalan akan buruk untuk keamanan. Jika cadangan anda tidak tergantung pada satu lokasi saja, maka mengurangi risiko hal buruk terjadi yang bisa menghalangi untuk memulihkan wallet. Anda mungkin bisa mempertimbangkan menggunakan media lain untuk menyimpan key seperti USB, kertas, dan CD.</p>
+
+        <h2 id="title7">Lakukan pencadangan secara teratur</h2>
+        <p class="summarytxt" id="desc7">Anda perlu membuat cadangan wallet anda secara teratur untuk memastikan semua perubahan alamat Nusacoin dan semua alamat Nusacoin baru yang anda buat akan dimasukkan dalam pencadangan anda. Bagaimanapun, semua aplikasi akan segera menggunakan wallet yang hanya perlu dibuat cadangan sekali.</p>
+
+        <h2 id="title8">Enkripsi wallet Anda</h2>
+        <p class="summarytxt" id="desc8">Mengenkripsi wallet atau ponsel memungkinkan untuk mengatur kata sandi untuk mencegah orang lain menggunakan dana anda. Hal ini membantu melindungi dari pencurian, meskipun tidak dapat melindungi dari perangkat keras atau lunak perekam ketikan.</p>
+
+        <h2 id="title9">Jangan lupakan kata sandi Anda</h2>
+        <p class="summarytxt" id="desc9">Pastikan Anda tidak pernah lupa kata sandi atau uang Anda akan hilang secara permanen. Tidak seperti bank, Nusacoin hanya menyediakan sangat sedikit pilihan untuk pemulihan kata sandi. Anda harus mengingat kata sandi Anda meskipun sudah bertahun-tahun tidak menggunakannya. Untuk jaga-jaga, Anda mungkin bisa menyimpan salinan kata sandi Anda di tempat yang aman seperti brankas.</p>
+
+        <h2 id="title10">Gunakan kata sandi yang kuat</h2>
+        <p class="summarytxt" id="desc10">Kata sandi yang hanya terdiri dari huruf saja atau kata yang mudah dikenali bisa dianggap sangat lemah dan mudah untuk dibobol. Kata sandi yang kuat harus mengandung unsur huruf, angka, tanda baca dan panjangnya paling tidak 16 karakter. Kata sandi yang paling aman adalah yang dibuat dengan program yang didesain untuk keperluan seperti ini. Kata sandi yang kuat biasanya sulit untuk diingat, sehingga Anda sebaiknya berhati-hati dalam mengingatnya.</p>
+
+        <h2 id="title11">Wallet offline untuk penyimpanan</h2>
+        <p class="summarytxt" id="desc11">Sebuah wallet offline, juga dikenal sebagai "cold storage", menyediakan tingkat keamanan paling tinggi sebagai penyimpanan. Dengan wallet offline berarti menyimpan wallet di tempat aman yang tidak terhubung dengan jaringan. Bila dilakukan dengan benar, wallet offline menawarkan pelindungan yang baik terhadap kerentanan komputer. Menggunakan wallet offline bersamaan dengan membuat cadangan dan enkripsi juga merupakan praktik pengamanan yang baik. Berikut ini adalah gambaran melalui beberapa pendekatan.</p>
+
+        <h3 id="subtitle1">Penandatanganan transaksi offline</h3>
+        <p class="summarytxt" id="subdesc1">Pendekatan ini melibatkan dua komputer yang berbagi beberapa bagian dari wallet yang sama. Komputer pertama harus diputuskan dari jaringan apapun. Komputer tersebut memegang seluruh wallet dan bisa digunakan untuk menandatangani transaksi. Komputer kedua terhubung ke jaringan dan hanya memantau wallet yang bisa membuat transaksi yang tidak ditandatangani. Dengan cara ini, anda bisa dengan aman melakukan transaksi baru dengan langkah-langkah berikut ini.</p>
+        <ul>
+            <li id="step1">Buat sebuah transaksi baru pada komputer online dan simpanlah pada sebuah kunci USB.</li>
+            <li id="step2">Tandatangani transaksi dengan komputer offline.</li>
+            <li id="step3">Kirim transaksi yang telah ditandatangani dengan komputer online. Karena komputer yang terhubung dengan jaringan tidak dapat menandatangani transaksi, maka komputer tersebut tidak bisa digunakan untuk menarik dana apapun jika dibajak.</li>
+        </ul>
+
+        <h3 id="subtitle2">Wallet perangkat keras</h3>
+        <p class="summarytxt" id="subdesc2">Wallet perangkat keras adalah keseimbangan terbaik antara keamanan yang sangat tinggi dan kemudahan pemakaian. Wallet perangkat keras ini dirancang khusus sejak awal hanya untuk menjadi wallet Nusacoin dan bukan yang lain. Tidak ada perangkat lunak yang bisa diinstal pada wallet ini, sehingga sangat aman terhadap kerentanan komputer dan pencurian online. Wallet perangkat keras ini memungkinkan membuat cadangan, sehingga bisa memulihkan dana jika anda kehilangan perangkat tersebut.</p>
+
+        <h2 id="title12">Tetap jaga perangkat lunak Anda terbarui</h2>
+        <p class="summarytxt" id="desc12">Menggunakan perangkat lunak Nusacoin versi terbaru memungkinkan untuk menerima perbaikan stabilitas dan keamanan yang penting. Pembaruan dapat mencegah berbagai masalah dengan tingkat kerumitannya, termasuk fitur baru yang berguna dan menjaga wallet anda tetap aman. Menginstalasi pembaruan untuk semua perangkat lunak lain pada komputer atau ponsel juga penting untuk menjaga lingkungan dompet anda menjadi lebih aman.</p>
+
+        <h2 id="title13">Tanda tangan berganda untuk melindungi dari pencurian</h2>
+        <p class="summarytxt" id="desc13">Nusacoin memiliki fitur multi-signature yang memungkinkan sebuah transaksi membutuhkan beberapa persetujuan independen agar bisa dibelanjakan. Fitur ini bisa digunakan oleh sebuah organisasi untuk memberikan akses anggota lain terhadap sumber dana dan hanya memungkinkan penarikan jika 3 dari 5 anggota menandatangani transaksi. Beberapa web wallet juga menyediakan wallet multi-signature, yang memungkinkan pengguna untuk tetap memiliki kendali atas uang mereka sambil mencegah pencuri mengambil dana dengan membobol sebuah perangkat atau sebuah server.</p>
+
+        <h2 id="title14">Pikirkan mengenai wasiat Anda</h2>
+        <p class="summarytxt" id="desc14">Nusacoin anda dapat hilang selamanya jika tidak mempunyai cadangan untuk rekan dan keluarga anda. Jika lokasi wallet atau kata sandi anda tidak diketahui oleh siapapun ketika anda sudah tiada, tidak ada harapan bahwa dana tersebut akan pernah bisa ditemukan. Luangkan sedikit waktu untuk hal tersebut agar dapat memberi perubahan yang besar.</p>
+
+        <div class="wrapper-tombol">
+            <a class="btn-nusacoin" id="btnDownload" href="https://github.com/TaobotX11/nusacoin/releases/download/0.26.60/nusacoin-0.26.60-win64-setup.exe">
+                Nusacoin Core Win
+            </a>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <h2>Nusacoin Network</h2>
+                <p id="footerDesc">Blockchain milik rakyat dengan prinsip crypto yang adil. Terdesentralisasi, aman, dan dapat diakses semua orang.</p>
+                <div class="social-icons">
+                    <a href="https://x.com/Nusacoin_chain" target="_blank" class="social-box" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="https://discord.gg/NcKKZFBzJ" target="_blank" class="social-box" aria-label="Discord"><i class="fab fa-discord"></i></a>
+                    <a href="https://telegram.me/NusacoinX11" target="_blank" class="social-box" aria-label="Telegram"><i class="fab fa-telegram-plane"></i></a>
+                    <a href="https://www.reddit.com/r/Nusacoin" target="_blank" class="social-box" aria-label="Reddit"><i class="fab fa-reddit-alien"></i></a>
+                    <a href="https://github.com/TaobotX11/nusacoin" target="_blank" class="social-box" aria-label="GitHub"><i class="fab fa-github"></i></a>
+                </div>
+            </div>
+
+            <div class="footer-col">
+                <h3 id="footerQuickTitle">Tautan Cepat</h3>
+                <ul>
+                    <li><a href="https://explorer.nusacoin.org" target="_blank">Explorer</a></li>
+                    <li><a href="https://dompet.nusacoin.org" target="_blank">Nusacoin Web Wallet</a></li>
+                    <li><a href="https://github.com/TaobotX11/nusacoin" target="_blank">Nusacoin Core</a></li>
+                    <li><a href="https://green.nusacoin.org" target="_blank">Nusacoin Green Wallet</a></li>
+                    <li><a href="/Pages/Visi-Misi.html">Roadmap</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h3 id="footerResTitle">Sumber Daya</h3>
+                <ul>
+                    <li><a href="https://paper.nusacoin.org" target="_blank">Paper Wallet</a></li>
+                    <li><a href="https://pool.nusacoin.org" target="_blank">Mining Pool</a></li>
+                    <li><a href="https://ijol.nusacoin.org" target="_blank">Ijol Nusacoin (P2P)</a></li>
+                    <li><a href="https://t.me/rdnmesin_bot" target="_blank">Nusacard RDN Bot</a></li>
+                    <li><a href="/Pages/Kosa-Kata.html" target="_blank" id="menuGlossary">Kosa Kata</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h3 id="footerDocsTitle">Dokumen &amp; Keamanan</h3>
+                <ul>
+                    <li><a href="/Pages/Whitepaper_Nusacoin_in.pdf">Whitepaper IN</a></li>
+                    <li><a href="/Pages/Whitepaper_Nusacoin_en.pdf">Whitepaper EN</a></li>
+                    <li><a href="/Pages/Amankan-Wallet.html" target="_blank" id="menuSecure">Amankan Wallet</a></li>
+                    <li><a href="/Pages/Lindungi-Privasi-Anda.html" target="_blank" id="menuPrivacy">Lindungi Privasi</a></li>
+                    <li><a href="/Pages/FAQ.html">FAQ</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <span id="footerCopyright">© 2026 Nusacoin Project. Dibangun untuk desentralisasi.</span>
+            <span class="mono"> · NUX / X11</span>
+        </div>
+    </footer>
+
+    <!-- Script Fungsionalitas Bahasa (IN/EN) dan Tema (Simbol) -->
+    <script>
+        const translations = {
+            id: {
+                topBarHelp: "Nusacoin.org membutuhkan bantuan anda!",
+                introTxt: "Dalam dunia nyata, wallet anda haruslah diamankan. Nusacoin memungkinkan untuk melakukan transfer ke mana saja dengan cara yang sangat mudah serta memungkinkan untuk mengendalikan uang anda. Fitur hebat itu juga datang bersama dengan perhatian yang tinggi atas keamanan. Nusacoin menyediakan tingkat keamanan yang cukup tinggi jika digunakan secara benar. ",
+                rememberTxt: "Selalu ingat bahwa merupakan tanggung jawab anda untuk melakukan langkah-langkah pengamanan yang baik dalam rangka melindungi uang anda",
+                title1: "Berhati-hati dengan layanan online",
+                desc1: "Anda sebaiknya memahami berbagai jenis layanan yang didesain untuk menyimpan uang anda secara online. Banyak tempat penukaran dan dompet online yang pernah mengalami kebocoran keamanan di masa lalu. Pada umumnya mereka masih belum menyediakan kepastian dan keamanan yang memadai untuk digunakan sebagai sarana penyimpanan layaknya bank. Sebaiknya, anda menggunakan layanan wallet Nusacoin lainnya. Jika tidak, sebaiknya memilih jenis layanan semacam ini dengan lebih berhati-hati. Sebagai tambahan, sangat disarankan memilih layanan yang menggunakan otentikasi dua-faktor.",
+                title2: "Jumlah kecil untuk penggunaan sehari-hari",
+                desc2: "Sebuah wallet Nusacoin layaknya sebuah dompet sungguhan dengan uang tunai di dalamnya. Jika tidak ingin menyimpan ribuan dolar di dalam dompet, anda mungkin juga memiliki pertimbangan yang sama untuk wallet Nusacoin anda. Secara umum, sebaiknya menyimpan uang nusacoin dalam jumlah kecil di komputer, ponsel, ataupun server untuk penggunaan sehari-hari dan menyimpan sebagian uang pada tempat yang lebih aman.",
+                title3: "Buat cadangan wallet anda",
+                desc3: "Dengan disimpan di tempat yang aman, cadangan wallet dapat melindungi dari kerusakan komputer dan kesalahan manusia lainnya. Pencadangan juga memungkinkan untuk memulihkan wallet setelah ponsel atau komputer dicuri jika telah mengenskripsi dompet anda.",
+                title4: "Buat cadangan seluruh wallet",
+                desc4: "Beberapa jenis wallet menggunakan banyak kunci pribadi yang tersembunyi di dalamnya. Jika anda hanya memiliki cadangan kunci pribadi untuk alamat Nusacoin anda yang tampak, anda mungkin tidak bisa mengembalikan sebagian besar uang dengan cadangan anda tersebut.",
+                title5: "Enkripsi pencadangan online",
+                desc5: "Cadangan apapun yang tersimpan secara online sangat rentan terhadap pencurian. Bahkan sebuah komputer yang terhubung dengan Internet rentan akan perangkat lunak berbahaya. Dengan demikian, mengenkripsi cadangan apapun yang terekspos ke jaringan adalah sebuah langkah pengamanan yang baik.",
+                title6: "Gunakan banyak lokasi aman",
+                desc6: "Satu poin kegagalan akan buruk untuk keamanan. Jika cadangan anda tidak tergantung pada satu lokasi saja, maka mengurangi risiko hal buruk terjadi yang bisa menghalangi untuk memulihkan wallet. Anda mungkin bisa mempertimbangkan menggunakan media lain untuk menyimpan key seperti USB, kertas, dan CD.",
+                title7: "Lakukan pencadangan secara teratur",
+                desc7: "Anda perlu membuat cadangan wallet anda secara teratur untuk memastikan semua perubahan alamat Nusacoin dan semua alamat Nusacoin baru yang anda buat akan dimasukkan dalam pencadangan anda. Bagaimanapun, semua aplikasi akan segera menggunakan wallet yang hanya perlu dibuat cadangan sekali.",
+                title8: "Enkripsi wallet Anda",
+                desc8: "Mengenkripsi wallet atau ponsel memungkinkan untuk mengatur kata sandi untuk mencegah orang lain menggunakan dana anda. Hal ini membantu melindungi dari pencurian, meskipun tidak dapat melindungi dari perangkat keras atau lunak perekam ketikan.",
+                title9: "Jangan lupakan kata sandi Anda",
+                desc9: "Pastikan Anda tidak pernah lupa kata sandi atau uang Anda akan hilang secara permanen. Tidak seperti bank, Nusacoin hanya menyediakan sangat sedikit pilihan untuk pemulihan kata sandi. Anda harus mengingat kata sandi Anda meskipun sudah bertahun-tahun tidak menggunakannya. Untuk jaga-jaga, Anda mungkin bisa menyimpan salinan kata sandi Anda di tempat yang aman seperti brankas.",
+                title10: "Gunakan kata sandi yang kuat",
+                desc10: "Kata sandi yang hanya terdiri dari huruf saja atau kata yang mudah dikenali bisa dianggap sangat lemah dan mudah untuk dibobol. Kata sandi yang kuat harus mengandung unsur huruf, angka, tanda baca dan panjangnya paling tidak 16 karakter. Kata sandi yang paling aman adalah yang dibuat dengan program yang didesain untuk keperluan seperti ini. Kata sandi yang kuat biasanya sulit untuk diingat, sehingga Anda sebaiknya berhati-hati dalam mengingatnya.",
+                title11: "Wallet offline untuk penyimpanan",
+                desc11: "Sebuah wallet offline, juga dikenal sebagai \"cold storage\", menyediakan tingkat keamanan paling tinggi sebagai penyimpanan. Dengan wallet offline berarti menyimpan wallet di tempat aman yang tidak terhubung dengan jaringan. Bila dilakukan dengan benar, wallet offline menawarkan pelindungan yang baik terhadap kerentanan komputer. Menggunakan wallet offline bersamaan dengan membuat cadangan dan enkripsi juga merupakan praktik pengamanan yang baik. Berikut ini adalah gambaran melalui beberapa pendekatan.",
+                subtitle1: "Penandatanganan transaksi offline",
+                subdesc1: "Pendekatan ini melibatkan dua komputer yang berbagi beberapa bagian dari wallet yang sama. Komputer pertama harus diputuskan dari jaringan apapun. Komputer tersebut memegang seluruh wallet dan bisa digunakan untuk menandatangani transaksi. Komputer kedua terhubung ke jaringan dan hanya memantau wallet yang bisa membuat transaksi yang tidak ditandatangani. Dengan cara ini, anda bisa dengan aman melakukan transaksi baru dengan langkah-langkah berikut ini.",
+                step1: "Buat sebuah transaksi baru pada komputer online dan simpanlah pada sebuah kunci USB.",
+                step2: "Tandatangani transaksi dengan komputer offline.",
+                step3: "Kirim transaksi yang telah ditandatangani dengan komputer online. Karena komputer yang terhubung dengan jaringan tidak dapat menandatangani transaksi, maka komputer tersebut tidak bisa digunakan untuk menarik dana apapun jika dibajak.",
+                subtitle2: "Wallet perangkat keras",
+                subdesc2: "Wallet perangkat keras adalah keseimbangan terbaik antara keamanan yang sangat tinggi dan kemudahan pemakaian. Wallet perangkat keras ini dirancang khusus sejak awal hanya untuk menjadi wallet Nusacoin dan bukan yang lain. Tidak ada perangkat lunak yang bisa diinstal pada wallet ini, sehingga sangat aman terhadap kerentanan komputer dan pencurian online. Wallet perangkat keras ini memungkinkan membuat cadangan, sehingga bisa memulihkan dana jika anda kehilangan perangkat tersebut.",
+                title12: "Tetap jaga perangkat lunak Anda terbarui",
+                desc12: "Menggunakan perangkat lunak Nusacoin versi terbaru memungkinkan untuk menerima perbaikan stabilitas dan keamanan yang penting. Pembaruan dapat mencegah berbagai masalah dengan tingkat kerumitannya, termasuk fitur baru yang berguna dan menjaga wallet anda tetap aman. Menginstalasi pembaruan untuk semua perangkat lunak lain pada komputer atau ponsel juga penting untuk menjaga lingkungan dompet anda menjadi lebih aman.",
+                title13: "Tanda tangan berganda untuk melindungi dari pencurian",
+                desc13: "Nusacoin memiliki fitur multi-signature yang memungkinkan sebuah transaksi membutuhkan beberapa persetujuan independen agar bisa dibelanjakan. Fitur ini bisa digunakan oleh sebuah organisasi untuk memberikan akses anggota lain terhadap sumber dana dan hanya memungkinkan penarikan jika 3 dari 5 anggota menandatangani transaksi. Beberapa web wallet juga menyediakan wallet multi-signature, yang memungkinkan pengguna untuk tetap memiliki kendali atas uang mereka sambil mencegah pencuri mengambil dana dengan membobol sebuah perangkat atau sebuah server.",
+                title14: "Pikirkan mengenai wasiat Anda",
+                desc14: "Nusacoin anda dapat hilang selamanya jika tidak mempunyai cadangan untuk rekan dan keluarga anda. Jika lokasi wallet atau kata sandi anda tidak diketahui oleh siapapun ketika anda sudah tiada, tidak ada harapan bahwa dana tersebut akan pernah bisa ditemukan. Luangkan sedikit waktu untuk hal tersebut agar dapat memberi perubahan yang besar.",
+                btnDownload: "Nusacoin Core Win",
+                footerDesc: "Blockchain milik rakyat dengan prinsip crypto yang adil. Terdesentralisasi, aman, dan dapat diakses semua orang.",
+                footerQuickTitle: "Tautan Cepat",
+                footerResTitle: "Sumber Daya",
+                footerDocsTitle: "Dokumen & Keamanan",
+                menuGlossary: "Kosa Kata",
+                menuSecure: "Amankan Wallet",
+                menuPrivacy: "Lindungi Privasi",
+                footerCopyright: "© 2026 Nusacoin Project. Dibangun untuk desentralisasi."
+            },
+            en: {
+                topBarHelp: "Nusacoin.org needs your help!",
+                introTxt: "In the real world, your wallet must be secured. Nusacoin makes it possible to transfer value anywhere easily while giving you control of your money. Such great features also come with great security requirements. Nusacoin provides high levels of security when used properly. ",
+                rememberTxt: "Always remember that it is your responsibility to adopt good security practices in order to protect your money",
+                title1: "Beware of online services",
+                desc1: "You should be cautious with any service designed to store your money online. Many exchanges and online wallets suffered from security breaches in the past. Generally, they do not offer enough security and guarantees to be used like a bank. You should prefer using other Nusacoin wallet options. Otherwise, choose such services with great care. Additionally, using two-factor authentication is strongly recommended.",
+                title2: "Small amounts for everyday use",
+                desc2: "A Nusacoin wallet is like a real wallet with cash. If you wouldn't keep thousands of dollars in your pocket, you might want to apply the same consideration to your Nusacoin wallet. In general, it is good practice to keep only small amounts of nusacoin on your computer, mobile, or server for everyday use, and keep the rest of your funds in a safer environment.",
+                title3: "Backup your wallet",
+                desc3: "Stored in a safe place, a backup of your wallet can protect you against computer failures and human errors. It can also allow you to recover your wallet after your phone or computer is stolen, provided you encrypted your wallet.",
+                title4: "Backup your whole wallet",
+                desc4: "Some wallets use many hidden private keys internally. If you only backup the private keys for visible Nusacoin addresses, you might not be able to recover a large part of your funds with your backup.",
+                title5: "Encrypt online backups",
+                desc5: "Any backup stored online is highly vulnerable to theft. Even a computer connected to the Internet is vulnerable to malicious software. Encrypting any backup exposed to the network is a basic security practice.",
+                title6: "Use multiple safe locations",
+                desc6: "Single points of failure are bad for security. If your backup doesn't depend on a single location, you reduce the likelihood of an event preventing you from restoring your wallet. You might consider using different media like USB keys, paper, and CDs.",
+                title7: "Perform regular backups",
+                desc7: "You need to backup your wallet regularly to ensure all recent Nusacoin change addresses and new addresses you created are included in your backup. However, all applications will soon be using wallets that only need to be backed up once.",
+                title8: "Encrypt your wallet",
+                desc8: "Encrypting your wallet or phone allows you to set a password to prevent anyone from spending your funds. This helps protect against theft, though it cannot protect against hardware or software keyloggers.",
+                title9: "Never forget your password",
+                desc9: "You must ensure you never forget your password or your funds will be permanently lost. Unlike a bank, Nusacoin offers very few password recovery options. You must remember your password even after years of not using it. As a precaution, you might store a copy of your password in a safe place like a vault.",
+                title10: "Use a strong password",
+                desc10: "A password containing only letters or common words is considered weak and easy to crack. A strong password must contain letters, numbers, punctuation marks, and be at least 16 characters long. The safest passwords are created using programs designed for this purpose. Strong passwords are hard to remember, so be careful.",
+                title11: "Offline wallet for cold storage",
+                desc11: "An offline wallet, also known as cold storage, provides the highest level of security. It consists of keeping a wallet in a secure place disconnected from any network. When done properly, it offers great protection against computer vulnerabilities. Using an offline wallet along with backups and encryption is good practice.",
+                subtitle1: "Offline transaction signing",
+                subdesc1: "This approach involves two computers sharing parts of the same wallet. The first computer must be disconnected from any network. It holds the whole wallet and signs transactions. The second computer is connected to the network and holds a watching-only wallet to create unsigned transactions.",
+                step1: "Create a new transaction on the online computer and save it to a USB drive.",
+                step2: "Sign the transaction with the offline computer.",
+                step3: "Send the signed transaction using the online computer. Since the connected computer cannot sign transactions, it cannot be abused to withdraw funds if compromised.",
+                subtitle2: "Hardware wallets",
+                subdesc2: "Hardware wallets are the best balance between high security and ease of use. They are purpose-built devices designed solely to be a Nusacoin wallet. No software can be installed on them, making them safe against computer vulnerabilities and online theft. They also support backups to recover funds if lost.",
+                title12: "Keep your software updated",
+                desc12: "Using the latest Nusacoin software version allows you to receive important stability and security fixes. Updates prevent issues of varying severity, introduce useful features, and keep your wallet safe. Installing updates for all other software on your computer or phone is also important.",
+                title13: "Multi-signature to protect against theft",
+                desc13: "Nusacoin includes a multi-signature feature requiring multiple independent approvals to spend funds. Organizations can use this to grant access to members while requiring 3 out of 5 approvals to authorize withdrawals. Some web wallets offer multi-sig options to keep control of your funds.",
+                title14: "Think about your testament",
+                desc14: "Your Nusacoins can be lost forever if you don't have a backup plan for your peers and family. If the location of your wallet or passwords are unknown to anyone when you are gone, there is no hope funds will ever be recovered. Spending a little time on this can make a big difference.",
+                btnDownload: "Nusacoin Core Win",
+                footerDesc: "The people's blockchain built on fair crypto principles. Decentralized, secure, and accessible to everyone.",
+                footerQuickTitle: "Quick Links",
+                footerResTitle: "Resources",
+                footerDocsTitle: "Docs & Security",
+                menuGlossary: "Glossary",
+                menuSecure: "Secure Wallet",
+                menuPrivacy: "Protect Privacy",
+                footerCopyright: "© 2026 Nusacoin Project. Built for decentralization."
+            }
+        };
+
+        function switchLanguage(lang) {
+            document.getElementById('btnIN').classList.toggle('active', lang === 'id');
+            document.getElementById('btnEN').classList.toggle('active', lang === 'en');
+
+            const t = translations[lang];
+            for (let id in t) {
+                const el = document.getElementById(id);
+                if (el) {
+                    if (id === 'introTxt') {
+                        el.childNodes[0].nodeValue = t[id];
+                    } else {
+                        el.textContent = t[id];
+                    }
+                }
+            }
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const icon = document.getElementById('themeIcon');
+            
+            body.classList.toggle('dark-mode');
+            
+            if (body.classList.contains('dark-mode')) {
+                icon.className = 'fa-solid fa-sun';
+            } else {
+                icon.className = 'fa-solid fa-moon';
+            }
+        }
+    </script>
+</body>
+</html>

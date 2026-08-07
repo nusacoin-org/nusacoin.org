@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nusacoin (NUX) — Visi &amp; Misi</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Titillium+Web:wght@400;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+  #navbar-iframe, .navbar, .navbar-ghost { display:none !important; height:0 !important; visibility:hidden !important; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  :root {
+    --primary: #27ae60;
+    --primary-dark: #1e8449;
+    --primary-deep: #006400;
+    --text-main: #1e293b;
+    --text-sub: #64748b;
+    --bg: #ffffff;
+    --bg-alt: #f8fafc;
+    --bg-card: #ffffff;
+    --border: #e2e8f0;
+    --mono-bg: #0f2418;
+    --mono-text: #8fe0b4;
+  }
+
+  html[data-theme="dark"] {
+    --primary: #34d17c;
+    --primary-dark: #27ae60;
+    --primary-deep: #062e18;
+    --text-main: #e6edf3;
+    --text-sub: #94a3b8;
+    --bg: #0b1210;
+    --bg-alt: #101815;
+    --bg-card: #131d19;
+    --border: #223029;
+    --mono-bg: #06110b;
+    --mono-text: #7fe8ab;
+  }
+
+  html, body { background:var(--bg); }
+  body {
+    font-family:'Inter', sans-serif;
+    color:var(--text-main);
+    line-height:1.6;
+    overflow-x:hidden;
+    transition:background-color .25s ease, color .25s ease;
+  }
+
+  /* ---------- top bar ---------- */
+  .top-bar {
+    background-color:var(--primary);
+    color:#ffffff;
+    text-align:center;
+    padding:9px 14px;
+    font-size:.82rem;
+    font-weight:600;
+    letter-spacing:.4px;
+  }
+
+  /* ---------- header ---------- */
+  header {
+    background:var(--bg);
+    border-bottom:1px solid var(--border);
+    position:sticky;
+    top:0;
+    z-index:1000;
+    transition:background-color .25s ease, border-color .25s ease;
+  }
+  .nav-container {
+    max-width:1250px;
+    margin:0 auto;
+    display:flex;
+    align-items:center;
+    padding:0 20px;
+    height:72px;
+    justify-content:space-between;
+    gap:20px;
+  }
+  .logo-area {
+    display:flex;
+    align-items:center;
+    gap:10px;
+    text-decoration:none;
+    color:var(--text-main);
+    font-weight:800;
+    font-size:1.3rem;
+    flex-shrink:0;
+  }
+  .logo-badge {
+    width:36px; height:36px; border-radius:50%;
+    background:linear-gradient(135deg, var(--primary) 0%, var(--primary-deep) 100%);
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; font-family:'JetBrains Mono', monospace; font-weight:700; font-size:1.05rem;
+    box-shadow:0 0 0 2px var(--bg), 0 0 0 3px var(--primary);
+  }
+  .logo-area span { color:var(--primary); }
+
+  nav.main-nav { display:flex; align-items:center; gap:26px; }
+  nav.main-nav a {
+    color:var(--text-sub);
+    text-decoration:none;
+    font-size:.92rem;
+    font-weight:600;
+    transition:color .15s ease;
+  }
+  nav.main-nav a:hover, nav.main-nav a.active { color:var(--primary); }
+
+  .header-tools { display:flex; align-items:center; gap:10px; }
+
+  .tool-btn {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    height:38px;
+    padding:0 12px;
+    border-radius:8px;
+    border:1px solid var(--border);
+    background:var(--bg-alt);
+    color:var(--text-main);
+    font-family:inherit;
+    font-size:.82rem;
+    font-weight:700;
+    cursor:pointer;
+    transition:all .15s ease;
+  }
+  .tool-btn:hover { border-color:var(--primary); color:var(--primary); }
+
+  #themeToggle { width:38px; padding:0; font-size:1rem; }
+  #themeToggle .fa-sun { display:none; }
+  html[data-theme="dark"] #themeToggle .fa-moon { display:none; }
+  html[data-theme="dark"] #themeToggle .fa-sun { display:inline-block; }
+
+  /* ---------- hero ---------- */
+  .hero-container {
+    background:linear-gradient(180deg, var(--primary-deep) 0%, #043414 100%);
+    width:100%;
+    padding:90px 20px 130px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    position:relative;
+    color:#ffffff;
+    overflow:hidden;
+  }
+  .bg-lines {
+    position:absolute; inset:0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+    background-size:46px 46px;
+    z-index:1;
+    mask-image:radial-gradient(ellipse at center, black 30%, transparent 80%);
+  }
+  .hero-eyebrow {
+    position:relative; z-index:5;
+    font-family:'JetBrains Mono', monospace;
+    letter-spacing:2px;
+    font-size:.78rem;
+    color:#8fe0b4;
+    text-transform:uppercase;
+    margin-bottom:16px;
+  }
+  .hero-container h1 {
+    color:#ffffff;
+    font-size:clamp(2rem, 4.2vw, 3rem);
+    font-weight:700;
+    margin-bottom:16px;
+    position:relative;
+    z-index:5;
+    max-width:820px;
+  }
+  .hero-container p {
+    color:#b7c9bf;
+    font-size:1.05rem;
+    max-width:640px;
+    position:relative;
+    z-index:5;
+  }
+  .jagged-bottom {
+    position:absolute; bottom:-1px; left:0; width:100%; height:64px;
+    background-color:var(--bg);
+    clip-path:polygon(0% 70%,5% 60%,10% 80%,15% 55%,20% 85%,25% 60%,30% 80%,35% 50%,40% 90%,45% 60%,50% 80%,55% 55%,60% 85%,65% 60%,70% 80%,75% 50%,80% 90%,85% 60%,90% 80%,95% 55%,100% 70%,100% 100%,0% 100%);
+    z-index:5;
+    transition:background-color .25s ease;
+  }
+
+  /* ---------- main ---------- */
+  main { max-width:900px; margin:10px auto 0; padding:0 20px 20px; }
+
+  .lead {
+    font-family:'Titillium Web', Arial, sans-serif;
+    line-height:1.7em;
+    margin:15px auto 25px;
+    color:var(--primary);
+    font-size:1.05rem;
+    text-align:justify;
+    font-weight:600;
+  }
+
+  section.block { margin-top:52px; }
+  section.block:first-of-type { margin-top:20px; }
+
+  h2 {
+    font-family:'Titillium Web', Arial, sans-serif;
+    line-height:1.4em;
+    margin:0 0 14px;
+    font-size:1.5rem;
+    color:var(--primary-dark);
+    font-weight:700;
+    text-align:left;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  h2 i { font-size:1.1rem; opacity:.85; }
+
+  h3 {
+    font-family:'Titillium Web', Arial, sans-serif;
+    margin:22px 0 8px;
+    font-size:1.12rem;
+    color:var(--primary-dark);
+    font-weight:600;
+    text-align:left;
+  }
+
+  p.body-text {
+    color:var(--text-main);
+    text-align:justify;
+    margin-bottom:14px;
+    font-size:.98rem;
+  }
+
+  ul.styled { margin:10px 0 15px 4px; list-style:none; }
+  ul.styled li {
+    position:relative;
+    margin-bottom:10px;
+    padding-left:24px;
+    text-align:justify;
+    color:var(--text-main);
+    font-size:.96rem;
+  }
+  ul.styled li::before {
+    content:"";
+    position:absolute; left:0; top:8px;
+    width:9px; height:9px;
+    background:var(--primary);
+    border-radius:2px;
+    transform:rotate(45deg);
+  }
+
+  /* chain motif divider for "how it works" */
+  .chain-steps { position:relative; margin-top:18px; padding-left:38px; }
+  .chain-steps::before {
+    content:"";
+    position:absolute; left:13px; top:6px; bottom:6px; width:2px;
+    background:repeating-linear-gradient(180deg, var(--primary) 0 6px, transparent 6px 12px);
+  }
+  .chain-step { position:relative; margin-bottom:26px; }
+  .chain-step:last-child { margin-bottom:0; }
+  .chain-step .node {
+    position:absolute; left:-38px; top:0;
+    width:28px; height:28px; border-radius:8px;
+    background:var(--bg-card);
+    border:2px solid var(--primary);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono', monospace;
+    font-size:.78rem; font-weight:700; color:var(--primary);
+  }
+  .chain-step h4 { font-size:1rem; color:var(--text-main); margin-bottom:4px; font-weight:700; }
+  .chain-step p { color:var(--text-sub); font-size:.93rem; text-align:justify; }
+
+  /* pillars grid */
+  .pillars-grid {
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(230px, 1fr));
+    gap:14px;
+    margin:16px 0 6px;
+  }
+  .pillar-card {
+    background:var(--bg-card);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:16px 16px 18px;
+    transition:border-color .15s ease, transform .15s ease;
+  }
+  .pillar-card:hover { border-color:var(--primary); transform:translateY(-2px); }
+  .pillar-card i { color:var(--primary); font-size:1.1rem; margin-bottom:8px; display:block; }
+  .pillar-card span { font-size:.92rem; color:var(--text-main); font-weight:500; }
+
+  /* spec table */
+  .spec-table-wrap {
+    border:1px solid var(--border);
+    border-radius:10px;
+    overflow:hidden;
+    margin-top:16px;
+  }
+  table.spec-table { width:100%; border-collapse:collapse; font-size:.92rem; }
+  table.spec-table tr { border-bottom:1px solid var(--border); }
+  table.spec-table tr:last-child { border-bottom:none; }
+  table.spec-table td { padding:11px 16px; }
+  table.spec-table td:first-child {
+    color:var(--text-sub);
+    font-weight:600;
+    width:46%;
+  }
+  table.spec-table td:last-child {
+    font-family:'JetBrains Mono', monospace;
+    color:var(--primary-dark);
+    font-weight:600;
+  }
+  table.spec-table tr:nth-child(even) { background:var(--bg-alt); }
+
+  /* roadmap */
+  .roadmap-phase {
+    background:var(--bg-card);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:22px 22px 20px;
+    margin-bottom:16px;
+  }
+  .roadmap-phase .phase-tag {
+    display:inline-block;
+    font-family:'JetBrains Mono', monospace;
+    font-size:.72rem;
+    letter-spacing:1px;
+    color:var(--primary);
+    background:color-mix(in srgb, var(--primary) 14%, transparent);
+    padding:4px 10px;
+    border-radius:6px;
+    margin-bottom:10px;
+    font-weight:700;
+  }
+  .roadmap-phase h3 { margin:0 0 12px; font-size:1.08rem; }
+  .roadmap-item { display:flex; gap:12px; margin-bottom:12px; align-items:flex-start; }
+  .roadmap-item:last-child { margin-bottom:0; }
+  .roadmap-item .dot {
+    flex-shrink:0; width:8px; height:8px; border-radius:50%;
+    background:var(--primary); margin-top:7px;
+  }
+  .roadmap-item strong { display:block; font-size:.93rem; color:var(--text-main); margin-bottom:2px; }
+  .roadmap-item p { font-size:.88rem; color:var(--text-sub); text-align:justify; }
+
+  .app-list { margin-top:14px; }
+  .app-item { margin-bottom:16px; }
+  .app-item h4 { font-size:.98rem; color:var(--primary-dark); margin-bottom:4px; font-weight:700; }
+  .app-item p { font-size:.93rem; color:var(--text-main); text-align:justify; }
+
+  .closing-box {
+    margin-top:16px;
+    padding:22px;
+    border-left:3px solid var(--primary);
+    background:var(--bg-alt);
+    border-radius:0 10px 10px 0;
+  }
+  .closing-box p { text-align:justify; margin-bottom:12px; font-size:.96rem; }
+  .closing-box p:last-child { margin-bottom:0; }
+  .thanks {
+    text-align:center;
+    margin-top:44px;
+    color:var(--text-sub);
+    font-family:'JetBrains Mono', monospace;
+    font-size:.85rem;
+    letter-spacing:.5px;
+  }
+
+  /* ---------- footer ---------- */
+  .footer-container {
+    background-color:var(--bg-alt);
+    padding:60px 20px 40px;
+    border-top:1px solid var(--border);
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(230px, 1fr));
+    gap:40px;
+    max-width:1250px;
+    margin:60px auto 0;
+    transition:background-color .25s ease;
+  }
+  .footer-brand h2 { font-size:1.2rem; color:var(--primary-dark); margin-bottom:15px; }
+  .footer-brand p { color:var(--text-sub); font-size:.92rem; line-height:1.5; }
+  .footer-links h3, .footer-social h3 { font-size:1.05rem; color:var(--text-main); margin-bottom:15px; }
+  .footer-links ul { list-style:none; margin:0; padding:0; }
+  .footer-links ul li { margin-bottom:10px; }
+  .footer-links ul li a { color:var(--text-sub); text-decoration:none; transition:color .2s; font-size:.9rem; }
+  .footer-links ul li a:hover { color:var(--primary); }
+  .social-icons { display:flex; gap:12px; flex-wrap:wrap; }
+  .social-box {
+    display:flex; align-items:center; justify-content:center;
+    width:38px; height:38px;
+    background-color:var(--bg-card);
+    border:1px solid var(--border);
+    border-radius:8px;
+    color:var(--text-main);
+    text-decoration:none;
+    transition:all .2s;
+  }
+  .social-box:hover { background-color:var(--primary); color:#fff; border-color:var(--primary); }
+  .footer-bottom {
+    text-align:center; padding:20px;
+    border-top:1px solid var(--border);
+    color:var(--text-sub); font-size:.82rem;
+    background-color:var(--bg-alt);
+  }
+  .footer-bottom .mono { font-family:'JetBrains Mono', monospace; }
+
+  @media (max-width:720px) {
+    nav.main-nav { display:none; }
+    .nav-container { height:64px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="top-bar" data-i18n="topbar">Nusacoin.org membutuhkan bantuan anda!</div>
+
+<header>
+  <div class="nav-container">
+    <a href="https://www.nusacoin.org" class="logo-area">
+      <img src="https://iili.io/Cr21Nx2.th.png" alt="Nusacoin Logo">
+      NUSA<span>COIN</span>
+    </a>
+    <nav class="main-nav">
+      <a href="https://www.nusacoin.org" data-i18n="nav.home">Beranda</a>
+      <a href="#" class="active" data-i18n="nav.visimisi">Visi &amp; Misi</a>
+      <a href="/Pages/Whitepaper_Nusacoin_in.pdf" data-i18n="nav.whitepaper">Whitepaper</a>
+      <a href="https://explorer.nusacoin.org" data-i18n="nav.explorer">Explorer</a>
+    </nav>
+    <div class="header-tools">
+      <button class="tool-btn" id="langToggle" type="button" aria-label="Switch language">EN</button>
+      <button class="tool-btn" id="themeToggle" type="button" aria-label="Switch theme">
+        <i class="fa-solid fa-moon"></i>
+        <i class="fa-solid fa-sun"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="hero-container">
+  <div class="bg-lines"></div>
+  <div class="hero-eyebrow" data-i18n="hero.eyebrow">NUX · X11 · Proof of Work</div>
+  <h1 data-i18n="hero.title">Visi &amp; Misi Nusacoin</h1>
+  <p data-i18n="hero.subtitle">Aset kripto peer-to-peer murni yang mengembalikan kendali penuh atas kekayaan digital kepada setiap orang.</p>
+  <div class="jagged-bottom"></div>
+</div>
+
+<main>
+
+  <p class="lead" data-i18n="lead">NusaCoin ($NUX) adalah aset kripto yang dirancang sebagai alat transaksi elektronik peer-to-peer murni, memungkinkan nilai berpindah langsung antar pihak tanpa perantara lembaga keuangan. Dibangun di atas teknologi blockchain terdesentralisasi, NusaCoin memberi setiap orang kendali penuh atas kekayaan digitalnya sendiri melalui dompet non-custodial yang mudah digunakan.</p>
+
+  <section class="block" id="ringkasan">
+    <h2><i class="fa-solid fa-file-lines"></i><span data-i18n="summary.title">Ringkasan Eksekutif</span></h2>
+    <p class="body-text" data-i18n="summary.text">Whitepaper ini menjabarkan latar belakang masalah yang melandasi NusaCoin, tujuan proyek, teknologi yang digunakan, cara kerja jaringan, spesifikasi teknis token, serta peta jalan (roadmap) pengembangan dalam beberapa fase utama.</p>
+  </section>
+
+  <section class="block" id="masalah">
+    <h2><i class="fa-solid fa-triangle-exclamation"></i><span data-i18n="problem.title">Pernyataan Masalah</span></h2>
+    <p class="body-text" data-i18n="problem.text1">Secara global, masyarakat di hampir semua negara menghadapi keterbatasan dalam mengatur kekayaan mereka sendiri serta minimnya jaminan keamanan yang kokoh atas aset yang mereka miliki.</p>
+    <p class="body-text" data-i18n="problem.text2">Lembaga keuangan pusat memiliki wewenang untuk menambah pasokan uang dan mengendalikan peredarannya. Di sisi lain, nilai komoditas uang tersebut cenderung menurun dari waktu ke waktu — sebuah fenomena yang oleh banyak pihak dipandang sebagai bentuk perampasan kekayaan secara perlahan.</p>
+  </section>
+
+  <section class="block" id="tujuan">
+    <h2><i class="fa-solid fa-bullseye"></i><span data-i18n="goal.title">Tujuan</span></h2>
+    <p class="body-text" data-i18n="goal.text1">NusaCoin (NUX) diluncurkan sebagai aset kripto yang berfungsi sebagai alat transaksi elektronik peer-to-peer murni — perpindahan nilai dari satu pihak ke pihak lain tanpa melibatkan pihak ketiga atau lembaga perantara mana pun.</p>
+    <p class="body-text" data-i18n="goal.text2">Setiap orang dapat membuat rekening NusaCoin miliknya sendiri secara tidak terbatas, tanpa prosedur yang rumit dan melelahkan, dengan menggunakan dompet pribadi (non-custodial) yang mudah digunakan, memiliki kredibilitas tinggi, serta memberikan kendali penuh atas aset pribadi.</p>
+    <p class="body-text" data-i18n="goal.text3">Sifatnya yang terdesentralisasi berarti tidak ada otoritas pusat yang dapat mengendalikan pasokan, distribusi, maupun nilai NusaCoin. Setiap pengguna memiliki porsi dan kedudukan yang setara di dalam jaringan.</p>
+
+    <h3 data-i18n="goal.pillars.title">Lima Pilar Utama NusaCoin</h3>
+    <div class="pillars-grid">
+      <div class="pillar-card"><i class="fa-solid fa-money-bill-transfer"></i><span data-i18n="pillar1">Mengedepankan fungsi sebagai alat pembayaran / barter.</span></div>
+      <div class="pillar-card"><i class="fa-solid fa-piggy-bank"></i><span data-i18n="pillar2">Menabung dalam bentuk aset digital.</span></div>
+      <div class="pillar-card"><i class="fa-solid fa-server"></i><span data-i18n="pillar3">Mendukung jaringan blockchain NusaChain melalui penambangan (mining).</span></div>
+      <div class="pillar-card"><i class="fa-solid fa-shield-halved"></i><span data-i18n="pillar4">Mengamankan jaringan NusaChain dengan memasang node pada komputer.</span></div>
+      <div class="pillar-card"><i class="fa-solid fa-chalkboard-user"></i><span data-i18n="pillar5">Mengedukasi masyarakat mengenai manfaat teknologi cryptocurrency.</span></div>
+    </div>
+  </section>
+
+  <section class="block" id="teknologi">
+    <h2><i class="fa-solid fa-link"></i><span data-i18n="tech.title">Teknologi</span></h2>
+    <p class="body-text" data-i18n="tech.text1">Blockchain adalah sistem pencatatan transaksi yang tersebar di banyak basis data pada banyak komputer sekaligus, atau yang dikenal sebagai distributed ledger. Setiap transaksi tercatat dalam blok-blok yang saling terhubung, sehingga teknologi ini juga mengamankan jaringan dari potensi double spend — masalah klasik dalam pencatatan keuangan digital.</p>
+    <p class="body-text" data-i18n="tech.text2">Secara lebih rinci, blockchain adalah kumpulan catatan data digital yang dikelola oleh sekumpulan komputer (node) yang tidak dimiliki oleh satu entitas mana pun. Setiap catatan individual dibungkus di dalam sebuah wadah yang disebut blok, dan rangkaian blok tersebut membentuk rantai yang diamankan menggunakan prinsip kriptografi yang dipelopori oleh Satoshi Nakamoto.</p>
+    <p class="body-text" data-i18n="tech.text3">Teknologi blockchain digunakan untuk mencatat transaksi mata uang kripto seperti Bitcoin dan Nusacoin, dan juga berpotensi diterapkan pada berbagai sistem lain seperti rumah sakit, keuangan, pemerintahan, dan pendidikan.</p>
+  </section>
+
+  <section class="block" id="cara-kerja">
+    <h2><i class="fa-solid fa-diagram-project"></i><span data-i18n="how.title">Cara Kerja Secara Umum</span></h2>
+    <div class="chain-steps">
+      <div class="chain-step">
+        <div class="node">1</div>
+        <h4 data-i18n="how.step1.title">Transaksi</h4>
+        <p data-i18n="how.step1.text">Pengguna memulai transaksi pada dompetnya masing-masing, misalnya mentransfer aset kripto NUX dari satu dompet ke dompet yang lain.</p>
+      </div>
+      <div class="chain-step">
+        <div class="node">2</div>
+        <h4 data-i18n="how.step2.title">Penyebaran</h4>
+        <p data-i18n="how.step2.text">Transaksi disiarkan ke jaringan peer-to-peer (P2P) yang terdiri dari komputer-komputer (node).</p>
+      </div>
+      <div class="chain-step">
+        <div class="node">3</div>
+        <h4 data-i18n="how.step3.title">Validasi</h4>
+        <p data-i18n="how.step3.text">Node-node dalam jaringan memvalidasi transaksi dengan memeriksa keabsahannya — memastikan pengirim memiliki saldo yang cukup dan transaksi sesuai dengan aturan jaringan. Proses validasi ini umumnya disebut penambangan (mining).</p>
+      </div>
+      <div class="chain-step">
+        <div class="node">4</div>
+        <h4 data-i18n="how.step4.title">Penambahan Blok</h4>
+        <p data-i18n="how.step4.text">Blok baru yang telah divalidasi disebarkan ke seluruh jaringan. Jika disetujui oleh mayoritas node, blok tersebut akan ditambahkan ke dalam rantai (blockchain).</p>
+      </div>
+      <div class="chain-step">
+        <div class="node">5</div>
+        <h4 data-i18n="how.step5.title">Penyelesaian</h4>
+        <p data-i18n="how.step5.text">Setelah blok ditambahkan ke dalam rantai, transaksi dianggap selesai dan dicatat secara permanen di dalam blockchain.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="spesifikasi">
+    <h2><i class="fa-solid fa-microchip"></i><span data-i18n="spec.title">Spesifikasi Teknis NusaCoin</span></h2>
+    <p class="body-text" data-i18n="spec.text">NusaCoin mengadopsi teknologi blockchain dari Bitcoin versi v0.20 yang menggunakan mekanisme bukti kerja (Proof of Work) dengan pasokan terbatas hanya 18.000.000 NUX, dan diperkirakan akan terus ditambang hingga tahun 2240. Nusacoin menggunakan algoritma X11 dan dirancang sebagai proyek blockchain yang dapat digunakan serta diadopsi secara umum demi manfaat masyarakat.</p>
+
+    <div class="spec-table-wrap">
+      <table class="spec-table">
+        <tr><td data-i18n="spec.name">Nama</td><td>NUSA</td></tr>
+        <tr><td data-i18n="spec.ticker">Kode / Ticker</td><td>NUX</td></tr>
+        <tr><td data-i18n="spec.algo">Algoritma</td><td>X11</td></tr>
+        <tr><td data-i18n="spec.consensus">Konsensus</td><td>Proof of Work (PoW)</td></tr>
+        <tr><td data-i18n="spec.type">Tipe</td><td>UTXO (Unspent Transaction Output)</td></tr>
+        <tr><td data-i18n="spec.maxsupply">Persediaan Maksimum</td><td>18.000.000 NUX</td></tr>
+        <tr><td data-i18n="spec.premine">Premine</td><td><span data-i18n="spec.premine.value">Tidak ada</span></td></tr>
+        <tr><td data-i18n="spec.smallest">Satuan Terkecil</td><td>Nusan</td></tr>
+        <tr><td data-i18n="spec.reward">Reward Awal per Blok</td><td>30 NUX / 6 <span data-i18n="spec.minute">menit</span></td></tr>
+        <tr><td data-i18n="spec.halving">Halving</td><td><span data-i18n="spec.halving.value">Setiap 300.000 blok</span></td></tr>
+        <tr><td data-i18n="spec.difficulty">Penyesuaian Kesulitan</td><td><span data-i18n="spec.difficulty.value">Setiap 3.360 blok</span></td></tr>
+        <tr><td data-i18n="spec.eta">Estimasi Selesai Ditambang</td><td><span data-i18n="spec.eta.value">± Tahun 2240</span></td></tr>
+        <tr><td data-i18n="spec.chain">Blockchain</td><td>NusaChain</td></tr>
+        <tr><td data-i18n="spec.domain">Main Domain</td><td>nusacoin.org</td></tr>
+        <tr><td data-i18n="spec.domain2">Second Domain</td><td>nusacoin.site / nusachain.site</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section class="block" id="roadmap">
+    <h2><i class="fa-solid fa-route"></i><span data-i18n="roadmap.title">Peta Jalan (Roadmap)</span></h2>
+    <p class="body-text" data-i18n="roadmap.intro">Pengembangan NusaCoin dibagi ke dalam beberapa fase utama, mulai dari pembangunan jaringan inti, peningkatan adopsi dan edukasi masyarakat, hingga pengembangan ekosistem yang berkelanjutan.</p>
+
+    <div class="roadmap-phase">
+      <span class="phase-tag">FASE 1</span>
+      <h3 data-i18n="phase1.title">Peluncuran Jaringan Inti</h3>
+      <div class="roadmap-item"><div class="dot"></div><div><strong data-i18n="phase1.item1.t">Jaringan &amp; Konsensus</strong><p data-i18n="phase1.item1.d">Peluncuran resmi mainnet NusaChain dengan algoritma X11 dan konsensus Proof of Work (PoW).</p></div></div>
+      <div class="roadmap-item"><div class="dot"></div><div><strong data-i18n="phase1.item2.t">Pasokan</strong><p data-i18n="phase1.item2.d">Distribusi pasokan awal NUX untuk penambangan hingga total 18.000.000 coin.</p></div></div>
+      <div class="roadmap-item"><div class="dot"></div><div><strong data-i18n="phase1.item3.t">Alat Pengguna</strong><p data-i18n="phase1.item3.d">Peluncuran dompet desktop non-custodial agar setiap orang dapat membuat rekening NUSA sendiri.</p></div></div>
+    </div>
+
+    <div class="roadmap-phase">
+      <span class="phase-tag">FASE 2</span>
+      <h3 data-i18n="phase2.title">Peningkatan Adopsi dan Edukasi</h3>
+      <div class="roadmap-item"><div class="dot"></div><div><strong data-i18n="phase2.item1.t">Fungsi Utama</strong><p data-i18n="phase2.item1.d">Integrasi dengan platform e-commerce atau penyedia layanan pertama sebagai alat pembayaran/barter.</p></div></div>
+      <div class="roadmap-item"><div class="dot"></div><div><strong data-i18n="phase2.item2.t">Edukasi &amp; Komunitas</strong><p data-i18n="phase2.item2.d">Peluncuran program edukasi masyarakat tentang manfaat cryptocurrency dan cara kerja blockchain.</p></div></div>
+      <div class="roadmap-item"><div class="dot"></div><div><strong data-i18n="phase2.item3.t">Aksesibilitas</strong><p data-i18n="phase2.item3.d">Pengembangan dan peluncuran dompet seluler (mobile wallet) untuk mempermudah akses dan transaksi.</p></div></div>
+    </div>
+
+    <div class="roadmap-phase">
+      <span class="phase-tag">FASE 3</span>
+      <h3 data-i18n="phase3.title">Pengembangan Ekosistem</h3>
+      <div class="roadmap-item"><div class="dot"></div><div><strong data-i18n="phase3.item1.t">Keamanan Jaringan</strong><p data-i18n="phase3.item1.d">Peningkatan jumlah node dan penambang untuk memperkuat desentralisasi jaringan NusaChain.</p></div></div>
+      <div class="roadmap-item"><div class="dot"></div><div><strong data-i18n="phase3.item2.t">Kasus Penggunaan</strong><p data-i18n="phase3.item2.d">Mengembangkan proyek percontohan di sektor keuangan atau pemerintahan.</p></div></div>
+      <div class="roadmap-item"><div class="dot"></div><div><strong data-i18n="phase3.item3.t">Stabilitas Aset</strong><p data-i18n="phase3.item3.d">Mendorong penggunaan NUX sebagai bentuk menabung dalam aset digital melalui kemitraan penyimpanan atau investasi.</p></div></div>
+    </div>
+
+    <div class="roadmap-phase">
+      <span class="phase-tag">FASE 4</span>
+      <h3 data-i18n="phase4.title">Pengembangan Aplikasi Ekosistem</h3>
+      <div class="app-list">
+        <div class="app-item">
+          <h4 data-i18n="app1.title">Nusacoin Core Wallet</h4>
+          <p data-i18n="app1.text">Kemudahan menerima dan mengirim NUX dengan keamanan tinggi, privasi, dan stabilitas. Mengoperasikan satu node penuh, mencakup validasi transaksi, pemeliharaan salinan seluruh blockchain, dan penerusan transaksi ke node lain.</p>
+        </div>
+        <div class="app-item">
+          <h4 data-i18n="app2.title">Dompet NUX Seluler (Taobot App)</h4>
+          <p data-i18n="app2.text">Menerima dan mengirim NUX dalam genggaman, termasuk pembayaran lintas benua dengan konversi mata uang fiat, integrasi NUSA TV &amp; Bioskop, NUSA Exchange, integrasi ke koperasi UMKM Indonesia, NUSA E-commerce, NUX Airdrop Mining, jaringan testnet, Verisign, MultiSig, serta akses ke mining pool, explorer, dan ekosistem lainnya.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="penutup">
+    <h2><i class="fa-solid fa-flag-checkered"></i><span data-i18n="closing.title">Penutup</span></h2>
+    <div class="closing-box">
+      <p data-i18n="closing.text1">NUSA (NUX) hadir sebagai respons atas persoalan global mengenai ketidakbebasan dan lemahnya keamanan atas kekayaan pribadi, serta penurunan nilai aset yang kerap dianggap sebagai bentuk perampokan kekayaan secara perlahan oleh lembaga keuangan sentral.</p>
+      <p data-i18n="closing.text2">Nusacoin adalah aset kripto yang bertujuan menghadirkan alat transaksi elektronik peer-to-peer murni dari satu pihak ke pihak lain, tanpa melibatkan pihak ketiga atau lembaga apa pun. Inilah inti dari semangat desentralisasi yang diusung oleh Nusachain.</p>
+    </div>
+    <p class="thanks" data-i18n="closing.thanks">Terima Kasih — Komunitas Nusachain</p>
+  </section>
+
+</main>
+
+<footer class="footer-container">
+  <div class="footer-brand">
+    <h2>Nusacoin Network</h2>
+    <p data-i18n="footer.desc">Blockchain milik rakyat dengan prinsip crypto yang adil. Terdesentralisasi, aman, dan dapat diakses semua orang.</p>
+    <div class="social-icons">
+      <a href="https://x.com/Nusacoin_chain" target="_blank" class="social-box" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+      <a href="https://discord.gg/NcKKZFBzJ" target="_blank" class="social-box" aria-label="Discord"><i class="fab fa-discord"></i></a>
+      <a href="https://telegram.me/NusacoinX11" target="_blank" class="social-box" aria-label="Telegram"><i class="fab fa-telegram-plane"></i></a>
+      <a href="https://www.reddit.com/r/Nusacoin" target="_blank" class="social-box" aria-label="Reddit"><i class="fab fa-reddit-alien"></i></a>
+      <a href="https://github.com/TaobotX11/nusacoin" target="_blank" class="social-box" aria-label="GitHub"><i class="fab fa-github"></i></a>
+    </div>
+  </div>
+
+  <div class="footer-links">
+    <h3 data-i18n="footer.quick">Tautan Cepat</h3>
+    <ul>
+      <li><a href="https://explorer.nusacoin.org" target="_blank" data-i18n="res.explorer">Explorer</a></li>
+      <li><a href="https://dompet.nusacoin.org" target="_blank" data-i18n="res.webwallet">Nusacoin Web Wallet</a></li>
+      <li><a href="https://github.com/TaobotX11/nusacoin" target="_blank" data-i18n="res.core">Nusacoin Core</a></li>
+      <li><a href="https://green.nusacoin.org" target="_blank" data-i18n="res.greenwallet">Nusacoin Green Wallet</a></li>
+      <li><a href="/Pages/Visi-Misi.html">Roadmap</a></li>
+    </ul>
+  </div>
+
+  <div class="footer-links">
+    <h3 data-i18n="footer.res">Sumber Daya</h3>
+    <ul>
+      <li><a href="https://paper.nusacoin.org" target="_blank" data-i18n="res.paperwallet">Paper Wallet</a></li>
+      <li><a href="https://pool.nusacoin.org" target="_blank" data-i18n="footer.pool">Mining Pool</a></li>
+      <li><a href="https://ijol.nusacoin.org" target="_blank" data-i18n="footer.ijol">Ijol Nusacoin (P2P)</a></li>
+      <li><a href="https://t.me/rdnmesin_bot" target="_blank" data-i18n="footer.rdn">Nusacard RDN Bot</a></li>
+      <li><a href="/Pages/Kosa-Kata.html">Kosa Kata</a></li>
+    </ul>
+  </div>
+
+  <div class="footer-links">
+    <h3 data-i18n="footer.docs">Dokumen &amp; Keamanan</h3>
+    <ul>
+      <li><a href="/Pages/Whitepaper_Nusacoin_in.pdf" data-i18n="footer.wp.id">Whitepaper IN</a></li>
+      <li><a href="/Pages/Whitepaper_Nusacoin_en.pdf" data-i18n="footer.wp.en">Whitepaper EN</a></li>
+      <<li><a href="/Pages/Amankan-Wallet.html">Amankan Wallet</a></li>
+      <li><a href="/Pages/Lindungi-Privasi-Anda.html">Lindungi Privasi</a></li>
+      <li><a href="/Pages/FAQ.html">FAQ</a></li>
+    </ul>
+  </div>
+</footer>
+
+<div class="footer-bottom">
+  <span data-i18n="footer.copyright">© 2026 Nusacoin Project. Dibangun untuk desentralisasi.</span>
+  <span class="mono"> · NUX / X11</span>
+</div>
+
+<script>
+(function(){
+  const translations = {
+    id: {
+      "topbar":"Nusacoin.org membutuhkan bantuan anda!",
+      "nav.home":"Beranda","nav.visimisi":"Visi & Misi","nav.whitepaper":"Whitepaper","nav.explorer":"Explorer",
+      "hero.eyebrow":"NUX · X11 · Proof of Work",
+      "hero.title":"Visi & Misi Nusacoin",
+      "hero.subtitle":"Aset kripto peer-to-peer murni yang mengembalikan kendali penuh atas kekayaan digital kepada setiap orang.",
+      "lead":"NusaCoin ($NUX) adalah aset kripto yang dirancang sebagai alat transaksi elektronik peer-to-peer murni, memungkinkan nilai berpindah langsung antar pihak tanpa perantara lembaga keuangan. Dibangun di atas teknologi blockchain terdesentralisasi, NusaCoin memberi setiap orang kendali penuh atas kekayaan digitalnya sendiri melalui dompet non-custodial yang mudah digunakan.",
+      "summary.title":"Ringkasan Eksekutif",
+      "summary.text":"Whitepaper ini menjabarkan latar belakang masalah yang melandasi NusaCoin, tujuan proyek, teknologi yang digunakan, cara kerja jaringan, spesifikasi teknis token, serta peta jalan (roadmap) pengembangan dalam beberapa fase utama.",
+      "problem.title":"Pernyataan Masalah",
+      "problem.text1":"Secara global, masyarakat di hampir semua negara menghadapi keterbatasan dalam mengatur kekayaan mereka sendiri serta minimnya jaminan keamanan yang kokoh atas aset yang mereka miliki.",
+      "problem.text2":"Lembaga keuangan pusat memiliki wewenang untuk menambah pasokan uang dan mengendalikan peredarannya. Di sisi lain, nilai komoditas uang tersebut cenderung menurun dari waktu ke waktu — sebuah fenomena yang oleh banyak pihak dipandang sebagai bentuk perampasan kekayaan secara perlahan.",
+      "goal.title":"Tujuan",
+      "goal.text1":"NusaCoin (NUX) diluncurkan sebagai aset kripto yang berfungsi sebagai alat transaksi elektronik peer-to-peer murni — perpindahan nilai dari satu pihak ke pihak lain tanpa melibatkan pihak ketiga atau lembaga perantara mana pun.",
+      "goal.text2":"Setiap orang dapat membuat rekening NusaCoin miliknya sendiri secara tidak terbatas, tanpa prosedur yang rumit dan melelahkan, dengan menggunakan dompet pribadi (non-custodial) yang mudah digunakan, memiliki kredibilitas tinggi, serta memberikan kendali penuh atas aset pribadi.",
+      "goal.text3":"Sifatnya yang terdesentralisasi berarti tidak ada otoritas pusat yang dapat mengendalikan pasokan, distribusi, maupun nilai NusaCoin. Setiap pengguna memiliki porsi dan kedudukan yang setara di dalam jaringan.",
+      "goal.pillars.title":"Lima Pilar Utama NusaCoin",
+      "pillar1":"Mengedepankan fungsi sebagai alat pembayaran / barter.",
+      "pillar2":"Menabung dalam bentuk aset digital.",
+      "pillar3":"Mendukung jaringan blockchain NusaChain melalui penambangan (mining).",
+      "pillar4":"Mengamankan jaringan NusaChain dengan memasang node pada komputer.",
+      "pillar5":"Mengedukasi masyarakat mengenai manfaat teknologi cryptocurrency.",
+      "tech.title":"Teknologi",
+      "tech.text1":"Blockchain adalah sistem pencatatan transaksi yang tersebar di banyak basis data pada banyak komputer sekaligus, atau yang dikenal sebagai distributed ledger. Setiap transaksi tercatat dalam blok-blok yang saling terhubung, sehingga teknologi ini juga mengamankan jaringan dari potensi double spend — masalah klasik dalam pencatatan keuangan digital.",
+      "tech.text2":"Secara lebih rinci, blockchain adalah kumpulan catatan data digital yang dikelola oleh sekumpulan komputer (node) yang tidak dimiliki oleh satu entitas mana pun. Setiap catatan individual dibungkus di dalam sebuah wadah yang disebut blok, dan rangkaian blok tersebut membentuk rantai yang diamankan menggunakan prinsip kriptografi yang dipelopori oleh Satoshi Nakamoto.",
+      "tech.text3":"Teknologi blockchain digunakan untuk mencatat transaksi mata uang kripto seperti Bitcoin dan Nusacoin, dan juga berpotensi diterapkan pada berbagai sistem lain seperti rumah sakit, keuangan, pemerintahan, dan pendidikan.",
+      "how.title":"Cara Kerja Secara Umum",
+      "how.step1.title":"Transaksi","how.step1.text":"Pengguna memulai transaksi pada dompetnya masing-masing, misalnya mentransfer aset kripto NUX dari satu dompet ke dompet yang lain.",
+      "how.step2.title":"Penyebaran","how.step2.text":"Transaksi disiarkan ke jaringan peer-to-peer (P2P) yang terdiri dari komputer-komputer (node).",
+      "how.step3.title":"Validasi","how.step3.text":"Node-node dalam jaringan memvalidasi transaksi dengan memeriksa keabsahannya — memastikan pengirim memiliki saldo yang cukup dan transaksi sesuai dengan aturan jaringan. Proses validasi ini umumnya disebut penambangan (mining).",
+      "how.step4.title":"Penambahan Blok","how.step4.text":"Blok baru yang telah divalidasi disebarkan ke seluruh jaringan. Jika disetujui oleh mayoritas node, blok tersebut akan ditambahkan ke dalam rantai (blockchain).",
+      "how.step5.title":"Penyelesaian","how.step5.text":"Setelah blok ditambahkan ke dalam rantai, transaksi dianggap selesai dan dicatat secara permanen di dalam blockchain.",
+      "spec.title":"Spesifikasi Teknis NusaCoin",
+      "spec.text":"NusaCoin mengadopsi teknologi blockchain dari Bitcoin versi v0.20 yang menggunakan mekanisme bukti kerja (Proof of Work) dengan pasokan terbatas hanya 18.000.000 NUX, dan diperkirakan akan terus ditambang hingga tahun 2240. Nusacoin menggunakan algoritma X11 dan dirancang sebagai proyek blockchain yang dapat digunakan serta diadopsi secara umum demi manfaat masyarakat.",
+      "spec.name":"Nama","spec.ticker":"Kode / Ticker","spec.algo":"Algoritma","spec.consensus":"Konsensus","spec.type":"Tipe",
+      "spec.maxsupply":"Persediaan Maksimum","spec.premine":"Premine","spec.premine.value":"Tidak ada","spec.smallest":"Satuan Terkecil",
+      "spec.reward":"Reward Awal per Blok","spec.minute":"menit","spec.halving":"Halving","spec.halving.value":"Setiap 300.000 blok",
+      "spec.difficulty":"Penyesuaian Kesulitan","spec.difficulty.value":"Setiap 3.360 blok","spec.eta":"Estimasi Selesai Ditambang","spec.eta.value":"± Tahun 2240",
+      "spec.chain":"Blockchain","spec.domain":"Main Domain","spec.domain2":"Second Domain",
+      "roadmap.title":"Peta Jalan (Roadmap)",
+      "roadmap.intro":"Pengembangan NusaCoin dibagi ke dalam beberapa fase utama, mulai dari pembangunan jaringan inti, peningkatan adopsi dan edukasi masyarakat, hingga pengembangan ekosistem yang berkelanjutan.",
+      "phase1.title":"Peluncuran Jaringan Inti",
+      "phase1.item1.t":"Jaringan & Konsensus","phase1.item1.d":"Peluncuran resmi mainnet NusaChain dengan algoritma X11 dan konsensus Proof of Work (PoW).",
+      "phase1.item2.t":"Pasokan","phase1.item2.d":"Distribusi pasokan awal NUX untuk penambangan hingga total 18.000.000 coin.",
+      "phase1.item3.t":"Alat Pengguna","phase1.item3.d":"Peluncuran dompet desktop non-custodial agar setiap orang dapat membuat rekening NUSA sendiri.",
+      "phase2.title":"Peningkatan Adopsi dan Edukasi",
+      "phase2.item1.t":"Fungsi Utama","phase2.item1.d":"Integrasi dengan platform e-commerce atau penyedia layanan pertama sebagai alat pembayaran/barter.",
+      "phase2.item2.t":"Edukasi & Komunitas","phase2.item2.d":"Peluncuran program edukasi masyarakat tentang manfaat cryptocurrency dan cara kerja blockchain.",
+      "phase2.item3.t":"Aksesibilitas","phase2.item3.d":"Pengembangan dan peluncuran dompet seluler (mobile wallet) untuk mempermudah akses dan transaksi.",
+      "phase3.title":"Pengembangan Ekosistem",
+      "phase3.item1.t":"Keamanan Jaringan","phase3.item1.d":"Peningkatan jumlah node dan penambang untuk memperkuat desentralisasi jaringan NusaChain.",
+      "phase3.item2.t":"Kasus Penggunaan","phase3.item2.d":"Mengembangkan proyek percontohan di sektor keuangan atau pemerintahan.",
+      "phase3.item3.t":"Stabilitas Aset","phase3.item3.d":"Mendorong penggunaan NUX sebagai bentuk menabung dalam aset digital melalui kemitraan penyimpanan atau investasi.",
+      "phase4.title":"Pengembangan Aplikasi Ekosistem",
+      "app1.title":"Nusacoin Core Wallet",
+      "app1.text":"Kemudahan menerima dan mengirim NUX dengan keamanan tinggi, privasi, dan stabilitas. Mengoperasikan satu node penuh, mencakup validasi transaksi, pemeliharaan salinan seluruh blockchain, dan penerusan transaksi ke node lain.",
+      "app2.title":"Dompet NUX Seluler (Taobot App)",
+      "app2.text":"Menerima dan mengirim NUX dalam genggaman, termasuk pembayaran lintas benua dengan konversi mata uang fiat, integrasi NUSA TV & Bioskop, NUSA Exchange, integrasi ke koperasi UMKM Indonesia, NUSA E-commerce, NUX Airdrop Mining, jaringan testnet, Verisign, MultiSig, serta akses ke mining pool, explorer, dan ekosistem lainnya.",
+      "closing.title":"Penutup",
+      "closing.text1":"NUSA (NUX) hadir sebagai respons atas persoalan global mengenai ketidakbebasan dan lemahnya keamanan atas kekayaan pribadi, serta penurunan nilai aset yang kerap dianggap sebagai bentuk perampokan kekayaan secara perlahan oleh lembaga keuangan sentral.",
+      "closing.text2":"Nusacoin adalah aset kripto yang bertujuan menghadirkan alat transaksi elektronik peer-to-peer murni dari satu pihak ke pihak lain, tanpa melibatkan pihak ketiga atau lembaga apa pun. Inilah inti dari semangat desentralisasi yang diusung oleh Nusachain.",
+      "closing.thanks":"Terima Kasih — Komunitas Nusachain",
+      "footer.desc":"Blockchain milik rakyat dengan prinsip crypto yang adil. Terdesentralisasi, aman, dan dapat diakses semua orang.",
+      "footer.quick":"Tautan Cepat","res.explorer":"Explorer","res.webwallet":"Nusacoin Web Wallet","res.core":"Nusacoin Core","res.greenwallet":"Nusacoin Green Wallet","quick.roadmap2":"Roadmap",
+      "footer.res":"Sumber Daya","res.paperwallet":"Paper Wallet","footer.pool":"Mining Pool","footer.ijol":"Ijol Nusacoin (P2P)","footer.rdn":"Nusacard RDN Bot","res.glossary":"Kosa Kata",
+      "footer.docs":"Dokumen & Keamanan","footer.wp.id":"Whitepaper IN","footer.wp.en":"Whitepaper EN","footer.secure":"Amankan Wallet","footer.privacy":"Lindungi Privasi",
+      "footer.copyright":"© 2026 Nusacoin Project. Dibangun untuk desentralisasi."
+    },
+    en: {
+      "topbar":"Nusacoin.org needs your support!",
+      "nav.home":"Home","nav.visimisi":"Vision & Mission","nav.whitepaper":"Whitepaper","nav.explorer":"Explorer",
+      "hero.eyebrow":"NUX · X11 · Proof of Work",
+      "hero.title":"Nusacoin's Vision & Mission",
+      "hero.subtitle":"A pure peer-to-peer crypto asset that gives everyone full control over their own digital wealth.",
+      "lead":"NusaCoin ($NUX) is a crypto asset designed as a pure peer-to-peer electronic cash system, allowing value to move directly between parties without any financial intermediary. Built on decentralized blockchain technology, NusaCoin gives everyone full control over their own digital wealth through an easy-to-use, non-custodial wallet.",
+      "summary.title":"Executive Summary",
+      "summary.text":"This whitepaper outlines the problem behind NusaCoin, the project's goals, the technology used, how the network works, the token's technical specifications, and the development roadmap across several key phases.",
+      "problem.title":"Problem Statement",
+      "problem.text1":"Globally, people in almost every country face limits on how they can manage their own wealth, along with a lack of strong security guarantees over the assets they hold.",
+      "problem.text2":"Central financial institutions have the authority to increase the money supply and control its circulation. Meanwhile, the value of that money commodity tends to decline over time — a phenomenon many view as a slow, quiet erosion of wealth.",
+      "goal.title":"Purpose",
+      "goal.text1":"NusaCoin (NUX) was launched as a crypto asset that functions as a pure peer-to-peer electronic cash system — moving value from one party to another without involving any third party or intermediary institution.",
+      "goal.text2":"Anyone can create an unlimited number of their own NusaCoin accounts, without complicated or tedious procedures, using an easy-to-use, highly credible, non-custodial personal wallet that gives full control over personal assets.",
+      "goal.text3":"Its decentralized nature means no central authority can control the supply, distribution, or value of NusaCoin. Every user holds an equal share and standing within the network.",
+      "goal.pillars.title":"NusaCoin's Five Core Pillars",
+      "pillar1":"Prioritizing its role as a means of payment / barter.",
+      "pillar2":"Saving in the form of a digital asset.",
+      "pillar3":"Supporting the NusaChain blockchain network through mining.",
+      "pillar4":"Securing the NusaChain network by running a node on a computer.",
+      "pillar5":"Educating the public on the benefits of cryptocurrency technology.",
+      "tech.title":"Technology",
+      "tech.text1":"Blockchain is a transaction recording system distributed across many databases on many computers at once, known as a distributed ledger. Every transaction is recorded in interlinked blocks, which also secures the network against double spending — a classic problem in digital record-keeping.",
+      "tech.text2":"More specifically, a blockchain is a collection of digital data records maintained by a set of computers (nodes) not owned by any single entity. Each individual record is wrapped inside a container called a block, and the resulting chain of blocks is secured using cryptographic principles pioneered by Satoshi Nakamoto.",
+      "tech.text3":"Blockchain technology is used to record cryptocurrency transactions such as Bitcoin and Nusacoin, and can also potentially be applied to other systems such as healthcare, finance, government, and education.",
+      "how.title":"How It Works, in General",
+      "how.step1.title":"Transaction","how.step1.text":"A user initiates a transaction from their own wallet, for example transferring NUX from one wallet to another.",
+      "how.step2.title":"Broadcasting","how.step2.text":"The transaction is broadcast to the peer-to-peer (P2P) network made up of computers (nodes).",
+      "how.step3.title":"Validation","how.step3.text":"Nodes on the network validate the transaction by checking its legitimacy — confirming the sender has sufficient balance and that the transaction follows network rules. This validation process is generally called mining.",
+      "how.step4.title":"Block Addition","how.step4.text":"Newly validated blocks are propagated across the network. If approved by a majority of nodes, the block is added to the chain (blockchain).",
+      "how.step5.title":"Finality","how.step5.text":"Once a block is added to the chain, the transaction is considered complete and permanently recorded on the blockchain.",
+      "spec.title":"NusaCoin Technical Specifications",
+      "spec.text":"NusaCoin adopts blockchain technology from Bitcoin v0.20, using a Proof of Work mechanism with a capped supply of just 18,000,000 NUX, expected to continue being mined until around the year 2240. Nusacoin uses the X11 algorithm and is designed as a blockchain project that can be broadly used and adopted for the public's benefit.",
+      "spec.name":"Name","spec.ticker":"Ticker","spec.algo":"Algorithm","spec.consensus":"Consensus","spec.type":"Type",
+      "spec.maxsupply":"Max Supply","spec.premine":"Premine","spec.premine.value":"None","spec.smallest":"Smallest Unit",
+      "spec.reward":"Initial Block Reward","spec.minute":"minutes","spec.halving":"Halving","spec.halving.value":"Every 300,000 blocks",
+      "spec.difficulty":"Difficulty Adjustment","spec.difficulty.value":"Every 3,360 blocks","spec.eta":"Estimated Mining Completion","spec.eta.value":"± Year 2240",
+      "spec.chain":"Blockchain","spec.domain":"Main Domain","spec.domain2":"Second Domain",
+      "roadmap.title":"Roadmap",
+      "roadmap.intro":"NusaCoin's development is divided into several key phases, from building the core network, to growing adoption and public education, to building out a sustainable ecosystem.",
+      "phase1.title":"Core Network Launch",
+      "phase1.item1.t":"Network & Consensus","phase1.item1.d":"Official launch of the NusaChain mainnet with the X11 algorithm and Proof of Work (PoW) consensus.",
+      "phase1.item2.t":"Supply","phase1.item2.d":"Distribution of the initial NUX supply for mining, up to a total of 18,000,000 coins.",
+      "phase1.item3.t":"User Tools","phase1.item3.d":"Launch of a non-custodial desktop wallet so anyone can create their own NUSA account.",
+      "phase2.title":"Adoption & Education Growth",
+      "phase2.item1.t":"Core Utility","phase2.item1.d":"Integration with the first e-commerce platforms or service providers to establish it as a means of payment/barter.",
+      "phase2.item2.t":"Education & Community","phase2.item2.d":"Launch of a public education program on the benefits of cryptocurrency and how blockchain works.",
+      "phase2.item3.t":"Accessibility","phase2.item3.d":"Development and launch of a mobile wallet to make access and transactions easier.",
+      "phase3.title":"Ecosystem Development",
+      "phase3.item1.t":"Network Security","phase3.item1.d":"Growing the number of nodes and miners to strengthen NusaChain's decentralization.",
+      "phase3.item2.t":"Use Cases","phase3.item2.d":"Developing pilot projects in sectors such as finance or government.",
+      "phase3.item3.t":"Asset Stability","phase3.item3.d":"Encouraging the use of NUX as a form of digital savings through partnerships with custody or investment services.",
+      "phase4.title":"Application Ecosystem Development",
+      "app1.title":"Nusacoin Core Wallet",
+      "app1.text":"Send and receive NUX with strong security, privacy, and stability. Runs a full node, covering transaction validation, maintaining a full copy of the blockchain, and relaying transactions to other nodes.",
+      "app2.title":"NUX Mobile Wallet (Taobot App)",
+      "app2.text":"Send and receive NUX right from your hand, including cross-border payments with fiat currency conversion, NUSA TV & Cinema integration, NUSA Exchange, integration with Indonesian UMKM cooperatives, NUSA E-commerce, NUX Airdrop Mining, a testnet network, Verisign, MultiSig, plus access to the mining pool, explorer, and other parts of the ecosystem.",
+      "closing.title":"Closing",
+      "closing.text1":"NUSA (NUX) exists as a response to the global problem of restricted freedom and weak security over personal wealth, and to the erosion of asset value that many see as a slow form of wealth confiscation by central financial institutions.",
+      "closing.text2":"Nusacoin is a crypto asset built to deliver a pure peer-to-peer electronic cash system from one party to another, without involving any third party or institution. This is the very essence of the decentralization that NusaChain stands for.",
+      "closing.thanks":"Thank You — The Nusachain Community",
+      "footer.desc":"A blockchain for the people, built on fair crypto principles. Decentralized, secure, and accessible to everyone.",
+      "footer.quick":"Quick Links","res.explorer":"Explorer","res.webwallet":"Nusacoin Web Wallet","res.core":"Nusacoin Core","res.greenwallet":"Nusacoin Green Wallet","quick.roadmap2":"Roadmap",
+      "footer.res":"Resources","res.paperwallet":"Paper Wallet","footer.pool":"Mining Pool","footer.ijol":"Ijol Nusacoin (P2P)","footer.rdn":"Nusacard RDN Bot","res.glossary":"Glossary",
+      "footer.docs":"Docs & Security","footer.wp.id":"Whitepaper ID","footer.wp.en":"Whitepaper EN","footer.secure":"Secure Your Wallet","footer.privacy":"Protect Your Privacy",
+      "footer.copyright":"© 2026 Nusacoin Project. Built for decentralization."
+    }
+  };
+
+  let currentLang = "id";
+  const langBtn = document.getElementById("langToggle");
+  const nodes = document.querySelectorAll("[data-i18n]");
+
+  function applyLang(lang){
+    const dict = translations[lang];
+    nodes.forEach(el => {
+      const key = el.getAttribute("data-i18n");
+      if (dict[key] !== undefined) el.textContent = dict[key];
+    });
+    document.documentElement.lang = lang;
+    langBtn.textContent = lang === "id" ? "EN" : "ID";
+    currentLang = lang;
+  }
+
+  langBtn.addEventListener("click", () => applyLang(currentLang === "id" ? "en" : "id"));
+  applyLang("id");
+
+  const themeBtn = document.getElementById("themeToggle");
+  themeBtn.addEventListener("click", () => {
+    const root = document.documentElement;
+    const next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+    if (next === "dark") root.setAttribute("data-theme", "dark");
+    else root.removeAttribute("data-theme");
+  });
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nusacoin (NUX) - Memulai dengan Nusacoin</title>
+    
+    <!-- Google Fonts & FontAwesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Titillium+Web:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- CSS Styling -->
+    <style>
+        /* --- RESET & HAPUS NAVBAR BLOGGER --- */
+        #navbar-iframe, .navbar, .navbar-ghost { 
+            display: none !important; 
+            height: 0 !important; 
+            visibility: hidden !important; 
+        }
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+
+        /* Variables Tema Light & Dark Mode */
+        :root {
+            --primary: #27ae60;
+            --primary-dark: #1e8449;
+            --bg-body: #ffffff;
+            --bg-card: #ffffff;
+            --bg-hero: linear-gradient(135deg, #1e8449, #27ae60);
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --bg-light: #f8fafc;
+            --border: #e2e8f0;
+            --title-green: #38761d;
+            --link-green: #38761d;
+            --code-bg: #f1f5f9;
+        }
+
+        /* Mode Dark */
+        body.dark-mode {
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --bg-hero: linear-gradient(135deg, #0f172a, #1e293b);
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --bg-light: #1e293b;
+            --border: #334155;
+            --title-green: #4ade80;
+            --link-green: #4ade80;
+            --code-bg: #334155;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            color: var(--text-main); 
+            line-height: 1.6; 
+            overflow-x: hidden;
+            background-color: var(--bg-body);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background-color: var(--primary);
+            color: white;
+            padding: 8px 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .top-bar-container {
+            max-width: 1250px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .top-bar-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Tombol Pilihan Bahasa */
+        .lang-switch {
+            display: flex;
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 4px;
+            padding: 2px;
+        }
+
+        .lang-btn {
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.75);
+            padding: 2px 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: all 0.2s;
+        }
+
+        .lang-btn.active, .lang-btn:hover {
+            background: #ffffff;
+            color: var(--primary);
+        }
+
+        /* Tombol Tema (Hanya Simbol) */
+        .theme-toggle-btn {
+            background: rgba(0, 0, 0, 0.15);
+            border: none;
+            color: #ffffff;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        .theme-toggle-btn:hover {
+            background: rgba(0, 0, 0, 0.3);
+            transform: scale(1.08);
+        }
+
+        /* Hero Banner */
+        .hero-container {
+            background: var(--bg-hero);
+            color: white;
+            text-align: center;
+            padding: 50px 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-container h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            font-family: 'Titillium Web', sans-serif;
+        }
+
+        .hero-container p {
+            font-size: 1rem;
+            opacity: 0.9;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Main Content Styling */
+        main {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .section-header {
+            font-family: 'Titillium Web', Arial, sans-serif;
+            font-size: 1.5rem;
+            color: var(--title-green);
+            font-weight: 700;
+            margin-top: 35px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 5px;
+        }
+
+        .content-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .content-item {
+            margin-bottom: 20px;
+        }
+
+        .content-item h3 {
+            font-size: 1.1rem;
+            color: var(--title-green);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .content-item p {
+            font-size: 0.95rem;
+            color: var(--text-main);
+            line-height: 1.7;
+            text-align: justify;
+        }
+
+        .content-item a {
+            color: var(--link-green);
+            font-weight: bold;
+            text-decoration: underline;
+        }
+
+        .node-box {
+            background-color: var(--code-bg);
+            border-left: 4px solid var(--primary);
+            padding: 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            margin-top: 15px;
+            color: var(--text-main);
+            overflow-x: auto;
+        }
+
+        /* Tombol Wrapper */
+        .wrapper-tombol {
+            text-align: center;
+            margin-top: 35px;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        .btn-nusacoin {
+            display: inline-block;
+            padding: 14px 28px;
+            background-color: #28a745;
+            color: #ffffff !important;
+            text-decoration: none;
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            font-size: 16px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-nusacoin:hover {
+            background-color: #218838;
+            color: #ffffff !important;
+        }
+
+        /* Footer Styling */
+        footer {
+            background-color: var(--bg-light);
+            border-top: 1px solid var(--border);
+            padding: 60px 20px 20px;
+            margin-top: 60px;
+        }
+
+        .footer-grid {
+            max-width: 1250px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 40px;
+        }
+
+        .footer-brand h2 {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .footer-brand p {
+            color: var(--text-sub);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .footer-col h3 {
+            font-size: 1.1rem;
+            color: var(--text-main);
+            margin-bottom: 15px;
+        }
+
+        .footer-col ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .footer-col ul li {
+            margin-bottom: 10px;
+        }
+
+        .footer-col ul li a {
+            color: var(--text-sub);
+            text-decoration: none;
+            transition: color 0.2s;
+            font-size: 0.95rem;
+        }
+
+        .footer-col ul li a:hover {
+            color: var(--primary);
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .social-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-main);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .social-box:hover {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .footer-bottom {
+            max-width: 1250px;
+            margin: 40px auto 0;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-sub);
+            font-size: 0.85rem;
+        }
+
+        .mono {
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Bar dengan Tombol Bahasa IN/EN & Tema Simbol -->
+    <div class="top-bar">
+        <div class="top-bar-container">
+            <span id="topBarHelp">Nusacoin.org membutuhkan bantuan anda!</span>
+            
+            <div class="top-bar-controls">
+                <!-- Pilihan Bahasa IN / EN -->
+                <div class="lang-switch">
+                    <button class="lang-btn active" id="btnIN" onclick="switchLanguage('id')">IN</button>
+                    <button class="lang-btn" id="btnEN" onclick="switchLanguage('en')">EN</button>
+                </div>
+
+                <!-- Tombol Tema (Hanya Simbol Ikon) -->
+                <button class="theme-toggle-btn" id="themeToggle" onclick="toggleTheme()" aria-label="Ganti Tema" title="Ganti Tema">
+                    <i class="fa-solid fa-moon" id="themeIcon"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main>
+        <header class="hero-container">
+            <h1 id="heroTitle">Memulai dengan Nusacoin</h1>
+            <p id="heroSub">Menggunakan Nusacoin untuk bisa menerima dan melakukan pembayaran cukup mudah dilakukan untuk semua orang.</p>
+        </header>
+
+        <!-- Bagian Pengguna -->
+        <h2 class="section-header" id="userHeader">Cara menggunakan Nusacoin</h2>
+        <div class="content-list">
+            <div class="content-item">
+                <h3 id="uTitle1"><i class="fa-solid fa-circle-info"></i> Informasikan Anda sendiri</h3>
+                <p id="uDesc1">
+                    <span id="uTxt1">Nusacoin berbeda dengan apa yang Anda ketahui dan gunakan setiap hari. Sebelum Anda mulai menggunakan Nusacoin, ada beberapa hal yang perlu Anda ketahui untuk menggunakannya secara aman dan untuk menghindari kendala umum. </span>
+                    <a href="/Pages/Beberapa-Hal-Penting.html" id="uLink1">Baca Selengkapnya</a>
+                </p>
+            </div>
+
+            <div class="content-item">
+                <h3 id="uTitle2"><i class="fa-solid fa-wallet"></i> Pilih wallet anda</h3>
+                <p id="uDesc2">Nusacoin secara gratis telah tersedia di hampir keseluruhan sistem dan perangkat untuk menunjang segala kebutuhan anda. Sebagai contoh, anda dapat menginstal aplikasi di perangkat ponsel anda dalam keseharian anda atau anda juga dapat mempunyai sebuah wallet Nusacoin sebagai pembayaran online di komputer. Dalam banyak hal, memilih sebuah wallet Nusacoin cukup mudah dan bisa dilakukan dalam hitungan menit.</p>
+            </div>
+
+            <div class="content-item">
+                <h3 id="uTitle3"><i class="fa-solid fa-coins"></i> Dapatkan Nusacoin</h3>
+                <p id="uDesc3">Anda bisa mendapat nusacoin dengan menerimanya sebagai alat pembayaran untuk barang dan layanan. Selain itu ada berbagai macam cara agar anda dapat membeli Nusacoin.</p>
+            </div>
+
+            <div class="content-item">
+                <h3 id="uTitle4"><i class="fa-solid fa-cart-shopping"></i> Belanjakan Nusacoin</h3>
+                <p id="uDesc4">Terdapat sejumlah layanan dan merchant yang terus bertambah di seluruh dunia yang telah menerima nusacoin. Menggunakan Nusacoin sebagai pembayarannya dan berikan pengalaman anda untuk membantu mereka agar mendapat lebih banyak visibilitas.</p>
+            </div>
+        </div>
+
+        <!-- Bagian Penjual/Merchant -->
+        <h2 class="section-header" id="merchantHeader">Cara menerima Nusacoin</h2>
+        <div class="content-list">
+            <div class="content-item">
+                <h3 id="mTitle1"><i class="fa-solid fa-user-shield"></i> Memberitahu diri sendiri</h3>
+                <p id="mDesc1">Nusacoin tidak meminta penjual untuk mengubah kebiasaan mereka. Meski demikian, Nusacoin berbeda dengan apa yang biasa Anda ketahui dan gunakan sehari-harinya. Sebelum Anda mulai menggunakan Nusacoin, ada beberapa hal yang Anda perlu ketahui untuk bisa menggunakannya secara aman dan menghindari perangkap umum.</p>
+            </div>
+
+            <div class="content-item">
+                <h3 id="mTitle2"><i class="fa-solid fa-cash-register"></i> Memroses pembayaran</h3>
+                <p id="mDesc2">Anda dapat memroses pembayaran dan tagihan sendiri, atau Anda dapat menggunakan layanan penjual dan memasukkan uang ke dalam mata uang lokal Anda atau nusacoin. Banyak bisnis yang memasang sistem pembayaran menggunakan tablet atau ponsel untuk memudahkan pelanggan melakukan pembayaran melalui ponsel mereka.</p>
+            </div>
+
+            <div class="content-item">
+                <h3 id="mTitle3"><i class="fa-solid fa-calculator"></i> Akunting dan pajak</h3>
+                <p id="mDesc3">Penjual sering menyimpan dan menampilkan harga dalam mata uang lokal mereka. Dalam kasus lain, Nusacoin bekerja mirip dengan mata uang asing. Untuk mendapatkan panduan yang tepat mengenai kewajiban pajak di negara Anda sendiri, Anda harus menghubungi seorang akuntan yang berkualitas.</p>
+            </div>
+
+            <div class="content-item">
+                <h3 id="mTitle4"><i class="fa-solid fa-store"></i> Membuat bisnis Anda dikenal</h3>
+                <p id="mDesc4">Saat ini ada banyak pengguna yang mencari cara untuk membelanjakan nusacoin mereka. Anda dapat mendaftarkan bisnis Anda di direktori online agar mereka mudah menemukan bisnis Anda. Selain itu, Anda juga dapat memasang logo Nusacoin pada website atau toko Anda.</p>
+            </div>
+        </div>
+
+        <!-- Node List -->
+        <h2 class="section-header" id="nodeHeader">Full Node Nusacoin</h2>
+        <div class="node-box">
+            addnode "202.10.44.112:28573" "onetry"<br>
+            addnode "161.97.76.233:28573" "add"<br>
+            addnode "202.10.38.22:28573" "add"<br>
+            addnode "204.13.232.148:28573" "add"
+        </div>
+
+        <div class="wrapper-tombol">
+            <a class="btn-nusacoin" id="btnDownload" href="https://github.com/TaobotX11/nusacoin/releases/download/0.26.60/nusacoin-0.26.60-win64-setup.exe">
+                Nusacoin Core Win
+            </a>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <h2>Nusacoin Network</h2>
+                <p id="footerDesc">Blockchain milik rakyat dengan prinsip crypto yang adil. Terdesentralisasi, aman, dan dapat diakses semua orang.</p>
+                <div class="social-icons">
+                    <a href="https://x.com/Nusacoin_chain" target="_blank" class="social-box" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="https://discord.gg/NcKKZFBzJ" target="_blank" class="social-box" aria-label="Discord"><i class="fab fa-discord"></i></a>
+                    <a href="https://telegram.me/NusacoinX11" target="_blank" class="social-box" aria-label="Telegram"><i class="fab fa-telegram-plane"></i></a>
+                    <a href="https://www.reddit.com/r/Nusacoin" target="_blank" class="social-box" aria-label="Reddit"><i class="fab fa-reddit-alien"></i></a>
+                    <a href="https://github.com/TaobotX11/nusacoin" target="_blank" class="social-box" aria-label="GitHub"><i class="fab fa-github"></i></a>
+                </div>
+            </div>
+
+            <div class="footer-col">
+                <h3 id="footerQuickTitle">Tautan Cepat</h3>
+                <ul>
+                    <li><a href="https://explorer.nusacoin.org" target="_blank">Explorer</a></li>
+                    <li><a href="https://dompet.nusacoin.org" target="_blank">Nusacoin Web Wallet</a></li>
+                    <li><a href="https://github.com/TaobotX11/nusacoin" target="_blank">Nusacoin Core</a></li>
+                    <li><a href="https://green.nusacoin.org" target="_blank">Nusacoin Green Wallet</a></li>
+                    <li><a href="/Pages/Visi-Misi.html" target="_blank">Roadmap</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h3 id="footerResTitle">Sumber Daya</h3>
+                <ul>
+                    <li><a href="https://paper.nusacoin.org" target="_blank">Paper Wallet</a></li>
+                    <li><a href="https://pool.nusacoin.org" target="_blank">Mining Pool</a></li>
+                    <li><a href="https://ijol.nusacoin.org" target="_blank">Ijol Nusacoin (P2P)</a></li>
+                    <li><a href="https://t.me/rdnmesin_bot" target="_blank">Nusacard RDN Bot</a></li>
+                    <li><a href="/Pages/Kosa-Kata.html" target="_blank" id="menuGlossary">Kosa Kata</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h3 id="footerDocsTitle">Dokumen &amp; Keamanan</h3>
+                <ul>
+                    <li><a href="/Pages/Whitepaper_Nusacoin_in.pdf">Whitepaper IN</a></li>
+                    <li><a href="/Pages/Whitepaper_Nusacoin_en.pdf">Whitepaper EN</a></li>
+                    <li><a href="/Pages/Amankan-Wallet.html" target="_blank" id="menuSecure">Amankan Wallet</a></li>
+                    <li><a href="/Pages/Lindungi-Privasi-Anda.html" target="_blank" id="menuPrivacy">Lindungi Privasi</a></li>
+                    <li><a href="/Pages/FAQ.html" target="_blank">FAQ</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <span id="footerCopyright">© 2026 Nusacoin Project. Dibangun untuk desentralisasi.</span>
+            <span class="mono"> · NUX / X11</span>
+        </div>
+    </footer>
+
+    <!-- Script Tema Switcher (Simbol) & Bahasa (IN/EN) -->
+    <script>
+        const translations = {
+            id: {
+                topBarHelp: "Nusacoin.org membutuhkan bantuan anda!",
+                heroTitle: "Memulai dengan Nusacoin",
+                heroSub: "Menggunakan Nusacoin untuk bisa menerima dan melakukan pembayaran cukup mudah dilakukan untuk semua orang.",
+                userHeader: "Cara menggunakan Nusacoin",
+                uTitle1: "Informasikan Anda sendiri",
+                uTxt1: "Nusacoin berbeda dengan apa yang Anda ketahui dan gunakan setiap hari. Sebelum Anda mulai menggunakan Nusacoin, ada beberapa hal yang perlu Anda ketahui untuk menggunakannya secara aman dan untuk menghindari kendala umum. ",
+                uLink1: "Baca Selengkapnya",
+                uTitle2: "Pilih wallet anda",
+                uDesc2: "Nusacoin secara gratis telah tersedia di hampir keseluruhan sistem dan perangkat untuk menunjang segala kebutuhan anda. Sebagai contoh, anda dapat menginstal aplikasi di perangkat ponsel anda dalam keseharian anda atau anda juga dapat mempunyai sebuah wallet Nusacoin sebagai pembayaran online di komputer. Dalam banyak hal, memilih sebuah wallet Nusacoin cukup mudah dan bisa dilakukan dalam hitungan menit.",
+                uTitle3: "Dapatkan Nusacoin",
+                uDesc3: "Anda bisa mendapat nusacoin dengan menerimanya sebagai alat pembayaran untuk barang dan layanan. Selain itu ada berbagai macam cara agar anda dapat membeli Nusacoin.",
+                uTitle4: "Belanjakan Nusacoin",
+                uDesc4: "Terdapat sejumlah layanan dan merchant yang terus bertambah di seluruh dunia yang telah menerima nusacoin. Menggunakan Nusacoin sebagai pembayarannya dan berikan pengalaman anda untuk membantu mereka agar mendapat lebih banyak visibilitas.",
+                merchantHeader: "Cara menerima Nusacoin",
+                mTitle1: "Memberitahu diri sendiri",
+                mDesc1: "Nusacoin tidak meminta penjual untuk mengubah kebiasaan mereka. Meski demikian, Nusacoin berbeda dengan apa yang biasa Anda ketahui dan gunakan sehari-harinya. Sebelum Anda mulai menggunakan Nusacoin, ada beberapa hal yang Anda perlu ketahui untuk bisa menggunakannya secara aman dan menghindari perangkap umum.",
+                mTitle2: "Memroses pembayaran",
+                mDesc2: "Anda dapat memroses pembayaran dan tagihan sendiri, atau Anda dapat menggunakan layanan penjual dan memasukkan uang ke dalam mata uang lokal Anda atau nusacoin. Banyak bisnis yang memasang sistem pembayaran menggunakan tablet atau ponsel untuk memudahkan pelanggan melakukan pembayaran melalui ponsel mereka.",
+                mTitle3: "Akunting dan pajak",
+                mDesc3: "Penjual sering menyimpan dan menampilkan harga dalam mata uang lokal mereka. Dalam kasus lain, Nusacoin bekerja mirip dengan mata uang asing. Untuk mendapatkan panduan yang tepat mengenai kewajiban pajak di negara Anda sendiri, Anda harus menghubungi seorang akuntan yang berkualitas.",
+                mTitle4: "Membuat bisnis Anda dikenal",
+                mDesc4: "Saat ini ada banyak pengguna yang mencari cara untuk membelanjakan nusacoin mereka. Anda dapat mendaftarkan bisnis Anda di direktori online agar mereka mudah menemukan bisnis Anda. Selain itu, Anda juga dapat memasang logo Nusacoin pada website atau toko Anda.",
+                nodeHeader: "Full Node Nusacoin",
+                btnDownload: "Nusacoin Core Win",
+                footerDesc: "Blockchain milik rakyat dengan prinsip crypto yang adil. Terdesentralisasi, aman, dan dapat diakses semua orang.",
+                footerQuickTitle: "Tautan Cepat",
+                footerResTitle: "Sumber Daya",
+                footerDocsTitle: "Dokumen & Keamanan",
+                menuGlossary: "Kosa Kata",
+                menuSecure: "Amankan Wallet",
+                menuPrivacy: "Lindungi Privasi",
+                footerCopyright: "© 2026 Nusacoin Project. Dibangun untuk desentralisasi."
+            },
+            en: {
+                topBarHelp: "Nusacoin.org needs your help!",
+                heroTitle: "Getting Started with Nusacoin",
+                heroSub: "Using Nusacoin to accept and make payments is simple enough for anyone.",
+                userHeader: "How to use Nusacoin",
+                uTitle1: "Inform yourself",
+                uTxt1: "Nusacoin is different than what you know and use every day. Before you start using Nusacoin, there are a few things that you need to know in order to use it securely and avoid common pitfalls. ",
+                uLink1: "Read More",
+                uTitle2: "Choose your wallet",
+                uDesc2: "Free Nusacoin wallets are available for all major operating systems and devices to serve a variety of your needs. For example, you can install an app on your mobile device for everyday use or you can have a wallet only for online payments on your computer. In any case, choosing a wallet is easy and can be done in minutes.",
+                uTitle3: "Get Nusacoin",
+                uDesc3: "You can get Nusacoin by accepting it as a payment method for goods and services. There are also several ways you can buy Nusacoin.",
+                uTitle4: "Spend Nusacoin",
+                uDesc4: "There is a growing number of services and merchants accepting Nusacoin all over the world. Use Nusacoin to pay them and rate your experience to help them gain more visibility.",
+                merchantHeader: "How to accept Nusacoin",
+                mTitle1: "Inform yourself",
+                mDesc1: "Nusacoin does not require merchants to change their habits. However, Nusacoin is different than what you know and use every day. Before you start accepting Nusacoin, there are a few things that you need to know in order to use it securely and avoid common pitfalls.",
+                mTitle2: "Processing payments",
+                mDesc2: "You can process payments and invoices on your own or you can use merchant services and deposit money in your local currency or Nusacoins. Most point of sale setups use a tablet or a mobile phone to allow customers to pay with their mobile phones.",
+                mTitle3: "Accounting and taxes",
+                mDesc3: "Merchants often deposit and display prices in their local currency. In other cases, Nusacoin works similarly to a foreign currency. To get appropriate guidance regarding tax compliance for your own jurisdiction, you should contact a qualified accountant.",
+                mTitle4: "Gaining visibility",
+                mDesc4: "There is a growing number of users looking for ways to spend their Nusacoins. You can submit your business in online directories to help them easily find you. You can also display the Nusacoin logo on your website or brick and mortar store.",
+                nodeHeader: "Nusacoin Full Nodes",
+                btnDownload: "Nusacoin Core Win",
+                footerDesc: "The people's blockchain built on fair crypto principles. Decentralized, secure, and accessible to everyone.",
+                footerQuickTitle: "Quick Links",
+                footerResTitle: "Resources",
+                footerDocsTitle: "Docs & Security",
+                menuGlossary: "Glossary",
+                menuSecure: "Secure Wallet",
+                menuPrivacy: "Protect Privacy",
+                footerCopyright: "© 2026 Nusacoin Project. Built for decentralization."
+            }
+        };
+
+        function switchLanguage(lang) {
+            document.getElementById('btnIN').classList.toggle('active', lang === 'id');
+            document.getElementById('btnEN').classList.toggle('active', lang === 'en');
+
+            const t = translations[lang];
+            for (let id in t) {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.textContent = t[id];
+                }
+            }
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const icon = document.getElementById('themeIcon');
+            
+            body.classList.toggle('dark-mode');
+            
+            if (body.classList.contains('dark-mode')) {
+                icon.className = 'fa-solid fa-sun';
+            } else {
+                icon.className = 'fa-solid fa-moon';
+            }
+        }
+    </script>
+</body>
+</html>

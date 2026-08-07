@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nusacoin (NUX) - Kosa Kata & Istilah</title>
+    
+    <!-- Google Fonts & FontAwesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Titillium+Web:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- CSS Styling -->
+    <style>
+        /* --- RESET & HAPUS NAVBAR BLOGGER --- */
+        #navbar-iframe, .navbar, .navbar-ghost { 
+            display: none !important; 
+            height: 0 !important; 
+            visibility: hidden !important; 
+        }
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+
+        /* Variables Tema Light & Dark Mode */
+        :root {
+            --primary: #27ae60;
+            --primary-dark: #1e8449;
+            --bg-body: #ffffff;
+            --bg-card: #ffffff;
+            --bg-hero: linear-gradient(135deg, #1e8449, #27ae60);
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --bg-light: #f8fafc;
+            --border: #e2e8f0;
+            --title-green: #38761d;
+            --link-green: #38761d;
+        }
+
+        /* Mode Dark */
+        body.dark-mode {
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --bg-hero: linear-gradient(135deg, #0f172a, #1e293b);
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --bg-light: #1e293b;
+            --border: #334155;
+            --title-green: #4ade80;
+            --link-green: #4ade80;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            color: var(--text-main); 
+            line-height: 1.6; 
+            overflow-x: hidden;
+            background-color: var(--bg-body);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background-color: var(--primary);
+            color: white;
+            padding: 8px 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .top-bar-container {
+            max-width: 1250px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .top-bar-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Tombol Pilihan Bahasa */
+        .lang-switch {
+            display: flex;
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 4px;
+            padding: 2px;
+        }
+
+        .lang-btn {
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.75);
+            padding: 2px 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: all 0.2s;
+        }
+
+        .lang-btn.active, .lang-btn:hover {
+            background: #ffffff;
+            color: var(--primary);
+        }
+
+        /* Tombol Tema (Hanya Simbol) */
+        .theme-toggle-btn {
+            background: rgba(0, 0, 0, 0.15);
+            border: none;
+            color: #ffffff;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        .theme-toggle-btn:hover {
+            background: rgba(0, 0, 0, 0.3);
+            transform: scale(1.08);
+        }
+
+        /* Hero Banner */
+        .hero-container {
+            background: var(--bg-hero);
+            color: white;
+            text-align: center;
+            padding: 50px 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-container h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            font-family: 'Titillium Web', sans-serif;
+            color: #ffffff !important;
+        }
+
+        .hero-container p {
+            font-size: 1rem;
+            opacity: 0.9;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Main Content Styling */
+        main {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .glossary-item {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin-bottom: 20px;
+            transition: transform 0.2s;
+        }
+
+        .glossary-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .glossary-item h3 {
+            font-family: 'Titillium Web', Arial, sans-serif;
+            font-size: 1.3rem;
+            color: var(--title-green);
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .glossary-item p {
+            font-size: 0.95rem;
+            color: var(--text-main);
+            line-height: 1.7;
+            text-align: justify;
+        }
+
+        /* Tombol Wrapper */
+        .wrapper-tombol {
+            text-align: center;
+            margin-top: 35px;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        .btn-nusacoin {
+            display: inline-block;
+            padding: 14px 28px;
+            background-color: #28a745;
+            color: #ffffff !important;
+            text-decoration: none;
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            font-size: 16px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-nusacoin:hover {
+            background-color: #218838;
+            color: #ffffff !important;
+        }
+
+        /* Footer Styling */
+        footer {
+            background-color: var(--bg-light);
+            border-top: 1px solid var(--border);
+            padding: 60px 20px 20px;
+            margin-top: 60px;
+        }
+
+        .footer-grid {
+            max-width: 1250px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 40px;
+        }
+
+        .footer-brand h2 {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .footer-brand p {
+            color: var(--text-sub);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .footer-col h3 {
+            font-size: 1.1rem;
+            color: var(--text-main);
+            margin-bottom: 15px;
+        }
+
+        .footer-col ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .footer-col ul li {
+            margin-bottom: 10px;
+        }
+
+        .footer-col ul li a {
+            color: var(--text-sub);
+            text-decoration: none;
+            transition: color 0.2s;
+            font-size: 0.95rem;
+        }
+
+        .footer-col ul li a:hover {
+            color: var(--primary);
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .social-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-main);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .social-box:hover {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .footer-bottom {
+            max-width: 1250px;
+            margin: 40px auto 0;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-sub);
+            font-size: 0.85rem;
+        }
+
+        .mono {
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Bar dengan Saklar Bahasa IN/EN & Tema Simbol -->
+    <div class="top-bar">
+        <div class="top-bar-container">
+            <span id="topBarHelp">Nusacoin.org membutuhkan bantuan anda!</span>
+            
+            <div class="top-bar-controls">
+                <!-- Pilihan Bahasa IN / EN -->
+                <div class="lang-switch">
+                    <button class="lang-btn active" id="btnIN" onclick="switchLanguage('id')">IN</button>
+                    <button class="lang-btn" id="btnEN" onclick="switchLanguage('en')">EN</button>
+                </div>
+
+                <!-- Tombol Tema (Hanya Simbol Ikon) -->
+                <button class="theme-toggle-btn" id="themeToggle" onclick="toggleTheme()" aria-label="Ganti Tema" title="Ganti Tema">
+                    <i class="fa-solid fa-moon" id="themeIcon"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main>
+        <header class="hero-container">
+            <h1 id="heroTitle">Beberapa kata terkait Nusacoin yang mungkin Anda dengar</h1>
+            <p id="heroSub">Nusacoin menyediakan pendekatan baru untuk pembayaran dan, karenanya, ada beberapa kata baru yang mungkin menjadi bagian dari kosakata Anda.</p>
+        </header>
+
+        <div class="glossary-list">
+            <div class="glossary-item">
+                <h3 id="term1">Alamat</h3>
+                <p id="desc1">Sebuah alamat Nusacoin mirip seperti sebuah alamat fisik atau email. Alamat Nusacoin adalah satu-satunya informasi yang perlu Anda berikan kepada orang yang hendak membayar Anda dengan Nusacoin. Satu perbedaan penting adalah: tiap satu alamat Nusacoin sebaiknya hanya digunakan untuk satu kali transaksi.</p>
+            </div>
+
+            <div class="glossary-item">
+                <h3 id="term2">Nusan</h3>
+                <p id="desc2">Nusan adalah unit umum untuk menentukan sebuah sub-unit dalam satu Nusacoin - 100.000.000 nusan setara dengan 1 Nusacoin (NUX). Unit ini biasanya lebih nyaman digunakan dalam memberi harga tip, barang, dan jasa.</p>
+            </div>
+
+            <div class="glossary-item">
+                <h3 id="term3">Nusacoin</h3>
+                <p id="desc3">Nusacoin - dengan huruf kapital, digunakan saat menjelaskan konsep dari Nusacoin, atau seluruh jaringan itu sendiri. Contoh: "Saya belajar mengenai protokol Nusacoin hari ini."<br><br>nusacoin - tanpa huruf kapital, digunakan untuk menjelaskan nusacoin sebagai satuan dari rekening. Contoh: "Saya kirim sepuluh nusacoin hari ini."; seringkali disingkat menjadi NUX.</p>
+            </div>
+
+            <div class="glossary-item">
+                <h3 id="term4">Rantai-Blok (Blockchain)</h3>
+                <p id="desc4">Rantai-blok adalah catatan umum dari semua transaksi Nusacoin, berurutan secara kronologis. Rantai-blok dibagi antara semua pengguna Nusacoin. Rantai-blok digunakan untuk memverifikasi transaksi Nusacoin permanen dan untuk mencegah terjadinya pengeluaran-ganda.</p>
+            </div>
+
+            <div class="glossary-item">
+                <h3 id="term5">Blok</h3>
+                <p id="desc5">Blok adalah rekaman dalam rantai-blok yang mengandung dan mengonfirmasi antrian transaksi. Rata-rata setiap 6 menit, sebuah blok baru yang mengandung banyak transaksi ditambahkan ke dalam rantai blok melalui penambangan.</p>
+            </div>
+
+            <div class="glossary-item">
+                <h3 id="term6">NUX</h3>
+                <p id="desc6">NUX adalah unit yang umum digunakan untuk menentukan satu nusacoin.</p>
+            </div>
+
+            <div class="glossary-item">
+                <h3 id="term7">Konfirmasi</h3>
+                <p id="desc7">Konfirmasi artinya adalah sebuah transaksi telah diproses oleh jaringan dan cukup kecil kemungkinannya untuk bisa dibatalkan. Transaksi menerima konfirmasi pada saat dimasukkan ke dalam sebuah blok dan untuk setiap blok selanjutnya. Satu konfirmasi dapat dianggap aman untuk sebuah transaksi yang bernilai rendah, tetapi untuk transaksi yang bernilai tinggi seperti USD 1000 maka sebaiknya menunggu hingga mendapat 6 konfirmasi atau lebih. Setiap konfirmasi secara eksponensial memperkecil risiko pembatalan transaksi.</p>
+            </div>
+
+            <div class="glossary-item">
+                <h3 id="term8">Kriptografi</h3>
+                <p id="desc8">Kriptografi adalah cabang dari matematika yang memungkinkan kita untuk membuat bukti matematis dengan tingkat keamanan yang tinggi. Perdagangan dan perbankan online sudah menggunakan kriptografi. Dalam kasus Nusacoin, kriptografi digunakan untuk mencegah seseorang membelanjakan dana dari wallet pengguna lain atau merusak rantai-blok. Kriptografi juga dapat digunakan untuk mengenkripsi wallet, sehingga tidak dapat digunakan tanpa kata sandi.</p>
+            </div>
+
+            <div class="glossary-item">
+                <h3 id="term9">Pengeluaran Ganda (Double Spending)</h3>
+                <p id="desc9">Jika pengguna berbahaya mencoba untuk membelanjakan nusacoin mereka pada dua penerima yang berbeda pada waktu yang sama, ini disebut pengeluaran-ganda. Penambangan dan rantai-blok Nusacoin berguna untuk menciptakan kesepakatan pada jaringan mengenai transaksi mana yang dianggap valid dan akan dikonfirmasi.</p>
+            </div>
+
+            <div class="glossary-item">
+                <h3 id="term10">Tingkat Hash (Hash Rate)</h3>
+                <p id="desc10">Tingkat hash adalah satuan pengukuran atas kekuatan pengolahan di jaringan Nusacoin. Jaringan Nusacoin harus membuat operasi matematis secara intensif untuk alasan keamanan. Ketika jaringan mencapai tingkat hash 10 Gh/detik, berarti jaringan ini bisa melakukan 10 milyar perhitungan tiap detiknya.</p>
+            </div>
+
+            <div class="glossary-item">
+                <h3 id="term11">Penambangan (Mining)</h3>
+                <p id="desc11">Penambangan Nusacoin adalah sebuah proses yang membuat perangkat keras komputer melakukan perhitungan matematis bagi jaringan Nusacoin untuk mengonfirmasi transaksi dan sekaligus meningkatkan keamanan. Sebagai imbalan dari layanan tersebut, penambang Nusacoin memperoleh biaya transaksi untuk transaksi yang mereka konfirmasi, sekaligus dengan terbitnya nusacoin yang baru. Penambangan merupakan pasar khusus dan kompetitif, di mana imbalannya dibagi sesuai dengan berapa banyak perhitungan yang diselesaikan.</p>
+            </div>
+
+            <div class="glossary-item">
+                <h3 id="term12">P2P (Peer-to-Peer)</h3>
+                <p id="desc12">Peer-to-peer mengacu pada sistem yang bekerja seperti sebuah kolektif terorganisir dengan memungkinkan setiap individu berinteraksi secara langsung dengan lainnya. Dalam kasus Nusacoin, jaringan dibangun sedemikian rupa sehingga setiap pengguna menyiarkan transaksi dari pengguna lainnya. Dan, yang paling penting, tidak diperlukan bank sebagai pihak ketiga.</p>
+            </div>
+
+            <div class="glossary-item">
+                <h3 id="term13">Kunci Pribadi (Private Key)</h3>
+                <p id="desc13">Kunci pribadi adalah bagian rahasia dari data yang membuktikan hak Anda untuk membelanjakan nusacoin dari wallet Nusacoin tertentu melalui tanda tangan kriptografi. Kunci pribadi anda tersimpan dalam komputer jika anda menggunakan wallet perangkat lunak; bila anda menggunakan web wallet maka kunci pribadi anda tersimpan pada server jarak-jauh. Jangan pernah beritahukan kunci pribadi Anda kepada orang lain.</p>
+            </div>
+
+            <div class="glossary-item">
+                <h3 id="term14">Tanda tangan (Signature)</h3>
+                <p id="desc14">Tanda tangan kriptografi adalah sebuah mekanisme matematis yang memungkinkan seseorang untuk membuktikan kepemilikannya. Dalam Nusacoin, sebuah wallet Nusacoin dan kunci pribadinya saling terkait dengan beberapa keajaiban matematika. Ketika perangkat lunak Nusacoin menandai sebuah transaksi dengan kunci pribadi yang benar, maka seluruh jaringan dapat melihat bahwa tanda tangan tersebut cocok dengan nusacoin yang dibelanjakan.</p>
+            </div>
+
+            <div class="glossary-item">
+                <h3 id="term15">Wallet (Dompet)</h3>
+                <p id="desc15">Wallet Nusacoin pada dasarnya serupa dengan dompet fisik pada jaringan Nusacoin. Wallet tersebut sebenarnya mengandung kunci pribadi yang memungkinkan anda untuk membelanjakan nusacoin di dalamnya pada rantai-blok. Setiap wallet Nusacoin dapat menampilkan jumlah total dari semua nusacoin yang dimiliki dan memungkinkan untuk membayar jumlah tertentu kepada seseorang.</p>
+            </div>
+        </div>
+
+        <div class="wrapper-tombol">
+            <a class="btn-nusacoin" id="btnDownload" href="https://github.com/TaobotX11/nusacoin/releases/download/0.26.60/nusacoin-0.26.60-win64-setup.exe">
+                Nusacoin Core Win
+            </a>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <h2>Nusacoin Network</h2>
+                <p id="footerDesc">Blockchain milik rakyat dengan prinsip crypto yang adil. Terdesentralisasi, aman, dan dapat diakses semua orang.</p>
+                <div class="social-icons">
+                    <a href="https://x.com/Nusacoin_chain" target="_blank" class="social-box" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="https://discord.gg/NcKKZFBzJ" target="_blank" class="social-box" aria-label="Discord"><i class="fab fa-discord"></i></a>
+                    <a href="https://telegram.me/NusacoinX11" target="_blank" class="social-box" aria-label="Telegram"><i class="fab fa-telegram-plane"></i></a>
+                    <a href="https://www.reddit.com/r/Nusacoin" target="_blank" class="social-box" aria-label="Reddit"><i class="fab fa-reddit-alien"></i></a>
+                    <a href="https://github.com/TaobotX11/nusacoin" target="_blank" class="social-box" aria-label="GitHub"><i class="fab fa-github"></i></a>
+                </div>
+            </div>
+
+            <div class="footer-col">
+                <h3 id="footerQuickTitle">Tautan Cepat</h3>
+                <ul>
+                    <li><a href="https://explorer.nusacoin.org" target="_blank">Explorer</a></li>
+                    <li><a href="https://dompet.nusacoin.org" target="_blank">Nusacoin Web Wallet</a></li>
+                    <li><a href="https://github.com/TaobotX11/nusacoin" target="_blank">Nusacoin Core</a></li>
+                    <li><a href="https://green.nusacoin.org" target="_blank">Nusacoin Green Wallet</a></li>
+                    <li><a href="/Pages/Visi-Misi.html" target="_blank">Roadmap</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h3 id="footerResTitle">Sumber Daya</h3>
+                <ul>
+                    <li><a href="https://paper.nusacoin.org" target="_blank">Paper Wallet</a></li>
+                    <li><a href="https://pool.nusacoin.org" target="_blank">Mining Pool</a></li>
+                    <li><a href="https://ijol.nusacoin.org" target="_blank">Ijol Nusacoin (P2P)</a></li>
+                    <li><a href="https://t.me/rdnmesin_bot" target="_blank">Nusacard RDN Bot</a></li>
+                    <li><a href="/Pages/Kosa-Kata.html" target="_blank" id="menuGlossary">Kosa Kata</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h3 id="footerDocsTitle">Dokumen &amp; Keamanan</h3>
+                <ul>
+                    <li><a href="/Pages/Whitepaper_Nusacoin_in.pdf">Whitepaper IN</a></li>
+                    <li><a href="/Pages/Whitepaper_Nusacoin_en.pdf">Whitepaper EN</a></li>
+                    <li><a href="/Pages/Amankan-Wallet.html" target="_blank" id="menuSecure">Amankan Wallet</a></li>
+                    <li><a href="/Pages/Lindungi-Privasi-Anda.html" target="_blank" id="menuPrivacy">Lindungi Privasi</a></li>
+                    <li><a href="/Pages/FAQ.html" target="_blank">FAQ</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <span id="footerCopyright">© 2026 Nusacoin Project. Dibangun untuk desentralisasi.</span>
+            <span class="mono"> · NUX / X11</span>
+        </div>
+    </footer>
+
+    <!-- Script Tema Switcher (Simbol) & Bahasa (IN/EN) -->
+    <script>
+        const translations = {
+            id: {
+                topBarHelp: "Nusacoin.org membutuhkan bantuan anda!",
+                heroTitle: "Beberapa kata terkait Nusacoin yang mungkin Anda dengar",
+                heroSub: "Nusacoin menyediakan pendekatan baru untuk pembayaran dan, karenanya, ada beberapa kata baru yang mungkin menjadi bagian dari kosakata Anda.",
+                term1: "Alamat",
+                desc1: "Sebuah alamat Nusacoin mirip seperti sebuah alamat fisik atau email. Alamat Nusacoin adalah satu-satunya informasi yang perlu Anda berikan kepada orang yang hendak membayar Anda dengan Nusacoin. Satu perbedaan penting adalah: tiap satu alamat Nusacoin sebaiknya hanya digunakan untuk satu kali transaksi.",
+                term2: "Nusan",
+                desc2: "Nusan adalah unit umum untuk menentukan sebuah sub-unit dalam satu Nusacoin - 100.000.000 nusan setara dengan 1 Nusacoin (NUX). Unit ini biasanya lebih nyaman digunakan dalam memberi harga tip, barang, dan jasa.",
+                term3: "Nusacoin",
+                desc3: "Nusacoin - dengan huruf kapital, digunakan saat menjelaskan konsep dari Nusacoin, atau seluruh jaringan itu sendiri. Contoh: \"Saya belajar mengenai protokol Nusacoin hari ini.\"\n\nnusacoin - tanpa huruf kapital, digunakan untuk menjelaskan nusacoin sebagai satuan dari rekening. Contoh: \"Saya kirim sepuluh nusacoin hari ini.\"; seringkali disingkat menjadi NUX.",
+                term4: "Rantai-Blok (Blockchain)",
+                desc4: "Rantai-blok adalah catatan umum dari semua transaksi Nusacoin, berurutan secara kronologis. Rantai-blok dibagi antara semua pengguna Nusacoin. Rantai-blok digunakan untuk memverifikasi transaksi Nusacoin permanen dan untuk mencegah terjadinya pengeluaran-ganda.",
+                term5: "Blok",
+                desc5: "Blok adalah rekaman dalam rantai-blok yang mengandung dan mengonfirmasi antrian transaksi. Rata-rata setiap 6 menit, sebuah blok baru yang mengandung banyak transaksi ditambahkan ke dalam rantai blok melalui penambangan.",
+                term6: "NUX",
+                desc6: "NUX adalah unit yang umum digunakan untuk menentukan satu nusacoin.",
+                term7: "Konfirmasi",
+                desc7: "Konfirmasi artinya adalah sebuah transaksi telah diproses oleh jaringan dan cukup kecil kemungkinannya untuk bisa dibatalkan. Transaksi menerima konfirmasi pada saat dimasukkan ke dalam sebuah blok dan untuk setiap blok selanjutnya. Satu konfirmasi dapat dianggap aman untuk sebuah transaksi yang bernilai rendah, tetapi untuk transaksi yang bernilai tinggi seperti USD 1000 maka sebaiknya menunggu hingga mendapat 6 konfirmasi atau lebih.",
+                term8: "Kriptografi",
+                desc8: "Kriptografi adalah cabang dari matematika yang memungkinkan kita untuk membuat bukti matematis dengan tingkat keamanan yang tinggi. Dalam kasus Nusacoin, kriptografi digunakan untuk mencegah seseorang membelanjakan dana dari wallet pengguna lain atau merusak rantai-blok.",
+                term9: "Pengeluaran Ganda (Double Spending)",
+                desc9: "Jika pengguna berbahaya mencoba untuk membelanjakan nusacoin mereka pada dua penerima yang berbeda pada waktu yang sama, ini disebut pengeluaran-ganda.",
+                term10: "Tingkat Hash (Hash Rate)",
+                desc10: "Tingkat hash adalah satuan pengukuran atas kekuatan pengolahan di jaringan Nusacoin. Ketika jaringan mencapai tingkat hash 10 Gh/detik, berarti jaringan ini bisa melakukan 10 milyar perhitungan tiap detiknya.",
+                term11: "Penambangan (Mining)",
+                desc11: "Penambangan Nusacoin adalah sebuah proses yang membuat perangkat keras komputer melakukan perhitungan matematis bagi jaringan Nusacoin untuk mengonfirmasi transaksi dan sekaligus meningkatkan keamanan.",
+                term12: "P2P (Peer-to-Peer)",
+                desc12: "Peer-to-peer mengacu pada sistem yang bekerja seperti sebuah kolektif terorganisir dengan memungkinkan setiap individu berinteraksi secara langsung dengan lainnya. Tidak diperlukan bank sebagai pihak ketiga.",
+                term13: "Kunci Pribadi (Private Key)",
+                desc13: "Kunci pribadi adalah bagian rahasia dari data yang membuktikan hak Anda untuk membelanjakan nusacoin dari wallet Nusacoin tertentu. Jangan pernah beritahukan kunci pribadi Anda kepada orang lain.",
+                term14: "Tanda tangan (Signature)",
+                desc14: "Tanda tangan kriptografi adalah sebuah mekanisme matematis yang memungkinkan seseorang untuk membuktikan kepemilikannya.",
+                term15: "Wallet (Dompet)",
+                desc15: "Wallet Nusacoin pada dasarnya serupa dengan dompet fisik pada jaringan Nusacoin. Wallet tersebut sebenarnya mengandung kunci pribadi yang memungkinkan anda untuk membelanjakan nusacoin di dalamnya pada rantai-blok.",
+                btnDownload: "Nusacoin Core Win",
+                footerDesc: "Blockchain milik rakyat dengan prinsip crypto yang adil. Terdesentralisasi, aman, dan dapat diakses semua orang.",
+                footerQuickTitle: "Tautan Cepat",
+                footerResTitle: "Sumber Daya",
+                footerDocsTitle: "Dokumen & Keamanan",
+                menuGlossary: "Kosa Kata",
+                menuSecure: "Amankan Wallet",
+                menuPrivacy: "Lindungi Privasi",
+                footerCopyright: "© 2026 Nusacoin Project. Dibangun untuk desentralisasi."
+            },
+            en: {
+                topBarHelp: "Nusacoin.org needs your help!",
+                heroTitle: "Some Nusacoin words you might hear",
+                heroSub: "Nusacoin provides a new approach to payments and, as such, there are some new words that may become part of your vocabulary.",
+                term1: "Address",
+                desc1: "A Nusacoin address is similar to a physical address or an email. It is the only information you need to provide for someone to pay you with Nusacoin. An important difference is that each address should only be used for a single transaction.",
+                term2: "Nusan",
+                desc2: "Nusan is a common unit to denote a sub-unit in one Nusacoin - 100,000,000 nusan equals 1 Nusacoin (NUX). This unit is usually more convenient for pricing tips, goods, and services.",
+                term3: "Nusacoin",
+                desc3: "Nusacoin - capitalized, is used to describe the concept of Nusacoin, or the entire network itself. Example: \"I learned about the Nusacoin protocol today.\"\n\nnusacoin - uncapitalized, is used to describe nusacoin as a unit of account. Example: \"I sent ten nusacoins today.\"; often abbreviated as NUX.",
+                term4: "Blockchain",
+                desc4: "A blockchain is a public record of all Nusacoin transactions in chronological order. The blockchain is shared among all Nusacoin users and is used to verify permanent transactions and prevent double-spending.",
+                term5: "Block",
+                desc5: "A block is a record in the blockchain that contains and confirms pending transactions. On average every 6 minutes, a new block containing many transactions is added to the blockchain through mining.",
+                term6: "NUX",
+                desc6: "NUX is a common unit used to denote one nusacoin.",
+                term7: "Confirmation",
+                desc7: "Confirmation means that a transaction has been processed by the network and is very unlikely to be reversed. Transactions receive confirmations as soon as they are included in a block and for every subsequent block.",
+                term8: "Cryptography",
+                desc8: "Cryptography is a branch of mathematics that allows us to create mathematical proofs with high security levels. In Nusacoin, cryptography prevents funds from being spent by unauthorized users or tampering with the blockchain.",
+                term9: "Double Spending",
+                desc9: "If a malicious user tries to send their nusacoins to two different recipients at the same time, this is called double spending.",
+                term10: "Hash Rate",
+                desc10: "Hash rate is the unit of measurement for processing power on the Nusacoin network. When the network reaches a hash rate of 10 Gh/s, it means the network can perform 10 billion calculations per second.",
+                term11: "Mining",
+                desc11: "Nusacoin mining is a process where computer hardware performs mathematical calculations for the Nusacoin network to confirm transactions and increase security.",
+                term12: "P2P (Peer-to-Peer)",
+                desc12: "Peer-to-peer refers to systems that work like an organized collective by allowing individuals to interact directly with each other without third-party banks.",
+                term13: "Private Key",
+                desc13: "A private key is a secret piece of data that proves your right to spend nusacoins from a specific Nusacoin wallet. Never share your private key with anyone.",
+                term14: "Signature",
+                desc14: "A cryptographic signature is a mathematical mechanism that allows someone to prove ownership.",
+                term15: "Wallet",
+                desc15: "A Nusacoin wallet is similar to a physical wallet on the Nusacoin network. It contains private keys that allow you to spend the nusacoins allocated to it on the blockchain.",
+                btnDownload: "Nusacoin Core Win",
+                footerDesc: "The people's blockchain built on fair crypto principles. Decentralized, secure, and accessible to everyone.",
+                footerQuickTitle: "Quick Links",
+                footerResTitle: "Resources",
+                footerDocsTitle: "Docs & Security",
+                menuGlossary: "Glossary",
+                menuSecure: "Secure Wallet",
+                menuPrivacy: "Protect Privacy",
+                footerCopyright: "© 2026 Nusacoin Project. Built for decentralization."
+            }
+        };
+
+        function switchLanguage(lang) {
+            document.getElementById('btnIN').classList.toggle('active', lang === 'id');
+            document.getElementById('btnEN').classList.toggle('active', lang === 'en');
+
+            const t = translations[lang];
+            for (let id in t) {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.textContent = t[id];
+                }
+            }
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const icon = document.getElementById('themeIcon');
+            
+            body.classList.toggle('dark-mode');
+            
+            if (body.classList.contains('dark-mode')) {
+                icon.className = 'fa-solid fa-sun';
+            } else {
+                icon.className = 'fa-solid fa-moon';
+            }
+        }
+    </script>
+</body>
+</html>

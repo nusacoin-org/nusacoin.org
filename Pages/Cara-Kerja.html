@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nusacoin (NUX) - Cara Kerja Nusacoin</title>
+    
+    <!-- Google Fonts & FontAwesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Titillium+Web:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- CSS Styling -->
+    <style>
+        /* RESET & HAPUS NAVBAR BLOGGER */
+        #navbar-iframe, .navbar, .navbar-ghost { 
+            display: none !important; 
+            height: 0 !important; 
+            visibility: hidden !important; 
+        }
+
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+
+        /* Variables Tema Light & Dark Mode */
+        :root {
+            --primary: #27ae60;
+            --primary-dark: #1e8449;
+            --bg-body: #ffffff;
+            --bg-card: #ffffff;
+            --bg-hero: #006400;
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --bg-light: #f8fafc;
+            --border: #e2e8f0;
+            --title-green: #27ae60;
+            --link-green: #27ae60;
+        }
+
+        body.dark-mode {
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --bg-hero: #093809;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --bg-light: #1e293b;
+            --border: #334155;
+            --title-green: #4ade80;
+            --link-green: #4ade80;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            color: var(--text-main); 
+            line-height: 1.6; 
+            overflow-x: hidden;
+            background-color: var(--bg-body);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background-color: var(--primary-dark);
+            color: white;
+            padding: 8px 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .top-bar-container {
+            max-width: 1250px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .top-bar-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Lang Switcher */
+        .lang-switch {
+            display: flex;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+            padding: 2px;
+        }
+
+        .lang-btn {
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.8);
+            padding: 2px 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: all 0.2s;
+        }
+
+        .lang-btn.active, .lang-btn:hover {
+            background: #ffffff;
+            color: var(--primary-dark);
+        }
+
+        /* Theme Toggle Button (Icon Only) */
+        .theme-toggle-btn {
+            background: rgba(0, 0, 0, 0.2);
+            border: none;
+            color: #ffffff;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        .theme-toggle-btn:hover {
+            background: rgba(0, 0, 0, 0.4);
+            transform: scale(1.08);
+        }
+
+        /* Hero Header */
+        .hero-container {
+            background-color: var(--bg-hero);
+            width: 100%;
+            height: 280px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            color: #ffffff;
+            padding: 0 20px;
+            overflow: hidden;
+            transition: background-color 0.3s;
+        }
+
+        .hero-container h1 {
+            color: #ffffff !important;
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 10;
+            font-family: 'Titillium Web', sans-serif;
+        }
+
+        .hero-container p {
+            color: #cbd5e1;
+            font-size: 1.05rem;
+            max-width: 650px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .bg-lines {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: 1;
+        }
+
+        .wireframe-svg {
+            position: absolute;
+            bottom: 40px; left: 0; width: 100%; z-index: 2; opacity: 0.3;
+        }
+
+        .jagged-bottom {
+            position: absolute;
+            bottom: -1px; left: 0; width: 100%; height: 50px;
+            background-color: var(--bg-body);
+            clip-path: polygon(0% 70%, 5% 60%, 10% 80%, 15% 55%, 20% 85%, 25% 60%, 30% 80%, 35% 50%, 40% 90%, 45% 60%, 50% 80%, 55% 55%, 60% 85%, 65% 60%, 70% 80%, 75% 50%, 80% 90%, 85% 60%, 90% 80%, 95% 55%, 100% 70%, 100% 100%, 0% 100%);
+            z-index: 5;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Main Content Structure */
+        main {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .content-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 50px;
+            margin-bottom: 50px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 30px;
+            transition: transform 0.2s, background-color 0.3s, border-color 0.3s;
+        }
+
+        .content-container:hover {
+            transform: translateY(-2px);
+        }
+
+        .content-container.reverse {
+            flex-direction: row-reverse;
+        }
+
+        .text-column {
+            flex: 1.2;
+        }
+
+        .text-column h2 {
+            font-family: 'Titillium Web', sans-serif;
+            color: var(--title-green);
+            font-size: 1.5rem;
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+
+        .text-column p {
+            color: var(--text-main);
+            font-size: 1rem;
+            line-height: 1.7;
+            text-align: justify;
+        }
+
+        .text-column a {
+            color: var(--link-green);
+            text-decoration: underline;
+            font-weight: 600;
+        }
+
+        .image-column {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+        }
+
+        .image-column img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--bg-light);
+            border-top: 1px solid var(--border);
+            padding: 60px 20px 20px;
+            margin-top: 60px;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .footer-grid {
+            max-width: 1250px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 40px;
+        }
+
+        .footer-brand h2 {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-family: 'Titillium Web', sans-serif;
+        }
+
+        .footer-brand p {
+            color: var(--text-sub);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .footer-col h3 {
+            font-size: 1.1rem;
+            color: var(--text-main);
+            margin-bottom: 15px;
+            font-family: 'Titillium Web', sans-serif;
+        }
+
+        .footer-col ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .footer-col ul li {
+            margin-bottom: 10px;
+        }
+
+        .footer-col ul li a {
+            color: var(--text-sub);
+            text-decoration: none;
+            transition: color 0.2s;
+            font-size: 0.95rem;
+        }
+
+        .footer-col ul li a:hover {
+            color: var(--primary);
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .social-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-main);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .social-box:hover {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .footer-bottom {
+            max-width: 1250px;
+            margin: 40px auto 0;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-sub);
+            font-size: 0.85rem;
+        }
+
+        .mono {
+            font-family: monospace;
+        }
+
+        @media (max-width: 768px) {
+            .content-container, .content-container.reverse {
+                flex-direction: column;
+                text-align: center;
+            }
+            .image-column {
+                order: -1;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Bar dengan Saklar Bahasa & Tema Simbol -->
+    <div class="top-bar">
+        <div class="top-bar-container">
+            <span id="topBarHelp">Nusacoin.org membutuhkan bantuan anda!</span>
+            
+            <div class="top-bar-controls">
+                <!-- Pilihan Bahasa IN / EN -->
+                <div class="lang-switch">
+                    <button class="lang-btn active" id="btnIN" onclick="switchLanguage('id')">IN</button>
+                    <button class="lang-btn" id="btnEN" onclick="switchLanguage('en')">EN</button>
+                </div>
+
+                <!-- Tombol Tema (Simbol Moon/Sun) -->
+                <button class="theme-toggle-btn" id="themeToggle" onclick="toggleTheme()" aria-label="Ganti Tema" title="Ganti Tema">
+                    <i class="fa-solid fa-moon" id="themeIcon"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Header -->
+    <header class="hero-container">
+        <div class="bg-lines"></div>
+        <h1 id="heroTitle">Bagaimana cara kerja Nusacoin?</h1>
+        <p id="heroSub">Pertanyaan berikut seringkali menimbulkan kebingungan. Berikut adalah penjelasan singkatnya!</p>
+        <svg class="wireframe-svg" preserveAspectRatio="none" viewBox="0 0 1440 100">
+            <path d="M0,80 L200,50 L400,90 L600,30 L800,80 L1000,40 L1200,90 L1440,50" fill="none" stroke-width="1" stroke="rgba(255,255,255,0.2)"></path>
+        </svg>
+        <div class="jagged-bottom"></div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Section 1 -->
+        <div class="content-container">
+            <div class="text-column">
+                <h2 id="title1">Dasar untuk pengguna baru</h2>
+                <p id="desc1">Sebagai pengguna baru, anda dapat <a href="https://www.nusacoin.org/p/memulai.html" id="linkStart">memulai</a> menggunakan Nusacoin tanpa harus memahami detil teknisnya. Setelah menginstal wallet Nusacoin di komputer atau ponsel, secara otomatis akan membuat alamat Nusacoin pertama.</p>
+            </div>
+            <div class="image-column">
+                <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhHuK3BGJwHTuh36gAyoNwVNIIYyMuJ5ovABiI5A4BrNM52VoO2csIPcp37e0smlvrDlR5T1DIRUud2Z2-EiJChZWacGI7pXNR3GtbGouXPOeHkiKRX9NCJRoyi3E-aUw1hCLPpJ7j1GbdFQxs8KSqz7ADhxGSiy03Ue1BQc_ENL-csB567F7Sv8qgvnAU/s320/1.png" alt="Basic Usage">
+            </div>
+        </div>
+
+        <!-- Section 2 -->
+        <div class="content-container reverse">
+            <div class="text-column">
+                <h2 id="title2">Saldo - block chain</h2>
+                <p id="desc2">Rantai-blok (blockchain) adalah sebuah catatan transaksi publik di mana jaringan Nusacoin bersandar. Semua transaksi yang telah dikonfirmasi tersimpan di dalam rantai-blok. Sehingga, wallet Nusacoin dapat menghitung sisa uang yang dapat dibelanjakan serta transaksi-transaksi baru dapat diverifikasi untuk memastikan bahwa memang dimiliki oleh pengguna itu. Integritas dan urutan kronologis rantai-blok diterapkan menggunakan <a href="https://www.nusacoin.org/p/kosa-kata.html" id="linkCrypto">kriptografi</a>.</p>
+            </div>
+            <div class="image-column">
+                <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhltd93Z9-s-9NWfqmGI_PUM7wXNAIZRqx6J42q753vQfpcZ8aeubFVxj2sBTVEtnpXCl7ku0nvGYv8oQeUrKJGBFDX8J2FfnODnUGRT1FRJ2Bq5xbxKNb2N_fK8q96EjNwl99oLWS-s8UgHSVr8kwzUIpDfNfSizQjAuoMRthSu6IvhonvlGp_MrZc7kQ/s320/2.png" alt="Blockchain Ledger">
+            </div>
+        </div>
+
+        <!-- Section 3 -->
+        <div class="content-container">
+            <div class="text-column">
+                <h2 id="title3">Transaksi - private keys</h2>
+                <p id="desc3">Sebuah transaksi adalah transfer nilai antar wallet Nusacoin yang dimasukkan ke dalam rantai-blok. Wallet Nusacoin menyimpan sebagian data rahasia yang disebut <a href="https://www.nusacoin.org/p/kosa-kata.html" id="linkPrivKey">kunci pribadi</a> atau seed, yang digunakan untuk menandatangani transaksi, memberikan bukti matematis bahwa memang benar berasal dari pemilik wallet. <a href="https://www.nusacoin.org/p/kosa-kata.html" id="linkSig">Tanda tangan</a> juga mencegah transaksi diubah oleh siapapun setelah diterbitkan. Semua transaksi disiarkan ke dalam jaringan dan biasanya akan mulai dikonfirmasi dalam waktu 6-12 menit, melalui proses yang disebut <a href="https://www.nusacoin.org/p/kosa-kata.html" id="linkMining">pertambangan</a>.</p>
+            </div>
+            <div class="image-column">
+                <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiu0zrYGVRhL9u3-twGHwx4zzaGtDqk65yKHRc4sV8nvK7HIGlCd88R4OStTNbfHDd3LUAthqP5WSeSORi5Fa4g6EgiCn9Hjer3HG_plweCMUtQIcnz-F9Zz7UMyIfDEK31vimSAxQzCjdBoyhGHmnUgsBWruDqPWRzYa2I0kbWqJUDuJzwOqNGQfCmfjI/s320/3.png" alt="Private Keys">
+            </div>
+        </div>
+
+        <!-- Section 4 -->
+        <div class="content-container reverse">
+            <div class="text-column">
+                <h2 id="title4">Memproses - pertambangan</h2>
+                <p id="desc4">Pertambangan adalah sistem konsensus terdistribusi yang digunakan untuk <a href="https://www.nusacoin.org/p/kosa-kata.html" id="linkConfirm">mengonfirmasi</a> antrian transaksi dengan memasukkannya ke dalam rantai-blok. Proses ini menegaskan urutan kronologis rantai-blok, melindungi netralitas jaringan, dan memungkinkan komputer lain untuk menyetujui keadaan sistem. Agar dapat dikonfirmasi, transaksi haruslah dirangkai dalam sebuah <a href="https://www.nusacoin.org/p/kosa-kata.html" id="linkBlock">blok</a> yang sesuai dengan aturan kriptografi ketat dan akan diverifikasi oleh jaringan. Pertambangan mencegah individu atau kelompok mengendalikan atau mengganti sebagian dari rantai-blok untuk memutar kembali transaksi mereka.</p>
+            </div>
+            <div class="image-column">
+                <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhYV-ryhDGJvelHX76JXZ1JDvV8g_7ilvYpyrEca1MSzxN-UjtFu_UlN3G2MsGMTZ2nv7TysRm2_vzunCNy87aJ7r6rGpuZtZnfMLLtr7S8xrZNC8ZALecfgHvAkHJ0bq1GAdLe_ZjJCdvGuEZGX-qq5goPgQViuyQBfzgqi_aez0Aes4rW-AlzlYCF8lo/s320/4.png" alt="Mining Process">
+            </div>
+        </div>
+
+        <!-- Section 5 -->
+        <div class="content-container">
+            <div class="text-column">
+                <h2 id="title5">Menjelajahi dunia yang rumit</h2>
+                <p id="desc5">Ini hanyalah ringkasan singkat tentang Nusacoin. Jika Anda ingin mempelajari detail lebih lanjut, Anda dapat membaca makalah asli yang menjelaskan desainnya.</p>
+            </div>
+            <div class="image-column">
+                <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj9hPb0s8ec4FcKfkIIOcT0MOc9gsXX9BfdNpUr5zyrz0SUCnGzyIcQOuszylKulLa2flzlx-A3bypMEVmITVRCnp69VFcneo2vEtMwnL-aQ9uB-qzg1y6PEDrGl0x1QNBN1kxwMb8OGwFHJq3IGBipubt3sfKSsTSwWMUPBevmyX6Kz95FP3E37QBaao4/s320/5.png" alt="Deep Dive">
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <h2>Nusacoin Network</h2>
+                <p id="footerDesc">Blockchain milik rakyat dengan prinsip crypto yang adil. Terdesentralisasi, aman, dan dapat diakses semua orang.</p>
+                <div class="social-icons">
+                    <a href="https://x.com/Nusacoin_chain" target="_blank" class="social-box" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="https://discord.gg/NcKKZFBzJ" target="_blank" class="social-box" aria-label="Discord"><i class="fab fa-discord"></i></a>
+                    <a href="https://telegram.me/NusacoinX11" target="_blank" class="social-box" aria-label="Telegram"><i class="fab fa-telegram-plane"></i></a>
+                    <a href="https://www.reddit.com/r/Nusacoin" target="_blank" class="social-box" aria-label="Reddit"><i class="fab fa-reddit-alien"></i></a>
+                    <a href="https://github.com/TaobotX11/nusacoin" target="_blank" class="social-box" aria-label="GitHub"><i class="fab fa-github"></i></a>
+                </div>
+            </div>
+
+            <div class="footer-col">
+                <h3 id="footerQuickTitle">Tautan Cepat</h3>
+                <ul>
+                    <li><a href="https://explorer.nusacoin.org" target="_blank">Explorer</a></li>
+                    <li><a href="https://dompet.nusacoin.org" target="_blank">Nusacoin Web Wallet</a></li>
+                    <li><a href="https://github.com/TaobotX11/nusacoin" target="_blank">Nusacoin Core</a></li>
+                    <li><a href="https://green.nusacoin.org" target="_blank">Nusacoin Green Wallet</a></li>
+                    <li><a href="/Pages/Visi-Misi.html" target="_blank">Roadmap</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h3 id="footerResTitle">Sumber Daya</h3>
+                <ul>
+                    <li><a href="https://paper.nusacoin.org" target="_blank">Paper Wallet</a></li>
+                    <li><a href="https://pool.nusacoin.org" target="_blank">Mining Pool</a></li>
+                    <li><a href="https://ijol.nusacoin.org" target="_blank">Ijol Nusacoin (P2P)</a></li>
+                    <li><a href="https://t.me/rdnmesin_bot" target="_blank">Nusacard RDN Bot</a></li>
+                    <li><a href="/Pages/Kosa-Kata.html" target="_blank" id="menuGlossary">Kosa Kata</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h3 id="footerDocsTitle">Dokumen &amp; Keamanan</h3>
+                <ul>
+                    <li><a href="/Pages/Whitepaper_Nusacoin_in.pdf">Whitepaper IN</a></li>
+                    <li><a href="/Pages/Whitepaper_Nusacoin_en.pdf">Whitepaper EN</a></li>
+                    <li><a href="/Pages/Amankan-Wallet.html" target="_blank" id="menuSecure">Amankan Wallet</a></li>
+                    <li><a href="/Pages/Lindungi-Privasi-Anda.html" target="_blank" id="menuPrivacy">Lindungi Privasi</a></li>
+                    <li><a href="/Pages/FAQ.html" target="_blank">FAQ</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <span id="footerCopyright">© 2026 Nusacoin Project. Dibangun untuk desentralisasi.</span>
+            <span class="mono"> · NUX / X11</span>
+        </div>
+    </footer>
+
+    <!-- JavaScript Translator & Theme Switcher -->
+    <script>
+        const translations = {
+            id: {
+                topBarHelp: "Nusacoin.org membutuhkan bantuan anda!",
+                heroTitle: "Bagaimana cara kerja Nusacoin?",
+                heroSub: "Pertanyaan berikut seringkali menimbulkan kebingungan. Berikut adalah penjelasan singkatnya!",
+                title1: "Dasar untuk pengguna baru",
+                desc1: "Sebagai pengguna baru, anda dapat memulainya tanpa harus memahami detil teknisnya. Setelah menginstal wallet Nusacoin di komputer atau ponsel, secara otomatis akan membuat alamat Nusacoin pertama.",
+                linkStart: "memulai",
+                title2: "Saldo - block chain",
+                desc2: "Rantai-blok (blockchain) adalah sebuah catatan transaksi publik di mana jaringan Nusacoin bersandar. Semua transaksi yang telah dikonfirmasi tersimpan di dalam rantai-blok. Sehingga, wallet Nusacoin dapat menghitung sisa uang yang dapat dibelanjakan serta transaksi-transaksi baru dapat diverifikasi.",
+                linkCrypto: "kriptografi",
+                title3: "Transaksi - private keys",
+                desc3: "Sebuah transaksi adalah transfer nilai antar wallet Nusacoin yang dimasukkan ke dalam rantai-blok. Wallet Nusacoin menyimpan sebagian data rahasia yang disebut kunci pribadi atau seed, yang digunakan untuk menandatangani transaksi.",
+                linkPrivKey: "kunci pribadi",
+                linkSig: "Tanda tangan",
+                linkMining: "pertambangan",
+                title4: "Memproses - pertambangan",
+                desc4: "Pertambangan adalah sistem konsensus terdistribusi yang digunakan untuk mengonfirmasi antrian transaksi dengan memasukkannya ke dalam rantai-blok. Pertambangan mencegah individu atau kelompok mengendalikan atau mengganti sebagian dari rantai-blok.",
+                linkConfirm: "mengonfirmasi",
+                linkBlock: "blok",
+                title5: "Menjelajahi dunia yang rumit",
+                desc5: "Ini hanyalah ringkasan singkat tentang Nusacoin. Jika Anda ingin mempelajari detail lebih lanjut, Anda dapat membaca makalah asli yang menjelaskan desainnya.",
+                footerDesc: "Blockchain milik rakyat dengan prinsip crypto yang adil. Terdesentralisasi, aman, dan dapat diakses semua orang.",
+                footerQuickTitle: "Tautan Cepat",
+                footerResTitle: "Sumber Daya",
+                footerDocsTitle: "Dokumen & Keamanan",
+                menuGlossary: "Kosa Kata",
+                menuSecure: "Amankan Wallet",
+                menuPrivacy: "Lindungi Privasi",
+                footerCopyright: "© 2026 Nusacoin Project. Dibangun untuk desentralisasi."
+            },
+            en: {
+                topBarHelp: "Nusacoin.org needs your help!",
+                heroTitle: "How does Nusacoin work?",
+                heroSub: "This is a question that often causes confusion. Here is a quick explanation!",
+                title1: "The basics for a new user",
+                desc1: "As a new user, you can get started with Nusacoin without understanding the technical details. Once you've installed a Nusacoin wallet on your computer or mobile phone, it will generate your first Nusacoin address.",
+                linkStart: "get started",
+                title2: "Balances - block chain",
+                desc2: "The block chain is a shared public ledger upon which the entire Nusacoin network relies. All confirmed transactions are included in the block chain so that Nusacoin wallets can calculate their spendable balance and verify new transactions.",
+                linkCrypto: "cryptography",
+                title3: "Transactions - private keys",
+                desc3: "A transaction is a transfer of value between Nusacoin wallets that gets included in the block chain. Nusacoin wallets keep a secret piece of data called a private key or seed, which is used to sign transactions.",
+                linkPrivKey: "private key",
+                linkSig: "signatures",
+                linkMining: "mining",
+                title4: "Processing - mining",
+                desc4: "Mining is a distributed consensus system that is used to confirm pending transactions by including them in the block chain. Mining prevents individuals from modifying or altering parts of the block chain.",
+                linkConfirm: "confirm",
+                linkBlock: "block",
+                title5: "Securing the network",
+                desc5: "This is only a short summary of Nusacoin. If you want to learn more details, you can read the original whitepaper describing its core design.",
+                footerDesc: "The people's blockchain built on fair crypto principles. Decentralized, secure, and accessible to everyone.",
+                footerQuickTitle: "Quick Links",
+                footerResTitle: "Resources",
+                footerDocsTitle: "Docs & Security",
+                menuGlossary: "Glossary",
+                menuSecure: "Secure Wallet",
+                menuPrivacy: "Protect Privacy",
+                footerCopyright: "© 2026 Nusacoin Project. Built for decentralization."
+            }
+        };
+
+        function switchLanguage(lang) {
+            document.getElementById('btnIN').classList.toggle('active', lang === 'id');
+            document.getElementById('btnEN').classList.toggle('active', lang === 'en');
+
+            const t = translations[lang];
+            for (let id in t) {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.textContent = t[id];
+                }
+            }
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const icon = document.getElementById('themeIcon');
+            
+            body.classList.toggle('dark-mode');
+            
+            if (body.classList.contains('dark-mode')) {
+                icon.className = 'fa-solid fa-sun';
+            } else {
+                icon.className = 'fa-solid fa-moon';
+            }
+        }
+    </script>
+</body>
+</html>

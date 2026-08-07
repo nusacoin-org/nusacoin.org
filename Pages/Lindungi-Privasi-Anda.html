@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nusacoin (NUX) - Lindungi Privasi Anda</title>
+    
+    <!-- Google Fonts & FontAwesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Titillium+Web:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- CSS Styling -->
+    <style>
+        /* --- RESET & HAPUS NAVBAR BLOGGER --- */
+        #navbar-iframe, .navbar, .navbar-ghost { 
+            display: none !important; 
+            height: 0 !important; 
+            visibility: hidden !important; 
+        }
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+
+        /* Variables Tema Light & Dark Mode */
+        :root {
+            --primary: #27ae60;
+            --primary-dark: #1e8449;
+            --bg-body: #ffffff;
+            --bg-card: #ffffff;
+            --bg-highlight: #b6d7a8;
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --text-highlight: #1f1f1f;
+            --bg-light: #f8fafc;
+            --border: #e2e8f0;
+            --title-green: #38761d;
+        }
+
+        /* Mode Dark */
+        body.dark-mode {
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --bg-highlight: #1e3a1e;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --text-highlight: #e2e8f0;
+            --bg-light: #1e293b;
+            --border: #334155;
+            --title-green: #4ade80;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            color: var(--text-main); 
+            line-height: 1.6; 
+            overflow-x: hidden;
+            background-color: var(--bg-body);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background-color: var(--primary);
+            color: white;
+            padding: 8px 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .top-bar-container {
+            max-width: 1250px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .top-bar-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Tombol Pilihan Bahasa */
+        .lang-switch {
+            display: flex;
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 4px;
+            padding: 2px;
+        }
+
+        .lang-btn {
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.75);
+            padding: 2px 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: all 0.2s;
+        }
+
+        .lang-btn.active, .lang-btn:hover {
+            background: #ffffff;
+            color: var(--primary);
+        }
+
+        /* Tombol Tema (Hanya Simbol) */
+        .theme-toggle-btn {
+            background: rgba(0, 0, 0, 0.15);
+            border: none;
+            color: #ffffff;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        .theme-toggle-btn:hover {
+            background: rgba(0, 0, 0, 0.3);
+            transform: scale(1.08);
+        }
+
+        /* Main Content */
+        main {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .intro-banner {
+            background-color: var(--bg-highlight);
+            color: var(--text-highlight);
+            font-family: 'Verdana', sans-serif;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .content-section {
+            margin-bottom: 25px;
+        }
+
+        .content-section h2 {
+            font-family: 'Titillium Web', 'Verdana', sans-serif;
+            font-size: 1.4rem;
+            color: var(--title-green);
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-align: left;
+        }
+
+        .content-section p {
+            font-family: 'Verdana', sans-serif;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            line-height: 1.7;
+            text-align: justify;
+            margin-bottom: 15px;
+        }
+
+        /* Tombol Download */
+        .wrapper-tombol {
+            text-align: center;
+            margin-top: 35px;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        .btn-nusacoin {
+            display: inline-block;
+            padding: 14px 28px;
+            background-color: #28a745;
+            color: #ffffff !important;
+            text-decoration: none;
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            font-size: 16px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-nusacoin:hover {
+            background-color: #218838;
+            color: #ffffff !important;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--bg-light);
+            border-top: 1px solid var(--border);
+            padding: 60px 20px 20px;
+            margin-top: 60px;
+        }
+
+        .footer-grid {
+            max-width: 1250px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 40px;
+        }
+
+        .footer-brand h2 {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .footer-brand p {
+            color: var(--text-sub);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .footer-col h3 {
+            font-size: 1.1rem;
+            color: var(--text-main);
+            margin-bottom: 15px;
+        }
+
+        .footer-col ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .footer-col ul li {
+            margin-bottom: 10px;
+        }
+
+        .footer-col ul li a {
+            color: var(--text-sub);
+            text-decoration: none;
+            transition: color 0.2s;
+            font-size: 0.95rem;
+        }
+
+        .footer-col ul li a:hover {
+            color: var(--primary);
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .social-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-main);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .social-box:hover {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .footer-bottom {
+            max-width: 1250px;
+            margin: 40px auto 0;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-sub);
+            font-size: 0.85rem;
+        }
+
+        .mono {
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Bar dengan Tombol Bahasa IN/EN & Mode Tema (Hanya Simbol) -->
+    <div class="top-bar">
+        <div class="top-bar-container">
+            <span id="topBarHelp">Nusacoin.org membutuhkan bantuan anda!</span>
+            
+            <div class="top-bar-controls">
+                <!-- Pilihan Bahasa IN / EN -->
+                <div class="lang-switch">
+                    <button class="lang-btn active" id="btnIN" onclick="switchLanguage('id')">IN</button>
+                    <button class="lang-btn" id="btnEN" onclick="switchLanguage('en')">EN</button>
+                </div>
+
+                <!-- Tombol Tema (Hanya Simbol Ikon) -->
+                <button class="theme-toggle-btn" id="themeToggle" onclick="toggleTheme()" aria-label="Ganti Tema" title="Ganti Tema">
+                    <i class="fa-solid fa-moon" id="themeIcon"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Intro Highlight Banner -->
+        <div class="intro-banner" id="introBanner">
+            Nusacoin seringkali dianggap sebagai jaringan pembayaran anonim. Padahal sesungguhnya, Nusacoin bisa jadi merupakan jaringan pembayaran yang paling transparan di dunia. Di saat bersamaan, Nusacoin juga dapat memberikan tingkat keamanan privasi yang bisa diterima, bila digunakan dengan benar. Mohon selalu ingat bahwa melindungi privasi Anda dengan senantiasa melakukan langkah-langkah pengamanan adalah tanggung jawab Anda.
+        </div>
+
+        <!-- Content Sections -->
+        <section class="content-section">
+            <h2 id="titleSec1">Memahami kemampuan Nusacoin untuk ditelusuri</h2>
+            <p id="descSec1">
+                Nusacoin bekerja dengan tingkat transparansi yang belum pernah ada sebelumnya. Semua transaksi Nusacoin bersifat publik, dapat dilacak, dan secara permanen disimpan dalam jaringan Nusacoin. Alamat Nusacoin adalah satu-satunya informasi yang digunakan untuk menentukan di mana nusacoin disimpan dan ke mana dikirimkan. Alamat nusacoin ini dibuat secara pribadi melalui masing-masing wallet pengguna. Namun, setelah alamat tersebut digunakan, mereka menjadi terkait dengan kesejarahan semua transaksi mereka. Siapapun dapat melihat saldo dan semua transaksi pada alamat nusacoin manapun. Karena pengguna biasanya harus menyertakan identitas mereka saat menerima jasa atau barang, alamat Nusacoin tidak bisa sepenuhnya anonim. Karena rantai blok bersifat permanen, penting untuk dicatat bahwa sesuatu yang tidak dapat dilacak saat ini mungkin mudah dilakukan di masa depan. Untuk alasan ini, alamat Nusacoin sebaiknya hanya digunakan sekali dan pengguna harus berhati-hati untuk tidak memberitahukan alamat mereka.
+            </p>
+        </section>
+
+        <section class="content-section">
+            <h2 id="titleSec2">Gunakan alamat baru untuk menerima pembayaran</h2>
+            <p id="descSec2">
+                Untuk melindungi privasi, disarankan menggunakan satu alamat Nusacoin yang baru setiap kali anda menerima pembayaran. Sebagai tambahan, anda bisa menggunakan banyak wallet untuk tujuan yang berbeda-beda. Dengan demikian transaksi-transaksi yang anda lakukan tidak dapat dikorelasikan secara bersamaan. Orang-orang yang mengirimkan anda uang tidak bisa melihat akun Nusacoin lain yang anda miliki serta apa yang anda lakukan dengan akun-akun tersebut. Ini adalah saran yang harus selalu anda ingat.
+            </p>
+        </section>
+
+        <section class="content-section">
+            <h2 id="titleSec3">Berhati-hatilah di ruang publik</h2>
+            <p id="descSec3">
+                Kecuali Anda berniat menerima donasi atau pembayaran publik dengan transparansi penuh, mempublikasikan alamat Nusacoin di ruang publik seperti website atau media sosial tidaklah disarankan demi privasi Anda. Jika Anda memilih demikian, selalu ingat bahwa jika Anda memindahkan uang dari alamat ini ke alamat Anda yang lain, maka publik akan mengetahui jejak sejarah alamat Anda. Sebagai tambahan, Anda juga perlu berhati-hati untuk tidak mempublikasikan informasi mengenai transaksi dan pembelian Anda yang dapat membuat seseorang mampu mengidentifikasi alamat Nusacoin Anda.
+            </p>
+        </section>
+
+        <section class="content-section">
+            <h2 id="titleSec4">Alamat IP Anda dapat tercatat</h2>
+            <p id="descSec4">
+                Karena jaringan Nusacoin adalah jaringan peer-to-peer, ada kemungkinan untuk mendengarkan siaran transaksi dan alamat IP mereka. Klien asli menyiarkan semua transaksi pengguna seperti transaksi mereka sendiri. Ini artinya sulit untuk menemukan sumber dari transaksi tertentu dan bisa saja salah menebak jaringan Nusacoin tertentu sebagai sumber transaksi, padahal bukan. Anda perlu mempertimbangkan untuk menyembunyikan alamat IP komputer Anda dengan alat seperti Tor sehingga tidak dapat tercatat.
+            </p>
+        </section>
+
+        <section class="content-section">
+            <h2 id="titleSec5">Keterbatasan layanan pencampuran</h2>
+            <p id="descSec5">
+                Beberapa layanan online yang disebut layanan pencampuran menawarkan untuk mencampur traceability antara pengguna dengan menerima dan mengirim kembali jumlah uang yang sama menggunakan alamat Nusacoin independen. Penting untuk dicatat bahwa keabsahan penggunaan layanan tersebut mungkin berbeda-beda dan dikenakan aturan yang berbeda di setiap negara. Layanan ini juga mengharuskan Anda untuk mempercayai individu yang menjalankan layanan tersebut, bahwa mereka tidak akan menghilangkan atau mencuri uang Anda dan tidak mencatat permintaan Anda. Meskipun layanan pencampuran dapat mematahkan traceability untuk transaksi dalam jumlah kecil, namun semakin sulit untuk melakukan hal yang sama pada transaksi yang berjumlah lebih besar.
+            </p>
+        </section>
+
+        <section class="content-section">
+            <h2 id="titleSec6">Pengembangan di masa depan</h2>
+            <p id="descSec6">
+                Banyak pengembangan di masa mendatang diharapkan dapat meningkatkan privasi. Contohnya, beberapa upaya tengah dilakukan adalah API untuk pesan pembayaran agar dapat menghindari pencemaran banyak alamat nusacoin secara bersamaan saat melakukan satu pembayaran. Alamat Nusacoin Core yang dapat berubah-ubah mungkin dapat diimplementasikan pada wallet lain nantinya. Grafik antarmuka pengguna mungkin akan ditingkatkan untuk menyediakan fitur permintaan pembayaran yang ramah pengguna, serta mencegah penggunaan alamat nusacoin yang pernah digunakan sebelumnya. Berbagai penelitian juga tengah dilakukan untuk mengembangkan fitur-fitur privasi yang potensial untuk diperpanjang, seperti kemampuan untuk menggabungkan transaksi beberapa pengguna secara acak secara bersamaan.
+            </p>
+        </section>
+
+        <!-- Tombol Akses Download -->
+        <div class="wrapper-tombol">
+            <a class="btn-nusacoin" id="btnDownload" href="https://github.com/TaobotX11/nusacoin/releases/download/0.26.60/nusacoin-0.26.60-win64-setup.exe">
+                Nusacoin Core Win
+            </a>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <h2>Nusacoin Network</h2>
+                <p id="footerDesc">Blockchain milik rakyat dengan prinsip crypto yang adil. Terdesentralisasi, aman, dan dapat diakses semua orang.</p>
+                <div class="social-icons">
+                    <a href="https://x.com/Nusacoin_chain" target="_blank" class="social-box" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="https://discord.gg/NcKKZFBzJ" target="_blank" class="social-box" aria-label="Discord"><i class="fab fa-discord"></i></a>
+                    <a href="https://telegram.me/NusacoinX11" target="_blank" class="social-box" aria-label="Telegram"><i class="fab fa-telegram-plane"></i></a>
+                    <a href="https://www.reddit.com/r/Nusacoin" target="_blank" class="social-box" aria-label="Reddit"><i class="fab fa-reddit-alien"></i></a>
+                    <a href="https://github.com/TaobotX11/nusacoin" target="_blank" class="social-box" aria-label="GitHub"><i class="fab fa-github"></i></a>
+                </div>
+            </div>
+
+            <div class="footer-col">
+                <h3 id="footerQuickTitle">Tautan Cepat</h3>
+                <ul>
+                    <li><a href="https://explorer.nusacoin.org" target="_blank">Explorer</a></li>
+                    <li><a href="https://dompet.nusacoin.org" target="_blank">Nusacoin Web Wallet</a></li>
+                    <li><a href="https://github.com/TaobotX11/nusacoin" target="_blank">Nusacoin Core</a></li>
+                    <li><a href="https://green.nusacoin.org" target="_blank">Nusacoin Green Wallet</a></li>
+                    <li><a href="/Pages/Visi-Misi.html" target="_blank">Roadmap</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h3 id="footerResTitle">Sumber Daya</h3>
+                <ul>
+                    <li><a href="https://paper.nusacoin.org" target="_blank">Paper Wallet</a></li>
+                    <li><a href="https://pool.nusacoin.org" target="_blank">Mining Pool</a></li>
+                    <li><a href="https://ijol.nusacoin.org" target="_blank">Ijol Nusacoin (P2P)</a></li>
+                    <li><a href="https://t.me/rdnmesin_bot" target="_blank">Nusacard RDN Bot</a></li>
+                    <li><a href="/Pages/Kosa-Kata.html" target="_blank" id="menuGlossary">Kosa Kata</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h3 id="footerDocsTitle">Dokumen &amp; Keamanan</h3>
+                <ul>
+                    <li><a href="/Pages/Whitepaper_Nusacoin_in.pdf">Whitepaper IN</a></li>
+                    <li><a href="/Pages/Whitepaper_Nusacoin_en.pdf">Whitepaper EN</a></li>
+                    <li><a href="/Pages/Amankan-Wallet.html" target="_blank" id="menuSecure">Amankan Wallet</a></li>
+                    <li><a href="/Pages/Lindungi-Privasi-Anda.html" target="_blank" id="menuPrivacy">Lindungi Privasi</a></li>
+                    <li><a href="/Pages/FAQ.html" target="_blank">FAQ</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <span id="footerCopyright">© 2026 Nusacoin Project. Dibangun untuk desentralisasi.</span>
+            <span class="mono"> · NUX / X11</span>
+        </div>
+    </footer>
+
+    <!-- Script Tema & Sistem Bahasa (IN/EN) -->
+    <script>
+        // Data Kamus Bahasa
+        const translations = {
+            id: {
+                topBarHelp: "Nusacoin.org membutuhkan bantuan anda!",
+                introBanner: "Nusacoin seringkali dianggap sebagai jaringan pembayaran anonim. Padahal sesungguhnya, Nusacoin bisa jadi merupakan jaringan pembayaran yang paling transparan di dunia. Di saat bersamaan, Nusacoin juga dapat memberikan tingkat keamanan privasi yang bisa diterima, bila digunakan dengan benar. Mohon selalu ingat bahwa melindungi privasi Anda dengan senantiasa melakukan langkah-langkah pengamanan adalah tanggung jawab Anda.",
+                titleSec1: "Memahami kemampuan Nusacoin untuk ditelusuri",
+                descSec1: "Nusacoin bekerja dengan tingkat transparansi yang belum pernah ada sebelumnya. Semua transaksi Nusacoin bersifat publik, dapat dilacak, dan secara permanen disimpan dalam jaringan Nusacoin. Alamat Nusacoin adalah satu-satunya informasi yang digunakan untuk menentukan di mana nusacoin disimpan dan ke mana dikirimkan. Alamat nusacoin ini dibuat secara pribadi melalui masing-masing wallet pengguna. Namun, setelah alamat tersebut digunakan, mereka menjadi terkait dengan kesejarahan semua transaksi mereka. Siapapun dapat melihat saldo dan semua transaksi pada alamat nusacoin manapun. Karena pengguna biasanya harus menyertakan identitas mereka saat menerima jasa atau barang, alamat Nusacoin tidak bisa sepenuhnya anonim. Karena rantai blok bersifat permanen, penting untuk dicatat bahwa sesuatu yang tidak dapat dilacak saat ini mungkin mudah dilakukan di masa depan. Untuk alasan ini, alamat Nusacoin sebaiknya hanya digunakan sekali dan pengguna harus berhati-hati untuk tidak memberitahukan alamat mereka.",
+                titleSec2: "Gunakan alamat baru untuk menerima pembayaran",
+                descSec2: "Untuk melindungi privasi, disarankan menggunakan satu alamat Nusacoin yang baru setiap kali anda menerima pembayaran. Sebagai tambahan, anda bisa menggunakan banyak wallet untuk tujuan yang berbeda-beda. Dengan demikian transaksi-transaksi yang anda lakukan tidak dapat dikorelasikan secara bersamaan. Orang-orang yang mengirimkan anda uang tidak bisa melihat akun Nusacoin lain yang anda miliki serta apa yang anda lakukan dengan akun-akun tersebut. Ini adalah saran yang harus selalu anda ingat.",
+                titleSec3: "Berhati-hatilah di ruang publik",
+                descSec3: "Kecuali Anda berniat menerima donasi atau pembayaran publik dengan transparansi penuh, mempublikasikan alamat Nusacoin di ruang publik seperti website atau media sosial tidaklah disarankan demi privasi Anda. Jika Anda memilih demikian, selalu ingat bahwa jika Anda memindahkan uang dari alamat ini ke alamat Anda yang lain, maka publik akan mengetahui jejak sejarah alamat Anda. Sebagai tambahan, Anda juga perlu berhati-hati untuk tidak mempublikasikan informasi mengenai transaksi dan pembelian Anda yang dapat membuat seseorang mampu mengidentifikasi alamat Nusacoin Anda.",
+                titleSec4: "Alamat IP Anda dapat tercatat",
+                descSec4: "Karena jaringan Nusacoin adalah jaringan peer-to-peer, ada kemungkinan untuk mendengarkan siaran transaksi dan alamat IP mereka. Klien asli menyiarkan semua transaksi pengguna seperti transaksi mereka sendiri. Ini artinya sulit untuk menemukan sumber dari transaksi tertentu dan bisa saja salah menebak jaringan Nusacoin tertentu sebagai sumber transaksi, padahal bukan. Anda perlu mempertimbangkan untuk menyembunyikan alamat IP komputer Anda dengan alat seperti Tor sehingga tidak dapat tercatat.",
+                titleSec5: "Keterbatasan layanan pencampuran",
+                descSec5: "Beberapa layanan online yang disebut layanan pencampuran menawarkan untuk mencampur traceability antara pengguna dengan menerima dan mengirim kembali jumlah uang yang sama menggunakan alamat Nusacoin independen. Penting untuk dicatat bahwa keabsahan penggunaan layanan tersebut mungkin berbeda-beda dan dikenakan aturan yang berbeda di setiap negara. Layanan ini juga mengharuskan Anda untuk mempercayai individu yang menjalankan layanan tersebut, bahwa mereka tidak akan menghilangkan atau mencuri uang Anda dan tidak mencatat permintaan Anda. Meskipun layanan pencampuran dapat mematahkan traceability untuk transaksi dalam jumlah kecil, namun semakin sulit untuk melakukan hal yang sama pada transaksi yang berjumlah lebih besar.",
+                titleSec6: "Pengembangan di masa depan",
+                descSec6: "Banyak pengembangan di masa mendatang diharapkan dapat meningkatkan privasi. Contohnya, beberapa upaya tengah dilakukan adalah API untuk pesan pembayaran agar dapat menghindari pencemaran banyak alamat nusacoin secara bersamaan saat melakukan satu pembayaran. Alamat Nusacoin Core yang dapat berubah-ubah mungkin dapat diimplementasikan pada wallet lain nantinya. Grafik antarmuka pengguna mungkin akan ditingkatkan untuk menyediakan fitur permintaan pembayaran yang ramah pengguna, serta mencegah penggunaan alamat nusacoin yang pernah digunakan sebelumnya. Berbagai penelitian juga tengah dilakukan untuk mengembangkan fitur-fitur privasi yang potensial untuk diperpanjang, seperti kemampuan untuk menggabungkan transaksi beberapa pengguna secara acak secara bersamaan.",
+                btnDownload: "Nusacoin Core Win",
+                footerDesc: "Blockchain milik rakyat dengan prinsip crypto yang adil. Terdesentralisasi, aman, dan dapat diakses semua orang.",
+                footerQuickTitle: "Tautan Cepat",
+                footerResTitle: "Sumber Daya",
+                footerDocsTitle: "Dokumen & Keamanan",
+                menuGlossary: "Kosa Kata",
+                menuSecure: "Amankan Wallet",
+                menuPrivacy: "Lindungi Privasi",
+                footerCopyright: "© 2026 Nusacoin Project. Dibangun untuk desentralisasi."
+            },
+            en: {
+                topBarHelp: "Nusacoin.org needs your help!",
+                introBanner: "Nusacoin is often thought to be an anonymous payment network. But in reality, Nusacoin may be the most transparent payment network in the world. At the same time, Nusacoin can provide acceptable levels of privacy protection when used correctly. Always remember that protecting your privacy through ongoing security practices is your responsibility.",
+                titleSec1: "Understanding Nusacoin's traceability",
+                descSec1: "Nusacoin works with an unprecedented level of transparency. All Nusacoin transactions are public, traceable, and permanently stored in the Nusacoin network. Nusacoin addresses are the only information used to determine where nusacoins are stored and where they are sent. These addresses are created privately within each user's wallet. However, once addresses are used, they become associated with the history of all transactions performed with them. Anyone can see the balance and transactions of any Nusacoin address. Since users usually have to reveal their identity when receiving goods or services, Nusacoin addresses cannot remain fully anonymous. Because the blockchain is permanent, it is important to note that something untraceable today may become easily traceable in the future. For this reason, Nusacoin addresses should preferably be used only once.",
+                titleSec2: "Use new addresses to receive payments",
+                descSec2: "To protect your privacy, you should use a new Nusacoin address every time you receive a payment. Additionally, you can use multiple wallets for different purposes. That way, your transactions cannot be correlated together. People who send you money cannot see your other Nusacoin accounts or what you do with them. This is an important rule to keep in mind.",
+                titleSec3: "Be cautious in public spaces",
+                descSec3: "Unless you intend to receive donations or public payments with full transparency, publishing a Nusacoin address in public spaces like websites or social media is not recommended for your privacy. If you choose to do so, remember that moving funds from this address to your other addresses will make your history public. Furthermore, be careful not to publish information about your transactions that could allow someone to identify your Nusacoin address.",
+                titleSec4: "Your IP address can be logged",
+                descSec4: "Because the Nusacoin network is peer-to-peer, transaction broadcasts and their IP addresses can potentially be listened to. Full nodes broadcast transactions as if they were their own. This makes it challenging to pinpoint the exact source of a transaction. You should consider hiding your computer's IP address using tools like Tor to prevent logging.",
+                titleSec5: "Limitations of mixing services",
+                descSec5: "Some online services known as mixing services offer to break traceability between users by receiving and sending back the same amount of money using independent Nusacoin addresses. Note that the legality of using such services varies and is subject to laws in each country. These services also require trusting the service operator not to steal your funds or log your requests. While mixing services can break traceability for small amounts, doing so for larger amounts becomes increasingly difficult.",
+                titleSec6: "Future developments",
+                descSec6: "Future developments are expected to further improve privacy. For instance, efforts are underway on payment request APIs to avoid address reuse during single transactions. Flexible address mechanisms in Nusacoin Core may be adopted by other wallets over time. User interface improvements aim to provide user-friendly payment requests and prevent address reuse.",
+                btnDownload: "Nusacoin Core Win",
+                footerDesc: "The people's blockchain built on fair crypto principles. Decentralized, secure, and accessible to everyone.",
+                footerQuickTitle: "Quick Links",
+                footerResTitle: "Resources",
+                footerDocsTitle: "Docs & Security",
+                menuGlossary: "Glossary",
+                menuSecure: "Secure Wallet",
+                menuPrivacy: "Protect Privacy",
+                footerCopyright: "© 2026 Nusacoin Project. Built for decentralization."
+            }
+        };
+
+        // Fungsi Ganti Bahasa
+        function switchLanguage(lang) {
+            document.getElementById('btnIN').classList.toggle('active', lang === 'id');
+            document.getElementById('btnEN').classList.toggle('active', lang === 'en');
+
+            const t = translations[lang];
+            for (let id in t) {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.textContent = t[id];
+                }
+            }
+        }
+
+        // Fungsi Ganti Tema (Hanya Simbol)
+        function toggleTheme() {
+            const body = document.body;
+            const icon = document.getElementById('themeIcon');
+            
+            body.classList.toggle('dark-mode');
+            
+            if (body.classList.contains('dark-mode')) {
+                icon.className = 'fa-solid fa-sun';
+            } else {
+                icon.className = 'fa-solid fa-moon';
+            }
+        }
+    </script>
+</body>
+</html>

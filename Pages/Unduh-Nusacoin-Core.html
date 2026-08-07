@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nusacoin (NUX) - Jaringan Pembayaran Inovatif</title>
+    
+    <!-- Google Fonts & FontAwesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Titillium+Web:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- CSS Styling -->
+    <style>
+        /* Reset & Blogger Navbar Fix */
+        #navbar-iframe, .navbar, .navbar-ghost { 
+            display: none !important; 
+            height: 0 !important; 
+            visibility: hidden !important; 
+        }
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+
+        /* Variables Tema Light & Dark */
+        :root {
+            --primary: #27ae60;
+            --primary-dark: #1e8449;
+            --bg-body: #ffffff;
+            --bg-card: #ffffff;
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --bg-light: #f8fafc;
+            --border: #e2e8f0;
+            --title-green: #274e13;
+            --sub-green: #38761d;
+        }
+
+        /* Class khusus untuk Mode Gelap */
+        body.dark-mode {
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --bg-light: #1e293b;
+            --border: #334155;
+            --title-green: #4ade80;
+            --sub-green: #22c55e;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            color: var(--text-main); 
+            line-height: 1.6; 
+            overflow-x: hidden;
+            background-color: var(--bg-body);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background-color: var(--primary);
+            color: white;
+            padding: 8px 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .top-bar-container {
+            max-width: 1250px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .top-bar-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Tombol Bahasa */
+        .lang-switch {
+            display: flex;
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 4px;
+            padding: 2px;
+        }
+
+        .lang-btn {
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            padding: 2px 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: all 0.2s;
+        }
+
+        .lang-btn.active, .lang-btn:hover {
+            background: #ffffff;
+            color: var(--primary);
+        }
+
+        /* Tombol Tema (Hanya Simbol/Ikon) */
+        .theme-toggle-btn {
+            background: rgba(0, 0, 0, 0.15);
+            border: none;
+            color: #ffffff;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        .theme-toggle-btn:hover {
+            background: rgba(0, 0, 0, 0.3);
+            transform: scale(1.08);
+        }
+
+        /* Navigation Header */
+        header {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1250px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            height: 75px;
+            justify-content: space-between;
+            gap: 30px;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: var(--text-main);
+            font-weight: 800;
+            font-size: 1.4rem;
+            flex-shrink: 0;
+        }
+        .logo-area img { height: 35px; margin-right: 10px; }
+        .logo-area span { color: var(--primary); }
+
+        /* Main Content */
+        main {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+            text-align: center;
+        }
+
+        .hero-title {
+            font-family: 'Verdana', sans-serif;
+            color: var(--title-green);
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+
+        .hero-version {
+            color: var(--sub-green);
+            font-family: 'Verdana', sans-serif;
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+        }
+
+        .hero-image-container {
+            margin: 20px 0;
+        }
+
+        .hero-image-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        .download-section {
+            text-align: justify;
+            margin-top: 30px;
+        }
+
+        .download-title {
+            font-family: 'Helvetica', sans-serif;
+            font-size: 1.25rem;
+            color: var(--text-main);
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .download-text {
+            font-family: 'Helvetica', sans-serif;
+            color: var(--text-sub);
+            line-height: 1.8;
+            margin-bottom: 20px;
+            font-size: 1rem;
+        }
+
+        .download-text a {
+            color: #3490e6;
+            text-decoration: none;
+        }
+
+        .download-text a:hover {
+            text-decoration: underline;
+        }
+
+        /* Button Wrapper */
+        .wrapper-tombol {
+            text-align: center;
+            margin-top: 32px;
+            width: 100%;
+        }
+
+        .btn-nusacoin {
+            display: inline-block;
+            padding: 14px 28px;
+            background-color: #28a745;
+            color: #ffffff !important;
+            text-decoration: none;
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            font-size: 16px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-nusacoin:hover {
+            background-color: #218838;
+            color: #ffffff !important;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--bg-light);
+            border-top: 1px solid var(--border);
+            padding: 60px 20px 20px;
+            margin-top: 60px;
+        }
+
+        .footer-grid {
+            max-width: 1250px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 40px;
+        }
+
+        .footer-brand h2 {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .footer-brand p {
+            color: var(--text-sub);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .footer-col h3 {
+            font-size: 1.1rem;
+            color: var(--text-main);
+            margin-bottom: 15px;
+        }
+
+        .footer-col ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .footer-col ul li {
+            margin-bottom: 10px;
+        }
+
+        .footer-col ul li a {
+            color: var(--text-sub);
+            text-decoration: none;
+            transition: color 0.2s;
+            font-size: 0.95rem;
+        }
+
+        .footer-col ul li a:hover {
+            color: var(--primary);
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .social-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-main);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .social-box:hover {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .footer-bottom {
+            max-width: 1250px;
+            margin: 40px auto 0;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-sub);
+            font-size: 0.85rem;
+        }
+
+        .mono {
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Bar dengan Pilihan Bahasa & Mode Tema (Hanya Simbol) -->
+    <div class="top-bar">
+        <div class="top-bar-container">
+            <span>Nusacoin.org membutuhkan bantuan anda!</span>
+            
+            <div class="top-bar-controls">
+                <!-- Pilihan Bahasa IN/EN -->
+                <div class="lang-switch">
+                    <button class="lang-btn active" onclick="switchLanguage('id')">IN</button>
+                    <button class="lang-btn" onclick="switchLanguage('en')">EN</button>
+                </div>
+
+                <!-- Tombol Tema (Hanya Simbol Ikon) -->
+                <button class="theme-toggle-btn" id="themeToggle" onclick="toggleTheme()" aria-label="Ganti Tema" title="Ganti Mode Tema">
+                    <i class="fa-solid fa-moon" id="themeIcon"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main>
+        <h2 class="hero-title">Unduh Nusacoin Core</h2>
+        <div class="hero-version">Versi Terbaru : 0.26.60</div>
+
+        <div class="hero-image-container">
+            <a href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgGyjN7Ib9oCv4R7BU0gPgZpqwmTN_nA4xBbpuHvKS7x2Z5sijzsgmT9Q9vZyI_g0FT1zAiHtFGt_bVwgK-PVDkvOfiIKshmc8QbYsrpabi8jkzqNQnTP4CFCfVqExV1xx_QP6a5MDbdpLtnI8j9oFGvQRcGUdMvOkbhvI86hRSJ_nfaON2NmgL5o3cbfw/s1152/Gemini_Generated_Image_dbk4v8dbk4v8dbk4.png">
+                <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgGyjN7Ib9oCv4R7BU0gPgZpqwmTN_nA4xBbpuHvKS7x2Z5sijzsgmT9Q9vZyI_g0FT1zAiHtFGt_bVwgK-PVDkvOfiIKshmc8QbYsrpabi8jkzqNQnTP4CFCfVqExV1xx_QP6a5MDbdpLtnI8j9oFGvQRcGUdMvOkbhvI86hRSJ_nfaON2NmgL5o3cbfw/s16000/Gemini_Generated_Image_dbk4v8dbk4v8dbk4.png" alt="Nusacoin Core Banner" />
+            </a>
+        </div>
+
+        <section class="download-section">
+            <h3 class="download-title">Periksa bandwidth dan sisa ruang penyimpanan anda</h3>
+            <p class="download-text">
+                Sinkronisasi awal Nusacoin Core dalam waktu singkat. Sebaiknya Anda memastikan bahwa Anda memiliki bandwidth dan penyimpanan yang cukup untuk ukuran rantai-blok (minimal 50mb). Jika Anda memiliki koneksi Internet yang bagus, Anda dapat memperkuat jaringan dengan menjalankan Nusacoin Core dan membuka port tcp 28573. Silahkan baca panduan node lengkap untuk keterangan lebih lanjut.
+            </p>
+            <p class="download-text">
+                Nusacoin Core adalah proyek yang digerakkan oleh komunitas perangkat lunak gratis, dirilis di bawah <a href="http://opensource.org/licenses/mit-license.php" target="_blank" rel="noopener noreferrer">lisensi MIT</a>.
+            </p>
+        </section>
+
+        <div class="wrapper-tombol">
+            <a class="btn-nusacoin" href="https://github.com/TaobotX11/nusacoin/releases/download/0.26.60/nusacoin-0.26.60-win64-setup.exe">
+                Nusacoin Core Win
+            </a>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <h2>Nusacoin Network</h2>
+                <p data-i18n="footer.desc">Blockchain milik rakyat dengan prinsip crypto yang adil. Terdesentralisasi, aman, dan dapat diakses semua orang.</p>
+                <div class="social-icons">
+                    <a href="https://x.com/Nusacoin_chain" target="_blank" class="social-box" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="https://discord.gg/NcKKZFBzJ" target="_blank" class="social-box" aria-label="Discord"><i class="fab fa-discord"></i></a>
+                    <a href="https://telegram.me/NusacoinX11" target="_blank" class="social-box" aria-label="Telegram"><i class="fab fa-telegram-plane"></i></a>
+                    <a href="https://www.reddit.com/r/Nusacoin" target="_blank" class="social-box" aria-label="Reddit"><i class="fab fa-reddit-alien"></i></a>
+                    <a href="https://github.com/TaobotX11/nusacoin" target="_blank" class="social-box" aria-label="GitHub"><i class="fab fa-github"></i></a>
+                </div>
+            </div>
+
+            <div class="footer-col">
+                <h3 data-i18n="footer.quick">Tautan Cepat</h3>
+                <ul>
+                    <li><a href="https://explorer.nusacoin.org" target="_blank" data-i18n="res.explorer">Explorer</a></li>
+                    <li><a href="https://dompet.nusacoin.org" target="_blank" data-i18n="res.webwallet">Nusacoin Web Wallet</a></li>
+                    <li><a href="https://github.com/TaobotX11/nusacoin" target="_blank" data-i18n="res.core">Nusacoin Core</a></li>
+                    <li><a href="https://green.nusacoin.org" target="_blank" data-i18n="res.greenwallet">Nusacoin Green Wallet</a></li>
+                    <li><a href="/Pages/Visi-Misi.html" target="_blank" data-i18n="quick.roadmap2">Roadmap</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h3 data-i18n="footer.res">Sumber Daya</h3>
+                <ul>
+                    <li><a href="https://paper.nusacoin.org" target="_blank" data-i18n="res.paperwallet">Paper Wallet</a></li>
+                    <li><a href="https://pool.nusacoin.org" target="_blank" data-i18n="footer.pool">Mining Pool</a></li>
+                    <li><a href="https://ijol.nusacoin.org" target="_blank" data-i18n="footer.ijol">Ijol Nusacoin (P2P)</a></li>
+                    <li><a href="https://t.me/rdnmesin_bot" target="_blank" data-i18n="footer.rdn">Nusacard RDN Bot</a></li>
+                    <li><a href="/Pages/Kosa-Kata.html" target="_blank" data-i18n="res.glossary">Kosa Kata</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h3 data-i18n="footer.docs">Dokumen &amp; Keamanan</h3>
+                <ul>
+                    <li><a href="/Pages/Whitepaper_Nusacoin_in.pdf">Whitepaper IN</a></li>
+                    <li><a href="/Pages/Whitepaper_Nusacoin_en.pdf">Whitepaper EN</a></li>
+                    <li><a href="/Pages/Amankan-Wallet.html" target="_blank" data-i18n="footer.secure">Amankan Wallet</a></li>
+                    <li><a href="/Pages/Lindungi-Privasi-Anda.html" target="_blank" data-i18n="footer.privacy">Lindungi Privasi</a></li>
+                    <li><a href="/Pages/FAQ.html" target="_blank">FAQ</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <span data-i18n="footer.copyright">© 2026 Nusacoin Project. Dibangun untuk desentralisasi.</span>
+            <span class="mono"> · NUX / X11</span>
+        </div>
+    </footer>
+
+    <!-- Script Tema Switcher (Simbol Sahaja) & Bahasa -->
+    <script>
+        function toggleTheme() {
+            const body = document.body;
+            const icon = document.getElementById('themeIcon');
+            
+            body.classList.toggle('dark-mode');
+            
+            if (body.classList.contains('dark-mode')) {
+                icon.className = 'fa-solid fa-sun';
+            } else {
+                icon.className = 'fa-solid fa-moon';
+            }
+        }
+
+        function switchLanguage(lang) {
+            const buttons = document.querySelectorAll('.lang-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            if (lang === 'id') {
+                buttons[0].classList.add('active');
+            } else {
+                buttons[1].classList.add('active');
+            }
+        }
+    </script>
+</body>
+</html>

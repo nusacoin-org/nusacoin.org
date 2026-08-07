@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nusacoin (NUX) - Pertanyaan yang Sering Diajukan (FAQ)</title>
+    
+    <!-- Google Fonts & FontAwesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Titillium+Web:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- CSS Styling -->
+    <style>
+        /* Hapus Navbar Blogger/Ghost */
+        #navbar-iframe, .navbar, .navbar-ghost { 
+            display: none !important; 
+            height: 0 !important; 
+            visibility: hidden !important; 
+        }
+
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+
+        /* Variables Tema Light & Dark */
+        :root {
+            --primary: #27ae60;
+            --primary-dark: #1e8449;
+            --bg-body: #ffffff;
+            --bg-card: #ffffff;
+            --bg-hero: #006400;
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --bg-light: #f8fafc;
+            --border: #e2e8f0;
+            --title-green: #27ae60;
+            --link-green: #27ae60;
+            --highlight-bg: #d9ead3;
+            --code-bg: #f1f5f9;
+        }
+
+        body.dark-mode {
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --bg-hero: #093809;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --bg-light: #1e293b;
+            --border: #334155;
+            --title-green: #4ade80;
+            --link-green: #4ade80;
+            --highlight-bg: #14532d;
+            --code-bg: #0f172a;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            color: var(--text-main); 
+            line-height: 1.6; 
+            overflow-x: hidden;
+            background-color: var(--bg-body);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background-color: var(--primary-dark);
+            color: white;
+            padding: 8px 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .top-bar-container {
+            max-width: 1250px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .top-bar-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Lang Switcher */
+        .lang-switch {
+            display: flex;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+            padding: 2px;
+        }
+
+        .lang-btn {
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.8);
+            padding: 2px 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: all 0.2s;
+        }
+
+        .lang-btn.active, .lang-btn:hover {
+            background: #ffffff;
+            color: var(--primary-dark);
+        }
+
+        /* Theme Toggle Button (Icon Only) */
+        .theme-toggle-btn {
+            background: rgba(0, 0, 0, 0.2);
+            border: none;
+            color: #ffffff;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        .theme-toggle-btn:hover {
+            background: rgba(0, 0, 0, 0.4);
+            transform: scale(1.08);
+        }
+
+        /* Hero Header */
+        .hero-container {
+            background-color: var(--bg-hero);
+            width: 100%;
+            height: 280px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            color: #ffffff;
+            padding: 0 20px;
+            overflow: hidden;
+        }
+
+        .hero-container h1 {
+            color: #ffffff !important;
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 10;
+            font-family: 'Titillium Web', sans-serif;
+        }
+
+        .hero-container p {
+            color: #cbd5e1;
+            font-size: 1.05rem;
+            max-width: 650px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .bg-lines {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: 1;
+        }
+
+        .wireframe-svg {
+            position: absolute;
+            bottom: 40px; left: 0; width: 100%; z-index: 2; opacity: 0.3;
+        }
+
+        .jagged-bottom {
+            position: absolute;
+            bottom: -1px; left: 0; width: 100%; height: 50px;
+            background-color: var(--bg-body);
+            clip-path: polygon(0% 70%, 5% 60%, 10% 80%, 15% 55%, 20% 85%, 25% 60%, 30% 80%, 35% 50%, 40% 90%, 45% 60%, 50% 80%, 55% 55%, 60% 85%, 65% 60%, 70% 80%, 75% 50%, 80% 90%, 85% 60%, 90% 80%, 95% 55%, 100% 70%, 100% 100%, 0% 100%);
+            z-index: 5;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Main Content Structure */
+        main {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .faq-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 25px 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            transition: transform 0.2s, background-color 0.3s, border-color 0.3s;
+        }
+
+        .faq-section:hover {
+            transform: translateY(-2px);
+        }
+
+        .faq-title {
+            font-family: 'Titillium Web', sans-serif;
+            font-size: 1.35rem;
+            color: var(--title-green);
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+
+        .faq-category-header {
+            font-family: 'Titillium Web', sans-serif;
+            font-size: 1.25rem;
+            color: var(--title-green);
+            background: var(--highlight-bg);
+            padding: 8px 15px;
+            border-radius: 6px;
+            margin: 30px 0 15px;
+            font-weight: 700;
+        }
+
+        p {
+            font-size: 0.98rem;
+            color: var(--text-main);
+            margin-bottom: 12px;
+            text-align: justify;
+        }
+
+        ul, ol {
+            margin: 10px 0 15px 25px;
+            color: var(--text-main);
+        }
+
+        li {
+            margin-bottom: 8px;
+            text-align: justify;
+        }
+
+        code {
+            background-color: var(--code-bg);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9em;
+            color: var(--title-green);
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 25px 0;
+        }
+
+        /* AI Link Button */
+        .ai-btn-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .ai-btn {
+            display: inline-block;
+            background-color: var(--primary);
+            color: white !important;
+            padding: 10px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 700;
+            transition: background 0.2s;
+        }
+
+        .ai-btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        blockquote {
+            background: var(--bg-light);
+            border-left: 4px solid var(--primary);
+            padding: 15px 20px;
+            margin: 15px 0;
+            font-style: italic;
+            border-radius: 0 8px 8px 0;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--bg-light);
+            border-top: 1px solid var(--border);
+            padding: 60px 20px 20px;
+            margin-top: 60px;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .footer-grid {
+            max-width: 1250px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 40px;
+        }
+
+        .footer-brand h2 {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .footer-brand p {
+            color: var(--text-sub);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .footer-col h3 {
+            font-size: 1.1rem;
+            color: var(--text-main);
+            margin-bottom: 15px;
+        }
+
+        .footer-col ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .footer-col ul li {
+            margin-bottom: 10px;
+        }
+
+        .footer-col ul li a {
+            color: var(--text-sub);
+            text-decoration: none;
+            transition: color 0.2s;
+            font-size: 0.95rem;
+        }
+
+        .footer-col ul li a:hover {
+            color: var(--primary);
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .social-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-main);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .social-box:hover {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .footer-bottom {
+            max-width: 1250px;
+            margin: 40px auto 0;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-sub);
+            font-size: 0.85rem;
+        }
+
+        .mono {
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Bar dengan Saklar Bahasa & Tema Simbol -->
+    <div class="top-bar">
+        <div class="top-bar-container">
+            <span id="topBarHelp">Nusacoin.org membutuhkan bantuan anda!</span>
+            
+            <div class="top-bar-controls">
+                <!-- Pilihan Bahasa IN / EN -->
+                <div class="lang-switch">
+                    <button class="lang-btn active" id="btnIN" onclick="switchLanguage('id')">IN</button>
+                    <button class="lang-btn" id="btnEN" onclick="switchLanguage('en')">EN</button>
+                </div>
+
+                <!-- Tombol Tema (Simbol Moon/Sun) -->
+                <button class="theme-toggle-btn" id="themeToggle" onclick="toggleTheme()" aria-label="Ganti Tema" title="Ganti Tema">
+                    <i class="fa-solid fa-moon" id="themeIcon"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header Hero -->
+    <header class="hero-container">
+        <div class="bg-lines"></div>
+        <h1 id="heroTitle">Pertanyaan yang Sering Diajukan</h1>
+        <p id="heroSub">Temukan jawaban atas pertanyaan dan mitos yang sering muncul tentang Nusacoin.</p>
+        <svg class="wireframe-svg" preserveAspectRatio="none" viewBox="0 0 1440 100">
+            <path d="M0,80 L200,50 L400,90 L600,30 L800,80 L1000,40 L1200,90 L1440,50" fill="none" stroke-width="1" stroke="rgba(255,255,255,0.2)"></path>
+        </svg>
+        <div class="jagged-bottom"></div>
+    </header>
+
+    <!-- Main Content FAQ -->
+    <main>
+        <!-- Pengenalan & AI Button -->
+        <div class="faq-section">
+            <h2 class="faq-title" id="qIntro">Apa itu Nusacoin (NUX)?</h2>
+            <p id="aIntro">Nusacoin (NUX) adalah aset kripto yang berjalan di <strong>blockchain independen</strong> dengan ekosistem sendiri. NUX dirancang untuk transaksi digital, utilitas aplikasi, dan penggunaan lain dalam jaringan Nusacoin.</p>
+            
+            <div class="ai-btn-container">
+                <a href="https://tanya.nusachain.site/" target="_blank" rel="nofollow" class="ai-btn" id="aiBtn">KLIK AI TANYA NUSACHAIN</a>
+            </div>
+        </div>
+
+        <!-- Transaksi & Teknis -->
+        <div class="faq-section">
+            <h2 class="faq-title" id="secTransTitle">Transaksi & Operational</h2>
+            
+            <h3 class="faq-title" style="font-size: 1.1rem;" id="qConfirm">Mengapa saya harus menunggu konfirmasi?</h3>
+            <p id="aConfirm">Menerima notifikasi pembayaran hampir instan dengan Nusacoin. Namun ada penundaan sebelum jaringan mulai mengonfirmasi transaksi Anda dengan memasukkannya dalam blok. Setiap transaksi butuh antara beberapa detik dan 90 menit, dengan rata-rata 10 menit. 6 konfirmasi sering dianggap aman untuk transaksi bernilai besar.</p>
+            
+            <hr>
+
+            <h3 class="faq-title" style="font-size: 1.1rem;" id="qFee">Berapa biaya transaksinya?</h3>
+            <p id="aFee">Sebagian besar transaksi bisa diproses dengan biaya sangat kecil. Biaya ditentukan oleh atribut seperti ukuran byte dalam transaksi. Menggunakan multisig atau koin dari beberapa transaksi sebelumnya memakan biaya sedikit lebih tinggi dari transaksi biasa.</p>
+
+            <hr>
+
+            <h3 class="faq-title" style="font-size: 1.1rem;" id="qOffline">Apakah yang terjadi jika saya menerima nusacoin saat komputer mati?</h3>
+            <p id="aOffline">Tidak masalah. Nusacoin dicatat pada buku catatan publik (blockchain). Koin akan langsung muncul saat Anda membuka kembali aplikasi wallet Anda.</p>
+
+            <hr>
+
+            <h3 class="faq-title" style="font-size: 1.1rem;" id="qSync">Apa yang dimaksud dengan "sinkronisasi"?</h3>
+            <p id="aSync">Sinkronisasi adalah proses mengunduh dan memverifikasi semua riwayat transaksi pada jaringan Nusacoin untuk menghitung saldo secara akurat pada wallet penuh seperti Nusacoin Core.</p>
+        </div>
+
+        <!-- Tanya Jawab Umum -->
+        <div class="faq-section">
+            <h2 class="faq-title" id="qIndo">Apakah NUX adalah proyek yang berhubungan dengan Indonesia?</h2>
+            <p id="aIndo">Nama Nusacoin terinspirasi dari konsep “Nusantara”. Namun detail mengenai tim pengembang dan lokasi operasional tetap mengacu pada sumber resmi proyek.</p>
+
+            <hr>
+
+            <h2 class="faq-title" id="qChain">Di jaringan blockchain apa NUX berjalan?</h2>
+            <p id="aChain">NUX <strong>berjalan di blockchain miliknya sendiri</strong>, bukan di Ethereum, BNB Chain, atau jaringan lain.</p>
+
+            <hr>
+
+            <h2 class="faq-title" id="qWallet">Wallet apa yang digunakan untuk menyimpan NUX?</h2>
+            <p id="aWallet">NUX menggunakan wallet resmi bernama <strong>Nusa Core</strong> untuk pengiriman, penerimaan, dan manajemen alamat wallet.</p>
+
+            <hr>
+
+            <h2 class="faq-title" id="qAddr">Seperti apa format alamat wallet NUX?</h2>
+            <p id="aAddr">Alamat wallet Nusacoin selalu diawali dengan awalan <code>nu</code>, contoh: <code>nu3k8h2…</code></p>
+
+            <hr>
+
+            <h2 class="faq-title" id="qMining">Apakah NUX bisa di-mining?</h2>
+            <p id="aMining">Ya, NUX dapat di-mining menggunakan <strong>algoritma X11</strong> via mining pool publik maupun private pool.</p>
+
+            <hr>
+
+            <h2 class="faq-title" id="qLegal">Apakah NUX legal di Indonesia?</h2>
+            <p id="aLegal">Regulasi aset kripto di Indonesia diawasi oleh <strong>Bappebti</strong>. Selalu cek daftar aturan dan token resmi Bappebti sebelum bertransaksi.</p>
+        </div>
+
+        <!-- Coin Control Feature -->
+        <div class="faq-section">
+            <h2 class="faq-title" id="qCoinControl">Fitur Coin Control pada Nusacoin Core</h2>
+            <p id="aCoinControl">Fitur Coin Control memberikan pengguna kendali penuh atas UTXO (Unspent Transaction Outputs) yang ingin mereka gunakan saat membuat transaksi. Ini bermanfaat untuk mengatur biaya transaksi (fee), meningkatkan privasi, dan mengelola fragmentasi saldo.</p>
+        </div>
+
+        <!-- Tata Kelola & Perspektif Islam -->
+        <div class="faq-category-header" id="catIslam">Implementasi & Governance Nusachain</div>
+
+        <div class="faq-section">
+            <h2 class="faq-title" id="qIslamLaw">Bagaimana hukum menggunakan teknologi Nusachain dari sudut pandang Fikih?</h2>
+            <p id="aIslamLaw">Fatwa MUI/PBNU mengharamkan kripto jika digunakan sebagai spekulasi (gharar/maysir). Namun, Nusachain yang difungsikan murni sebagai sistem pencatatan digital (buku kas/stempel digital) untuk transparansi dana atau sertifikasi wakaf masuk dalam kaidah <i>Maslahah Mursalah</i> (kemaslahatan umum) tanpa trading spekulatif.</p>
+
+            <hr>
+
+            <h2 class="faq-title" id="qAmanah">Bagaimana teknologi ini menjamin prinsip "Amanah"?</h2>
+            <p id="aAmanah">Sifat blockchain yang <i>immutable</i> (tidak bisa diubah/dihapus) memastikan setiap catatan dana masuk dan keluar tercatat jujur secara objektif tanpa bisa direkayasa oleh pihak IT sekalipun.</p>
+
+            <hr>
+
+            <h2 class="faq-title" id="qSec">Bagaimana jika Private Key Pengurus hilang atau dicuri?</h2>
+            <p id="aSec">Keamanan menggunakan skema <i>Multi-Signature (Multi-sig)</i>. Misalnya butuh 3 dari 5 kunci untuk mencairkan dana, sehingga jika 1 kunci hilang, kunci pengurus lainnya masih bisa memulihkan aset.</p>
+
+            <hr>
+
+            <h2 class="faq-title" id="qDevMotiv">Apa motivasi developer jika tidak menjual koin spekulatif?</h2>
+            <p id="aDevMotiv">Developer bergerak dengan model bisnis jasa (kustomisasi, integrasi sistem, perawatan), filosofi open-source (amal jariyah digital), dan membangun reputasi global.</p>
+
+            <blockquote>
+                <p id="blockQuoteAnalogy">"Pengembang Nusachain ibarat merancang cetak biru jalan tol secara open-source. Keuntungan legal didapat saat organisasi menunjuk mereka secara profesional untuk merawat sistem dan integrasi."</p>
+            </blockquote>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <h2>Nusacoin Network</h2>
+                <p id="footerDesc">Blockchain milik rakyat dengan prinsip crypto yang adil. Terdesentralisasi, aman, dan dapat diakses semua orang.</p>
+                <div class="social-icons">
+                    <a href="https://x.com/Nusacoin_chain" target="_blank" class="social-box" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="https://discord.gg/NcKKZFBzJ" target="_blank" class="social-box" aria-label="Discord"><i class="fab fa-discord"></i></a>
+                    <a href="https://telegram.me/NusacoinX11" target="_blank" class="social-box" aria-label="Telegram"><i class="fab fa-telegram-plane"></i></a>
+                    <a href="https://www.reddit.com/r/Nusacoin" target="_blank" class="social-box" aria-label="Reddit"><i class="fab fa-reddit-alien"></i></a>
+                    <a href="https://github.com/TaobotX11/nusacoin" target="_blank" class="social-box" aria-label="GitHub"><i class="fab fa-github"></i></a>
+                </div>
+            </div>
+
+            <div class="footer-col">
+                <h3 id="footerQuickTitle">Tautan Cepat</h3>
+                <ul>
+                    <li><a href="https://explorer.nusacoin.org" target="_blank">Explorer</a></li>
+                    <li><a href="https://dompet.nusacoin.org" target="_blank">Nusacoin Web Wallet</a></li>
+                    <li><a href="https://github.com/TaobotX11/nusacoin" target="_blank">Nusacoin Core</a></li>
+                    <li><a href="https://green.nusacoin.org" target="_blank">Nusacoin Green Wallet</a></li>
+                    <li><a href="https://nusacoinorg.blogspot.com/p/whitepaper-dan-roadmap-nusa-coin-nux.html" target="_blank">Roadmap</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h3 id="footerResTitle">Sumber Daya</h3>
+                <ul>
+                    <li><a href="https://paper.nusacoin.org" target="_blank">Paper Wallet</a></li>
+                    <li><a href="https://pool.nusacoin.org" target="_blank">Mining Pool</a></li>
+                    <li><a href="https://ijol.nusacoin.org" target="_blank">Ijol Nusacoin (P2P)</a></li>
+                    <li><a href="https://t.me/rdnmesin_bot" target="_blank">Nusacard RDN Bot</a></li>
+                    <li><a href="https://www.nusacoin.org/p/kosa-kata.html" target="_blank" id="menuGlossary">Kosa Kata</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h3 id="footerDocsTitle">Dokumen &amp; Keamanan</h3>
+                <ul>
+                    <li><a href="/Pages/Whitepaper_Nusacoin_in.pdf">Whitepaper IN</a></li>
+                    <li><a href="/Pages/Whitepaper_Nusacoin_en.pdf">Whitepaper EN</a></li>
+                    <li><a href="https://www.nusacoin.org/p/amankan-wallet-anda.html" target="_blank" id="menuSecure">Amankan Wallet</a></li>
+                    <li><a href="https://www.nusacoin.org/p/lindungi-privasi-anda.html" target="_blank" id="menuPrivacy">Lindungi Privasi</a></li>
+                    <li><a href="http://www.nusacoin.org/p/faq.html" target="_blank">FAQ</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <span id="footerCopyright">© 2026 Nusacoin Project. Dibangun untuk desentralisasi.</span>
+            <span class="mono"> · NUX / X11</span>
+        </div>
+    </footer>
+
+    <!-- JavaScript Translasi & Theme Switcher -->
+    <script>
+        const translations = {
+            id: {
+                topBarHelp: "Nusacoin.org membutuhkan bantuan anda!",
+                heroTitle: "Pertanyaan yang Sering Diajukan",
+                heroSub: "Temukan jawaban atas pertanyaan dan mitos yang sering muncul tentang Nusacoin.",
+                qIntro: "Apa itu Nusacoin (NUX)?",
+                aIntro: "Nusacoin (NUX) adalah aset kripto yang berjalan di blockchain independen dengan ekosistem sendiri. NUX dirancang untuk transaksi digital, utilitas aplikasi, dan penggunaan lain dalam jaringan Nusacoin.",
+                aiBtn: "KLIK AI TANYA NUSACHAIN",
+                secTransTitle: "Transaksi & Operasional",
+                qConfirm: "Mengapa saya harus menunggu konfirmasi?",
+                aConfirm: "Menerima notifikasi pembayaran hampir instan dengan Nusacoin. Namun ada penundaan sebelum jaringan mulai mengonfirmasi transaksi Anda dengan memasukkannya dalam blok. Setiap transaksi butuh antara beberapa detik dan 90 menit, dengan rata-rata 10 menit. 6 konfirmasi sering dianggap aman untuk transaksi bernilai besar.",
+                qFee: "Berapa biaya transaksinya?",
+                aFee: "Sebagian besar transaksi bisa diproses dengan biaya sangat kecil. Biaya ditentukan oleh atribut seperti ukuran byte dalam transaksi. Menggunakan multisig atau koin dari beberapa transaksi sebelumnya memakan biaya sedikit lebih tinggi dari transaksi biasa.",
+                qOffline: "Apakah yang terjadi jika saya menerima nusacoin saat komputer mati?",
+                aOffline: "Tidak masalah. Nusacoin dicatat pada buku catatan publik (blockchain). Koin akan langsung muncul saat Anda membuka kembali aplikasi wallet Anda.",
+                qSync: "Apa yang dimaksud dengan \"sinkronisasi\"?",
+                aSync: "Sinkronisasi adalah proses mengunduh dan memverifikasi semua riwayat transaksi pada jaringan Nusacoin untuk menghitung saldo secara akurat pada wallet penuh seperti Nusacoin Core.",
+                qIndo: "Apakah NUX adalah proyek yang berhubungan dengan Indonesia?",
+                aIndo: "Nama Nusacoin terinspirasi dari konsep “Nusantara”. Namun detail mengenai tim pengembang dan lokasi operasional tetap mengacu pada sumber resmi proyek.",
+                qChain: "Di jaringan blockchain apa NUX berjalan?",
+                aChain: "NUX berjalan di blockchain miliknya sendiri, bukan di Ethereum, BNB Chain, atau jaringan lain.",
+                qWallet: "Wallet apa yang digunakan untuk menyimpan NUX?",
+                aWallet: "NUX menggunakan wallet resmi bernama Nusa Core untuk pengiriman, penerimaan, dan manajemen alamat wallet.",
+                qAddr: "Seperti apa format alamat wallet NUX?",
+                aAddr: "Alamat wallet Nusacoin selalu diawali dengan awalan nu, contoh: nu3k8h2…",
+                qMining: "Apakah NUX bisa di-mining?",
+                aMining: "Ya, NUX dapat di-mining menggunakan algoritma X11 via mining pool publik maupun private pool.",
+                qLegal: "Apakah NUX legal di Indonesia?",
+                aLegal: "Regulasi aset kripto di Indonesia diawasi oleh Bappebti. Selalu cek daftar aturan dan token resmi Bappebti sebelum bertransaksi.",
+                qCoinControl: "Fitur Coin Control pada Nusacoin Core",
+                aCoinControl: "Fitur Coin Control memberikan pengguna kendali penuh atas UTXO (Unspent Transaction Outputs) yang ingin mereka gunakan saat membuat transaksi. Ini bermanfaat untuk mengatur biaya transaksi (fee), meningkatkan privasi, dan mengelola fragmentasi saldo.",
+                catIslam: "Implementasi & Governance Nusachain",
+                qIslamLaw: "Bagaimana hukum menggunakan teknologi Nusachain dari sudut pandang Fikih?",
+                aIslamLaw: "Fatwa MUI/PBNU mengharamkan kripto jika digunakan sebagai spekulasi (gharar/maysir). Namun, Nusachain yang difungsikan murni sebagai sistem pencatatan digital (buku kas/stempel digital) untuk transparansi dana atau sertifikasi wakaf masuk dalam kaidah Maslahah Mursalah (kemaslahatan umum) tanpa trading spekulatif.",
+                qAmanah: "Bagaimana teknologi ini menjamin prinsip \"Amanah\"?",
+                aAmanah: "Sifat blockchain yang immutable (tidak bisa diubah/dihapus) memastikan setiap catatan dana masuk dan keluar tercatat jujur secara objektif tanpa bisa direkayasa oleh pihak IT sekalipun.",
+                qSec: "Bagaimana jika Private Key Pengurus hilang atau dicuri?",
+                aSec: "Keamanan menggunakan skema Multi-Signature (Multi-sig). Misalnya butuh 3 dari 5 kunci untuk mencairkan dana, sehingga jika 1 kunci hilang, kunci pengurus lainnya masih bisa memulihkan aset.",
+                qDevMotiv: "Apa motivasi developer jika tidak menjual koin spekulatif?",
+                aDevMotiv: "Developer bergerak dengan model bisnis jasa (kustomisasi, integrasi sistem, perawatan), filosofi open-source (amal jariyah digital), dan membangun reputasi global.",
+                blockQuoteAnalogy: "\"Pengembang Nusachain ibarat merancang cetak biru jalan tol secara open-source. Keuntungan legal didapat saat organisasi menunjuk mereka secara profesional untuk merawat sistem dan integrasi.\"",
+                footerDesc: "Blockchain milik rakyat dengan prinsip crypto yang adil. Terdesentralisasi, aman, dan dapat diakses semua orang.",
+                footerQuickTitle: "Tautan Cepat",
+                footerResTitle: "Sumber Daya",
+                footerDocsTitle: "Dokumen & Keamanan",
+                menuGlossary: "Kosa Kata",
+                menuSecure: "Amankan Wallet",
+                menuPrivacy: "Lindungi Privasi",
+                footerCopyright: "© 2026 Nusacoin Project. Dibangun untuk desentralisasi."
+            },
+            en: {
+                topBarHelp: "Nusacoin.org needs your help!",
+                heroTitle: "Frequently Asked Questions",
+                heroSub: "Find answers to common questions and myths about Nusacoin.",
+                qIntro: "What is Nusacoin (NUX)?",
+                aIntro: "Nusacoin (NUX) is a crypto asset running on an independent blockchain with its own ecosystem. NUX is designed for digital payments, application utilities, and other network usages.",
+                aiBtn: "CLICK AI ASK NUSACHAIN",
+                secTransTitle: "Transactions & Operations",
+                qConfirm: "Why do I have to wait for confirmation?",
+                aConfirm: "Payment notifications are almost instant with Nusacoin. However, there is a delay before the network confirms your transaction by including it in a block. Each transaction takes between a few seconds to 90 minutes, averaging 10 minutes. 6 confirmations are considered secure for high-value transactions.",
+                qFee: "How much is the transaction fee?",
+                aFee: "Most transactions can be processed with very low fees. Fees depend on byte size. Multi-sig transactions or spending coins from multiple inputs cost slightly more than standard transactions.",
+                qOffline: "What happens if I receive nusacoin while my computer is turned off?",
+                aOffline: "No problem. Nusacoins are recorded on the public ledger (blockchain). They will appear as soon as you open your wallet software again.",
+                qSync: "What does \"synchronization\" mean?",
+                aSync: "Synchronization is the process of downloading and verifying all past transaction history on the Nusacoin network to calculate your wallet balance accurately in full node clients like Nusacoin Core.",
+                qIndo: "Is NUX a project related to Indonesia?",
+                aIndo: "The name Nusacoin is inspired by the concept of \"Nusantara\". However, development details and operations refer to official project sources.",
+                qChain: "Which blockchain network does NUX run on?",
+                aChain: "NUX runs on its own native blockchain, not on Ethereum, BNB Chain, or other networks.",
+                qWallet: "Which wallet is used to store NUX?",
+                aWallet: "NUX uses the official wallet named Nusa Core for sending, receiving, and managing wallet addresses.",
+                qAddr: "What is the format of a NUX wallet address?",
+                aAddr: "Nusacoin wallet addresses always start with the prefix nu, e.g., nu3k8h2…",
+                qMining: "Can NUX be mined?",
+                aMining: "Yes, NUX can be mined using the X11 algorithm via public mining pools or private pools.",
+                qLegal: "Is NUX legal in Indonesia?",
+                aLegal: "Crypto asset regulations in Indonesia are supervised by Bappebti. Always check official regulatory guidelines before trading.",
+                qCoinControl: "Coin Control Feature on Nusacoin Core",
+                aCoinControl: "The Coin Control feature gives users full control over which UTXOs (Unspent Transaction Outputs) they want to use in a transaction. It helps optimize transaction fees, improve privacy, and manage UTXO fragmentation.",
+                catIslam: "Implementation & Governance",
+                qIslamLaw: "What is the Islamic perspective on using Nusachain technology?",
+                aIslamLaw: "Islamic rulings prohibit crypto when used for speculation (gharar/maysir). However, using Nusachain purely as a digital ledger/stamp system for transparency and waqf certification falls under Maslahah Mursalah (public benefit) without speculative trading.",
+                qAmanah: "How does this technology ensure the principle of \"Amanah\"?",
+                aAmanah: "The immutable nature of blockchain ensures every financial record is honestly and objectively logged without risk of tampering.",
+                qSec: "What if a Manager's Private Key is lost or stolen?",
+                aSec: "Security utilizes a Multi-Signature scheme (Multi-sig). For example, 3 out of 5 keys are required to approve transactions, so losing 1 key will not freeze or compromise the organization's assets.",
+                qDevMotiv: "What motivates developers if they don't sell speculative coins?",
+                aDevMotiv: "Developers operate under a service business model (customization, system integration, maintenance), open-source philosophy, and building global reputational trust.",
+                blockQuoteAnalogy: "\"Nusachain developers are like blueprint designers providing open-source infrastructure. Legal revenue comes when organizations professionally hire them for system maintenance and integration.\"",
+                footerDesc: "The people's blockchain built on fair crypto principles. Decentralized, secure, and accessible to everyone.",
+                footerQuickTitle: "Quick Links",
+                footerResTitle: "Resources",
+                footerDocsTitle: "Docs & Security",
+                menuGlossary: "Glossary",
+                menuSecure: "Secure Wallet",
+                menuPrivacy: "Protect Privacy",
+                footerCopyright: "© 2026 Nusacoin Project. Built for decentralization."
+            }
+        };
+
+        function switchLanguage(lang) {
+            document.getElementById('btnIN').classList.toggle('active', lang === 'id');
+            document.getElementById('btnEN').classList.toggle('active', lang === 'en');
+
+            const t = translations[lang];
+            for (let id in t) {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.textContent = t[id];
+                }
+            }
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const icon = document.getElementById('themeIcon');
+            
+            body.classList.toggle('dark-mode');
+            
+            if (body.classList.contains('dark-mode')) {
+                icon.className = 'fa-solid fa-sun';
+            } else {
+                icon.className = 'fa-solid fa-moon';
+            }
+        }
+    </script>
+</body>
+</html>
