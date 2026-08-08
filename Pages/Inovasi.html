@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nusacoin (NUX) - Inovasi Sistem Pembayaran</title>
+    
+    <!-- Google Fonts & FontAwesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Titillium+Web:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- CSS Styling -->
+    <style>
+        /* HAPUS NAVBAR BLOGGER / GHOST */
+        #navbar-iframe, .navbar, .navbar-ghost { 
+            display: none !important; 
+            height: 0 !important; 
+            visibility: hidden !important; 
+        }
+
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+
+        /* Variabel Warna Hijau Nusacoin (Tanpa Oranye/Kuning) */
+        :root {
+            --primary: #27ae60;
+            --primary-dark: #1e8449;
+            --bg-body: #ffffff;
+            --bg-card: #ffffff;
+            --bg-hero: #006400;
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --bg-light: #f8fafc;
+            --border: #e2e8f0;
+            --title-green: #1e8449;
+            --icon-bg: #e8f5e9;
+        }
+
+        body.dark-mode {
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --bg-hero: #093809;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --bg-light: #1e293b;
+            --border: #334155;
+            --title-green: #4ade80;
+            --icon-bg: #14532d;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            color: var(--text-main); 
+            line-height: 1.6; 
+            overflow-x: hidden;
+            background-color: var(--bg-body);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background-color: var(--primary-dark);
+            color: white;
+            padding: 8px 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .top-bar-container {
+            max-width: 1250px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .top-bar-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Lang Switcher */
+        .lang-switch {
+            display: flex;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+            padding: 2px;
+        }
+
+        .lang-btn {
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.8);
+            padding: 2px 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: all 0.2s;
+        }
+
+        .lang-btn.active, .lang-btn:hover {
+            background: #ffffff;
+            color: var(--primary-dark);
+        }
+
+        /* Theme Toggle Button (Icon Only) */
+        .theme-toggle-btn {
+            background: rgba(0, 0, 0, 0.2);
+            border: none;
+            color: #ffffff;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        .theme-toggle-btn:hover {
+            background: rgba(0, 0, 0, 0.4);
+            transform: scale(1.08);
+        }
+
+        /* Hero Header */
+        .hero-container {
+            background-color: var(--bg-hero);
+            width: 100%;
+            min-height: 320px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            color: #ffffff;
+            padding: 40px 20px 60px;
+            overflow: hidden;
+            transition: background-color 0.3s;
+        }
+
+        .hero-container h1 {
+            color: #ffffff !important;
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 10;
+            font-family: 'Titillium Web', sans-serif;
+        }
+
+        .hero-container p {
+            color: #cbd5e1;
+            font-size: 1.05rem;
+            max-width: 750px;
+            position: relative;
+            z-index: 10;
+            line-height: 1.6;
+        }
+
+        .bg-lines {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: 1;
+        }
+
+        .wireframe-svg {
+            position: absolute;
+            bottom: 40px; left: 0; width: 100%; z-index: 2; opacity: 0.3;
+        }
+
+        .jagged-bottom {
+            position: absolute;
+            bottom: -1px; left: 0; width: 100%; height: 50px;
+            background-color: var(--bg-body);
+            clip-path: polygon(0% 70%, 5% 60%, 10% 80%, 15% 55%, 20% 85%, 25% 60%, 30% 80%, 35% 50%, 40% 90%, 45% 60%, 50% 80%, 55% 55%, 60% 85%, 65% 60%, 70% 80%, 75% 50%, 80% 90%, 85% 60%, 90% 80%, 95% 55%, 100% 70%, 100% 100%, 0% 100%);
+            z-index: 5;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Main Content Container */
+        main {
+            max-width: 1200px;
+            margin: 40px auto 60px;
+            padding: 0 20px;
+        }
+
+        /* Grid Layout Fitur */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s, background-color 0.3s, border-color 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .feature-icon {
+            width: 50px;
+            height: 50px;
+            background-color: var(--icon-bg);
+            color: var(--title-green);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+        }
+
+        .feature-title {
+            font-family: 'Titillium Web', sans-serif;
+            font-size: 1.3rem;
+            color: var(--title-green);
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .feature-desc {
+            font-size: 0.98rem;
+            color: var(--text-main);
+            line-height: 1.65;
+            text-align: justify;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--bg-light);
+            border-top: 1px solid var(--border);
+            padding: 60px 20px 20px;
+            margin-top: 60px;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .footer-grid {
+            max-width: 1250px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 40px;
+        }
+
+        .footer-brand h2 {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-family: 'Titillium Web', sans-serif;
+        }
+
+        .footer-brand p {
+            color: var(--text-sub);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .footer-col h3 {
+            font-size: 1.1rem;
+            color: var(--text-main);
+            margin-bottom: 15px;
+            font-family: 'Titillium Web', sans-serif;
+        }
+
+        .footer-col ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .footer-col ul li {
+            margin-bottom: 10px;
+        }
+
+        .footer-col ul li a {
+            color: var(--text-sub);
+            text-decoration: none;
+            transition: color 0.2s;
+            font-size: 0.95rem;
+        }
+
+        .footer-col ul li a:hover {
+            color: var(--primary);
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .social-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-main);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .social-box:hover {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .footer-bottom {
+            max-width: 1250px;
+            margin: 40px auto 0;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-sub);
+            font-size: 0.85rem;
+        }
+
+        .mono {
+            font-family: monospace;
+        }
+
+        @media (max-width: 768px) {
+            .hero-container h1 {
+                font-size: 1.8rem;
+            }
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Bar dengan Saklar Bahasa IN/EN & Tema Simbol -->
+    <div class="top-bar">
+        <div class="top-bar-container">
+            <span id="topBarHelp">Nusacoin.org membutuhkan bantuan anda!</span>
+            
+            <div class="top-bar-controls">
+                <!-- Pilihan Bahasa IN / EN -->
+                <div class="lang-switch">
+                    <button class="lang-btn active" id="btnIN" onclick="switchLanguage('id')">IN</button>
+                    <button class="lang-btn" id="btnEN" onclick="switchLanguage('en')">EN</button>
+                </div>
+
+                <!-- Tombol Tema (Simbol Moon/Sun) -->
+                <button class="theme-toggle-btn" id="themeToggle" onclick="toggleTheme()" aria-label="Ganti Tema" title="Ganti Tema">
+                    <i class="fa-solid fa-moon" id="themeIcon"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Header -->
+    <header class="hero-container">
+        <div class="bg-lines"></div>
+        <h1 id="heroTitle">Inovasi Sistem Pembayaran</h1>
+        <p id="heroSub">Nusacoin bukanlah sekadar soal pengiriman uang saja. Nusacoin mempunyai banyak fitur, membuka banyak kemungkinan lain yang perlu dieksplor oleh komunitasnya. Berikut beberapa teknologi yang tengah diteliti, pada beberapa kasus, diubah menjadi produk dan jasa riil. Kegunaan Nusacoin yang paling menarik mungkin masih akan ditemukan.</p>
+        <svg class="wireframe-svg" preserveAspectRatio="none" viewBox="0 0 1440 100">
+            <path d="M0,80 L200,50 L400,90 L600,30 L800,80 L1000,40 L1200,90 L1440,50" fill="none" stroke-width="1" stroke="rgba(255,255,255,0.2)"></path>
+        </svg>
+        <div class="jagged-bottom"></div>
+    </header>
+
+    <!-- Main Content Fitur & Inovasi -->
+    <main>
+        <div class="features-grid">
+
+            <!-- Item 1 -->
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                <h3 class="feature-title" id="f1Title">Kendali Terhadap Penipuan</h3>
+                <p class="feature-desc" id="f1Desc">Tingkatan keamanan yang belum pernah ada sebelumnya dapat dilakukan dengan Nusacoin. Jaringan Nusacoin memberikan perlindungan pengguna terhadap penipuan yang sering terjadi seperti chargeback maupun tagihan yang tidak diinginkan, serta Nusacoin mustahil dipalsukan. Pengguna dapat membuat cadangan atau mengenkripsi wallet mereka. Wallet perangkat keras sulit untuk dicuri atau kehilangan uang. Nusacoin dirancang agar pengguna mempunyai kontrol mutlak atas uang mereka.</p>
+            </div>
+
+            <!-- Item 2 -->
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-globe"></i></div>
+                <h3 class="feature-title" id="f2Title">Aksesibilitas Global</h3>
+                <p class="feature-desc" id="f2Desc">Dengan Nusacoin, semua pembayaran di dunia dapat dioperasikan sepenuhnya. Nusacoin memungkinkan bank, bisnis, atau individu mana pun bisa mengirim dan menerima pembayaran secara aman di mana saja kapanpun, dengan atau tanpa akun bank. Nusacoin tersedia di sejumlah besar negara yang masih jauh dari jangkauan sebagian besar sistem pembayaran karena keterbatasannya sendiri. Nusacoin meningkatkan akses global ke perdagangan dan dapat membantu perdagangan internasional untuk terus berkembang.</p>
+            </div>
+
+            <!-- Item 3 -->
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-bolt"></i></div>
+                <h3 class="feature-title" id="f3Title">Efisiensi Biaya</h3>
+                <p class="feature-desc" id="f3Desc">Dengan menggunakan kriptografi, pembayaran yang aman dapat dilakukan tanpa perlu perantara yang lambat dan berbiaya. Transaksi Nusacoin bisa jauh lebih murah daripada alternatif lain dan dapat diselesaikan dalam waktu singkat. Ini berarti Nusacoin memiliki potensi untuk menjadi cara yang umum melakukan transfer mata uang di masa depan. Nusacoin juga dapat berperan dalam mengurangi kemiskinan di berbagai negara dengan memangkas biaya transaksi yang tinggi pada gaji pekerja.</p>
+            </div>
+
+            <!-- Item 4 -->
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-hand-holding-heart"></i></div>
+                <h3 class="feature-title" id="f4Title">Tip dan Donasi</h3>
+                <p class="feature-desc" id="f4Desc">Nusacoin menjadi solusi yang cukup efisien untuk pemberian tip dan donasi. Mengirim pembayaran hanya dengan satu klik saja dan menerima donasi cukup dengan menunjukkan QR code. Donasi dapat diperlihatkan secara publik, untuk meningkatkan transparansi bagi organisasi nirlaba. Pada kasus-kasus darurat seperti bencana alam, donasi Nusacoin memungkinkan dilakukan menjadi respon internasional dan lebih cepat.</p>
+            </div>
+
+            <!-- Item 5 -->
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-chart-line"></i></div>
+                <h3 class="feature-title" id="f5Title">Penggalangan Dana</h3>
+                <p class="feature-desc" id="f5Desc">Nusacoin dapat digunakan sebagai penggalangan dana terbuka bergaya Kickstarter, di mana uang para donatur baru akan diambil jika telah memenuhi target. Jaminan kontrak seperti ini bisa dilakukan melalui protokol Nusacoin, untuk mencegah transaksi terjadi sebelum semua persyaratan fulfilled/terpenuhi.</p>
+            </div>
+
+            <!-- Item 6 -->
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-coins"></i></div>
+                <h3 class="feature-title" id="f6Title">Pembayaran Mikro</h3>
+                <p class="feature-desc" id="f6Desc">Bayangkan mendengar radio internet berbayar per detik, melihat halaman situs dengan tip kecil di tiap iklan yang tidak ditayangkan, atau membeli bandwidth dari sebuah hotspot WiFi per kilobyte. Nusacoin cukup efisien melakukan semua jenis pembayaran mikro ini secara otomatis.</p>
+            </div>
+
+            <!-- Item 7 -->
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-scale-balanced"></i></div>
+                <h3 class="feature-title" id="f7Title">Mediasi Sengketa</h3>
+                <p class="feature-desc" id="f7Desc">Nusacoin bisa digunakan untuk mengembangkan layanan mediasi penyelesaian sengketa transaksi elektronik yang inovatif menggunakan tanda tangan berganda (multiple signature). Layanan ini memungkinkan pihak ketiga untuk menyetujui atau membatalkan transaksi bila ada perselisihan tanpa memiliki kendali penuh atas dana tersebut.</p>
+            </div>
+
+            <!-- Item 8 -->
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-key"></i></div>
+                <h3 class="feature-title" id="f8Title">Akun Tanda Tangan Berganda</h3>
+                <p class="feature-desc" id="f8Desc">Tanda tangan berganda memungkinkan sebuah transaksi untuk diterima oleh jaringan hanya bila beberapa orang dalam suatu kelompok setuju untuk menandatangani transaksi. Ini bisa dilakukan oleh jajaran direksi untuk mencegah salah satu anggotanya membelanjakan dana tanpa persetujuan, atau oleh bank untuk mencegah pencurian.</p>
+            </div>
+
+            <!-- Item 9 -->
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-building-columns"></i></div>
+                <h3 class="feature-title" id="f9Title">Kepercayaan dan Integritas</h3>
+                <p class="feature-desc" id="f9Desc">Nusacoin menawarkan solusi terhadap masalah kepercayaan yang menimpa bank. Dengan transparansi keuangan selektif, kontrak digital, dan transaksi yang tidak bisa dibatalkan, Nusacoin menjadi pondasi untuk memulihkan kepercayaan tanpa ada pihak yang bisa mencurangi sistem.</p>
+            </div>
+
+            <!-- Item 10 -->
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-network-wired"></i></div>
+                <h3 class="feature-title" id="f10Title">Ketahanan dan Desentralisasi</h3>
+                <p class="feature-desc" id="f10Desc">Dengan tingkat desentralisasi yang tinggi, Nusacoin menciptakan jaringan pembayaran yang tahan serangan. Tanpa adanya titik tunggal kerentanan (single point of failure) seperti pusat data terpusat, sangat sulit menyerang jaringan Nusacoin secara global.</p>
+            </div>
+
+            <!-- Item 11 -->
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-eye"></i></div>
+                <h3 class="feature-title" id="f11Title">Transparansi yang Fleksibel</h3>
+                <p class="feature-desc" id="f11Desc">Semua transaksi Nusacoin bersifat publik dan transparan, namun identitas pemilik transaksi tetap terjaga privasinya. Ini memungkinkan individu atau organisasi mengatur tingkat transparansi sesuai kebutuhan, seperti audit publik donasi nirlaba.</p>
+            </div>
+
+            <!-- Item 12 -->
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-robot"></i></div>
+                <h3 class="feature-title" id="f12Title">Solusi Otomatis</h3>
+                <p class="feature-desc" id="f12Desc">Layanan serba otomatis dapat memangkas biaya operasional dengan Nusacoin. Dari mesin penjual otomatis, tiket transportasi, hingga sistem pembayaran kendaraan otonom yang dapat membayar bandwidth atau pengisian daya secara langsung tanpa kasir.</p>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <h2>Nusacoin Network</h2>
+                <p id="footerDesc">Blockchain milik rakyat dengan prinsip crypto yang adil. Terdesentralisasi, aman, dan dapat diakses semua orang.</p>
+                <div class="social-icons">
+                    <a href="https://x.com/Nusacoin_chain" target="_blank" class="social-box" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="https://discord.gg/NcKKZFBzJ" target="_blank" class="social-box" aria-label="Discord"><i class="fab fa-discord"></i></a>
+                    <a href="https://telegram.me/NusacoinX11" target="_blank" class="social-box" aria-label="Telegram"><i class="fab fa-telegram-plane"></i></a>
+                    <a href="https://www.reddit.com/r/Nusacoin" target="_blank" class="social-box" aria-label="Reddit"><i class="fab fa-reddit-alien"></i></a>
+                    <a href="https://github.com/TaobotX11/nusacoin" target="_blank" class="social-box" aria-label="GitHub"><i class="fab fa-github"></i></a>
+                </div>
+            </div>
+
+            <div class="footer-col">
+                <h3 id="footerQuickTitle">Tautan Cepat</h3>
+                <ul>
+                    <li><a href="https://explorer.nusacoin.org" target="_blank">Explorer</a></li>
+                    <li><a href="https://dompet.nusacoin.org" target="_blank">Nusacoin Web Wallet</a></li>
+                    <li><a href="https://github.com/TaobotX11/nusacoin" target="_blank">Nusacoin Core</a></li>
+                    <li><a href="https://green.nusacoin.org" target="_blank">Nusacoin Green Wallet</a></li>
+                    <li><a href="/Pages/Visi-Misi.html" target="_blank">Roadmap</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h3 id="footerResTitle">Sumber Daya</h3>
+                <ul>
+                    <li><a href="https://paper.nusacoin.org" target="_blank">Paper Wallet</a></li>
+                    <li><a href="https://pooljava.nusacoin.org" target="_blank">Mining Pool</a></li>
+                    <li><a href="https://ijol.nusacoin.org" target="_blank">Ijol Nusacoin (P2P)</a></li>
+                    <li><a href="https://t.me/rdnmesin_bot" target="_blank">Nusacard RDN Bot</a></li>
+                    <li><a href="/Pages/Kosa-Kata.html" target="_blank" id="menuGlossary">Kosa Kata</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h3 id="footerDocsTitle">Dokumen &amp; Keamanan</h3>
+                <ul>
+                    <li><a href="/Pages/Whitepaper_Nusacoin_in.pdf">Whitepaper IN</a></li>
+                    <li><a href="/Pages/Whitepaper_Nusacoin_en.pdf">Whitepaper EN</a></li>
+                    <li><a href="/Pages/Amankan-Wallet.html" target="_blank" id="menuSecure">Amankan Wallet</a></li>
+                    <li><a href="/Pages/Lindungi-Privasi-Anda.html" target="_blank" id="menuPrivacy">Lindungi Privasi</a></li>
+                    <li><a href="/Pages/FAQ.html" target="_blank">FAQ</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <span id="footerCopyright">© 2026 Nusacoin Project. Dibangun untuk desentralisasi.</span>
+            <span class="mono"> · NUX / X11</span>
+        </div>
+    </footer>
+
+    <!-- JavaScript Translasi & Theme Switcher -->
+    <script>
+        const translations = {
+            id: {
+                topBarHelp: "Nusacoin.org membutuhkan bantuan anda!",
+                heroTitle: "Inovasi Sistem Pembayaran",
+                heroSub: "Nusacoin bukanlah sekadar soal pengiriman uang saja. Nusacoin mempunyai banyak fitur, membuka banyak kemungkinan lain yang perlu dieksplor oleh komunitasnya. Berikut beberapa teknologi yang tengah diteliti, pada beberapa kasus, diubah menjadi produk dan jasa riil. Kegunaan Nusacoin yang paling menarik mungkin masih akan ditemukan.",
+                f1Title: "Kendali Terhadap Penipuan",
+                f1Desc: "Tingkatan keamanan yang belum pernah ada sebelumnya dapat dilakukan dengan Nusacoin. Jaringan Nusacoin memberikan perlindungan pengguna terhadap penipuan yang sering terjadi seperti chargeback maupun tagihan yang tidak diinginkan, serta Nusacoin mustahil dipalsukan. Pengguna dapat membuat cadangan atau mengenkripsi wallet mereka.",
+                f2Title: "Aksesibilitas Global",
+                f2Desc: "Dengan Nusacoin, semua pembayaran di dunia dapat dioperasikan sepenuhnya. Nusacoin memungkinkan bank, bisnis, atau individu mana pun bisa mengirim dan menerima pembayaran secara aman di mana saja kapanpun, dengan atau tanpa akun bank.",
+                f3Title: "Efisiensi Biaya",
+                f3Desc: "Dengan menggunakan kriptografi, pembayaran yang aman dapat dilakukan tanpa perlu perantara yang lambat dan berbiaya. Transaksi Nusacoin bisa jauh lebih murah daripada alternatif lain dan dapat diselesaikan dalam waktu singkat.",
+                f4Title: "Tip dan Donasi",
+                f4Desc: "Nusacoin menjadi solusi yang cukup efisien untuk pemberian tip dan donasi. Mengirim pembayaran hanya dengan satu klik saja dan menerima donasi cukup dengan menunjukkan QR code.",
+                f5Title: "Penggalangan Dana",
+                f5Desc: "Nusacoin dapat digunakan sebagai penggalangan dana terbuka bergaya Kickstarter, di mana uang para donatur baru akan diambil jika telah memenuhi target.",
+                f6Title: "Pembayaran Mikro",
+                f6Desc: "Bayangkan mendengar radio internet berbayar per detik, melihat halaman situs dengan tip kecil di tiap iklan yang tidak ditayangkan, atau membeli bandwidth dari sebuah hotspot WiFi per kilobyte.",
+                f7Title: "Mediasi Sengketa",
+                f7Desc: "Nusacoin bisa digunakan untuk mengembangkan layanan mediasi penyelesaian sengketa transaksi elektronik yang inovatif menggunakan tanda tangan berganda (multiple signature).",
+                f8Title: "Akun Tanda Tangan Berganda",
+                f8Desc: "Tanda tangan berganda memungkinkan sebuah transaksi untuk diterima oleh jaringan hanya bila beberapa orang dalam suatu kelompok setuju untuk menandatangani transaksi.",
+                f9Title: "Kepercayaan dan Integritas",
+                f9Desc: "Nusacoin menawarkan solusi terhadap masalah kepercayaan yang menimpa bank. Dengan transparansi keuangan selektif, kontrak digital, dan transaksi yang tidak bisa dibatalkan.",
+                f10Title: "Ketahanan dan Desentralisasi",
+                f10Desc: "Dengan tingkat desentralisasi yang tinggi, Nusacoin menciptakan jaringan pembayaran yang tahan serangan tanpa adanya titik tunggal kerentanan.",
+                f11Title: "Transparansi yang Fleksibel",
+                f11Desc: "Semua transaksi Nusacoin bersifat publik dan transparan, namun identitas pemilik transaksi tetap terjaga privasinya.",
+                f12Title: "Solusi Otomatis",
+                f12Desc: "Layanan serba otomatis dapat memangkas biaya operasional dengan Nusacoin, dari mesin penjual otomatis hingga sistem pembayaran kendaraan otonom.",
+                footerDesc: "Blockchain milik rakyat dengan prinsip crypto yang adil. Terdesentralisasi, aman, dan dapat diakses semua orang.",
+                footerQuickTitle: "Tautan Cepat",
+                footerResTitle: "Sumber Daya",
+                footerDocsTitle: "Dokumen & Keamanan",
+                menuGlossary: "Kosa Kata",
+                menuSecure: "Amankan Wallet",
+                menuPrivacy: "Lindungi Privasi",
+                footerCopyright: "© 2026 Nusacoin Project. Dibangun untuk desentralisasi."
+            },
+            en: {
+                topBarHelp: "Nusacoin.org needs your help!",
+                heroTitle: "Payment System Innovations",
+                heroSub: "Nusacoin isn't just about sending money. It comes with features that open up many possibilities being explored by the community. Below are technologies being researched and turned into real products and services. Nusacoin's most exciting uses may still be undiscovered.",
+                f1Title: "Control Against Fraud",
+                f1Desc: "An unprecedented level of security is possible with Nusacoin. The network protects users against common fraud like chargebacks or unwanted billing, and coins cannot be counterfeited.",
+                f2Title: "Global Accessibility",
+                f2Desc: "All payments worldwide can be fully interoperable with Nusacoin. It enables banks, businesses, or individuals to send and receive payments securely anywhere, with or without a bank account.",
+                f3Title: "Cost Efficiency",
+                f3Desc: "Using cryptography, secure payments can be processed without expensive or slow intermediaries. Nusacoin transactions are significantly cheaper and settled faster.",
+                f4Title: "Tips and Donations",
+                f4Desc: "Nusacoin is an efficient solution for tipping and donations. Sending payments takes just one click, and receiving donations requires showing a QR code.",
+                f5Title: "Crowdfunding",
+                f5Desc: "Nusacoin can be used for Kickstarter-style crowdfunding, where donor funds are only collected once the target project goal is reached.",
+                f6Title: "Micro-payments",
+                f6Desc: "Imagine listening to internet radio paid per second, browsing websites with micro-tips per blocked ad, or buying WiFi bandwidth per kilobyte seamlessly.",
+                f7Title: "Dispute Mediation",
+                f7Desc: "Nusacoin can be used to build innovative dispute resolution services using multi-signature transactions to resolve merchant or buyer conflicts.",
+                f8Title: "Multi-Signature Accounts",
+                f8Desc: "Multi-signature allows transactions to be accepted by the network only if a required group of people agree to sign, securing corporate funds or preventing theft.",
+                f9Title: "Trust and Integrity",
+                f9Desc: "Nusacoin offers solutions to trust issues facing traditional institutions through selective financial transparency and immutable digital contracts.",
+                f10Title: "Resilience & Decentralization",
+                f10Desc: "With high decentralization, Nusacoin creates a resilient payment network with no single point of failure or centralized data center vulnerable to attacks.",
+                f11Title: "Flexible Transparency",
+                f11Desc: "Transactions are public and transparent, while participant identities remain private, allowing businesses to tailor transparency policies as needed.",
+                f12Title: "Automated Solutions",
+                f12Desc: "Fully automated services reduce operational costs with Nusacoin, enabling smart vending machines, automated transport ticketing, or autonomous vehicle payments.",
+                footerDesc: "The people's blockchain built on fair crypto principles. Decentralized, secure, and accessible to everyone.",
+                footerQuickTitle: "Quick Links",
+                footerResTitle: "Resources",
+                footerDocsTitle: "Docs & Security",
+                menuGlossary: "Glossary",
+                menuSecure: "Secure Wallet",
+                menuPrivacy: "Protect Privacy",
+                footerCopyright: "© 2026 Nusacoin Project. Built for decentralization."
+            }
+        };
+
+        function switchLanguage(lang) {
+            document.getElementById('btnIN').classList.toggle('active', lang === 'id');
+            document.getElementById('btnEN').classList.toggle('active', lang === 'en');
+
+            const t = translations[lang];
+            for (let id in t) {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.textContent = t[id];
+                }
+            }
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const icon = document.getElementById('themeIcon');
+            
+            body.classList.toggle('dark-mode');
+            
+            if (body.classList.contains('dark-mode')) {
+                icon.className = 'fa-solid fa-sun';
+            } else {
+                icon.className = 'fa-solid fa-moon';
+            }
+        }
+    </script>
+</body>
+</html>
