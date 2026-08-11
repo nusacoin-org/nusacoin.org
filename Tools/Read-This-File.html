@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nusacoin Voice - Read This File</title>
+
+    <!-- Tailwind CSS & PDF.js CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen py-8 px-4 transition-colors duration-300">
+
+    <div class="max-w-3xl mx-auto rounded-2xl shadow-xl overflow-hidden p-6 sm:p-8 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 transition-colors duration-300">
+        
+        <!-- Header & Control Bar -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-slate-200 dark:border-slate-700 pb-4">
+            <div class="flex items-center space-x-3">
+                <div class="bg-gradient-to-tr from-[#27ae60] to-[#0f3d26] p-3 rounded-xl text-white shadow-md shadow-[#27ae60]/20 flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z" />
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white" id="appTitle">Read This File</h2>
+                    <p class="text-xs font-bold text-[#27ae60] uppercase tracking-wider">Nusacoin Voice</p>
+                </div>
+            </div>
+
+            <!-- Language & Theme Switchers -->
+            <div class="flex items-center space-x-3 self-end sm:self-center">
+                <!-- Language Toggle -->
+                <div class="flex bg-slate-200 dark:bg-slate-700 p-1 rounded-lg text-xs font-bold">
+                    <button id="btnIN" onclick="setLanguage('id')" class="px-2.5 py-1 rounded-md bg-white dark:bg-slate-600 text-[#27ae60] dark:text-green-400 shadow-sm transition-all">IN</button>
+                    <button id="btnEN" onclick="setLanguage('en')" class="px-2.5 py-1 rounded-md text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-all">EN</button>
+                </div>
+
+                <!-- Theme Toggle -->
+                <button id="themeToggleBtn" onclick="toggleTheme()" class="p-2.5 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-600 transition-all" aria-label="Toggle Theme">
+                    <i id="themeIcon" class="fa-solid fa-moon"></i>
+                </button>
+            </div>
+        </div>
+
+        <p id="appDescription" class="text-slate-600 dark:text-slate-300 mb-6 text-sm">
+            Upload file PDF Anda, pilih suara Bahasa Indonesia, dan dengarkan bacaannya bahkan saat layar HP dikunci.
+        </p>
+        
+        <!-- Upload Box -->
+        <div class="mb-6 bg-slate-50 dark:bg-slate-700/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700 transition-all hover:border-[#27ae60]">
+            <label id="uploadLabel" class="block text-sm font-semibold text-slate-800 dark:text-slate-200 mb-2">Pilih File PDF</label>
+            <input type="file" id="pdfUpload" accept=".pdf" class="block w-full text-sm text-slate-500 dark:text-slate-400 file:mr-4 file:py-2.5 file:px-5 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#27ae60] file:text-white hover:file:bg-[#1e8449] cursor-pointer transition-all">
+        </div>
+
+        <!-- Voice Controls -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
+            <div>
+                <label id="voiceLabel" class="block text-sm font-semibold text-slate-800 dark:text-slate-200 mb-2">Pilih Suara (Voice)</label>
+                <select id="voiceSelect" class="w-full border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm bg-white dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-[#27ae60] text-slate-800 dark:text-slate-100 font-medium">
+                    <option value="">Memuat suara...</option>
+                </select>
+                <p id="voiceNote" class="text-xs text-slate-500 dark:text-slate-400 mt-1.5">*Mendukung suara pria/wanita berbahasa Indonesia.</p>
+            </div>
+            <div class="flex items-end space-x-2">
+                <button id="playBtn" disabled class="flex-1 bg-[#27ae60] text-white py-3 px-4 rounded-xl font-semibold shadow-md shadow-[#27ae60]/30 hover:bg-[#1e8449] disabled:opacity-50 disabled:cursor-not-allowed transition-all">Putar</button>
+                <button id="pauseBtn" disabled class="bg-[#d4a017] text-white py-3 px-4 rounded-xl font-semibold shadow-md shadow-[#d4a017]/20 hover:bg-[#b88a14] disabled:opacity-50 disabled:cursor-not-allowed transition-all">Jeda</button>
+                <button id="stopBtn" disabled class="bg-[#0f3d26] dark:bg-slate-900 text-white py-3 px-4 rounded-xl font-semibold shadow-md shadow-[#0f3d26]/20 hover:bg-[#16231c] disabled:opacity-50 disabled:cursor-not-allowed transition-all">Berhenti</button>
+            </div>
+        </div>
+
+        <!-- Status & Output Text -->
+        <div class="mb-2 flex items-center justify-between">
+            <span id="status" class="text-xs font-bold text-[#1e8449] dark:text-green-400 bg-slate-100 dark:bg-slate-700 px-3 py-1 rounded-full border border-slate-200 dark:border-slate-600">
+                Status: Menunggu file PDF...
+            </span>
+        </div>
+        
+        <div class="border border-slate-200 dark:border-slate-700 rounded-xl p-4 h-64 overflow-y-auto bg-slate-50 dark:bg-slate-900/50 text-sm text-slate-800 dark:text-slate-200 whitespace-pre-line shadow-inner" id="pdfTextContent">
+            Teks dari PDF akan muncul di sini setelah di-upload...
+        </div>
+    </div>
+
+    <!-- Elemen Audio Tersembunyi untuk Background Playback di HP -->
+    <audio id="silentAudio" loop style="display:none;">
+        <source src="data:audio/wav;base64,UklGRjIAAABXQVZFZm10IBIAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=" type="audio/wav">
+    </audio>
+
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        // Translation Dictionary
+        const i18n = {
+            id: {
+                appTitle: "Read This File",
+                appDescription: "Upload file PDF Anda, pilih suara Bahasa Indonesia, dan dengarkan bacaannya bahkan saat layar HP dikunci.",
+                uploadLabel: "Pilih File PDF",
+                voiceLabel: "Pilih Suara (Voice)",
+                voiceLoading: "Memuat suara...",
+                voiceNote: "*Mendukung suara pria/wanita berbahasa Indonesia.",
+                playBtn: "Putar",
+                resumeBtn: "Lanjutkan",
+                pauseBtn: "Jeda",
+                stopBtn: "Berhenti",
+                statusWaiting: "Status: Menunggu file PDF...",
+                statusReading: "Status: Membaca file PDF...",
+                statusProcessing: "Memproses teks...",
+                statusLoaded: (pages) => `Status: PDF berhasil dimuat (${pages} hal). Siap dibaca.`,
+                statusError: "Status: Gagal membaca file PDF.",
+                statusParsingError: "Terjadi kesalahan saat memparsing PDF.",
+                statusFinished: "Status: Selesai membaca.",
+                statusReadingChunk: (curr, total) => `Status: Membaca bagian ${curr} dari ${total}...`,
+                statusErrorReading: "Status: Terjadi kesalahan saat membaca.",
+                statusPaused: "Status: Dijeda (Pause).",
+                statusStopped: "Status: Pembacaan dihentikan.",
+                defaultTextContent: "Teks dari PDF akan muncul di sini setelah di-upload..."
+            },
+            en: {
+                appTitle: "Read This File",
+                appDescription: "Upload your PDF file, choose a voice, and listen to the reading even when your phone screen is locked.",
+                uploadLabel: "Select PDF File",
+                voiceLabel: "Select Voice",
+                voiceLoading: "Loading voices...",
+                voiceNote: "*Supports multiple languages and voice profiles.",
+                playBtn: "Play",
+                resumeBtn: "Resume",
+                pauseBtn: "Pause",
+                stopBtn: "Stop",
+                statusWaiting: "Status: Waiting for PDF file...",
+                statusReading: "Status: Reading PDF file...",
+                statusProcessing: "Processing text...",
+                statusLoaded: (pages) => `Status: PDF successfully loaded (${pages} pages). Ready to read.`,
+                statusError: "Status: Failed to read PDF file.",
+                statusParsingError: "An error occurred while parsing the PDF.",
+                statusFinished: "Status: Finished reading.",
+                statusReadingChunk: (curr, total) => `Status: Reading part ${curr} of ${total}...`,
+                statusErrorReading: "Status: An error occurred during speech synthesis.",
+                statusPaused: "Status: Paused.",
+                statusStopped: "Status: Reading stopped.",
+                defaultTextContent: "PDF text content will appear here after uploading..."
+            }
+        };
+
+        let currentLang = 'id';
+
+        const pdfUpload = document.getElementById('pdfUpload');
+        const voiceSelect = document.getElementById('voiceSelect');
+        const playBtn = document.getElementById('playBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const statusEl = document.getElementById('status');
+        const textContentEl = document.getElementById('pdfTextContent');
+        const silentAudio = document.getElementById('silentAudio');
+        const btnIN = document.getElementById('btnIN');
+        const btnEN = document.getElementById('btnEN');
+
+        let textChunks = [];
+        let currentChunkIndex = 0;
+        let synth = window.speechSynthesis;
+        let voices = [];
+        let readerState = 'STOPPED';
+        let pdfNumPages = 0;
+
+        // Theme Toggle Functionality
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            const themeIcon = document.getElementById('themeIcon');
+            if (isDark) {
+                themeIcon.className = 'fa-solid fa-sun';
+            } else {
+                themeIcon.className = 'fa-solid fa-moon';
+            }
+        }
+
+        // Language Switch Functionality
+        function setLanguage(lang) {
+            currentLang = lang;
+            const t = i18n[lang];
+
+            // UI Elements Text Update
+            document.getElementById('appTitle').textContent = t.appTitle;
+            document.getElementById('appDescription').textContent = t.appDescription;
+            document.getElementById('uploadLabel').textContent = t.uploadLabel;
+            document.getElementById('voiceLabel').textContent = t.voiceLabel;
+            document.getElementById('voiceNote').textContent = t.voiceNote;
+            pauseBtn.textContent = t.pauseBtn;
+            stopBtn.textContent = t.stopBtn;
+
+            if (readerState === 'PAUSED') {
+                playBtn.textContent = t.resumeBtn;
+            } else {
+                playBtn.textContent = t.playBtn;
+            }
+
+            // Language Toggle Active Classes
+            if (lang === 'id') {
+                btnIN.className = "px-2.5 py-1 rounded-md bg-white dark:bg-slate-600 text-[#27ae60] dark:text-green-400 shadow-sm transition-all";
+                btnEN.className = "px-2.5 py-1 rounded-md text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-all";
+            } else {
+                btnEN.className = "px-2.5 py-1 rounded-md bg-white dark:bg-slate-600 text-[#27ae60] dark:text-green-400 shadow-sm transition-all";
+                btnIN.className = "px-2.5 py-1 rounded-md text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-all";
+            }
+
+            // Update status text if default/idle
+            if (readerState === 'STOPPED' && textChunks.length === 0) {
+                statusEl.textContent = t.statusWaiting;
+                textContentEl.textContent = t.defaultTextContent;
+            } else if (readerState === 'STOPPED' && textChunks.length > 0) {
+                statusEl.textContent = t.statusLoaded(pdfNumPages);
+            }
+
+            populateVoices();
+        }
+
+        function populateVoices() {
+            voices = synth.getVoices();
+            voiceSelect.innerHTML = '';
+            const t = i18n[currentLang];
+            
+            if (voices.length === 0) {
+                const option = document.createElement('option');
+                option.textContent = t.voiceLoading;
+                voiceSelect.appendChild(option);
+                return;
+            }
+
+            const langCode = currentLang === 'id' ? 'id' : 'en';
+
+            voices.sort((a, b) => {
+                const isAMatch = a.lang.toLowerCase().includes(langCode);
+                const isBMatch = b.lang.toLowerCase().includes(langCode);
+                return isBMatch - isAMatch;
+            });
+
+            voices.forEach((voice, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = `${voice.name} (${voice.lang})`;
+                
+                if (voice.lang.toLowerCase().includes(langCode)) {
+                    option.selected = true;
+                }
+
+                voiceSelect.appendChild(option);
+            });
+        }
+
+        populateVoices();
+        if (synth.onvoiceschanged !== undefined) {
+            synth.onvoiceschanged = populateVoices;
+        }
+
+        function normalizePDFText(text) {
+            let cleanText = text;
+            cleanText = cleanText.replace(/-\s*\n/g, "");
+            cleanText = cleanText.replace(/-\s+/g, "");
+            cleanText = cleanText.replace(/\s{2,}/g, " ");
+            cleanText = cleanText.replace(/[^\w\s.,?!;:()'"-]/g, ' ');
+            return cleanText.trim();
+        }
+
+        function splitTextIntoChunks(text, maxLength = 250) {
+            const sentences = text.match(/[^.!?]+[.!?]+(\s|$)/g) || [text];
+            let chunks = [];
+            let currentChunk = "";
+
+            sentences.forEach(sentence => {
+                if ((currentChunk + sentence).length <= maxLength) {
+                    currentChunk += sentence;
+                } else {
+                    if (currentChunk.trim()) chunks.push(currentChunk.trim());
+                    currentChunk = sentence;
+                }
+            });
+            if (currentChunk.trim()) chunks.push(currentChunk.trim());
+            return chunks;
+        }
+
+        pdfUpload.addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const t = i18n[currentLang];
+            statusEl.textContent = t.statusReading;
+            textContentEl.textContent = t.statusProcessing;
+            
+            readerState = 'STOPPED';
+            synth.cancel();
+            silentAudio.pause();
+            currentChunkIndex = 0;
+
+            const fileReader = new FileReader();
+            fileReader.onload = async function() {
+                try {
+                    const typedarray = new Uint8Array(this.result);
+                    const pdf = await pdfjsLib.getDocument(typedarray).promise;
+                    pdfNumPages = pdf.numPages;
+                    let fullText = '';
+
+                    for (let i = 1; i <= pdf.numPages; i++) {
+                        const page = await pdf.getPage(i);
+                        const textContent = await page.getTextContent();
+                        let lastY, textItem;
+                        let pageText = "";
+                        
+                        for (let j = 0; j < textContent.items.length; j++) {
+                            textItem = textContent.items[j];
+                            if (lastY == textItem.transform[5] || !lastY){
+                                pageText += textItem.str + " ";
+                            } else{
+                                pageText += '\n' + textItem.str + " ";
+                            }
+                            lastY = textItem.transform[5];
+                        }
+                        fullText += pageText + '\n\n';
+                    }
+
+                    fullText = normalizePDFText(fullText);
+                    textChunks = splitTextIntoChunks(fullText, 250);
+                    currentChunkIndex = 0;
+
+                    textContentEl.textContent = fullText;
+                    statusEl.textContent = t.statusLoaded(pdfNumPages);
+                    playBtn.disabled = false;
+                    playBtn.textContent = t.playBtn;
+                } catch (error) {
+                    console.error(error);
+                    statusEl.textContent = t.statusError;
+                    textContentEl.textContent = t.statusParsingError;
+                }
+            };
+            fileReader.readAsArrayBuffer(file);
+        });
+
+        function setupMediaSession() {
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: 'PDF Voice Reader',
+                    artist: 'Nusacoin Voice',
+                    album: 'Dokumen Aktif'
+                });
+
+                navigator.mediaSession.setActionHandler('play', function() { playBtn.click(); });
+                navigator.mediaSession.setActionHandler('pause', function() { pauseBtn.click(); });
+                navigator.mediaSession.setActionHandler('stop', function() { stopBtn.click(); });
+            }
+        }
+
+        function playNextChunk() {
+            const t = i18n[currentLang];
+            if (readerState !== 'PLAYING') return;
+
+            if (currentChunkIndex >= textChunks.length) {
+                statusEl.textContent = t.statusFinished;
+                playBtn.disabled = false;
+                playBtn.textContent = t.playBtn;
+                pauseBtn.disabled = true;
+                stopBtn.disabled = true;
+                readerState = 'STOPPED';
+                currentChunkIndex = 0;
+                silentAudio.pause();
+                if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'none';
+                return;
+            }
+
+            const utterance = new SpeechSynthesisUtterance(textChunks[currentChunkIndex]);
+            
+            const selectedVoiceIndex = voiceSelect.value;
+            if (selectedVoiceIndex !== '' && voices[selectedVoiceIndex]) {
+                utterance.voice = voices[selectedVoiceIndex];
+                utterance.lang = voices[selectedVoiceIndex].lang;
+            } else {
+                utterance.lang = currentLang === 'id' ? 'id-ID' : 'en-US';
+            }
+
+            utterance.onstart = function() {
+                if (readerState !== 'PLAYING') return;
+                statusEl.textContent = t.statusReadingChunk(currentChunkIndex + 1, textChunks.length);
+                pauseBtn.disabled = false;
+                stopBtn.disabled = false;
+                playBtn.disabled = true;
+                if ('mediaSession' in navigator) {
+                    navigator.mediaSession.playbackState = 'playing';
+                }
+            };
+
+            utterance.onend = function() {
+                if (readerState === 'PLAYING') {
+                    currentChunkIndex++;
+                    playNextChunk();
+                }
+            };
+
+            utterance.onerror = function(e) {
+                if (e.error === 'canceled' || e.error === 'interrupted') {
+                    return;
+                }
+
+                if (readerState !== 'PLAYING') return;
+
+                console.error("Speech error:", e);
+                statusEl.textContent = t.statusErrorReading;
+                playBtn.disabled = false;
+                pauseBtn.disabled = true;
+                stopBtn.disabled = true;
+                readerState = 'STOPPED';
+                silentAudio.pause();
+                if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'none';
+            };
+
+            synth.speak(utterance);
+        }
+
+        playBtn.addEventListener('click', function() {
+            if (textChunks.length === 0) return;
+            
+            setupMediaSession();
+            silentAudio.play().catch(e => console.log("Audio background lock prevented:", e));
+            
+            if (readerState === 'STOPPED') {
+                currentChunkIndex = 0;
+            }
+
+            readerState = 'PLAYING';
+            synth.cancel();
+
+            setTimeout(() => {
+                playNextChunk();
+            }, 200); 
+        });
+
+        pauseBtn.addEventListener('click', function() {
+            const t = i18n[currentLang];
+            if (readerState === 'PLAYING') {
+                readerState = 'PAUSED';
+                synth.cancel();
+                silentAudio.pause();
+                
+                statusEl.textContent = t.statusPaused;
+                playBtn.disabled = false;
+                playBtn.textContent = t.resumeBtn;
+                pauseBtn.disabled = true;
+                if ('mediaSession' in navigator) {
+                    navigator.mediaSession.playbackState = 'paused';
+                }
+            }
+        });
+
+        stopBtn.addEventListener('click', function() {
+            const t = i18n[currentLang];
+            readerState = 'STOPPED';
+            currentChunkIndex = 0;
+            synth.cancel();
+            silentAudio.pause();
+            
+            statusEl.textContent = t.statusStopped;
+            playBtn.disabled = false;
+            playBtn.textContent = t.playBtn;
+            pauseBtn.disabled = true;
+            stopBtn.disabled = true;
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.playbackState = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

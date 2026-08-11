@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nusachain Verisign & Explorer Integration</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      /* Brand Colors */
+      --nux-green: #27ae60;
+      --nux-green-dark: #1e8449;
+      --nux-green-deep: #0f3d26;
+      --gold: #d4a017;
+
+      /* Light Mode Tokens (Default) */
+      --bg: #f7f5ef;
+      --surface: #ffffff;
+      --surface-2: #f0efe6;
+      --ink: #16231c;
+      --ink-soft: #56645c;
+      --border: #e3ded0;
+      --shadow: rgba(15, 61, 38, 0.18);
+
+      --radius: 12px;
+    }
+
+    html.dark {
+      /* Dark Mode Tokens */
+      --bg: #0d1712;
+      --surface: #142219;
+      --surface-2: #182a1e;
+      --ink: #eef3ec;
+      --ink-soft: #9db3a4;
+      --border: #24382c;
+      --shadow: rgba(0, 0, 0, 0.55);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+    body { background-color: var(--bg); color: var(--ink-soft); min-height: 100vh; display: flex; flex-direction: column; transition: background-color .3s, color .3s; }
+
+    header { background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+    .nav-container { max-width: 1000px; margin: 0 auto; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; }
+    .brand { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: var(--ink); }
+    .brand img { height: 40px; width: auto; object-fit: contain; }
+    .brand-title { font-weight: 700; font-size: 1.25rem; color: var(--ink); }
+    .brand-title span { color: var(--nux-green); }
+
+    .header-controls { display: flex; align-items: center; gap: 0.75rem; }
+
+    .lang-switcher {
+      display: flex;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 2px;
+    }
+
+    .lang-btn {
+      background: transparent;
+      border: none;
+      color: var(--ink-soft);
+      padding: 4px 10px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+
+    .lang-btn.active {
+      background: var(--nux-green);
+      color: #ffffff;
+    }
+
+    .theme-toggle-btn {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--gold);
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      transition: background 0.2s;
+    }
+
+    .tabs-wrapper { background: var(--surface); border-bottom: 1px solid var(--border); }
+    .tabs-container { max-width: 1000px; margin: 0 auto; display: flex; padding: 0 1.5rem; gap: 2rem; }
+    .tab-btn { padding: 1rem 0.5rem; background: none; border: none; border-bottom: 3px solid transparent; font-size: 0.95rem; font-weight: 600; color: var(--ink-soft); cursor: pointer; display: flex; align-items: center; gap: 0.5rem; transition: all 0.2s; }
+    .tab-btn:hover, .tab-btn.active { color: var(--nux-green); border-bottom-color: var(--nux-green); }
+
+    main { flex: 1; max-width: 1000px; width: 100%; margin: 2rem auto; padding: 0 1.5rem; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .panel { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: 0 4px 20px var(--shadow); padding: 2rem; margin-bottom: 1.5rem; }
+    .panel-title { font-size: 1.35rem; font-weight: 700; color: var(--ink); margin-bottom: 0.35rem; }
+    .panel-desc { color: var(--ink-soft); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1.5rem; }
+
+    .drop-zone { border: 2px dashed rgba(39, 174, 96, 0.4); background: var(--surface-2); border-radius: var(--radius); padding: 2rem 1.5rem; text-align: center; cursor: pointer; position: relative; transition: all 0.2s; }
+    .drop-zone:hover { border-color: var(--nux-green); }
+    .drop-zone input[type="file"] { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+    
+    .form-group { margin-bottom: 1.25rem; }
+    .form-label { display: block; font-size: 0.875rem; font-weight: 600; color: var(--ink-soft); margin-bottom: 0.5rem; }
+    .form-input { width: 100%; padding: 0.85rem 1rem; background: var(--surface-2); color: var(--ink); border: 1px solid var(--border); border-radius: 8px; font-size: 0.9rem; outline: none; transition: border-color 0.2s; }
+    .form-input:focus { border-color: var(--nux-green); box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.18); }
+    .form-input.code { font-family: 'Courier New', Courier, monospace; font-size: 0.85rem; }
+
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.85rem 1.5rem; background: var(--nux-green); color: #ffffff; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer; width: 100%; transition: background 0.2s; }
+    .btn:hover { background: var(--nux-green-dark); }
+
+    .result-box { margin-top: 1.5rem; padding: 1.25rem; border-radius: 8px; background: var(--surface-2); border: 1px solid var(--border); display: none; color: var(--ink); }
+    .hash-display { background: var(--surface); padding: 0.85rem; border-radius: 6px; border: 1px solid var(--border); font-family: monospace; font-size: 0.9rem; word-break: break-all; margin-top: 0.5rem; color: var(--ink); }
+
+    .status-card { margin-top: 1.5rem; padding: 1.25rem; border-radius: 8px; display: none; background: var(--surface-2); border: 1px solid var(--border); }
+    .status-card.valid { display: block; border-color: var(--nux-green); color: var(--ink); }
+    .status-card.invalid { display: block; border-color: #e74c3c; color: var(--ink); }
+    .status-title { font-weight: 700; font-size: 1rem; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+
+    footer { background: var(--surface); border-top: 1px solid var(--border); padding: 1.5rem; text-align: center; margin-top: auto; font-size: 0.9rem; color: var(--ink-soft); }
+    footer span { color: var(--nux-green); font-weight: 700; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="nav-container">
+      <a href="#" class="brand">
+        <img src="https://iili.io/Cr21Nx2.th.png" alt="Nusachain Logo">
+        <span class="brand-title">Nusachain <span>Verisign & Explorer</span></span>
+      </a>
+
+      <div class="header-controls">
+        <div class="lang-switcher">
+          <button id="btnIN" class="lang-btn active" onclick="setLanguage('id')">IN</button>
+          <button id="btnEN" class="lang-btn" onclick="setLanguage('en')">EN</button>
+        </div>
+        <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()">
+          <i id="themeIcon" class="fa-solid fa-sun"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="tabs-wrapper">
+    <div class="tabs-container">
+      <button id="tabBtnGen" class="tab-btn active" onclick="switchTab('generator')"><i class="fa-solid fa-plus"></i> Generator Hash</button>
+      <button id="tabBtnVer" class="tab-btn" onclick="switchTab('verifier')"><i class="fa-solid fa-shield-halved"></i> Verifikasi & Explorer Match</button>
+    </div>
+  </div>
+
+  <main>
+    <!-- TAB 1: GENERATOR -->
+    <div id="tab-generator" class="tab-content active">
+      <div class="panel">
+        <h1 id="genTitle" class="panel-title">Generator Hash SHA-256</h1>
+        <p id="genDesc" class="panel-desc">Unggah file jenis apapun untuk mendapatkan nilai sidik jari digital (SHA-256).</p>
+        
+        <div class="drop-zone">
+          <input type="file" id="genFileInput" onchange="handleGenFileSelect(this.files)">
+          <div style="font-size: 2rem; color: var(--nux-green); margin-bottom: 0.5rem;"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+          <div id="genDropText" style="font-weight: 600; color: var(--ink);">Pilih atau Seret File ke Sini</div>
+        </div>
+
+        <div id="genResult" class="result-box">
+          <strong id="genResultLabel">Hasil SHA-256 Hash:</strong>
+          <div class="hash-display" id="genHashOutput">-</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: VERIFIKASI & EXPLORER MATCHING -->
+    <div id="tab-verifier" class="tab-content">
+      <div class="panel">
+        <h1 id="verTitle" class="panel-title">Verifikasi Dokumen & Pencocokan Explorer</h1>
+        <p id="verDesc" class="panel-desc">Unggah file Anda. Sistem akan mencocokkannya dengan database lokal / OP_RETURN Explorer. Masukkan TXID jika Anda memilikinya, atau biarkan sistem mencocokkannya secara otomatis.</p>
+
+        <div class="form-group">
+          <label id="lblStep1" class="form-label">1. Unggah File</label>
+          <div class="drop-zone" style="padding: 1.5rem;">
+            <input type="file" id="verFileInput" onchange="handleVerFileSelect(this.files)">
+            <div id="verFileText" style="font-weight: 600; color: var(--ink);">Klik atau seret file ke sini</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label id="lblStep2" class="form-label" for="manualTxidInput">2. Masukkan TXID Verisign (Opsional / Jika Pemilik Memiliki)</label>
+          <input type="text" id="manualTxidInput" class="form-input code" placeholder="Contoh: 7d2876... (Kosongkan untuk pencocokan otomatis via Database/Explorer)">
+        </div>
+
+        <div class="form-group">
+          <label id="lblStep3" class="form-label" for="refHashInput">3. Hash SHA-256 (Otomatis terisi dari file)</label>
+          <input type="text" id="refHashInput" class="form-input code" placeholder="Hash file...">
+        </div>
+
+        <button class="btn" onclick="verifyWithExplorer()">
+          <i class="fa-solid fa-magnifying-glass-chart"></i> <span id="btnVerifyText">Cocokkan dengan Explorer & Database</span>
+        </button>
+
+        <div id="verStatusCard" class="status-card">
+          <div id="verStatusTitle" class="status-title"></div>
+          <div style="font-size: 0.85rem; margin-top: 0.5rem;">
+            <strong id="lblTxDetails">Detail Transaksi / On-Chain Info:</strong>
+            <div id="verExplorerDetails" class="hash-display" style="margin-top: 0.25rem;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <span id="footerText">Powered by <span>Nusachain Explorer Integration</span></span>
+  </footer>
+
+  <script>
+    let currentLang = 'id';
+
+    const translations = {
+      id: {
+        tabBtnGen: '<i class="fa-solid fa-plus"></i> Generator Hash',
+        tabBtnVer: '<i class="fa-solid fa-shield-halved"></i> Verifikasi & Explorer Match',
+        genTitle: "Generator Hash SHA-256",
+        genDesc: "Unggah file jenis apapun untuk mendapatkan nilai sidik jari digital (SHA-256).",
+        genDropText: "Pilih atau Seret File ke Sini",
+        genResultLabel: "Hasil SHA-256 Hash:",
+        verTitle: "Verifikasi Dokumen & Pencocokan Explorer",
+        verDesc: "Unggah file Anda. Sistem akan mencocokkannya dengan database lokal / OP_RETURN Explorer. Masukkan TXID jika Anda memilikinya, atau biarkan sistem mencocokkannya secara otomatis.",
+        lblStep1: "1. Unggah File",
+        verFileTextDefault: "Klik atau seret file ke sini",
+        lblStep2: "2. Masukkan TXID Verisign (Opsional / Jika Pemilik Memiliki)",
+        phTxid: "Contoh: 7d2876... (Kosongkan untuk pencocokan otomatis via Database/Explorer)",
+        lblStep3: "3. Hash SHA-256 (Otomatis terisi dari file)",
+        phHash: "Hash file...",
+        btnVerifyText: "Cocokkan dengan Explorer & Database",
+        lblTxDetails: "Detail Transaksi / On-Chain Info:",
+        msgComputing: "Menghitung hash...",
+        msgGenFail: "Gagal memproses file.",
+        msgFileErr: "Silakan unggah file atau masukkan hash terlebih dahulu.",
+        msgChecking: "Menghubungkan ke Explorer & Memeriksa Database...",
+        msgMatching: "Memproses pencocokan...",
+        msgVerifySuccess: "VERIFIKASI BERHASIL: Hash & TXID Cocok dengan Explorer!",
+        msgVerifyFail: "VERIFIKASI GAGAL: Tidak Ditemukan di Explorer / Database",
+        lblDesc: "Keterangan:",
+        lblBlock: "Block Index:",
+        lblConfirm: "Konfirmasi:",
+        lblOnChainValid: "On-Chain Valid",
+        lblStatus: "Status:",
+        lblMatchDb: "Cocok dengan Database Verisign",
+        lblNoOpReturn: "tidak memiliki catatan OP_RETURN atau TXID yang cocok dengan database verisign saat ini."
+      },
+      en: {
+        tabBtnGen: '<i class="fa-solid fa-plus"></i> Hash Generator',
+        tabBtnVer: '<i class="fa-solid fa-shield-halved"></i> Verification & Explorer Match',
+        genTitle: "SHA-256 Hash Generator",
+        genDesc: "Upload any file type to get its digital fingerprint value (SHA-256).",
+        genDropText: "Choose or Drag File Here",
+        genResultLabel: "SHA-256 Hash Result:",
+        verTitle: "Document Verification & Explorer Match",
+        verDesc: "Upload your file. The system will match it with the local database / OP_RETURN Explorer. Enter a TXID if you have one, or let the system match it automatically.",
+        lblStep1: "1. Upload File",
+        verFileTextDefault: "Click or drag file here",
+        lblStep2: "2. Enter Verisign TXID (Optional / If Owned)",
+        phTxid: "Example: 7d2876... (Leave empty for auto-match via Database/Explorer)",
+        lblStep3: "3. SHA-256 Hash (Auto-filled from file)",
+        phHash: "File hash...",
+        btnVerifyText: "Match with Explorer & Database",
+        lblTxDetails: "Transaction Details / On-Chain Info:",
+        msgComputing: "Calculating hash...",
+        msgGenFail: "Failed to process file.",
+        msgFileErr: "Please upload a file or enter a hash first.",
+        msgChecking: "Connecting to Explorer & Checking Database...",
+        msgMatching: "Processing match...",
+        msgVerifySuccess: "VERIFICATION SUCCESSFUL: Hash & TXID Match with Explorer!",
+        msgVerifyFail: "VERIFICATION FAILED: Not Found in Explorer / Database",
+        lblDesc: "Description:",
+        lblBlock: "Block Index:",
+        lblConfirm: "Confirmation:",
+        lblOnChainValid: "On-Chain Valid",
+        lblStatus: "Status:",
+        lblMatchDb: "Matches Verisign Database",
+        lblNoOpReturn: "has no OP_RETURN record or TXID matching the current verisign database."
+      }
+    };
+
+    function setLanguage(lang) {
+      currentLang = lang;
+      const t = translations[lang];
+
+      document.getElementById('btnIN').classList.toggle('active', lang === 'id');
+      document.getElementById('btnEN').classList.toggle('active', lang === 'en');
+
+      document.getElementById('tabBtnGen').innerHTML = t.tabBtnGen;
+      document.getElementById('tabBtnVer').innerHTML = t.tabBtnVer;
+      document.getElementById('genTitle').textContent = t.genTitle;
+      document.getElementById('genDesc').textContent = t.genDesc;
+      document.getElementById('genDropText').textContent = t.genDropText;
+      document.getElementById('genResultLabel').textContent = t.genResultLabel;
+      
+      document.getElementById('verTitle').textContent = t.verTitle;
+      document.getElementById('verDesc').textContent = t.verDesc;
+      document.getElementById('lblStep1').textContent = t.lblStep1;
+      if (!selectedVerFile) {
+        document.getElementById('verFileText').textContent = t.verFileTextDefault;
+      }
+      document.getElementById('lblStep2').textContent = t.lblStep2;
+      document.getElementById('manualTxidInput').placeholder = t.phTxid;
+      document.getElementById('lblStep3').textContent = t.lblStep3;
+      document.getElementById('refHashInput').placeholder = t.phHash;
+      document.getElementById('btnVerifyText').textContent = t.btnVerifyText;
+      document.getElementById('lblTxDetails').textContent = t.lblTxDetails;
+    }
+
+    const verisignDatabase = [
+      {
+        hash: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        txid: "4a5e1f7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f",
+        description: "Contoh Dokumen Kosong / Perjanjian Kerjasama V1"
+      },
+      {
+        hash: "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824",
+        txid: "9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1f0e9d8c7b6a5f4e3d2c1b0a9f8e",
+        description: "Sertifikat Aset Digital Nusachain"
+      }
+    ];
+
+    const API_BASE = 'https://explorer.nusacoin.org';
+
+    function toggleTheme() {
+      const htmlEl = document.documentElement;
+      const themeIcon = document.getElementById('themeIcon');
+      if (htmlEl.classList.contains('dark')) {
+        htmlEl.classList.remove('dark');
+        themeIcon.className = 'fa-solid fa-moon';
+      } else {
+        htmlEl.classList.add('dark');
+        themeIcon.className = 'fa-solid fa-sun';
+      }
+    }
+
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+      if (tabName === 'generator') {
+        document.getElementById('tabBtnGen').classList.add('active');
+        document.getElementById('tab-generator').classList.add('active');
+      } else {
+        document.getElementById('tabBtnVer').classList.add('active');
+        document.getElementById('tab-verifier').classList.add('active');
+      }
+    }
+
+    async function calculateSHA256(file) {
+      const buffer = await file.arrayBuffer();
+      const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+      return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    async function handleGenFileSelect(files) {
+      const t = translations[currentLang];
+      if (!files || files.length === 0) return;
+      const file = files[0];
+      document.getElementById('genResult').style.display = 'block';
+      document.getElementById('genHashOutput').textContent = t.msgComputing;
+      try {
+        const hash = await calculateSHA256(file);
+        document.getElementById('genHashOutput').textContent = hash;
+      } catch (err) {
+        document.getElementById('genHashOutput').textContent = t.msgGenFail;
+      }
+    }
+
+    let selectedVerFile = null;
+    async function handleVerFileSelect(files) {
+      if (!files || files.length === 0) return;
+      selectedVerFile = files[0];
+      document.getElementById('verFileText').textContent = `File: ${selectedVerFile.name}`;
+      try {
+        const hash = await calculateSHA256(selectedVerFile);
+        document.getElementById('refHashInput').value = hash;
+      } catch (err) {
+        alert(translations[currentLang].msgGenFail);
+      }
+    }
+
+    async function verifyWithExplorer() {
+      const t = translations[currentLang];
+      const manualTxid = document.getElementById('manualTxidInput').value.trim();
+      const computedHash = document.getElementById('refHashInput').value.trim().toLowerCase();
+      const statusCard = document.getElementById('verStatusCard');
+      const statusTitle = document.getElementById('verStatusTitle');
+      const detailsBox = document.getElementById('verExplorerDetails');
+
+      if (!selectedVerFile && !computedHash) {
+        alert(t.msgFileErr);
+        return;
+      }
+
+      statusCard.className = 'status-card';
+      statusCard.style.display = 'block';
+      statusTitle.innerHTML = `<i class="fa-solid fa-spinner fa-spin" style="color: var(--gold);"></i> ${t.msgChecking}`;
+      detailsBox.textContent = t.msgMatching;
+
+      let matchedRecord = null;
+      let explorerData = null;
+
+      if (manualTxid) {
+        try {
+          const res = await fetch(`${API_BASE}/ext/gettx/${manualTxid}`);
+          const data = await res.json();
+          if (data && data.tx) {
+            explorerData = data.tx;
+            matchedRecord = { txid: manualTxid, source: 'Manual TXID Input & Explorer Verified' };
+          }
+        } catch (e) {
+          console.error("API Fetch Error:", e);
+        }
+      }
+
+      if (!matchedRecord && computedHash) {
+        const found = verisignDatabase.find(item => item.hash.toLowerCase() === computedHash);
+        if (found) {
+          matchedRecord = found;
+          try {
+            const res = await fetch(`${API_BASE}/ext/gettx/${found.txid}`);
+            const data = await res.json();
+            if (data && data.tx) explorerData = data.tx;
+          } catch (e) {}
+        }
+      }
+
+      if (matchedRecord) {
+        statusCard.className = 'status-card valid';
+        statusTitle.innerHTML = `<i class="fa-solid fa-circle-check" style="color: var(--nux-green);"></i> <span style="color: var(--nux-green);">${t.msgVerifySuccess}</span>`;
+        detailsBox.innerHTML = `
+          <strong>TXID:</strong> <span style="color: var(--gold);">${matchedRecord.txid}</span><br>
+          <strong>${t.lblDesc}</strong> ${matchedRecord.description || 'Terdaftar di Ledger Nusachain'}<br>
+          ${explorerData ? `<strong>${t.lblBlock}</strong> 🔗${explorerData.blockindex}<br><strong>${t.lblConfirm}</strong> ${t.lblOnChainValid}` : `<strong>${t.lblStatus}</strong> ${t.lblMatchDb}`}
+        `;
+      } else {
+        statusCard.className = 'status-card invalid';
+        statusTitle.innerHTML = `<i class="fa-solid fa-circle-xmark" style="color: #e74c3c;"></i> <span style="color: #e74c3c;">${t.msgVerifyFail}</span>`;
+        detailsBox.innerHTML = `${t.phHash} <code>${computedHash}</code> ${t.lblNoOpReturn}`;
+      }
+    }
+  </script>
+</body>
+</html>

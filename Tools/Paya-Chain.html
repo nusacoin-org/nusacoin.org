@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paya-Chain | Integrasi Explorer & Verifikasi Universal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <style>
+        /* DEFINISI COLOR TOKENS */
+        :root {
+            /* Brand & Hardcoded Colors */
+            --nux-green: #27ae60;
+            --nux-green-dark: #1e8449;
+            --nux-green-deep: #0f3d26;
+            --gold: #d4a017;
+            --white: #ffffff;
+            --green-pale: #eafff2;
+
+            /* Transparencies */
+            --green-ring: rgba(39, 174, 96, 0.18);
+            --green-shadow: rgba(39, 174, 96, 0.55);
+            --deep-shadow: rgba(15, 61, 38, 0.55);
+
+            /* Light Mode Tokens (Default) */
+            --bg: #f7f5ef;
+            --surface: #ffffff;
+            --surface-2: #f0efe6;
+            --ink: #16231c;
+            --ink-soft: #56645c;
+            --border: #e3ded0;
+            --shadow: rgba(15, 61, 38, 0.18);
+        }
+
+        html[data-theme="dark"] {
+            /* Dark Mode Tokens */
+            --bg: #0d1712;
+            --surface: #142219;
+            --surface-2: #182a1e;
+            --ink: #eef3ec;
+            --ink-soft: #9db3a4;
+            --border: #24382c;
+            --shadow: rgba(0, 0, 0, 0.55);
+        }
+
+        /* PEMETAAN VARIABEL PADA ELEMENT */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--ink);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .custom-header {
+            background-color: var(--surface);
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 4px 6px -1px var(--shadow);
+        }
+
+        .custom-card {
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 15px -3px var(--shadow);
+        }
+
+        .custom-inner-card {
+            background-color: var(--surface-2);
+            border: 1px solid var(--border);
+        }
+
+        .text-main { color: var(--ink); }
+        .text-soft { color: var(--ink-soft); }
+        .text-brand { color: var(--nux-green); }
+
+        .btn-brand {
+            background-color: var(--nux-green);
+            color: var(--white);
+        }
+        .btn-brand:hover {
+            background-color: var(--nux-green-dark);
+        }
+
+        .badge-brand {
+            background-color: var(--green-pale);
+            color: var(--nux-green-dark);
+            border: 1px solid var(--nux-green);
+        }
+
+        html[data-theme="dark"] .badge-brand {
+            background-color: var(--nux-green-deep);
+            color: var(--green-pale);
+            border: 1px solid var(--nux-green-dark);
+        }
+
+        .badge-gold {
+            background-color: rgba(212, 160, 23, 0.15);
+            color: var(--gold);
+            border: 1px solid var(--gold);
+        }
+
+        .custom-input {
+            background-color: var(--surface);
+            color: var(--ink);
+            border: 1px solid var(--border);
+        }
+        .custom-input:focus {
+            box-shadow: 0 0 0 3px var(--green-ring);
+            border-color: var(--nux-green);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+    <!-- HEADER -->
+    <header class="custom-header p-4 sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="btn-brand p-2.5 rounded-xl font-bold tracking-wider text-sm shadow-md">PAYA</div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-main">Paya-Chain Explorer</h1>
+                    <p class="text-xs text-soft" data-lang-key="sub-header">Verifikasi Dokumen & Pencocokan OP_RETURN Blockchain</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <!-- Toggle Mode Terang/Gelap -->
+                <button onclick="toggleTheme()" class="custom-inner-card px-3 py-1.5 rounded-lg text-xs font-semibold text-main hover:opacity-80 transition-opacity">
+                    <span id="theme-icon">🌙</span> <span id="theme-text">Dark</span>
+                </button>
+
+                <div class="custom-inner-card rounded-full px-4 py-1.5 text-xs flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span class="font-semibold text-main">Nusacoin Mainnet</span>
+                </div>
+                <div class="flex gap-1 custom-inner-card p-1 rounded-lg text-xs font-semibold">
+                    <button id="btn-id" onclick="switchLanguage('id')" class="px-2.5 py-1 btn-brand rounded-md transition-colors">ID</button>
+                    <button id="btn-en" onclick="switchLanguage('en')" class="px-2.5 py-1 text-soft hover:text-main transition-colors">EN</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="max-w-5xl w-full mx-auto p-4 my-auto space-y-6">
+        <div class="text-center my-6">
+            <span class="text-xs font-bold uppercase tracking-widest badge-brand px-3.5 py-1.5 rounded-full" data-lang-key="system-badge">Sistem Transparansi Desa Paya</span>
+            <h2 class="text-2xl sm:text-3xl font-extrabold mt-3 text-main" data-lang-key="village-name">Desa Paya, Aceh</h2>
+            <p class="text-sm font-medium mt-1 text-soft" data-lang-key="sub-district">Kecamatan Seunagan Timur, Kabupaten Nagan Raya</p>
+        </div>
+
+        <div class="custom-card rounded-2xl p-6 md:p-8 space-y-6">
+            
+            <!-- FORM INPUT MANUAL TXID & UPLOAD FILE UNIVERSAL -->
+            <div class="custom-inner-card p-5 rounded-xl space-y-4">
+                <h3 class="font-bold text-sm flex items-center gap-2 text-main">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    Pencocokan Langsung (TxID atau Unggah File Apa Saja)
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Input Manual TxID -->
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold text-soft">Masukkan TxID / Database Paya Chain:</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="manual-txid" placeholder="Contoh: 3a4f... atau txid database" class="w-full text-xs p-2.5 rounded-lg custom-input outline-none font-mono">
+                            <button onclick="verifyManualTxid()" class="btn-brand px-4 py-2 rounded-lg text-xs font-bold transition">Cari</button>
+                        </div>
+                    </div>
+                    <!-- Upload File -->
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold text-soft">Unggah File (PDF, DOCX, JPG, dll) untuk Dicocokkan:</label>
+                        <input type="file" id="universal-file-input" onchange="handleUniversalFile(event)" class="w-full text-xs p-1.5 rounded-lg custom-input file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-emerald-100 file:text-emerald-800 hover:file:bg-emerald-200">
+                    </div>
+                </div>
+            </div>
+
+            <!-- MENU UTAMA PILIHAN DOKUMEN -->
+            <div id="menu-section" class="space-y-6">
+                <div class="border-b style-border pb-4" style="border-color: var(--border);">
+                    <h3 class="text-xl font-bold text-main" data-lang-key="choose-doc">Pilih Jenis Dokumen & QR Scanner</h3>
+                    <p class="text-xs sm:text-sm text-soft mt-1" data-lang-key="choose-doc-desc">Verifikasi dokumen fisik melalui pemindaian QR Code resmi</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Card 1: Identitas Penduduk -->
+                    <button onclick="startScanner('identitas')" class="flex flex-col justify-between text-left p-6 rounded-2xl custom-inner-card hover:border-[#27ae60] transition-all duration-200 group shadow-sm">
+                        <div class="flex items-start gap-4 mb-6">
+                            <div class="btn-brand p-3.5 rounded-xl shadow-md group-hover:scale-105 transition-transform">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                            </div>
+                            <div>
+                                <h4 class="font-extrabold text-lg text-main" data-lang-key="card1-title">Identitas Penduduk</h4>
+                                <p class="text-xs text-soft mt-1 leading-relaxed" data-lang-key="card1-desc">Verifikasi Surat Pengantar, Domisili, KTP/KK Desa Paya.</p>
+                            </div>
+                        </div>
+                        <span class="text-brand text-sm font-bold flex items-center gap-1.5 group-hover:translate-x-1 transition-transform"><span data-lang-key="scan-btn">Scan QR Code</span> &rarr;</span>
+                    </button>
+
+                    <!-- Card 2: Bantuan & Legalitas -->
+                    <button onclick="startScanner('bantuan')" class="flex flex-col justify-between text-left p-6 rounded-2xl custom-inner-card hover:border-[#d4a017] transition-all duration-200 group shadow-sm">
+                        <div class="flex items-start gap-4 mb-6">
+                            <div class="p-3.5 rounded-xl shadow-md group-hover:scale-105 transition-transform" style="background-color: var(--gold); color: #fff;">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            </div>
+                            <div>
+                                <h4 class="font-extrabold text-lg text-main" data-lang-key="card2-title">Bantuan & Legalitas</h4>
+                                <p class="text-xs text-soft mt-1 leading-relaxed" data-lang-key="card2-desc">Verifikasi Transparansi Dana Desa, Penerima BLT, & SK.</p>
+                            </div>
+                        </div>
+                        <span class="text-sm font-bold flex items-center gap-1.5 group-hover:translate-x-1 transition-transform" style="color: var(--gold);"><span data-lang-key="scan-btn">Scan QR Code</span> &rarr;</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAMPILAN AREA SCANNER -->
+            <div id="scanner-section" class="hidden space-y-4">
+                <div class="flex justify-between items-center border-b pb-3" style="border-color: var(--border);">
+                    <div>
+                        <h3 class="text-lg font-bold text-main" data-lang-key="scanning-title">Memindai QR Dokumen</h3>
+                        <p id="scan-category" class="text-xs text-brand font-bold"></p>
+                    </div>
+                    <button onclick="stopScanner()" class="text-xs font-bold custom-inner-card px-4 py-2 rounded-lg text-main transition-colors">
+                        <span data-lang-key="back-btn">Kembali</span>
+                    </button>
+                </div>
+                
+                <div class="custom-inner-card rounded-2xl overflow-hidden max-w-md mx-auto aspect-square relative shadow-inner">
+                    <div id="reader" class="w-full h-full"></div>
+                </div>
+
+                <div class="max-w-md mx-auto text-center pt-2">
+                    <p class="text-xs text-soft font-medium mb-3" data-lang-key="scan-instruction">Posisikan kode QR di dalam kotak kamera.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="custom-header p-6 text-center text-xs text-soft mt-12">
+        <div class="max-w-5xl mx-auto space-y-2 font-medium">
+            <p data-lang-key="footer-copy">&copy; 2026 Pemerintah Desa Paya, Seunagan Timur, Nagan Raya. Semua Hak Dilindungi.</p>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // LOGIKA MODE TAMPILAN (LIGHT / DARK)
+        function toggleTheme() {
+            const htmlTag = document.documentElement;
+            const currentTheme = htmlTag.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            htmlTag.setAttribute('data-theme', newTheme);
+            document.getElementById('theme-icon').innerText = newTheme === 'dark' ? '☀️' : '🌙';
+            document.getElementById('theme-text').innerText = newTheme === 'dark' ? 'Light' : 'Dark';
+        }
+
+        // DATABASE PAYA CHAIN
+        const PAYA_CHAIN_DATABASE = [
+            {
+                txid: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                docName: "SK_Kelahiran_DesaPaya_01.pdf",
+                category: "identitas",
+                description: "Arsip Surat Keterangan Kelahiran Warga Desa Paya"
+            },
+            {
+                txid: "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918",
+                docName: "BLT_Penerima_Tahap1.xlsx",
+                category: "bantuan",
+                description: "Daftar Transparansi Penerima Bantuan Langsung Tunai"
+            },
+            {
+                txid: "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+                docName: "Domisili_Ahmad_2026.pdf",
+                category: "identitas",
+                description: "Surat Keterangan Domisili Resmi"
+            }
+        ];
+
+        let html5QrcodeScanner = null;
+        const TARGET_EXPLORER_HOST = "explorer.nusacoin.org";
+        const QR_PREFIX = "PAYACHAIN#";
+        let currentLang = 'id';
+
+        const translations = {
+            id: {
+                "sub-header": "Verifikasi Dokumen & Pencocokan OP_RETURN Blockchain",
+                "system-badge": "Sistem Transparansi Desa Paya",
+                "village-name": "Desa Paya, Aceh",
+                "sub-district": "Kecamatan Seunagan Timur, Kabupaten Nagan Raya",
+                "choose-doc": "Pilih Jenis Dokumen & QR Scanner",
+                "choose-doc-desc": "Verifikasi dokumen fisik melalui pemindaian QR Code resmi",
+                "card1-title": "Identitas Penduduk",
+                "card1-desc": "Verifikasi Surat Pengantar, Domisili, KTP/KK Desa Paya.",
+                "card2-title": "Bantuan & Legalitas",
+                "card2-desc": "Verifikasi Transparansi Dana Desa, Penerima BLT, & SK.",
+                "scan-btn": "Scan QR Code",
+                "scanning-title": "Memindai QR Dokumen",
+                "back-btn": "Kembali",
+                "scan-instruction": "Posisikan kode QR di dalam kotak kamera."
+            },
+            en: {
+                "sub-header": "Document Verification & Blockchain OP_RETURN Matching",
+                "system-badge": "Paya Village Transparency System",
+                "village-name": "Paya Village, Aceh",
+                "sub-district": "East Seunagan District, Nagan Raya Regency",
+                "choose-doc": "Select Document Type & QR Scanner",
+                "choose-doc-desc": "Verify physical documents via official QR Code scanning",
+                "card1-title": "Citizen Identity",
+                "card1-desc": "Verify Cover Letters, Domicile, National ID/Family Cards.",
+                "card2-title": "Social Aid & Legality",
+                "card2-desc": "Verify Village Fund Transparency, Cash Assistance (BLT), & Decrees.",
+                "scan-btn": "Scan QR Code",
+                "scanning-title": "Scanning Document QR",
+                "back-btn": "Back",
+                "scan-instruction": "Position the QR code inside the camera box."
+            }
+        };
+
+        const categoryTranslations = {
+            identitas: { id: "Identitas Penduduk (KK/KTP)", en: "Citizen Identity (ID/Family Card)" },
+            bantuan: { id: "Bantuan Sosial & Penerima Manfaat", en: "Social Aid & Beneficiary" }
+        };
+
+        let activeCategoryKey = "";
+
+        function switchLanguage(lang) {
+            currentLang = lang;
+            document.getElementById('btn-id').className = lang === 'id' ? "px-2.5 py-1 btn-brand rounded-md transition-colors" : "px-2.5 py-1 text-soft hover:text-main transition-colors";
+            document.getElementById('btn-en').className = lang === 'en' ? "px-2.5 py-1 btn-brand rounded-md transition-colors" : "px-2.5 py-1 text-soft hover:text-main transition-colors";
+
+            document.querySelectorAll('[data-lang-key]').forEach(element => {
+                const key = element.getAttribute('data-lang-key');
+                if (translations[lang][key]) element.innerText = translations[lang][key];
+            });
+            if (activeCategoryKey) document.getElementById('scan-category').innerText = categoryTranslations[activeCategoryKey][currentLang];
+        }
+
+        function verifyManualTxid() {
+            const txid = document.getElementById('manual-txid').value.trim();
+            if (!txid) {
+                alert("Masukkan TxID atau hash database terlebih dahulu!");
+                return;
+            }
+
+            const matchedDb = PAYA_CHAIN_DATABASE.find(item => item.txid.toLowerCase() === txid.toLowerCase());
+            if (matchedDb) {
+                alert(`✅ Dokumen Ditemukan dalam Database Paya Chain!\n\nNama File: ${matchedDb.docName}\nKeterangan: ${matchedDb.description}`);
+            }
+
+            window.open(`https://${TARGET_EXPLORER_HOST}/tx/${txid}`, '_blank');
+        }
+
+        async function handleUniversalFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            try {
+                const buffer = await file.arrayBuffer();
+                const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                const fileHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+                const found = PAYA_CHAIN_DATABASE.find(item => item.txid.toLowerCase() === fileHash.toLowerCase());
+
+                if (found) {
+                    alert(`✅ File Cocok dengan Rekaman Blockchain!\n\nFile: ${found.docName}\nTxID: ${found.txid}`);
+                    window.open(`https://${TARGET_EXPLORER_HOST}/tx/${found.txid}`, '_blank');
+                } else {
+                    alert(`ℹ️ File diproses. Hash SHA-256: ${fileHash.substring(0, 16)}...\nMencocokkan dengan OP_RETURN Explorer Nusacoin.`);
+                    window.open(`https://${TARGET_EXPLORER_HOST}/tx/${fileHash}`, '_blank');
+                }
+            } catch (err) {
+                alert("Gagal membaca file untuk verifikasi kriptografi.");
+            }
+        }
+
+        function startScanner(categoryKey) {
+            activeCategoryKey = categoryKey;
+            document.getElementById('menu-section').classList.add('hidden');
+            document.getElementById('scanner-section').classList.remove('hidden');
+            document.getElementById('scan-category').innerText = categoryTranslations[categoryKey][currentLang];
+
+            html5QrcodeScanner = new Html5Qrcode("reader");
+            const config = { fps: 15, qrbox: (w, h) => { const m = Math.min(w, h); return { width: m * 0.7, height: m * 0.7 }; }, aspectRatio: 1.0 };
+
+            html5QrcodeScanner.start({ facingMode: "environment" }, config, 
+                (msg) => { stopScanner(); processScannedData(msg); }, 
+                () => {}
+            ).catch(() => {
+                alert("Gagal mengakses kamera perangkat.");
+            });
+        }
+
+        function showMainMenu() {
+            document.getElementById('scanner-section').classList.add('hidden');
+            document.getElementById('menu-section').classList.remove('hidden');
+            html5QrcodeScanner = null;
+        }
+
+        function stopScanner() {
+            if (html5QrcodeScanner) {
+                const s = html5QrcodeScanner; html5QrcodeScanner = null; showMainMenu();
+                s.stop().catch(() => {});
+            } else { showMainMenu(); }
+        }
+
+        function processScannedData(scannedText) {
+            let cleanText = scannedText.trim();
+
+            if (!cleanText.startsWith(QR_PREFIX)) {
+                alert("❌ Saringan Keamanan: QR Code ditolak! Bukan dokumen resmi Paya-Chain.");
+                showMainMenu();
+                return;
+            }
+
+            const dataParts = cleanText.split("#");
+            if (dataParts.length < 3) {
+                alert("Struktur kode QR tidak valid.");
+                showMainMenu();
+                return;
+            }
+
+            const qrCategory = dataParts[1].toLowerCase();
+            const blockchainHash = dataParts[2];
+
+            if (qrCategory !== activeCategoryKey) {
+                alert("Kategori dokumen tidak sesuai dengan menu yang dipilih.");
+                showMainMenu();
+                return;
+            }
+
+            window.location.href = `https://${TARGET_EXPLORER_HOST}/tx/${blockchainHash}`;
+        }
+    </script>
+</body>
+</html>

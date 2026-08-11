@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nusachain Verisign — Integrasi Explorer Testnet</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        colors: {
+          nuxGreen: 'var(--nux-green)',
+          nuxGreenDark: 'var(--nux-green-dark)',
+          nuxGreenDeep: 'var(--nux-green-deep)',
+          gold: 'var(--gold)',
+          themeBg: 'var(--bg)',
+          cardBg: 'var(--surface)',
+          cardBg2: 'var(--surface-2)',
+          borderBg: 'var(--border)',
+          textPrimary: 'var(--ink)',
+          textSecondary: 'var(--ink-soft)'
+        }
+      }
+    }
+  }
+</script>
+<style>
+  :root {
+    --nux-green: #27ae60;
+    --nux-green-dark: #1e8449;
+    --nux-green-deep: #0f3d26;
+    --gold: #d4a017;
+
+    --bg: #f7f5ef;
+    --surface: #ffffff;
+    --surface-2: #f0efe6;
+    --ink: #16231c;
+    --ink-soft: #56645c;
+    --border: #e3ded0;
+    --shadow: rgba(15, 61, 38, 0.18);
+  }
+
+  html.dark {
+    --bg: #0d1712;
+    --surface: #142219;
+    --surface-2: #182a1e;
+    --ink: #eef3ec;
+    --ink-soft: #9db3a4;
+    --border: #24382c;
+    --shadow: rgba(0, 0, 0, 0.55);
+  }
+
+  html, body {
+    margin: 0; padding: 0; width: 100%; min-height: 100%;
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg);
+    color: var(--ink-soft);
+    transition: background-color .3s, color .3s;
+  }
+
+  .glow-box {
+    box-shadow: 0 4px 20px var(--shadow);
+    border: 1px solid var(--border);
+  }
+  .glow-box:hover {
+    border-color: rgba(39, 174, 96, 0.4);
+  }
+  .hidden-page { display: none !important; }
+  .fade-in { animation: fadeIn .35s ease; }
+  @keyframes fadeIn { from { opacity:0; transform: translateY(6px);} to {opacity:1; transform: translateY(0);} }
+  #toast-wrap { position: fixed; bottom: 20px; right: 20px; z-index: 60; display:flex; flex-direction:column; gap:8px; }
+  .toast { background: var(--surface); border: 1px solid var(--border); box-shadow: 0 10px 30px var(--shadow); color: var(--ink); }
+</style>
+</head>
+<body class="p-4 md:p-6">
+
+<div id="toast-wrap"></div>
+
+<!-- HEADER -->
+<header class="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 mb-6 backdrop-blur-md pb-4 border-b border-[var(--border)]">
+  <div class="flex items-center gap-3">
+    <div class="relative">
+      <img src="https://iili.io/Cr21Nx2.th.png" alt="Nusachain Logo" class="h-10 w-auto object-contain">
+    </div>
+    <span class="text-[var(--ink)] text-xl font-black tracking-wider uppercase">Nusachain <span class="text-[var(--nux-green)]">Verisign</span></span>
+    <span id="badgeConnected" class="bg-[var(--surface-2)] border border-[var(--nux-green)]/30 px-3 py-0.5 rounded-full text-[10px] text-[var(--nux-green)] font-mono tracking-widest uppercase">Testscan Connected</span>
+  </div>
+
+  <nav class="flex items-center gap-3 text-sm font-medium flex-wrap justify-center">
+    <button onclick="switchTab('generator')" id="tabBtnGen" class="px-4 py-2 rounded-xl bg-[var(--nux-green)] hover:bg-[var(--nux-green-dark)] text-white font-bold text-xs transition">Generator Hash</button>
+    <button onclick="switchTab('verifier')" id="tabBtnVer" class="px-4 py-2 rounded-xl bg-[var(--surface-2)] text-[var(--ink-soft)] font-bold text-xs transition border border-[var(--border)]">Verifikasi & Explorer</button>
+
+    <!-- LANGUAGE SWITCHER -->
+    <div class="flex bg-[var(--surface-2)] border border-[var(--border)] p-1 rounded-xl text-xs font-bold">
+      <button id="btnIN" onclick="setLanguage('id')" class="px-2.5 py-1 rounded-lg bg-[var(--nux-green)] text-white transition">IN</button>
+      <button id="btnEN" onclick="setLanguage('en')" class="px-2.5 py-1 rounded-lg text-[var(--ink-soft)] hover:text-[var(--ink)] transition">EN</button>
+    </div>
+
+    <!-- THEME TOGGLE BUTTON -->
+    <button id="themeToggle" class="w-9 h-9 bg-[var(--surface-2)] border border-[var(--border)] rounded-xl flex items-center justify-center text-[var(--gold)] transition shadow-sm">
+      <i id="themeIcon" class="fa-solid fa-sun"></i>
+    </button>
+  </nav>
+</header>
+
+<!-- MAIN CONTAINER -->
+<main class="max-w-5xl mx-auto space-y-6">
+
+  <!-- TAB 1: GENERATOR HASH -->
+  <div id="section-generator" class="bg-[var(--surface)] rounded-2xl p-6 glow-box fade-in">
+    <h2 id="genTitle" class="text-lg font-bold text-[var(--ink)] mb-1">Generator Hash SHA-256 File</h2>
+    <p id="genDesc" class="text-xs text-[var(--ink-soft)] mb-5">Unggah file jenis apa pun untuk mendapatkan sidik jari digital (hash) secara aman di browser.</p>
+
+    <div class="border-2 border-dashed border-[var(--nux-green)]/40 bg-[var(--surface-2)] rounded-xl p-8 text-center cursor-pointer relative hover:border-[var(--nux-green)] transition">
+      <input type="file" id="genFileInput" onchange="handleGenFileSelect(this.files)" class="absolute inset-0 opacity-0 cursor-pointer">
+      <div class="w-12 h-12 bg-[var(--nux-green)]/20 text-[var(--nux-green)] rounded-full flex items-center justify-center mx-auto mb-3">
+        <i class="fa-solid fa-file-arrow-up text-xl"></i>
+      </div>
+      <p id="genDropTitle" class="text-sm font-bold text-[var(--ink)] mb-1">Pilih atau seret file ke sini</p>
+      <p id="genDropSub" class="text-xs text-[var(--ink-soft)]">Mendukung dokumen, gambar, video, arsip, dan format lainnya</p>
+    </div>
+
+    <div id="genFileInfo" class="mt-4 p-3 rounded-xl bg-[var(--surface-2)] border border-[var(--border)] text-xs font-mono hidden-page flex items-center justify-between">
+      <span id="genFileName" class="text-[var(--nux-green)] truncate"></span>
+    </div>
+
+    <div id="genResult" class="mt-4 p-4 rounded-xl bg-[var(--surface-2)] border border-[var(--border)] hidden-page space-y-2">
+      <div class="flex items-center justify-between">
+        <span id="genOutputLabel" class="text-[10px] font-bold text-[var(--ink-soft)] uppercase tracking-widest">Kolom Hasil SHA-256 Hash</span>
+        <button onclick="copyHash()" class="text-xs bg-[var(--nux-green)]/20 text-[var(--nux-green)] hover:bg-[var(--nux-green)]/30 px-3 py-1.5 rounded-lg transition font-semibold">
+          <i class="fa-regular fa-copy mr-1"></i> <span id="btnCopyHashText">Salin Hash</span>
+        </button>
+      </div>
+      <input type="text" id="genHashOutput" readonly class="w-full bg-[var(--surface)] px-3 py-2.5 rounded-lg border border-[var(--border)] font-mono text-xs text-[var(--ink)] focus:outline-none select-all" placeholder="Hash akan muncul di sini...">
+    </div>
+  </div>
+
+  <!-- TAB 2: VERIFIKASI & EXPLORER CONNECTOR -->
+  <div id="section-verifier" class="bg-[var(--surface)] rounded-2xl p-6 glow-box hidden-page fade-in space-y-6">
+    <div>
+      <h2 id="verTitle" class="text-lg font-bold text-[var(--ink)] mb-1">Verifikasi File dengan Testnet Explorer & Database TXID</h2>
+      <p id="verDesc" class="text-xs text-[var(--ink-soft)]">Cukup pilih file untuk verifikasi otomatis. Masukkan TXID secara opsional jika ingin mencocokkan transaksi spesifik dengan blockchain.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="space-y-2">
+        <label id="lblVerFile" class="text-xs font-bold uppercase tracking-wider text-[var(--ink-soft)]">1. Unggah File yang Ingin Dicheck</label>
+        <div class="border-2 border-dashed border-[var(--nux-green)]/40 bg-[var(--surface-2)] rounded-xl p-6 text-center cursor-pointer relative hover:border-[var(--nux-green)] transition">
+          <input type="file" id="verFileInput" onchange="handleVerFileSelect(this.files)" class="absolute inset-0 opacity-0 cursor-pointer">
+          <i class="fa-solid fa-file-shield text-[var(--nux-green)] text-2xl mb-2"></i>
+          <p id="verFileText" class="text-xs font-bold text-[var(--ink)]">Klik atau seret file verifikasi</p>
+        </div>
+      </div>
+
+      <div class="space-y-2">
+        <label id="lblTxidManual" for="manualTxInput" class="text-xs font-bold uppercase tracking-wider text-[var(--ink-soft)]">2. Masukkan TXID Verisign (Opsional)</label>
+        <input type="text" id="manualTxInput" placeholder="Kosongkan jika ingin deteksi otomatis..."
+          class="w-full bg-[var(--surface-2)] border border-[var(--border)] rounded-xl px-4 py-3 text-xs font-mono text-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-[var(--nux-green)]/50">
+        <p id="lblTxidNote" class="text-[11px] text-[var(--ink-soft)]">TXID manual wajib terdaftar dan valid di blockchain testnet.</p>
+      </div>
+    </div>
+
+    <button onclick="executeVerification()" class="w-full bg-gradient-to-r from-[var(--nux-green)] to-[var(--nux-green-dark)] text-white font-bold py-3 rounded-xl shadow-lg hover:opacity-90 transition text-sm flex items-center justify-center gap-2">
+      <i class="fa-solid fa-magnifying-glass-chart"></i> <span id="btnRunVerifyText">Jalankan Verifikasi & Pencocokan Explorer</span>
+    </button>
+
+    <!-- Hasil Verifikasi -->
+    <div id="verResultCard" class="p-5 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] hidden-page space-y-3 font-mono text-xs">
+      <div id="verStatusHeader" class="font-bold text-sm flex items-center gap-2"></div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 border-t border-[var(--border)]">
+        <div>
+          <span id="lblCalculatedHash" class="text-[10px] uppercase text-[var(--ink-soft)] block font-sans">Hash File Terhitung:</span>
+          <span id="verActualHash" class="text-[var(--ink)] break-all"></span>
+        </div>
+        <div>
+          <span id="lblFoundSource" class="text-[10px] uppercase text-[var(--ink-soft)] block font-sans">Sumber / TXID Ditemukan:</span>
+          <span id="verFoundSource" class="text-[var(--nux-green)] break-all"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- OPSI SIMPAN OTOMATIS KE SPREADSHEET (MUNCUL JIKA VALID) -->
+    <div id="autoSaveContainer" class="hidden-page bg-[var(--surface-2)] p-5 rounded-xl border border-[var(--nux-green)]/40 space-y-4 fade-in">
+      <div class="flex items-center gap-2">
+        <input type="checkbox" id="saveToggleCheck" onchange="toggleSaveMenu()" class="w-4 h-4 text-[var(--nux-green)] rounded border-[var(--border)] focus:ring-[var(--nux-green)] cursor-pointer">
+        <label id="lblSaveSpreadsheet" for="saveToggleCheck" class="text-xs font-bold text-[var(--nux-green)] cursor-pointer uppercase tracking-wider">
+          Simpan data dokumen ini ke Spreadsheet agar tidak perlu input TXID di kemudian hari?
+        </label>
+      </div>
+
+      <!-- Menu Input Keterangan & Data Otomatis -->
+      <div id="saveMenuFields" class="hidden-page space-y-3 pt-2 border-t border-[var(--border)]">
+        <p id="lblSaveFieldsNote" class="text-[11px] text-[var(--ink-soft)]">TXID dan Hash SHA-256 terisi otomatis sesuai data valid dari blockchain.</p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div>
+            <label id="lblDocDesc" class="block text-[10px] uppercase font-bold text-[var(--ink-soft)] mb-1">Keterangan Dokumen</label>
+            <input type="text" id="autoRegDesc" placeholder="Contoh: Laporan Keuangan Q3" class="w-full bg-[var(--surface)] border border-[var(--border)] rounded-lg p-2.5 text-xs text-[var(--ink)] focus:outline-none focus:ring-1 focus:ring-[var(--nux-green)]">
+          </div>
+          <div>
+            <label id="lblAutoTxid" class="block text-[10px] uppercase font-bold text-[var(--ink-soft)] mb-1">TXID Verisign (Otomatis)</label>
+            <input type="text" id="autoRegTxid" readonly class="w-full bg-[var(--surface-2)] border border-[var(--border)] rounded-lg p-2.5 text-xs font-mono text-[var(--nux-green)] focus:outline-none cursor-not-allowed">
+          </div>
+          <div>
+            <label id="lblAutoHash" class="block text-[10px] uppercase font-bold text-[var(--ink-soft)] mb-1">Hash SHA-256 (Otomatis)</label>
+            <input type="text" id="autoRegHash" readonly class="w-full bg-[var(--surface-2)] border border-[var(--border)] rounded-lg p-2.5 text-xs font-mono text-[var(--gold)] focus:outline-none cursor-not-allowed">
+          </div>
+        </div>
+
+        <button onclick="submitAutoSaveData()" class="bg-[var(--nux-green)] hover:bg-[var(--nux-green-dark)] text-white font-bold px-4 py-2.5 rounded-lg text-xs transition flex items-center justify-center gap-2 w-full md:w-auto shadow-md">
+          <i class="fa-solid fa-cloud-arrow-up"></i> <span id="btnConfirmSaveText">Konfirmasi & Simpan ke Spreadsheet</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- TABEL DATABASE VERISIGN TERREKAM -->
+    <div class="pt-4 border-t border-[var(--border)]">
+      <div class="flex items-center justify-between mb-3">
+        <h3 id="lblDbHeading" class="text-xs font-bold uppercase tracking-widest text-[var(--nux-green)]"><i class="fa-solid fa-database mr-1"></i> Database Terekam Verisign</h3>
+        <span id="lblSyncStatus" class="text-[10px] text-[var(--ink-soft)] font-mono">Sinkronisasi Otomatis Spreadsheet</span>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs font-mono">
+          <thead>
+            <tr class="text-[10px] text-[var(--ink-soft)] uppercase border-b border-[var(--border)] pb-2">
+              <th id="thDesc" class="pb-2">Keterangan Dokumen</th>
+              <th id="thTxid" class="pb-2">TXID Verisign</th>
+              <th id="thHash" class="pb-2">Hash SHA-256</th>
+            </tr>
+          </thead>
+          <tbody id="databaseTableBody" class="divide-y divide-[var(--border)]">
+            <!-- Data dimasukkan via script -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+const SPREADSHEET_API_URL = "https://script.google.com/macros/s/AKfycbzNsq05CHIwKqGtkDOuyDoy0Emi9V6--mSNHshw65Fp4XwYq5KiNU4f6Q6r6pMLC60E/exec";
+const API_BASE = 'https://apitest.taobot.org';
+
+let currentLang = 'id';
+
+const i18n = {
+  id: {
+    badgeConnected: "Testscan Connected",
+    tabBtnGen: "Generator Hash",
+    tabBtnVer: "Verifikasi & Explorer",
+    genTitle: "Generator Hash SHA-256 File",
+    genDesc: "Unggah file jenis apa pun untuk mendapatkan sidik jari digital (hash) secara aman di browser.",
+    genDropTitle: "Pilih atau seret file ke sini",
+    genDropSub: "Mendukung dokumen, gambar, video, arsip, dan format lainnya",
+    genOutputLabel: "Kolom Hasil SHA-256 Hash",
+    btnCopyHashText: "Salin Hash",
+    placeholderHashOutput: "Hash akan muncul di sini...",
+    verTitle: "Verifikasi File dengan Testnet Explorer & Database TXID",
+    verDesc: "Cukup pilih file untuk verifikasi otomatis. Masukkan TXID secara opsional jika ingin mencocokkan transaksi spesifik dengan blockchain.",
+    lblVerFile: "1. Unggah File yang Ingin Dicheck",
+    verFileTextDefault: "Klik atau seret file verifikasi",
+    lblTxidManual: "2. Masukkan TXID Verisign (Opsional)",
+    placeholderTxid: "Kosongkan jika ingin deteksi otomatis...",
+    lblTxidNote: "TXID manual wajib terdaftar dan valid di blockchain testnet.",
+    btnRunVerifyText: "Jalankan Verifikasi & Pencocokan Explorer",
+    lblCalculatedHash: "Hash File Terhitung:",
+    lblFoundSource: "Sumber / TXID Ditemukan:",
+    lblSaveSpreadsheet: "Simpan data dokumen ini ke Spreadsheet agar tidak perlu input TXID di kemudian hari?",
+    lblSaveFieldsNote: "TXID dan Hash SHA-256 terisi otomatis sesuai data valid dari blockchain.",
+    lblDocDesc: "Keterangan Dokumen",
+    placeholderDocDesc: "Contoh: Laporan Keuangan Q3",
+    lblAutoTxid: "TXID Verisign (Otomatis)",
+    lblAutoHash: "Hash SHA-256 (Otomatis)",
+    btnConfirmSaveText: "Konfirmasi & Simpan ke Spreadsheet",
+    lblDbHeading: '<i class="fa-solid fa-database mr-1"></i> Database Terekam Verisign',
+    lblSyncStatus: "Sinkronisasi Otomatis Spreadsheet",
+    thDesc: "Keterangan Dokumen",
+    thTxid: "TXID Verisign",
+    thHash: "Hash SHA-256",
+    dbEmpty: "Memuat data atau database kosong...",
+    toastHashSuccess: "Hash SHA-256 berhasil dibuat!",
+    toastHashFailed: "Gagal memproses file.",
+    toastCopySuccess: "Hash berhasil disalin ke clipboard!",
+    toastUploadFirst: "Silakan unggah file terlebih dahulu!",
+    toastDescRequired: "Keterangan Dokumen harus diisi!",
+    toastDuplicate: "Gagal: TXID dan Hash yang sama sudah tersimpan di Spreadsheet!",
+    toastSaving: "Menyimpan data otomatis ke spreadsheet...",
+    toastSaveSuccess: "BERHASIL: Data berhasil disimpan ke spreadsheet!",
+    toastSaveError: "Terjadi kesalahan koneksi saat menyimpan ke spreadsheet.",
+    toastTxidCopied: "TXID disalin!",
+    verChecking: "Memeriksa TXID ke Testnet Explorer...",
+    verSuccess: "VERIFIKASI BERHASIL: Sesuai dengan Blockchain Testnet!",
+    verFailed: "VERIFIKASI GAGAL: TXID Tidak Valid atau Tidak Ditemukan.",
+    verErrSystem: "Terjadi kesalahan sistem saat verifikasi."
+  },
+  en: {
+    badgeConnected: "Testscan Connected",
+    tabBtnGen: "Hash Generator",
+    tabBtnVer: "Verification & Explorer",
+    genTitle: "File SHA-256 Hash Generator",
+    genDesc: "Upload any file type to get its digital fingerprint (hash) securely within your browser.",
+    genDropTitle: "Choose or drop a file here",
+    genDropSub: "Supports documents, images, videos, archives, and other formats",
+    genOutputLabel: "SHA-256 Hash Output Field",
+    btnCopyHashText: "Copy Hash",
+    placeholderHashOutput: "Hash will appear here...",
+    verTitle: "Verify File with Testnet Explorer & TXID Database",
+    verDesc: "Simply select a file for auto-verification. Optionally enter a TXID to match a specific transaction with the blockchain.",
+    lblVerFile: "1. Upload File to Check",
+    verFileTextDefault: "Click or drag verification file",
+    lblTxidManual: "2. Enter Verisign TXID (Optional)",
+    placeholderTxid: "Leave empty for auto-detection...",
+    lblTxidNote: "Manual TXID must be registered and valid on the testnet blockchain.",
+    btnRunVerifyText: "Run Verification & Explorer Match",
+    lblCalculatedHash: "Calculated File Hash:",
+    lblFoundSource: "Source / TXID Found:",
+    lblSaveSpreadsheet: "Save this document data to Spreadsheet to avoid typing TXID in the future?",
+    lblSaveFieldsNote: "TXID and SHA-256 Hash are auto-filled according to valid blockchain data.",
+    lblDocDesc: "Document Description",
+    placeholderDocDesc: "Example: Q3 Financial Report",
+    lblAutoTxid: "Verisign TXID (Auto)",
+    lblAutoHash: "SHA-256 Hash (Auto)",
+    btnConfirmSaveText: "Confirm & Save to Spreadsheet",
+    lblDbHeading: '<i class="fa-solid fa-database mr-1"></i> Recorded Verisign Database',
+    lblSyncStatus: "Spreadsheet Auto-Sync",
+    thDesc: "Document Description",
+    thTxid: "Verisign TXID",
+    thHash: "SHA-256 Hash",
+    dbEmpty: "Loading data or database is empty...",
+    toastHashSuccess: "SHA-256 Hash successfully generated!",
+    toastHashFailed: "Failed to process file.",
+    toastCopySuccess: "Hash successfully copied to clipboard!",
+    toastUploadFirst: "Please upload a file first!",
+    toastDescRequired: "Document Description is required!",
+    toastDuplicate: "Failed: Identical TXID and Hash are already saved in Spreadsheet!",
+    toastSaving: "Saving data automatically to spreadsheet...",
+    toastSaveSuccess: "SUCCESS: Data successfully saved to spreadsheet!",
+    toastSaveError: "Connection error occurred while saving to spreadsheet.",
+    toastTxidCopied: "TXID copied!",
+    verChecking: "Checking TXID on Testnet Explorer...",
+    verSuccess: "VERIFICATION SUCCESSFUL: Matches Blockchain Testnet!",
+    verFailed: "VERIFICATION FAILED: Invalid or Unfound TXID.",
+    verErrSystem: "System error occurred during verification."
+  }
+};
+
+function setLanguage(lang) {
+  currentLang = lang;
+  const t = i18n[lang];
+
+  document.getElementById('btnIN').className = lang === 'id' 
+    ? "px-2.5 py-1 rounded-lg bg-[var(--nux-green)] text-white transition" 
+    : "px-2.5 py-1 rounded-lg text-[var(--ink-soft)] hover:text-[var(--ink)] transition";
+  document.getElementById('btnEN').className = lang === 'en' 
+    ? "px-2.5 py-1 rounded-lg bg-[var(--nux-green)] text-white transition" 
+    : "px-2.5 py-1 rounded-lg text-[var(--ink-soft)] hover:text-[var(--ink)] transition";
+
+  document.getElementById('badgeConnected').textContent = t.badgeConnected;
+  document.getElementById('tabBtnGen').textContent = t.tabBtnGen;
+  document.getElementById('tabBtnVer').textContent = t.tabBtnVer;
+  document.getElementById('genTitle').textContent = t.genTitle;
+  document.getElementById('genDesc').textContent = t.genDesc;
+  document.getElementById('genDropTitle').textContent = t.genDropTitle;
+  document.getElementById('genDropSub').textContent = t.genDropSub;
+  document.getElementById('genOutputLabel').textContent = t.genOutputLabel;
+  document.getElementById('btnCopyHashText').textContent = t.btnCopyHashText;
+  document.getElementById('genHashOutput').placeholder = t.placeholderHashOutput;
+  
+  document.getElementById('verTitle').textContent = t.verTitle;
+  document.getElementById('verDesc').textContent = t.verDesc;
+  document.getElementById('lblVerFile').textContent = t.lblVerFile;
+  if (!selectedVerFile) {
+    document.getElementById('verFileText').textContent = t.verFileTextDefault;
+  }
+  document.getElementById('lblTxidManual').textContent = t.lblTxidManual;
+  document.getElementById('manualTxInput').placeholder = t.placeholderTxid;
+  document.getElementById('lblTxidNote').textContent = t.lblTxidNote;
+  document.getElementById('btnRunVerifyText').textContent = t.btnRunVerifyText;
+  document.getElementById('lblCalculatedHash').textContent = t.lblCalculatedHash;
+  document.getElementById('lblFoundSource').textContent = t.lblFoundSource;
+  document.getElementById('lblSaveSpreadsheet').textContent = t.lblSaveSpreadsheet;
+  document.getElementById('lblSaveFieldsNote').textContent = t.lblSaveFieldsNote;
+  document.getElementById('lblDocDesc').textContent = t.lblDocDesc;
+  document.getElementById('autoRegDesc').placeholder = t.placeholderDocDesc;
+  document.getElementById('lblAutoTxid').textContent = t.lblAutoTxid;
+  document.getElementById('lblAutoHash').textContent = t.lblAutoHash;
+  document.getElementById('btnConfirmSaveText').textContent = t.btnConfirmSaveText;
+  document.getElementById('lblDbHeading').innerHTML = t.lblDbHeading;
+  document.getElementById('lblSyncStatus').textContent = t.lblSyncStatus;
+  document.getElementById('thDesc').textContent = t.thDesc;
+  document.getElementById('thTxid').textContent = t.thTxid;
+  document.getElementById('thHash').textContent = t.thHash;
+
+  renderDatabaseTable();
+}
+
+async function apiFetch(endpoint) {
+  const res = await fetch(`${API_BASE}${endpoint}`);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const json = await res.json();
+  if (json.error) throw new Error(json.error.message || 'API Error');
+  return json.result;
+}
+
+let verisignDatabase = [];
+
+async function loadDatabaseFromSpreadsheet() {
+  try {
+    const response = await fetch(SPREADSHEET_API_URL);
+    const data = await response.json();
+    if (Array.isArray(data)) {
+      verisignDatabase = data;
+      renderDatabaseTable();
+      console.info("Database loaded successfully.");
+    }
+  } catch (err) {
+    console.warn("Failed to load database from Spreadsheet.", err);
+  }
+}
+
+function toggleSaveMenu() {
+  const check = document.getElementById('saveToggleCheck');
+  const menuFields = document.getElementById('saveMenuFields');
+  if (check.checked) {
+    menuFields.classList.remove('hidden-page');
+  } else {
+    menuFields.classList.add('hidden-page');
+  }
+}
+
+async function submitAutoSaveData() {
+  const t = i18n[currentLang];
+  const desc = document.getElementById('autoRegDesc').value.trim();
+  const txid = document.getElementById('autoRegTxid').value.trim();
+  const hash = document.getElementById('autoRegHash').value.trim();
+
+  if (!desc) {
+    toast(t.toastDescRequired, 'fa-triangle-exclamation', 'rose');
+    return;
+  }
+
+  const isDuplicate = verisignDatabase.some(item => 
+    String(item.txid).trim().toLowerCase() === txid.toLowerCase() && 
+    String(item.hash).trim().toLowerCase() === hash.toLowerCase()
+  );
+
+  if (isDuplicate) {
+    toast(t.toastDuplicate, 'fa-circle-xmark', 'rose');
+    return;
+  }
+
+  toast(t.toastSaving, 'fa-spinner fa-spin', 'emerald');
+
+  try {
+    await fetch(SPREADSHEET_API_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ desc: desc, txid: txid, hash: hash })
+    });
+
+    toast(t.toastSaveSuccess, 'fa-circle-check', 'emerald');
+    
+    document.getElementById('autoRegDesc').value = '';
+    document.getElementById('saveToggleCheck').checked = false;
+    document.getElementById('saveMenuFields').classList.add('hidden-page');
+    document.getElementById('autoSaveContainer').classList.add('hidden-page');
+
+    setTimeout(() => {
+      loadDatabaseFromSpreadsheet();
+    }, 2500);
+
+  } catch (err) {
+    toast(t.toastSaveError, 'fa-triangle-exclamation', 'rose');
+  }
+}
+
+loadDatabaseFromSpreadsheet();
+
+function renderDatabaseTable() {
+  const t = i18n[currentLang];
+  const tbody = document.getElementById('databaseTableBody');
+  tbody.innerHTML = '';
+  
+  if (verisignDatabase.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="3" class="py-3 text-center text-[var(--ink-soft)]">${t.dbEmpty}</td></tr>`;
+    return;
+  }
+
+  verisignDatabase.forEach(item => {
+    const tr = document.createElement('tr');
+    tr.className = 'hover:bg-[var(--surface-2)] transition';
+    tr.innerHTML = `
+      <td class="py-2.5 text-[var(--ink)] font-sans font-medium">${item.desc}</td>
+      <td class="py-2.5 text-[var(--gold)] truncate max-w-[150px] cursor-pointer hover:underline" onclick="navigator.clipboard.writeText('${item.txid}'); toast('${t.toastTxidCopied}');">${item.txid}</td>
+      <td class="py-2.5 text-[var(--nux-green)] truncate max-w-[180px]">${item.hash}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function switchTab(tab) {
+  const genSec = document.getElementById('section-generator');
+  const verSec = document.getElementById('section-verifier');
+  const genBtn = document.getElementById('tabBtnGen');
+  const verBtn = document.getElementById('tabBtnVer');
+
+  if (tab === 'generator') {
+    genSec.classList.remove('hidden-page');
+    verSec.classList.add('hidden-page');
+    genBtn.className = "px-4 py-2 rounded-xl bg-[var(--nux-green)] hover:bg-[var(--nux-green-dark)] text-white font-bold text-xs transition";
+    verBtn.className = "px-4 py-2 rounded-xl bg-[var(--surface-2)] text-[var(--ink-soft)] font-bold text-xs transition border border-[var(--border)]";
+  } else {
+    verSec.classList.remove('hidden-page');
+    genSec.classList.add('hidden-page');
+    verBtn.className = "px-4 py-2 rounded-xl bg-[var(--nux-green)] hover:bg-[var(--nux-green-dark)] text-white font-bold text-xs transition";
+    genBtn.className = "px-4 py-2 rounded-xl bg-[var(--surface-2)] text-[var(--ink-soft)] font-bold text-xs transition border border-[var(--border)]";
+  }
+}
+
+const themeToggleBtn = document.getElementById('themeToggle');
+const themeIcon = document.getElementById('themeIcon');
+const htmlEl = document.documentElement;
+
+themeToggleBtn.addEventListener('click', () => {
+  if (htmlEl.classList.contains('dark')) {
+    htmlEl.classList.remove('dark'); 
+    themeIcon.className = 'fa-solid fa-moon text-[var(--gold)]';
+  } else {
+    htmlEl.classList.add('dark'); 
+    themeIcon.className = 'fa-solid fa-sun text-[var(--gold)]';
+  }
+});
+
+async function calculateSHA256(file) {
+  const buffer = await file.arrayBuffer();
+  const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function handleGenFileSelect(files) {
+  const t = i18n[currentLang];
+  if (!files || !files.length) return;
+  const file = files[0];
+  document.getElementById('genFileInfo').classList.remove('hidden-page');
+  document.getElementById('genFileName').innerText = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+  document.getElementById('genResult').classList.remove('hidden-page');
+  document.getElementById('genHashOutput').value = '...';
+
+  try {
+    const hash = await calculateSHA256(file);
+    document.getElementById('genHashOutput').value = hash;
+    toast(t.toastHashSuccess, 'fa-circle-check');
+  } catch (err) {
+    document.getElementById('genHashOutput').value = t.toastHashFailed;
+  }
+}
+
+function copyHash() {
+  const t = i18n[currentLang];
+  const hashInput = document.getElementById('genHashOutput');
+  if (hashInput.value && hashInput.value !== '...' && hashInput.value !== t.toastHashFailed) {
+    hashInput.select();
+    navigator.clipboard.writeText(hashInput.value);
+    toast(t.toastCopySuccess, 'fa-copy');
+  }
+}
+
+let selectedVerFile = null;
+function handleVerFileSelect(files) {
+  if (!files || !files.length) return;
+  selectedVerFile = files[0];
+  document.getElementById('verFileText').innerText = `${selectedVerFile.name}`;
+}
+
+async function executeVerification() {
+  const t = i18n[currentLang];
+  if (!selectedVerFile) {
+    toast(t.toastUploadFirst, 'fa-triangle-exclamation', 'rose');
+    return;
+  }
+
+  const manualTx = document.getElementById('manualTxInput').value.trim();
+  const resultCard = document.getElementById('verResultCard');
+  const statusHeader = document.getElementById('verStatusHeader');
+  const actualHashEl = document.getElementById('verActualHash');
+  const foundSourceEl = document.getElementById('verFoundSource');
+  const autoSaveContainer = document.getElementById('autoSaveContainer');
+
+  resultCard.classList.remove('hidden-page');
+  autoSaveContainer.classList.add('hidden-page');
+  statusHeader.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-[var(--gold)]"></i> ${t.verChecking}`;
+  actualHashEl.innerText = '...';
+  foundSourceEl.innerText = 'https://apitest.taobot.org...';
+
+  try {
+    const fileHash = await calculateSHA256(selectedVerFile);
+    actualHashEl.innerText = fileHash;
+
+    let matched = false;
+    let sourceInfo = '';
+    let validTxid = '';
+
+    if (manualTx) {
+      try {
+        const txData = await apiFetch(`/transaction/${manualTx}`);
+        
+        if (txData && (txData.hash || txData.txid || txData.vin || txData.vout)) {
+          const dbItem = verisignDatabase.find(item => String(item.txid).trim().toLowerCase() === manualTx.toLowerCase());
+          
+          if (dbItem) {
+            if (String(dbItem.hash).trim().toLowerCase() === fileHash.toLowerCase()) {
+              matched = true;
+              validTxid = manualTx;
+              sourceInfo = `Explorer & Database (Valid): ${manualTx}`;
+            } else {
+              toast('TXID match found, but File Hash differs from database records!', 'fa-triangle-exclamation', 'rose');
+            }
+          } else {
+            matched = true;
+            validTxid = manualTx;
+            sourceInfo = `Testnet Explorer (Blockchain Valid): ${manualTx}`;
+          }
+        } else {
+          toast('TXID not found on testnet blockchain!', 'fa-circle-xmark', 'rose');
+        }
+      } catch (e) {
+        console.warn('API verification error:', e);
+        toast('Failed to connect to Explorer or invalid TXID.', 'fa-triangle-exclamation', 'rose');
+      }
+    }
+
+    if (!manualTx) {
+      const foundInDb = verisignDatabase.find(item => String(item.hash).trim().toLowerCase() === fileHash.toLowerCase());
+      if (foundInDb) {
+        matched = true;
+        validTxid = foundInDb.txid;
+        sourceInfo = `Spreadsheet Database (TXID: ${foundInDb.txid})`;
+      }
+    }
+
+    if (matched) {
+      statusHeader.innerHTML = `<i class="fa-solid fa-circle-check text-[var(--nux-green)] text-base"></i> <span class="text-[var(--nux-green)]">${t.verSuccess}</span>`;
+      foundSourceEl.innerText = sourceInfo;
+      toast(t.verSuccess, 'fa-circle-check');
+
+      const alreadySaved = verisignDatabase.some(item => item.txid === validTxid && item.hash === fileHash);
+      if (!alreadySaved && validTxid) {
+        document.getElementById('autoRegTxid').value = validTxid;
+        document.getElementById('autoRegHash').value = fileHash;
+        autoSaveContainer.classList.remove('hidden-page');
+      }
+
+    } else {
+      statusHeader.innerHTML = `<i class="fa-solid fa-circle-xmark text-rose-500 text-base"></i> <span class="text-rose-500">${t.verFailed}</span>`;
+      foundSourceEl.innerText = manualTx ? 'TXID rejected by testnet network' : 'No match found.';
+      toast(t.verFailed, 'fa-triangle-exclamation', 'rose');
+    }
+
+  } catch (err) {
+    statusHeader.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-rose-500"></i> <span class="text-rose-500">${t.verErrSystem}</span>`;
+  }
+}
+
+function toast(msg, icon='fa-cube', color='emerald') {
+  const wrap = document.getElementById('toast-wrap');
+  const el = document.createElement('div');
+  el.className = 'toast rounded-xl px-4 py-3 text-xs font-semibold flex items-center gap-2 fade-in';
+  el.innerHTML = `<i class="fa-solid ${icon} text-[var(--nux-green)]"></i> ${msg}`;
+  wrap.appendChild(el);
+  setTimeout(() => { el.style.opacity='0'; el.style.transition='opacity .4s'; setTimeout(()=>el.remove(),400); }, 4500);
+}
+</script>
+</body>
+</html>

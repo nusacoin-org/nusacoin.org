@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generator Hash Murni - Nusacoin OP_RETURN</title>
+    <!-- Font Awesome untuk Ikon Tema -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* DEFINISI COLOR TOKENS */
+        :root {
+            /* Brand Colors */
+            --nux-green: #27ae60;
+            --nux-green-dark: #1e8449;
+            --nux-green-deep: #0f3d26;
+            --gold: #d4a017;
+
+            /* Hardcoded / Utility Colors */
+            --white: #ffffff;
+            --green-pale: #eafff2;
+
+            /* Transparencies */
+            --green-ring: rgba(39, 174, 96, 0.18);
+            --green-shadow: rgba(39, 174, 96, 0.55);
+
+            /* Light Mode Tokens (Default) */
+            --bg: #f7f5ef;
+            --surface: #ffffff;
+            --surface-2: #f0efe6;
+            --ink: #16231c;
+            --ink-soft: #56645c;
+            --border: #e3ded0;
+            --shadow: rgba(15, 61, 38, 0.18);
+        }
+
+        html[data-theme="dark"] {
+            /* Dark Mode Tokens Override */
+            --bg: #0d1712;
+            --surface: #142219;
+            --surface-2: #182a1e;
+            --ink: #eef3ec;
+            --ink-soft: #9db3a4;
+            --border: #24382c;
+            --shadow: rgba(0, 0, 0, 0.55);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 30px 20px;
+            background-color: var(--bg);
+            color: var(--ink);
+            transition: background-color 0.3s ease, color 0.3s ease;
+            min-height: 100vh;
+        }
+
+        /* HEADER & LOGO NUSACOIN */
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--nux-green);
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+        }
+
+        .brand-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-logo {
+            height: 40px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        h2 {
+            color: var(--ink);
+            font-size: 1.4rem;
+        }
+
+        .controls-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .lang-switcher {
+            display: flex;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 2px;
+        }
+
+        .lang-btn {
+            background: transparent;
+            border: none;
+            color: var(--ink-soft);
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .lang-btn.active {
+            background: var(--nux-green);
+            color: var(--white);
+        }
+
+        .theme-toggle-btn {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            color: var(--gold);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.2s, color 0.2s;
+        }
+        .theme-toggle-btn:hover {
+            background: var(--border);
+        }
+
+        p.desc {
+            color: var(--ink-soft);
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 10px;
+            margin-bottom: 8px;
+            color: var(--ink);
+        }
+
+        textarea {
+            width: 100%;
+            height: 180px;
+            padding: 12px;
+            background-color: var(--surface-2);
+            color: var(--ink);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            resize: vertical;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        textarea:focus {
+            border-color: var(--nux-green);
+            box-shadow: 0 0 0 3px var(--green-ring);
+        }
+
+        button.btn-main {
+            background-color: var(--nux-green);
+            color: var(--white);
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 15px;
+            width: 100%;
+            transition: background 0.3s;
+        }
+
+        button.btn-main:hover {
+            background-color: var(--nux-green-dark);
+        }
+
+        .btn-download {
+            background-color: var(--nux-green);
+            margin-top: 15px;
+            color: var(--white);
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.3s;
+        }
+
+        .btn-download:hover {
+            background-color: var(--nux-green-dark);
+        }
+
+        .box {
+            background: var(--surface);
+            padding: 24px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 12px var(--shadow);
+            margin-bottom: 20px;
+        }
+
+        .result-container {
+            background-color: var(--surface-2);
+            padding: 15px;
+            border-left: 5px solid var(--nux-green);
+            border-radius: 6px;
+            word-break: break-all;
+            margin-top: 10px;
+        }
+
+        .hash-output {
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            font-size: 18px;
+            color: var(--nux-green);
+        }
+
+        html[data-theme="dark"] .hash-output {
+            color: var(--green-pale);
+        }
+
+        .info {
+            font-size: 13px;
+            color: var(--ink-soft);
+            margin-top: 8px;
+        }
+
+        .preview-text {
+            background: var(--surface-2);
+            padding: 10px;
+            border: 1px solid var(--border);
+            max-height: 100px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            color: var(--ink);
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER WITH NUSACOIN LOGO & CONTROLS -->
+    <div class="header-container">
+        <div class="brand-section">
+            <img src="https://iili.io/Cr21Nx2.th.png" alt="Nusacoin Logo" class="brand-logo">
+            <h2 id="appTitle">Nusacoin Hash Generator</h2>
+        </div>
+        <div class="controls-container">
+            <div class="lang-switcher">
+                <button id="btnIN" class="lang-btn active" onclick="setLanguage('id')">IN</button>
+                <button id="btnEN" class="lang-btn" onclick="setLanguage('en')">EN</button>
+            </div>
+            <button onclick="toggleTheme()" class="theme-toggle-btn" id="themeBtn">
+                <i id="theme-icon" class="fa-solid fa-sun"></i>
+                <span id="theme-text">Light</span>
+            </button>
+        </div>
+    </div>
+
+    <p id="appDesc" class="desc">Gunakan alat ini untuk membersihkan teks blog dari emoji/spasi ganda dan mengunduh file berekstensi .txt yang BERISI HANYA KODE HASH SAJA.</p>
+
+    <div class="box">
+        <label id="lblInputText" for="inputTeks">Tempel Isi Teks Blog Di Sini:</label>
+        <textarea id="inputTeks" placeholder="Tempel teks blog Anda di sini..."></textarea>
+        
+        <button id="btnGenerate" class="btn-main" onclick="prosesHashBlog()">Hasilkan Hash SHA-256</button>
+    </div>
+
+    <div class="box" id="hasilBox" style="display:none;">
+        <label id="lblCleanText">Hasil Pembersihan Teks (Yang Di-hash):</label>
+        <div id="teksBersihOutput" class="preview-text"></div>
+
+        <label id="lblHashResult">Kode Hash SHA-256 (Siap untuk OP_RETURN):</label>
+        <div class="result-container">
+            <span id="hashOutput" class="hash-output">-</span>
+        </div>
+        
+        <button id="btnDownload" class="btn-download" onclick="unduhHashTxtMurni()">Unduh File Txt (Hanya Isi Hash)</button>
+        <p id="infoText" class="info">*File .txt yang diunduh dipastikan bersih, tidak berisi teks tambahan, spasi kosong, atau baris baru.</p>
+    </div>
+
+    <script>
+        let currentLang = 'id';
+
+        const translations = {
+            id: {
+                appTitle: "Nusacoin Hash Generator",
+                appDesc: "Gunakan alat ini untuk membersihkan teks blog dari emoji/spasi ganda dan mengunduh file berekstensi .txt yang BERISI HANYA KODE HASH SAJA.",
+                lblInputText: "Tempel Isi Teks Blog Di Sini:",
+                phInputText: "Tempel teks blog Anda di sini...",
+                btnGenerate: "Hasilkan Hash SHA-256",
+                lblCleanText: "Hasil Pembersihan Teks (Yang Di-hash):",
+                lblHashResult: "Kode Hash SHA-256 (Siap untuk OP_RETURN):",
+                btnDownload: "Unduh File Txt (Hanya Isi Hash)",
+                infoText: "*File .txt yang diunduh dipastikan bersih, tidak berisi teks tambahan, spasi kosong, atau baris baru.",
+                alertEmptyText: "Harap masukkan teks blog terlebih dahulu!"
+            },
+            en: {
+                appTitle: "Nusacoin Hash Generator",
+                appDesc: "Use this tool to sanitize blog text from emojis/double spaces and download a .txt file CONTAINING ONLY THE HASH CODE.",
+                lblInputText: "Paste Blog Text Here:",
+                phInputText: "Paste your blog text here...",
+                btnGenerate: "Generate SHA-256 Hash",
+                lblCleanText: "Sanitized Text Result (Hashed):",
+                lblHashResult: "SHA-256 Hash Code (Ready for OP_RETURN):",
+                btnDownload: "Download Txt File (Pure Hash Only)",
+                infoText: "*The downloaded .txt file is guaranteed clean, containing no extra text, whitespaces, or newlines.",
+                alertEmptyText: "Please enter blog text first!"
+            }
+        };
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            const t = translations[lang];
+
+            document.getElementById('btnIN').classList.toggle('active', lang === 'id');
+            document.getElementById('btnEN').classList.toggle('active', lang === 'en');
+
+            document.getElementById('appTitle').textContent = t.appTitle;
+            document.getElementById('appDesc').textContent = t.appDesc;
+            document.getElementById('lblInputText').textContent = t.lblInputText;
+            document.getElementById('inputTeks').placeholder = t.phInputText;
+            document.getElementById('btnGenerate').textContent = t.btnGenerate;
+            document.getElementById('lblCleanText').textContent = t.lblCleanText;
+            document.getElementById('lblHashResult').textContent = t.lblHashResult;
+            document.getElementById('btnDownload').textContent = t.btnDownload;
+            document.getElementById('infoText').textContent = t.infoText;
+        }
+
+        // TOGGLE LIGHT / DARK MODE LOGIC
+        function toggleTheme() {
+            const htmlTag = document.documentElement;
+            const currentTheme = htmlTag.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            htmlTag.setAttribute('data-theme', newTheme);
+
+            const icon = document.getElementById('theme-icon');
+            const text = document.getElementById('theme-text');
+
+            if (newTheme === 'dark') {
+                icon.className = 'fa-solid fa-moon';
+                text.innerText = 'Dark';
+            } else {
+                icon.className = 'fa-solid fa-sun';
+                text.innerText = 'Light';
+            }
+        }
+
+        let currentHash = "";
+
+        async function sha256(message) {
+            const msgBuffer = new TextEncoder().encode(message);                    
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            return hashHex;
+        }
+
+        async function prosesHashBlog() {
+            const t = translations[currentLang];
+            const inputTeks = document.getElementById('inputTeks').value;
+
+            if (!inputTeks.trim()) {
+                alert(t.alertEmptyText);
+                return;
+            }
+
+            // 1. SANITASI: Hapus semua karakter non-ASCII (Termasuk Emoji)
+            let teksBersih = inputTeks.replace(/[^\x00-\x7F]+/g, '');
+
+            // 2. SANITASI: Satukan spasi ganda, tab, enter dan potong spasi di ujung teks
+            let teksCleaned = teksBersih.replace(/\s+/g, ' ').trim();
+
+            // 3. GENERATE HASH
+            currentHash = await sha256(teksCleaned);
+
+            // 4. TAMPILKAN HASIL KE LAYAR
+            document.getElementById('teksBersihOutput').innerText = teksCleaned;
+            document.getElementById('hashOutput').innerText = currentHash;
+            document.getElementById('hasilBox').style.display = 'block';
+        }
+
+        function unduhHashTxtMurni() {
+            if (!currentHash) return;
+
+            // Memastikan data murni tanpa spasi tambahan (\n)
+            const kontenMurni = currentHash.trim();
+
+            // Membuat blob tipe text/plain murni
+            const blob = new Blob([kontenMurni], { type: 'text/plain;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            
+            // Nama file menggunakan potongan hash agar unik
+            link.download = `hash-${currentHash.substring(0, 8)}.txt`;
+            link.click();
+            URL.revokeObjectURL(link.href);
+        }
+    </script>
+
+</body>
+</html>
