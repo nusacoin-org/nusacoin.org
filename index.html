@@ -8,7 +8,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
 <style>
 /* ============================================================
@@ -390,8 +390,6 @@ footer{background:var(--surface-2);border-top:1px solid var(--border);padding:60
     <button class="menu-toggle" id="mobile-btn" aria-label="Buka menu"><i class="fas fa-bars"></i></button>
 
     <ul class="nav-menu" id="nav-list">
-      <li class="nav-item"><a href="#beranda" class="nav-link" data-i18n="nav.home">Beranda</a></li>
-      
       <li class="nav-item">
   		<a href="#" class="nav-link" data-i18n="nav.Introduction">Perkenalan <i class="fa fa-caret-down"></i></a>
  		<ul class="dropdown">
@@ -405,6 +403,8 @@ footer{background:var(--surface-2);border-top:1px solid var(--border);padding:60
     	  <li><a class="dropdown-item" href="/Pages/Whitepaper_Nusacoin_en.pdf">Whitepaper EN</a></li>
         </ul>
       </li>
+
+	 <li class="nav-item"><a href="/Pages/Inovasi.html" class="nav-link" data-i18n="nav.inovasi">Inovasi</a></li>
 
      <li class="nav-item">
   	   <a href="#" class="nav-link" data-i18n="nav.resources">Sumber Daya <i class="fa fa-caret-down"></i></a>
@@ -446,12 +446,12 @@ footer{background:var(--surface-2);border-top:1px solid var(--border);padding:60
 		 <li><a href="/Tools/Blog-Hash-Generator.html">Blog Hash Generator</a></li>
 	   </ul>
 	 </li>
-
+		
       <li class="nav-item">
         <a href="#" class="nav-link" data-i18n="nav.community">Komunitas <i class="fa fa-caret-down"></i></a>
         <ul class="dropdown">
           <li><a href="https://x.com/Nusacoin_chain" target="_blank"><i class="fab fa-twitter"></i> Twitter / X</a></li>
-		  <li><a href="https://www.threads.com/@nusa_coin" target="_blank"><i class="fab fa-threads"></i> Threads</a></li>
+		  <li><a href="https://www.threads.net/@nusa_coin" target="_blank"><i class="fab fa-threads"></i> Threads</a></li>
           <li><a href="https://telegram.me/NusacoinX11" target="_blank"><i class="fab fa-telegram"></i> Telegram</a></li>
           <li><a href="https://discord.gg/NcKKZFBzJ" target="_blank"><i class="fab fa-discord"></i> Discord</a></li>
           <li><a href="https://www.instagram.com/nusa_coin" target="_blank"><i class="fab fa-instagram"></i> Instagram</a></li>
@@ -488,7 +488,7 @@ footer{background:var(--surface-2);border-top:1px solid var(--border);padding:60
           <a href="https://dompet.nusacoin.org" target="_blank" data-i18n="quick.wallet">💰 Web Wallet</a>
           <a href="https://pooljava.nusacoin.org" target="_blank" data-i18n="quick.pool">📊 Pool</a>
           <a href="/Pages/Visi-Misi.html" target="_blank" data-i18n="quick.roadmap">📈 Roadmap</a>
-          <a href="https://github.com/TaobotX11/nusacoin" target="_blank" data-i18n="quick.build">⚒️ Build</a>
+		  <a href="https://github.com/TaobotX11/nusacoin" target="_blank" data-i18n="quick.build">⚒️ Build</a>
           <a href="/Pages/Taobot-App.html" target="_blank" data-i18n="quick.taobot">🛒 Taobot App</a>
         </div>
       </div>
@@ -760,7 +760,7 @@ footer{background:var(--surface-2);border-top:1px solid var(--border);padding:60
         <h3 data-i18n="footer.res">Sumber Daya</h3>
         <ul>
           <li><a href="https://paper.nusacoin.org" target="_blank" data-i18n="res.paperwallet">Paper Wallet</a></li>
-          <li><a href="https://pooljava.nusacoin.org" target="_blank" data-i18n="footer.pool">Mining Pool</a></li>
+          <li><a href="https://pool.nusacoin.org" target="_blank" data-i18n="footer.pool">Mining Pool</a></li>
           <li><a href="https://ijol.nusacoin.org" target="_blank" data-i18n="footer.ijol">Ijol Nusacoin (P2P)</a></li>
           <li><a href="https://t.me/rdnmesin_bot" target="_blank" data-i18n="footer.rdn">Nusacard RDN Bot</a></li>
           <li><a href="/Pages/Kosa-Kata.html" target="_blank" data-i18n="res.glossary">Kosa Kata</a></li>
@@ -841,7 +841,7 @@ footer{background:var(--surface-2);border-top:1px solid var(--border);padding:60
   const dict = {
     id: {
       topbar: "Nusacoin.org membutuhkan bantuan anda!",
-      "nav.home":"Beranda","nav.Introduction":"Perkenalan","nav.how":"Cara Kerja","nav.features":"Fitur","nav.resources":"Sumber Daya","nav.started":"Memulai","nav.businesses":"Bisnis","nav.individu":"Individu",
+      "nav.inovasi":"Inovasi","nav.Introduction":"Perkenalan","nav.how":"Cara Kerja","nav.features":"Fitur","nav.resources":"Sumber Daya","nav.started":"Memulai","nav.businesses":"Bisnis","nav.individu":"Individu",
       "nav.faucet":"Faucet & Airdrop","nav.community":"Komunitas",
       "res.explorer":"Explorer","res.webwallet":"Nusacoin Web Wallet","res.paperwallet":"Nusacoin Paper Wallet",
       "res.greenwallet":"Nusacoin Green Wallet","res.core":"Nusacoin Core (GitHub)","res.pool":"Mining Pool","res.glossary":"Kosa Kata",
@@ -903,7 +903,7 @@ footer{background:var(--surface-2);border-top:1px solid var(--border);padding:60
     },
     en: {
       topbar: "Nusacoin.org needs your help!",
-      "nav.home":"Home","nav.Introduction":"Introduction","nav.how":"How It Works","nav.features":"Features","nav.resources":"Resources","nav.started":"Getting Started","nav.businesses":"Businesses","nav.individu":"Individuals",
+      "nav.inovasi":"Innovation","nav.Introduction":"Introduction","nav.how":"How It Works","nav.features":"Features","nav.resources":"Resources","nav.started":"Getting Started","nav.businesses":"Businesses","nav.individu":"Individuals",
       "nav.faucet":"Faucet & Airdrop","nav.community":"Community",
       "res.explorer":"Explorer","res.webwallet":"Nusacoin Web Wallet","res.paperwallet":"Nusacoin Paper Wallet",
       "res.greenwallet":"Nusacoin Green Wallet","res.core":"Nusacoin Core (GitHub)","res.pool":"Mining Pool","res.glossary":"Glossary",
