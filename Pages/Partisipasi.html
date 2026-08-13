@@ -3,50 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nusacoin (NUX) - Dukung & Berpartisipasi</title>
+    <title>Nusacoin (NUX) - Dukung Nusacoin</title>
     
     <!-- Google Fonts & FontAwesome -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Titillium+Web:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Titillium+Web:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <!-- CSS Styling -->
     <style>
-        /* --- RESET & HAPUS NAVBAR BLOGGER --- */
+        /* HAPUS NAVBAR BLOGGER / GHOST */
         #navbar-iframe, .navbar, .navbar-ghost { 
             display: none !important; 
             height: 0 !important; 
             visibility: hidden !important; 
         }
+
         * { 
             margin: 0; 
             padding: 0; 
             box-sizing: border-box; 
         }
 
-        /* Variables Tema Light & Dark Mode */
+        /* Variabel Warna Hijau Nusacoin (Bebas Oranye/Kuning) */
         :root {
             --primary: #27ae60;
             --primary-dark: #1e8449;
             --bg-body: #ffffff;
             --bg-card: #ffffff;
+            --bg-hero: #006400;
             --text-main: #1e293b;
             --text-sub: #64748b;
             --bg-light: #f8fafc;
             --border: #e2e8f0;
-            --title-green: #38761d;
-            --link-green: #38761d;
+            --title-green: #1e8449;
+            --icon-bg: #e8f5e9;
         }
 
-        /* Mode Dark */
         body.dark-mode {
             --bg-body: #0f172a;
             --bg-card: #1e293b;
+            --bg-hero: #093809;
             --text-main: #f8fafc;
             --text-sub: #94a3b8;
             --bg-light: #1e293b;
             --border: #334155;
             --title-green: #4ade80;
-            --link-green: #4ade80;
+            --icon-bg: #14532d;
         }
 
         body { 
@@ -60,7 +62,7 @@
 
         /* Top Bar */
         .top-bar {
-            background-color: var(--primary);
+            background-color: var(--primary-dark);
             color: white;
             padding: 8px 20px;
             font-size: 0.85rem;
@@ -82,10 +84,10 @@
             gap: 12px;
         }
 
-        /* Tombol Pilihan Bahasa */
+        /* Lang Switcher */
         .lang-switch {
             display: flex;
-            background: rgba(0, 0, 0, 0.15);
+            background: rgba(0, 0, 0, 0.2);
             border-radius: 4px;
             padding: 2px;
         }
@@ -93,7 +95,7 @@
         .lang-btn {
             background: transparent;
             border: none;
-            color: rgba(255, 255, 255, 0.75);
+            color: rgba(255, 255, 255, 0.8);
             padding: 2px 8px;
             font-size: 0.75rem;
             font-weight: 700;
@@ -104,12 +106,12 @@
 
         .lang-btn.active, .lang-btn:hover {
             background: #ffffff;
-            color: var(--primary);
+            color: var(--primary-dark);
         }
 
-        /* Tombol Tema (Hanya Simbol) */
+        /* Theme Toggle Button (Icon Only) */
         .theme-toggle-btn {
-            background: rgba(0, 0, 0, 0.15);
+            background: rgba(0, 0, 0, 0.2);
             border: none;
             color: #ffffff;
             width: 30px;
@@ -124,79 +126,144 @@
         }
 
         .theme-toggle-btn:hover {
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.4);
             transform: scale(1.08);
         }
 
-        /* Main Content Styling */
-        main.support-section {
-            max-width: 900px;
-            margin: 40px auto;
+        /* Hero Header */
+        .hero-container {
+            background-color: var(--bg-hero);
+            width: 100%;
+            min-height: 280px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            color: #ffffff;
+            padding: 40px 20px 60px;
+            overflow: hidden;
+            transition: background-color 0.3s;
+        }
+
+        .hero-container h1 {
+            color: #ffffff !important;
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 10;
+            font-family: 'Titillium Web', sans-serif;
+        }
+
+        .hero-container p {
+            color: #cbd5e1;
+            font-size: 1.05rem;
+            max-width: 700px;
+            position: relative;
+            z-index: 10;
+            line-height: 1.6;
+        }
+
+        .bg-lines {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: 1;
+        }
+
+        .wireframe-svg {
+            position: absolute;
+            bottom: 40px; left: 0; width: 100%; z-index: 2; opacity: 0.3;
+        }
+
+        .jagged-bottom {
+            position: absolute;
+            bottom: -1px; left: 0; width: 100%; height: 50px;
+            background-color: var(--bg-body);
+            clip-path: polygon(0% 70%, 5% 60%, 10% 80%, 15% 55%, 20% 85%, 25% 60%, 30% 80%, 35% 50%, 40% 90%, 45% 60%, 50% 80%, 55% 55%, 60% 85%, 65% 60%, 70% 80%, 75% 50%, 80% 90%, 85% 60%, 90% 80%, 95% 55%, 100% 70%, 100% 100%, 0% 100%);
+            z-index: 5;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Main Content Container */
+        main {
+            max-width: 1200px;
+            margin: 40px auto 60px;
             padding: 0 20px;
         }
 
-        .support-section h2 {
-            font-family: 'Titillium Web', Arial, sans-serif;
-            font-size: 1.4rem;
+        /* Support Cards Grid */
+        .support-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+        }
+
+        .support-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s, background-color 0.3s, border-color 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .support-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .support-icon {
+            width: 50px;
+            height: 50px;
+            background-color: var(--icon-bg);
             color: var(--title-green);
-            font-weight: 600;
-            margin-top: 30px;
-            margin-bottom: 10px;
-            text-align: left;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            margin-bottom: 20px;
         }
 
-        .support-section p {
-            font-size: 0.95rem;
+        .support-title {
+            font-family: 'Titillium Web', sans-serif;
+            font-size: 1.3rem;
+            color: var(--title-green);
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .support-desc {
+            font-size: 0.98rem;
             color: var(--text-main);
-            line-height: 1.7;
+            line-height: 1.65;
             text-align: justify;
-            margin-bottom: 15px;
         }
 
-        .support-section ul {
-            margin: 10px 0 20px 25px;
+        .sub-project-list {
+            margin: 10px 0 0 20px;
             color: var(--text-main);
         }
 
-        .support-section ul li {
+        .sub-project-list li {
             margin-bottom: 6px;
             font-size: 0.95rem;
         }
 
-        /* Tombol Wrapper */
-        .wrapper-tombol {
-            text-align: center;
-            margin-top: 35px;
-            margin-bottom: 20px;
-            width: 100%;
-        }
-
-        .btn-nusacoin {
-            display: inline-block;
-            padding: 14px 28px;
-            background-color: #28a745;
-            color: #ffffff !important;
-            text-decoration: none;
-            font-family: Arial, sans-serif;
-            font-weight: bold;
-            font-size: 16px;
-            border-radius: 4px;
-            transition: background-color 0.3s ease;
-            cursor: pointer;
-            border: none;
-        }
-
-        .btn-nusacoin:hover {
-            background-color: #218838;
-            color: #ffffff !important;
-        }
-
-        /* Footer Styling */
+        /* Footer */
         footer {
             background-color: var(--bg-light);
             border-top: 1px solid var(--border);
             padding: 60px 20px 20px;
             margin-top: 60px;
+            transition: background-color 0.3s, border-color 0.3s;
         }
 
         .footer-grid {
@@ -211,6 +278,7 @@
             font-size: 1.3rem;
             color: var(--primary);
             margin-bottom: 15px;
+            font-family: 'Titillium Web', sans-serif;
         }
 
         .footer-brand p {
@@ -224,6 +292,7 @@
             font-size: 1.1rem;
             color: var(--text-main);
             margin-bottom: 15px;
+            font-family: 'Titillium Web', sans-serif;
         }
 
         .footer-col ul {
@@ -286,11 +355,20 @@
         .mono {
             font-family: monospace;
         }
+
+        @media (max-width: 768px) {
+            .hero-container h1 {
+                font-size: 1.8rem;
+            }
+            .support-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
 
-    <!-- Top Bar dengan Tombol Bahasa IN/EN & Tema Simbol -->
+    <!-- Top Bar dengan Saklar Bahasa IN/EN & Tema Simbol -->
     <div class="top-bar">
         <div class="top-bar-container">
             <span id="topBarHelp">Nusacoin.org membutuhkan bantuan anda!</span>
@@ -302,7 +380,7 @@
                     <button class="lang-btn" id="btnEN" onclick="switchLanguage('en')">EN</button>
                 </div>
 
-                <!-- Tombol Tema (Hanya Simbol Ikon) -->
+                <!-- Tombol Tema (Simbol Moon/Sun) -->
                 <button class="theme-toggle-btn" id="themeToggle" onclick="toggleTheme()" aria-label="Ganti Tema" title="Ganti Tema">
                     <i class="fa-solid fa-moon" id="themeIcon"></i>
                 </button>
@@ -310,49 +388,98 @@
         </div>
     </div>
 
-    <!-- Main Content -->
-    <main class="support-section">
-        <h2 id="titleSec1">- Menggunakan Nusacoin</h2>
-        <p id="descSec1">Menggunakan Nusacoin adalah hal pertama yang bisa Anda lakukan untuk mendukung Nusacoin. Ada banyak kemudahan yang bisa Anda dapatkan dengan menggunakan Nusacoin. Anda dapat menerima pembayaran dan melakukan pembelian dengan Nusacoin.</p>
+    <!-- Hero Header -->
+    <header class="hero-container">
+        <div class="bg-lines"></div>
+        <h1 id="heroTitle">Dukung Nusacoin</h1>
+        <p id="heroSub">Nusacoin terlahir dari sebuah komunitas kecil dan berkembang cukup pesat. Banyak hal yang bisa Anda lakukan untuk dapat mendukungnya dan membantu orang lain untuk belajar lebih jauh.</p>
+        <svg class="wireframe-svg" preserveAspectRatio="none" viewBox="0 0 1440 100">
+            <path d="M0,80 L200,50 L400,90 L600,30 L800,80 L1000,40 L1200,90 L1440,50" fill="none" stroke-width="1" stroke="rgba(255,255,255,0.2)"></path>
+        </svg>
+        <div class="jagged-bottom"></div>
+    </header>
 
-        <h2 id="titleSec2">- Jadilah bagian dari jaringan</h2>
-        <p id="descSec2">Jika anda memiliki koneksi internet bagus, Anda bisa memperkuat jaringan Nusacoin dengan menjaga perangkat lunak full node tetap berjalan pada komputer atau server anda dengan port 28573 yang terbuka. Full node berfungsi untuk mengamankan dan menyampaikan kembali semua transaksi.</p>
+    <!-- Main Content Support Grid -->
+    <main>
+        <div class="support-grid">
 
-        <h2 id="titleSec3">- Penambangan</h2>
-        <p id="descSec3">Anda dapat mulai menambang nusacoin untuk membantu memroses transaksi. Untuk melindungi jaringan, sebaiknya anda bergabung dengan pools pertambangan kecil, dan mungkin bisa memilih kelompok pertambangan terdesentralisasi seperti P2Pool atau pools dengan dukungan getblocktemplate (GBT).</p>
+            <!-- Item 1 -->
+            <div class="support-card">
+                <div class="support-icon"><i class="fa-solid fa-wallet"></i></div>
+                <h3 class="support-title" id="s1Title">Menggunakan Nusacoin</h3>
+                <p class="support-desc" id="s1Desc">Menggunakan Nusacoin adalah hal pertama yang bisa Anda lakukan untuk mendukung Nusacoin. Ada banyak kemudahan yang bisa Anda dapatkan dengan menggunakan Nusacoin. Anda dapat menerima pembayaran dan melakukan pembelian dengan Nusacoin.</p>
+            </div>
 
-        <h2 id="titleSec4">- Terjemahkan</h2>
-        <p id="descSec4">Anda dapat membantu menyebarkan pengetahuan tentang Nusacoin dengan menterjemahkan atau meningkatkan terjemahan di berbagai bagian ekosistem Nusacoin. Pilih sebuah proyek yang memungkinkan anda dapat membantu.</p>
-        <ul>
-            <li>Nusacoin Core</li>
-            <li>Nusacoin.org</li>
-            <li>Nusacoin Wiki</li>
-            <li>Nusacoin Wallet (Android)</li>
-            <li>Electrum</li>
-        </ul>
+            <!-- Item 2 -->
+            <div class="support-card">
+                <div class="support-icon"><i class="fa-solid fa-server"></i></div>
+                <h3 class="support-title" id="s2Title">Jadilah Bagian dari Jaringan</h3>
+                <p class="support-desc" id="s2Desc">Jika Anda memiliki koneksi internet bagus, Anda bisa memperkuat jaringan Nusacoin dengan menjaga perangkat lunak full node tetap berjalan pada komputer atau server Anda dengan port 28573 yang terbuka. Full node berfungsi untuk mengamankan dan menyampaikan kembali semua transaksi.</p>
+            </div>
 
-        <h2 id="titleSec5">- Pengembangan</h2>
-        <p id="descSec5">Nusacoin adalah perangkat lunak gratis, jika anda adalah seorang pengembang, anda dapat menggunakan daya dan potensi anda untuk melakukan kebaikan dan meningkatkan Nusacoin. Anda juga dapat membangun layanan atau perangkat lunak baru yang menakjubkan dengan menggunakan Nusacoin.</p>
+            <!-- Item 3 -->
+            <div class="support-card">
+                <div class="support-icon"><i class="fa-solid fa-pickaxe"></i></div>
+                <h3 class="support-title" id="s3Title">Penambangan (Mining)</h3>
+                <p class="support-desc" id="s3Desc">Anda dapat mulai menambang Nusacoin untuk membantu memproses transaksi. Untuk melindungi jaringan, sebaiknya Anda bergabung dengan pools pertambangan kecil, dan mungkin bisa memilih kelompok pertambangan terdesentralisasi seperti P2Pool atau pools dengan dukungan getblocktemplate (GBT).</p>
+            </div>
 
-        <h2 id="titleSec6">- Donasi</h2>
-        <p id="descSec6">Cara termudah untuk membantu adalah donasi sejumlah nusacoin ke NusaGive (atau organisasi serupa yang mendukung Nusacoin). Atau bisa juga membantu langsung dengan mendanai proyek apapun yang berkaitan dengan Nusacoin yang anda percaya akan bermanfaat dimasa mendatang.</p>
+            <!-- Item 4 -->
+            <div class="support-card">
+                <div class="support-icon"><i class="fa-solid fa-language"></i></div>
+                <h3 class="support-title" id="s4Title">Terjemahkan</h3>
+                <p class="support-desc" id="s4Desc">Anda dapat membantu menyebarkan pengetahuan tentang Nusacoin dengan menerjemahkan atau meningkatkan terjemahan di berbagai bagian ekosistem Nusacoin. Pilih sebuah proyek yang memungkinkan Anda dapat membantu:</p>
+                <ul class="sub-project-list">
+                    <li>Nusacoin Core</li>
+                    <li>Nusacoin.org</li>
+                    <li>Nusacoin Wiki</li>
+                    <li>Nusacoin Wallet (Android)</li>
+                    <li>Electrum</li>
+                </ul>
+            </div>
 
-        <h2 id="titleSec7">- Organisasi</h2>
-        <p id="descSec7">Ada banyak organisasi nirlaba yang didedikasikan khusus untuk memproteksi dan juga mempromosikan Nusacoin. Anda dapat membantu grup-grup tersebut dengan bergabung dan berpartisipasi pada proyek mereka, berdiskusi dan hadir di event-event.</p>
+            <!-- Item 5 -->
+            <div class="support-card">
+                <div class="support-icon"><i class="fa-solid fa-code"></i></div>
+                <h3 class="support-title" id="s5Title">Pengembangan</h3>
+                <p class="support-desc" id="s5Desc">Nusacoin adalah perangkat lunak gratis. Jika Anda adalah seorang pengembang, Anda dapat menggunakan daya dan potensi Anda untuk melakukan kebaikan dan meningkatkan Nusacoin. Anda juga dapat membangun layanan atau perangkat lunak baru yang menakjubkan dengan menggunakan Nusacoin.</p>
+            </div>
 
-        <h2 id="titleSec8">- Sebarkan</h2>
-        <p id="descSec8">Bicaralah mengenai Nusacoin kepada orang-orang yang tertarik. Tulislah mengenai Nusacoin di blog anda. Beritahu toko-toko favorit anda bahwa anda ingin dapat membayarnya dengan Nusacoin. Bantu menjaga daftar penjual tetap akurat dan aktual. Atau menjadi kreatif dan membuat kaos Nusacoin yang bagus untuk anda sendiri.</p>
+            <!-- Item 6 -->
+            <div class="support-card">
+                <div class="support-icon"><i class="fa-solid fa-hand-holding-heart"></i></div>
+                <h3 class="support-title" id="s6Title">Donasi</h3>
+                <p class="support-desc" id="s6Desc">Cara termudah untuk membantu adalah donasi sejumlah Nusacoin ke NusaGive (atau organisasi serupa yang mendukung Nusacoin). Atau bisa juga membantu langsung dengan mendanai proyek apapun yang berkaitan dengan Nusacoin yang Anda percaya akan bermanfaat di masa mendatang.</p>
+            </div>
 
-        <h2 id="titleSec9">- Dokumentasi</h2>
-        <p id="descSec9">Nusacoin.org dan Wiki Nusacoin menyediakan berbagai informasi yang berguna dan kami secara terus-menerus meningkatkan informasi di dalamnya. Anda bisa membantu meningkatkan sumber-sumber informasi tersebut tetap akurat dan aktual.</p>
+            <!-- Item 7 -->
+            <div class="support-card">
+                <div class="support-icon"><i class="fa-solid fa-sitemap"></i></div>
+                <h3 class="support-title" id="s7Title">Organisasi</h3>
+                <p class="support-desc" id="s7Desc">Ada banyak organisasi nirlaba yang didedikasikan khusus untuk memproteksi dan juga mempromosikan Nusacoin. Anda dapat membantu grup-grup tersebut dengan bergabung dan berpartisipasi pada proyek mereka, berdiskusi, dan hadir di acara-acara komunitas.</p>
+            </div>
 
-        <h2 id="titleSec10">- Bertemu dengan komunitas</h2>
-        <p id="descSec10">Anda dapat bergabung dengan komunitas Nusacoin dan berbicara dengan penggemar Nusacoin lainnya. Anda juga bisa mempelajari lebih lanjut mengenai Nusacoin setiap hari, membantu pengguna baru dan ikut terlibat dalam proyek-proyek menarik.</p>
+            <!-- Item 8 -->
+            <div class="support-card">
+                <div class="support-icon"><i class="fa-solid fa-bullhorn"></i></div>
+                <h3 class="support-title" id="s8Title">Sebarkan Informasi</h3>
+                <p class="support-desc" id="s8Desc">Bicaralah mengenai Nusacoin kepada orang-orang yang tertarik. Tulislah mengenai Nusacoin di blog Anda. Beritahu toko-toko favorit Anda bahwa Anda ingin dapat membayarnya dengan Nusacoin. Bantu menjaga daftar penjual tetap akurat dan aktual, atau berkreasilah membuat merchandise Nusacoin yang bagus.</p>
+            </div>
 
-        <div class="wrapper-tombol">
-            <a class="btn-nusacoin" id="btnDownload" href="https://github.com/TaobotX11/nusacoin/releases/download/0.26.60/nusacoin-0.26.60-win64-setup.exe">
-                Nusacoin Core Win
-            </a>
+            <!-- Item 9 -->
+            <div class="support-card">
+                <div class="support-icon"><i class="fa-solid fa-book-bookmark"></i></div>
+                <h3 class="support-title" id="s9Title">Dokumentasi</h3>
+                <p class="support-desc" id="s9Desc">Nusacoin.org dan Wiki Nusacoin menyediakan berbagai informasi yang berguna dan kami secara terus-menerus meningkatkan informasi di dalamnya. Anda bisa membantu meningkatkan sumber-sumber informasi tersebut agar tetap akurat dan aktual.</p>
+            </div>
+
+            <!-- Item 10 -->
+            <div class="support-card">
+                <div class="support-icon"><i class="fa-solid fa-users"></i></div>
+                <h3 class="support-title" id="s10Title">Bertemu dengan Komunitas</h3>
+                <p class="support-desc" id="s10Desc">Anda dapat bergabung dengan komunitas Nusacoin dan berbicara dengan penggemar Nusacoin lainnya. Anda juga bisa mempelajari lebih lanjut mengenai Nusacoin setiap hari, membantu pengguna baru, dan ikut terlibat dalam proyek-proyek menarik.</p>
+            </div>
+
         </div>
     </main>
 
@@ -386,7 +513,7 @@
                 <h3 id="footerResTitle">Sumber Daya</h3>
                 <ul>
                     <li><a href="https://paper.nusacoin.org" target="_blank">Paper Wallet</a></li>
-                    <li><a href="https://pool.nusacoin.org" target="_blank">Mining Pool</a></li>
+                    <li><a href="https://pooljava.nusacoin.org" target="_blank">Mining Pool</a></li>
                     <li><a href="https://ijol.nusacoin.org" target="_blank">Ijol Nusacoin (P2P)</a></li>
                     <li><a href="https://t.me/rdnmesin_bot" target="_blank">Nusacard RDN Bot</a></li>
                     <li><a href="/Pages/Kosa-Kata.html" target="_blank" id="menuGlossary">Kosa Kata</a></li>
@@ -411,32 +538,33 @@
         </div>
     </footer>
 
-    <!-- Script Tema Switcher (Simbol) & Bahasa (IN/EN) -->
+    <!-- JavaScript Translasi & Theme Switcher -->
     <script>
         const translations = {
             id: {
                 topBarHelp: "Nusacoin.org membutuhkan bantuan anda!",
-                titleSec1: "- Menggunakan Nusacoin",
-                descSec1: "Menggunakan Nusacoin adalah hal pertama yang bisa Anda lakukan untuk mendukung Nusacoin. Ada banyak kemudahan yang bisa Anda dapatkan dengan menggunakan Nusacoin. Anda dapat menerima pembayaran dan melakukan pembelian dengan Nusacoin.",
-                titleSec2: "- Jadilah bagian dari jaringan",
-                descSec2: "Jika anda memiliki koneksi internet bagus, Anda bisa memperkuat jaringan Nusacoin dengan menjaga perangkat lunak full node tetap berjalan pada komputer atau server anda dengan port 28573 yang terbuka. Full node berfungsi untuk mengamankan dan menyampaikan kembali semua transaksi.",
-                titleSec3: "- Penambangan",
-                descSec3: "Anda dapat mulai menambang nusacoin untuk membantu memroses transaksi. Untuk melindungi jaringan, sebaiknya anda bergabung dengan pools pertambangan kecil, dan mungkin bisa memilih kelompok pertambangan terdesentralisasi seperti P2Pool atau pools dengan dukungan getblocktemplate (GBT).",
-                titleSec4: "- Terjemahkan",
-                descSec4: "Anda dapat membantu menyebarkan pengetahuan tentang Nusacoin dengan menterjemahkan atau meningkatkan terjemahan di berbagai bagian ekosistem Nusacoin. Pilih sebuah proyek yang memungkinkan anda dapat membantu.",
-                titleSec5: "- Pengembangan",
-                descSec5: "Nusacoin adalah perangkat lunak gratis, jika anda adalah seorang pengembang, anda dapat menggunakan daya dan potensi anda untuk melakukan kebaikan dan meningkatkan Nusacoin. Anda juga dapat membangun layanan atau perangkat lunak baru yang menakjubkan dengan menggunakan Nusacoin.",
-                titleSec6: "- Donasi",
-                descSec6: "Cara termudah untuk membantu adalah donasi sejumlah nusacoin ke NusaGive (atau organisasi serupa yang mendukung Nusacoin). Atau bisa juga membantu langsung dengan mendanai proyek apapun yang berkaitan dengan Nusacoin yang anda percaya akan bermanfaat dimasa mendatang.",
-                titleSec7: "- Organisasi",
-                descSec7: "Ada banyak organisasi nirlaba yang didedikasikan khusus untuk memproteksi dan juga mempromosikan Nusacoin. Anda dapat membantu grup-grup tersebut dengan bergabung dan berpartisipasi pada proyek mereka, berdiskusi dan hadir di event-event.",
-                titleSec8: "- Sebarkan",
-                descSec8: "Bicaralah mengenai Nusacoin kepada orang-orang yang tertarik. Tulislah mengenai Nusacoin di blog anda. Beritahu toko-toko favorit anda bahwa anda ingin dapat membayarnya dengan Nusacoin. Bantu menjaga daftar penjual tetap akurat dan aktual. Atau menjadi kreatif dan membuat kaos Nusacoin yang bagus untuk anda sendiri.",
-                titleSec9: "- Dokumentasi",
-                descSec9: "Nusacoin.org dan Wiki Nusacoin menyediakan berbagai informasi yang berguna dan kami secara terus-menerus meningkatkan informasi di dalamnya. Anda bisa membantu meningkatkan sumber-sumber informasi tersebut tetap akurat dan aktual.",
-                titleSec10: "- Bertemu dengan komunitas",
-                descSec10: "Anda dapat bergabung dengan komunitas Nusacoin dan berbicara dengan penggemar Nusacoin lainnya. Anda juga bisa mempelajari lebih lanjut mengenai Nusacoin setiap hari, membantu pengguna baru dan ikut terlibat dalam proyek-proyek menarik.",
-                btnDownload: "Nusacoin Core Win",
+                heroTitle: "Dukung Nusacoin",
+                heroSub: "Nusacoin terlahir dari sebuah komunitas kecil dan berkembang cukup pesat. Banyak hal yang bisa Anda lakukan untuk dapat mendukungnya dan membantu orang lain untuk belajar lebih jauh.",
+                s1Title: "Menggunakan Nusacoin",
+                s1Desc: "Menggunakan Nusacoin adalah hal pertama yang bisa Anda lakukan untuk mendukung Nusacoin. Ada banyak kemudahan yang bisa Anda dapatkan dengan menggunakan Nusacoin. Anda dapat menerima pembayaran dan melakukan pembelian dengan Nusacoin.",
+                s2Title: "Jadilah Bagian dari Jaringan",
+                s2Desc: "Jika Anda memiliki koneksi internet bagus, Anda bisa memperkuat jaringan Nusacoin dengan menjaga perangkat lunak full node tetap berjalan pada komputer atau server Anda dengan port 28573 yang terbuka.",
+                s3Title: "Penambangan (Mining)",
+                s3Desc: "Anda dapat mulai menambang Nusacoin untuk membantu memproses transaksi. Untuk melindungi jaringan, sebaiknya Anda bergabung dengan pools pertambangan kecil, dan mungkin bisa memilih kelompok pertambangan terdesentralisasi seperti P2Pool.",
+                s4Title: "Terjemahkan",
+                s4Desc: "Anda dapat membantu menyebarkan pengetahuan tentang Nusacoin dengan menerjemahkan atau meningkatkan terjemahan di berbagai bagian ekosistem Nusacoin.",
+                s5Title: "Pengembangan",
+                s5Desc: "Nusacoin adalah perangkat lunak gratis. Jika Anda adalah seorang pengembang, Anda dapat menggunakan daya dan potensi Anda untuk melakukan kebaikan dan meningkatkan Nusacoin.",
+                s6Title: "Donasi",
+                s6Desc: "Cara termudah untuk membantu adalah donasi sejumlah Nusacoin ke NusaGive (atau organisasi serupa yang mendukung Nusacoin). Atau mendanai proyek yang bermanfaat.",
+                s7Title: "Organisasi",
+                s7Desc: "Ada banyak organisasi nirlaba yang didedikasikan khusus untuk memproteksi dan mempromosikan Nusacoin. Anda dapat bergabung, berpartisipasi, dan hadir di acara-acara komunitas.",
+                s8Title: "Sebarkan Informasi",
+                s8Desc: "Bicaralah mengenai Nusacoin kepada orang-orang yang tertarik. Tulislah mengenai Nusacoin di blog Anda atau beritahu toko-toko favorit Anda untuk menerima pembayaran Nusacoin.",
+                s9Title: "Dokumentasi",
+                s9Desc: "Nusacoin.org dan Wiki Nusacoin menyediakan berbagai informasi yang berguna. Anda bisa membantu meningkatkan sumber-sumber informasi tersebut agar tetap akurat dan aktual.",
+                s10Title: "Bertemu dengan Komunitas",
+                s10Desc: "Anda dapat bergabung dengan komunitas Nusacoin dan berbicara dengan penggemar Nusacoin lainnya, membantu pengguna baru, dan terlibat dalam proyek menarik.",
                 footerDesc: "Blockchain milik rakyat dengan prinsip crypto yang adil. Terdesentralisasi, aman, dan dapat diakses semua orang.",
                 footerQuickTitle: "Tautan Cepat",
                 footerResTitle: "Sumber Daya",
@@ -448,27 +576,28 @@
             },
             en: {
                 topBarHelp: "Nusacoin.org needs your help!",
-                titleSec1: "- Using Nusacoin",
-                descSec1: "Using Nusacoin is the first thing you can do to support Nusacoin. There are many conveniences you can get by using Nusacoin. You can receive payments and make purchases with Nusacoin.",
-                titleSec2: "- Be part of the network",
-                descSec2: "If you have a good internet connection, you can strengthen the Nusacoin network by keeping a full node running on your computer or server with port 28573 open. Full nodes serve to secure and relay all transactions.",
-                titleSec3: "- Mining",
-                descSec3: "You can start mining Nusacoin to help process transactions. To protect the network, it is recommended to join smaller mining pools, and consider decentralized mining pools like P2Pool or pools with getblocktemplate (GBT) support.",
-                titleSec4: "- Translate",
-                descSec4: "You can help spread knowledge about Nusacoin by translating or improving translations in various parts of the Nusacoin ecosystem. Choose a project where you can help.",
-                titleSec5: "- Development",
-                descSec5: "Nusacoin is free software. If you are a developer, you can use your skills and potential to do good and improve Nusacoin. You can also build amazing new services or software using Nusacoin.",
-                titleSec6: "- Donate",
-                descSec6: "The easiest way to help is by donating Nusacoin to NusaGive (or similar organizations supporting Nusacoin). You can also help directly by funding any Nusacoin-related project you believe will be beneficial in the future.",
-                titleSec7: "- Organizations",
-                descSec7: "There are many non-profit organizations dedicated to protecting and promoting Nusacoin. You can help these groups by joining and participating in their projects, discussions, and events.",
-                titleSec8: "- Spread the word",
-                descSec8: "Talk about Nusacoin to interested people. Write about Nusacoin on your blog. Tell your favorite shops you would like to pay with Nusacoin. Help keep merchant directories accurate and up to date. Or get creative and make a nice Nusacoin t-shirt for yourself.",
-                titleSec9: "- Documentation",
-                descSec9: "Nusacoin.org and the Nusacoin Wiki provide useful information and we continuously improve them. You can help keep these information resources accurate and updated.",
-                titleSec10: "- Meet the community",
-                descSec10: "You can join the Nusacoin community and talk to other Nusacoin enthusiasts. You can also learn more about Nusacoin every day, help new users, and get involved in exciting projects.",
-                btnDownload: "Nusacoin Core Win",
+                heroTitle: "Support Nusacoin",
+                heroSub: "Nusacoin started from a small community and is growing rapidly. There are many ways you can support it and help others learn more.",
+                s1Title: "Use Nusacoin",
+                s1Desc: "Using Nusacoin is the easiest thing you can do to support the network. You can accept payments and make purchases with Nusacoin seamlessly.",
+                s2Title: "Be a Part of the Network",
+                s2Desc: "If you have a reliable internet connection, strengthen the Nusacoin network by running a full node on your computer or server with port 28573 open.",
+                s3Title: "Mining",
+                s3Desc: "Start mining Nusacoin to process transactions. To protect the network, join smaller mining pools or decentralized options like P2Pool.",
+                s4Title: "Translate",
+                s4Desc: "Help spread awareness of Nusacoin by translating or refining existing translations across various parts of the Nusacoin ecosystem.",
+                s5Title: "Development",
+                s5Desc: "Nusacoin is open-source software. If you are a developer, use your skills to improve Nusacoin or build awesome new services and integrations.",
+                s6Title: "Donate",
+                s6Desc: "The simplest way to help is donating Nusacoin to NusaGive or directly funding promising Nusacoin community projects.",
+                s7Title: "Organizations",
+                s7Desc: "Join non-profit organizations dedicated to protecting and promoting Nusacoin. Participate in discussions, events, and community projects.",
+                s8Title: "Spread the Word",
+                s8Desc: "Talk about Nusacoin to interested individuals, write blog posts, ask your favorite merchants to accept NUX, or create custom Nusacoin merchandise.",
+                s9Title: "Documentation",
+                s9Desc: "Nusacoin.org and the Nusacoin Wiki provide helpful guides. Help us keep these documentation resources up to date and accurate.",
+                s10Title: "Meet the Community",
+                s10Desc: "Join the vibrant Nusacoin community, interact with enthusiasts, guide new users, and collaborate on exciting ecosystem developments.",
                 footerDesc: "The people's blockchain built on fair crypto principles. Decentralized, secure, and accessible to everyone.",
                 footerQuickTitle: "Quick Links",
                 footerResTitle: "Resources",
