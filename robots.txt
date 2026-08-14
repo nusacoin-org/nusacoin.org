@@ -60,6 +60,7 @@ Disallow: /.github/
 Disallow: /admin/
 
 # Sitemap links
+Sitemap: https://www.nusachain.org/sitemap.xml
 Sitemap: https://www.nusacoin.org/sitemap.xml
 Sitemap: https://pooljava.nusacoin.org/sitemap.xml
 Sitemap: https://ijol.nusacoin.org/sitemap.xml
