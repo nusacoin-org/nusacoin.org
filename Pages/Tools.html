@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nusacoin (NUX) - Tools & Developer Portal</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Titillium+Web:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* RESET & HAPUS NAVBAR BLOGGER */
+        #navbar-iframe, .navbar, .navbar-ghost { 
+            display: none !important; 
+            height: 0 !important; 
+            visibility: hidden !important; 
+        }
+
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            width: 100%;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Variable Tema Light Mode (:root) */
+        :root {
+            --primary: #27ae60;
+            --primary-dark: #1e8449;
+            --bg-body: #ffffff;
+            --bg-card: #ffffff;
+            --bg-card-sub: #f8fafc;
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --bg-light: #f8fafc;
+            --border: #e2e8f0;
+            --title-green: #1e8449;
+            --link-green: #27ae60;
+            --btn-accent: #2ecc71;
+            --btn-accent-hover: #27ae60;
+            --link-blue: #3b82f6;
+        }
+
+        /* Variable Tema Dark Mode */
+        body.dark-mode {
+            --primary: #27ae60;
+            --primary-dark: #1e8449;
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --bg-card-sub: #0f172a;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --bg-light: #1e293b;
+            --border: #334155;
+            --title-green: #4ade80;
+            --link-green: #4ade80;
+            --btn-accent: #27ae60;
+            --btn-accent-hover: #1e8449;
+            --link-blue: #60a5fa;
+        }
+
+        body { 
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            color: var(--text-main); 
+            line-height: 1.6; 
+            background-color: var(--bg-body);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Top Bar Header (Presisi Sesuai Inovasi) */
+        .top-bar {
+            width: 100%;
+            background-color: var(--primary);
+            color: white;
+            padding: 8px 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .top-bar-container {
+            max-width: 1250px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .top-bar-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Saklar Bahasa */
+        .lang-switch {
+            display: flex;
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 4px;
+            padding: 2px;
+        }
+
+        .lang-btn {
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            padding: 2px 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: all 0.2s;
+        }
+
+        .lang-btn.active, .lang-btn:hover {
+            background: #ffffff;
+            color: var(--primary);
+        }
+
+        /* Tombol Tema */
+        .theme-toggle-btn {
+            background: rgba(0, 0, 0, 0.15);
+            border: none;
+            color: #ffffff;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        .theme-toggle-btn:hover {
+            background: rgba(0, 0, 0, 0.3);
+            transform: scale(1.08);
+        }
+
+        /* Main Area (Mengikuti max-width 1250px Seperti File Inovasi) */
+        main {
+            max-width: 1250px;
+            margin: 40px auto;
+            padding: 0 20px;
+            width: 100%;
+        }
+
+        .header {
+            margin-bottom: 2rem;
+            width: 100%;
+        }
+
+        .title-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem 1.5rem;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+            width: 100%;
+        }
+
+        .page-title {
+            color: var(--title-green);
+            font-size: clamp(1.4rem, 4vw, 2.2rem);
+            font-weight: 700;
+            font-family: 'Titillium Web', sans-serif;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        .page-title i, 
+        .title-icon {
+            color: var(--link-green);
+            transition: color 0.3s ease;
+        }
+
+        /* Grid Tools Responsif Full Width */
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.25rem;
+            width: 100%;
+        }
+
+        .tool-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary);
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+        }
+
+        .tool-icon {
+            font-size: 1.8rem;
+            color: var(--link-green);
+            margin-bottom: 0.75rem;
+        }
+
+        .tool-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+            font-family: 'Titillium Web', sans-serif;
+        }
+
+        .tool-description {
+            font-size: 0.9rem;
+            color: var(--text-sub);
+            line-height: 1.5;
+            margin-bottom: 1.25rem;
+        }
+
+        .tool-btn-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--link-green);
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-top: auto;
+        }
+
+        .tool-card:hover .tool-btn-action {
+            color: var(--primary-dark);
+        }
+
+        /* Footer (Persis File Asli) */
+        footer {
+            width: 100%;
+            background-color: var(--bg-light);
+            border-top: 1px solid var(--border);
+            padding: 40px 20px 20px;
+            margin-top: 50px;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .footer-grid {
+            max-width: 1250px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 30px;
+        }
+
+        .footer-brand h2 {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 12px;
+            font-family: 'Titillium Web', sans-serif;
+        }
+
+        .footer-brand p {
+            color: var(--text-sub);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .footer-col h3 {
+            font-size: 1.05rem;
+            color: var(--text-main);
+            margin-bottom: 12px;
+            font-family: 'Titillium Web', sans-serif;
+        }
+
+        .footer-col ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .footer-col ul li {
+            margin-bottom: 8px;
+        }
+
+        .footer-col ul li a {
+            color: var(--text-sub);
+            text-decoration: none;
+            transition: color 0.2s;
+            font-size: 0.9rem;
+            display: inline-block;
+            padding: 2px 0;
+        }
+
+        .footer-col ul li a:hover {
+            color: var(--primary);
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .social-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-main);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .social-box:hover {
+            background-color: var(--primary) !important;
+            color: white !important;
+            border-color: var(--primary);
+        }
+
+        .footer-bottom {
+            width: 100%;
+            max-width: 1250px;
+            margin: 30px auto 0;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-sub);
+            font-size: 0.85rem;
+        }
+
+        .mono {
+            font-family: monospace;
+        }
+
+        /* OPTIMASI KHUSUS MOBILE */
+        @media (max-width: 640px) {
+            .top-bar-container {
+                flex-direction: column;
+                text-align: center;
+                justify-content: center;
+            }
+
+            main {
+                margin: 20px auto;
+                padding: 0 15px;
+            }
+
+            .tools-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .title-card {
+                padding: 1rem;
+            }
+
+            footer {
+                padding: 30px 15px 20px;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+
+            .footer-brand, .footer-col {
+                text-align: center;
+            }
+
+            .social-icons {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <div class="top-bar-container">
+            <span id="topBarHelp">Nusacoin.org membutuhkan bantuan anda!</span>
+            
+            <div class="top-bar-controls">
+                <div class="lang-switch">
+                    <button class="lang-btn active" id="btnIN" onclick="switchLanguage('id')">IN</button>
+                    <button class="lang-btn" id="btnEN" onclick="switchLanguage('en')">EN</button>
+                </div>
+
+                <button class="theme-toggle-btn" id="themeToggle" onclick="toggleTheme()" aria-label="Ganti Tema" title="Ganti Tema">
+                    <i class="fa-solid fa-moon" id="themeIcon"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <main>
+        <header class="header">
+            <div class="title-card">
+                <h1 class="page-title" id="pageTitle">
+                    <i class="fa-solid fa-toolbox title-icon"></i> Tools Nusachain
+                </h1>
+            </div>
+        </header>
+
+        <section class="tools-grid">
+
+            <a href="https://www.nusachain.org/Tools/VeriSign-Mainnet.html" target="_blank" rel="noopener noreferrer" class="tool-card">
+                <div>
+                    <div class="tool-icon"><i class="fa-solid fa-file-contract"></i></div>
+                    <h2 class="tool-title">VeriSign Mainnet</h2>
+                    <p class="tool-description" id="descVerisignMainnet">Layanan verifikasi dan validasi tanda tangan digital dokumen atau transaksi pada jaringan utama (Mainnet) Nusachain.</p>
+                </div>
+                <div class="tool-btn-action">
+                    <span class="btn-text">Buka Alat</span> <i class="fa-solid fa-arrow-right"></i>
+                </div>
+            </a>
+
+            <a href="https://www.nusachain.org/Tools/VeriSign-Testnet.html" target="_blank" rel="noopener noreferrer" class="tool-card">
+                <div>
+                    <div class="tool-icon"><i class="fa-solid fa-vial"></i></div>
+                    <h2 class="tool-title">VeriSign Testnet</h2>
+                    <p class="tool-description" id="descVerisignTestnet">Lingkungan pengujian (Testnet) untuk verifikasi tanda tangan digital bagi pengembang sebelum melakukan rilis di Mainnet.</p>
+                </div>
+                <div class="tool-btn-action">
+                    <span class="btn-text">Buka Alat</span> <i class="fa-solid fa-arrow-right"></i>
+                </div>
+            </a>
+          
+            <a href="https://www.nusachain.org/Tools/Paper-Card.html" target="_blank" rel="noopener noreferrer" class="tool-card">
+                <div>
+                    <div class="tool-icon"><i class="fa-solid fa-file-invoice"></i></div>
+                    <h2 class="tool-title">Paper Card</h2>
+                    <p class="tool-description" id="descPaper">Generator Paper Wallet Nusa Coin (NUX) aman berbasis client-side. Buat dan simpan private key NUX Anda secara offline.</p>
+                </div>
+                <div class="tool-btn-action">
+                    <span class="btn-text">Buka Alat</span> <i class="fa-solid fa-arrow-right"></i>
+                </div>
+            </a>
+          
+            <a href="https://www.nusachain.org/Tools/Decode.html" target="_blank" rel="noopener noreferrer" class="tool-card">
+                <div>
+                    <div class="tool-icon"><i class="fa-solid fa-file-code"></i></div>
+                    <h2 class="tool-title">Decode</h2>
+                    <p class="tool-description" id="descDecode">Buka enkripsi Private Key dari kartu paper wallet Anda.</p>
+                </div>
+                <div class="tool-btn-action">
+                    <span class="btn-text">Buka Alat</span> <i class="fa-solid fa-arrow-right"></i>
+                </div>
+            </a>
+
+            <a href="https://www.nusachain.org/Tools/Nusa-Card.html" target="_blank" rel="noopener noreferrer" class="tool-card">
+                <div>
+                    <div class="tool-icon"><i class="fa-solid fa-id-card"></i></div>
+                    <h2 class="tool-title">Nusa Card</h2>
+                    <p class="tool-description" id="descNusaCard">Modul manajemen identitas berbasis kartu digital yang terhubung dengan aset dan ekosistem Nusachain.</p>
+                </div>
+                <div class="tool-btn-action">
+                    <span class="btn-text">Buka Alat</span> <i class="fa-solid fa-arrow-right"></i>
+                </div>
+            </a>
+          
+            <a href="https://www.nusachain.org/Tools/Paya-Chain.html" target="_blank" rel="noopener noreferrer" class="tool-card">
+                <div>
+                    <div class="tool-icon"><i class="fa-solid fa-file-signature"></i></div>
+                    <h2 class="tool-title">Paya Chain</h2>
+                    <p class="tool-description" id="descPayaChain">Konsep Layanan verifikasi dan validasi tanda tangan digital dokumen desa pada jaringan utama (Mainnet) Nusachain.</p>
+                </div>
+                <div class="tool-btn-action">
+                    <span class="btn-text">Buka Alat</span> <i class="fa-solid fa-arrow-right"></i>
+                </div>
+            </a>
+
+            <a href="https://www.nusachain.org/Tools/Read-This-File.html" target="_blank" rel="noopener noreferrer" class="tool-card">
+                <div>
+                    <div class="tool-icon"><i class="fa-solid fa-file-audio"></i></div>
+                    <h2 class="tool-title">Read This File</h2>
+                    <p class="tool-description" id="descReadThisFile">Alat untuk membaca file dokumen apapun dengan fitur suara.</p>
+                </div>
+                <div class="tool-btn-action">
+                    <span class="btn-text">Buka Alat</span> <i class="fa-solid fa-arrow-right"></i>
+                </div>
+            </a>
+
+            <a href="https://ta-render.nusachain.org/" target="_blank" rel="noopener noreferrer" class="tool-card">
+                <div>
+                    <div class="tool-icon"><i class="fa-solid fa-cube"></i></div>
+                    <h2 class="tool-title">TA Render</h2>
+                    <p class="tool-description" id="descTaRender">Alat prompting visualisasi rendering untuk pekerjaan 3d modeling arsitektur untuk gemini ai.</p>
+                </div>
+                <div class="tool-btn-action">
+                    <span class="btn-text">Buka Alat</span> <i class="fa-solid fa-arrow-right"></i>
+                </div>
+            </a>
+
+            <a href="https://tanya.nusachain.site/" target="_blank" rel="noopener noreferrer" class="tool-card">
+                <div>
+                    <div class="tool-icon"><i class="fa-solid fa-robot"></i></div>
+                    <h2 class="tool-title">Tanya Nusa</h2>
+                    <p class="tool-description" id="descTanyaNusa">Sebuah halaman bot untuk menjawab semua pertanyaan terkait Nusachain serta membagikan panduan Doa sehari-hari.</p>
+                </div>
+                <div class="tool-btn-action">
+                    <span class="btn-text">Buka Alat</span> <i class="fa-solid fa-arrow-right"></i>
+                </div>
+            </a>
+
+            <a href="https://www.nusachain.org/Tools/Blog-Hash-Generator.html" target="_blank" rel="noopener noreferrer" class="tool-card">
+                <div>
+                    <div class="tool-icon"><i class="fa-solid fa-hashtag"></i></div>
+                    <h2 class="tool-title">Blog Hash Generator</h2>
+                    <p class="tool-description" id="descBlogHash">Alat untuk memunculkan hash kriptografi khusus dari postingan blog guna memastikan keaslian konten di blockchain.</p>
+                </div>
+                <div class="tool-btn-action">
+                    <span class="btn-text">Buka Alat</span> <i class="fa-solid fa-arrow-right"></i>
+                </div>
+            </a>
+
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <h2>Nusacoin Network</h2>
+                <p id="footerDesc">Blockchain milik rakyat dengan prinsip crypto yang adil. Terdesentralisasi, aman, dan dapat diakses semua orang.</p>
+                <div class="social-icons">
+                    <a href="https://x.com/Nusacoin_chain" target="_blank" class="social-box" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="https://discord.gg/NcKKZFBzJ" target="_blank" class="social-box" aria-label="Discord"><i class="fab fa-discord"></i></a>
+                    <a href="https://telegram.me/NusacoinX11" target="_blank" class="social-box" aria-label="Telegram"><i class="fab fa-telegram-plane"></i></a>
+                    <a href="https://www.reddit.com/r/Nusacoin" target="_blank" class="social-box" aria-label="Reddit"><i class="fab fa-reddit-alien"></i></a>
+                    <a href="https://github.com/TaobotX11/nusacoin" target="_blank" class="social-box" aria-label="GitHub"><i class="fab fa-github"></i></a>
+                </div>
+            </div>
+
+            <div class="footer-col">
+                <h3 id="footerQuickTitle">Tautan Cepat</h3>
+                <ul>
+                    <li><a href="https://explorer.nusacoin.org" target="_blank">Explorer</a></li>
+                    <li><a href="https://dompet.nusacoin.org" target="_blank">Nusacoin Web Wallet</a></li>
+                    <li><a href="https://github.com/TaobotX11/nusacoin" target="_blank">Nusacoin Core</a></li>
+                    <li><a href="https://green.nusacoin.org" target="_blank">Nusacoin Green Wallet</a></li>
+                    <li><a href="/Pages/Visi-Misi.html" target="_blank">Roadmap</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h3 id="footerResTitle">Sumber Daya</h3>
+                <ul>
+                    <li><a href="https://paper.nusacoin.org" target="_blank">Paper Wallet</a></li>
+                    <li><a href="https://pool.nusacoin.org" target="_blank">Mining Pool</a></li>
+                    <li><a href="https://ijol.nusacoin.org" target="_blank">Ijol Nusacoin (P2P)</a></li>
+                    <li><a href="https://t.me/rdnmesin_bot" target="_blank">Nusacard RDN Bot</a></li>
+                    <li><a href="/Pages/Kosa-Kata.html" target="_blank" id="menuGlossary">Kosa Kata</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h3 id="footerDocsTitle">Dokumen &amp; Keamanan</h3>
+                <ul>
+                    <li><a href="/Pages/Whitepaper_Nusacoin_in.pdf">Whitepaper IN</a></li>
+                    <li><a href="/Pages/Whitepaper_Nusacoin_en.pdf">Whitepaper EN</a></li>
+                    <li><a href="/Pages/Amankan-Wallet.html" target="_blank" id="menuSecure">Amankan Wallet</a></li>
+                    <li><a href="/Pages/Lindungi-Privasi-Anda.html" target="_blank" id="menuPrivacy">Lindungi Privasi</a></li>
+                    <li><a href="/Pages/FAQ.html" target="_blank">FAQ</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <span id="footerCopyright">&copy; 2026 Nusacoin Project. Dibangun untuk desentralisasi.</span>
+            <span class="mono"> &middot; NUX / X11</span>
+        </div>
+    </footer>
+
+    <script>
+        const translations = {
+            id: {
+                topBarHelp: "Nusacoin.org membutuhkan bantuan anda!",
+                pageTitle: "<i class=\"fa-solid fa-toolbox title-icon\"></i> Tools Nusachain",
+                btnOpenTool: "Buka Alat",
+                descVerisignMainnet: "Layanan verifikasi dan validasi tanda tangan digital dokumen atau transaksi pada jaringan utama (Mainnet) Nusachain.",
+                descVerisignTestnet: "Lingkungan pengujian (Testnet) untuk verifikasi tanda tangan digital bagi pengembang sebelum melakukan rilis di Mainnet.",
+                descPaper: "Generator Paper Wallet Nusa Coin (NUX) aman berbasis client-side. Buat dan simpan private key NUX Anda secara offline.",
+                descDecode: "Buka enkripsi Private Key dari kartu paper wallet Anda.",
+                descNusaCard: "Modul manajemen identitas berbasis kartu digital yang terhubung dengan aset dan ekosistem Nusachain.",
+                descPayaChain: "Konsep Layanan verifikasi dan validasi tanda tangan digital dokumen desa pada jaringan utama (Mainnet) Nusachain.",
+                descReadThisFile: "Alat untuk membaca file dokumen apapun dengan fitur suara.",
+                descTaRender: "Alat prompting visualisasi rendering untuk pekerjaan 3d modeling arsitektur untuk gemini ai.",
+                descTanyaNusa: "Sebuah halaman bot untuk menjawab semua pertanyaan terkait Nusachain serta membagikan panduan Doa sehari-hari.",
+                descBlogHash: "Alat untuk memunculkan hash kriptografi khusus dari postingan blog guna memastikan keaslian konten di blockchain.",
+                footerDesc: "Blockchain milik rakyat dengan prinsip crypto yang adil. Terdesentralisasi, aman, dan dapat diakses semua orang.",
+                footerQuickTitle: "Tautan Cepat",
+                footerResTitle: "Sumber Daya",
+                footerDocsTitle: "Dokumen & Keamanan",
+                menuGlossary: "Kosa Kata",
+                menuSecure: "Amankan Wallet",
+                menuPrivacy: "Lindungi Privasi",
+                footerCopyright: "\u00A9 2026 Nusacoin Project. Dibangun untuk desentralisasi."
+            },
+            en: {
+                topBarHelp: "Nusacoin.org needs your help!",
+                pageTitle: "<i class=\"fa-solid fa-toolbox title-icon\"></i> Nusachain Tools",
+                btnOpenTool: "Open Tool",
+                descVerisignMainnet: "Verification and validation service for digital signatures on documents or transactions on the Nusachain Mainnet.",
+                descVerisignTestnet: "Testing environment (Testnet) for digital signature verification for developers prior to Mainnet release.",
+                descPaper: "Secure, client-side Nusa Coin (NUX) Paper Wallet Generator. Generate and store your NUX private keys offline.",
+                descDecode: "Unlock the Private Key encryption from your paper wallet card.",
+                descNusaCard: "Digital card-based identity management module connected to the Nusachain assets and ecosystem.",
+                descPayaChain: "Service concept for verification and validation of village document digital signatures on the Nusachain Mainnet.",
+                descReadThisFile: "A tool to read any document file with text-to-speech audio features.",
+                descTaRender: "Rendering visualization prompting tool for 3D architectural modeling workflows on Gemini AI.",
+                descTanyaNusa: "A bot page designed to answer all Nusachain-related questions and share daily prayer guides.",
+                descBlogHash: "A tool to generate custom cryptographic hashes for blog posts to verify content authenticity on the blockchain.",
+                footerDesc: "The people's blockchain built on fair crypto principles. Decentralized, secure, and accessible to everyone.",
+                footerQuickTitle: "Quick Links",
+                footerResTitle: "Resources",
+                footerDocsTitle: "Docs & Security",
+                menuGlossary: "Glossary",
+                menuSecure: "Secure Wallet",
+                menuPrivacy: "Protect Privacy",
+                footerCopyright: "\u00A9 2026 Nusacoin Project. Built for decentralization."
+            }
+        };
+
+        function switchLanguage(lang) {
+            document.getElementById('btnIN').classList.toggle('active', lang === 'id');
+            document.getElementById('btnEN').classList.toggle('active', lang === 'en');
+
+            const t = translations[lang];
+
+            for (let id in t) {
+                const el = document.getElementById(id);
+                if (el) {
+                    if (id === 'pageTitle') {
+                        el.innerHTML = t[id];
+                    } else {
+                        el.textContent = t[id];
+                    }
+                }
+            }
+
+            const btnTexts = document.querySelectorAll('.btn-text');
+            btnTexts.forEach(btn => {
+                btn.textContent = t.btnOpenTool;
+            });
+
+            document.documentElement.lang = lang;
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const icon = document.getElementById('themeIcon');
+            
+            body.classList.toggle('dark-mode');
+            
+            if (body.classList.contains('dark-mode')) {
+                icon.className = 'fa-solid fa-sun';
+            } else {
+                icon.className = 'fa-solid fa-moon';
+            }
+        }
+    </script>
+</body>
+</html>
