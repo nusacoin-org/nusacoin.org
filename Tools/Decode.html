@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nusacoin Card Decrypter</title>
+  
+  <!-- Crypto-JS untuk Dekripsi AES-256 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <!-- HTML5 QR Code Scanner Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --nux-green: #27ae60;
+      --nux-green-dark: #1e8449;
+      --gold: #d4a017;
+      --red: #e74c3c;
+      --bg: #f7f5ef;
+      --surface: #ffffff;
+      --surface-2: #f0efe6;
+      --ink: #16231c;
+      --ink-soft: #56645c;
+      --border: #e3ded0;
+      --shadow: rgba(15, 61, 38, 0.18);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--ink);
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      min-height: 100vh;
+      margin: 0;
+      padding: 40px 15px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .decrypt-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 30px;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 10px 25px -5px var(--shadow);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .header h2 {
+      margin: 0 0 6px 0;
+      color: var(--nux-green);
+      font-size: 22px;
+    }
+
+    .header p {
+      margin: 0;
+      color: var(--ink-soft);
+      font-size: 13px;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--ink);
+      font-size: 14px;
+      font-family: monospace;
+      outline: none;
+    }
+
+    textarea {
+      resize: vertical;
+      height: 70px;
+    }
+
+    input:focus, textarea:focus {
+      border-color: var(--nux-green);
+    }
+
+    /* Action Buttons Area */
+    .qr-actions {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .btn-secondary {
+      flex: 1;
+      padding: 10px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--ink);
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary:hover {
+      background: var(--border);
+    }
+
+    #reader {
+      width: 100%;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 15px;
+      display: none;
+    }
+
+    .btn-decrypt {
+      width: 100%;
+      padding: 14px;
+      background: var(--nux-green);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-decrypt:hover {
+      background: var(--nux-green-dark);
+    }
+
+    /* RESULT AREA */
+    .result-box {
+      margin-top: 24px;
+      padding: 16px;
+      border-radius: 8px;
+      display: none;
+      word-break: break-all;
+    }
+
+    .result-box.success {
+      display: block;
+      background: #eafff2;
+      border: 1px solid var(--nux-green);
+      color: var(--nux-green-dark);
+    }
+
+    .result-box.error {
+      display: block;
+      background: #fdf2f2;
+      border: 1px solid var(--red);
+      color: var(--red);
+    }
+
+    .result-title {
+      font-size: 11px;
+      font-weight: bold;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .result-value {
+      font-family: monospace;
+      font-size: 14px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<div class="decrypt-card">
+  <div class="header">
+    <h2><i class="fa-solid fa-key"></i> Nusacoin Key Decrypter</h2>
+    <p>Buka enkripsi Private Key dari kartu paper wallet Anda</p>
+  </div>
+
+  <!-- Fitur Kamera Scan & Upload -->
+  <div class="qr-actions">
+    <button class="btn-secondary" onclick="toggleCamera()">
+      <i class="fa-solid fa-camera"></i> Scan Kamera
+    </button>
+    <label class="btn-secondary" style="margin:0;">
+      <i class="fa-solid fa-upload"></i> Upload QR
+      <input type="file" id="qrFileInput" accept="image/*" style="display:none;" onchange="uploadQR(event)">
+    </label>
+  </div>
+
+  <!-- Area Video Kamera -->
+  <div id="reader"></div>
+
+  <div class="form-group">
+    <label for="encText">Teks / Hasil Scan QR Terenkripsi</label>
+    <textarea id="encText" placeholder="Tempelkan teks hasil scan di sini (contoh: ENC:U2FsdGVkX1...)"></textarea>
+  </div>
+
+  <div class="form-group">
+    <label for="pinInput">PIN Pengaman</label>
+    <input type="password" id="pinInput" placeholder="Masukkan PIN saat pembuatan kartu">
+  </div>
+
+  <button class="btn-decrypt" onclick="decryptKey()">
+    <i class="fa-solid fa-lock-open"></i> Dekripsi Private Key
+  </button>
+
+  <div id="resultBox" class="result-box">
+    <div class="result-title" id="resTitle">PRIVATE KEY ASLI:</div>
+    <div class="result-value" id="resValue">-</div>
+  </div>
+</div>
+
+<script>
+  let html5QrCode = null;
+  let isScanning = false;
+
+  // Toggle Buka/Tutup Kamera
+  function toggleCamera() {
+    const readerDiv = document.getElementById("reader");
+
+    if (isScanning) {
+      stopCamera();
+    } else {
+      readerDiv.style.display = "block";
+      if (!html5QrCode) {
+        html5QrCode = new Html5Qrcode("reader");
+      }
+      
+      html5QrCode.start(
+        { facingMode: "environment" }, 
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        (decodedText) => {
+          document.getElementById("encText").value = decodedText;
+          stopCamera();
+        },
+        (errorMessage) => {
+          // Mengabaikan error pemindaian per-frame
+        }
+      ).catch(err => {
+        alert("Gagal mengakses kamera: " + err);
+        readerDiv.style.display = "none";
+      });
+
+      isScanning = true;
+    }
+  }
+
+  // Matikan Kamera
+  function stopCamera() {
+    if (html5QrCode && isScanning) {
+      html5QrCode.stop().then(() => {
+        document.getElementById("reader").style.display = "none";
+        isScanning = false;
+      }).catch(err => console.error(err));
+    }
+  }
+
+  // Upload dan Scan File Gambar QR
+  function uploadQR(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!html5QrCode) {
+      html5QrCode = new Html5Qrcode("reader");
+    }
+
+    html5QrCode.scanFile(file, true)
+      .then(decodedText => {
+        document.getElementById("encText").value = decodedText;
+      })
+      .catch(err => {
+        alert("Gagal membaca QR Code dari gambar. Pastikan gambar jelas.");
+      });
+  }
+
+  // Fungsi Dekripsi
+  function decryptKey() {
+    let encText = document.getElementById("encText").value.trim();
+    const pin = document.getElementById("pinInput").value.trim();
+    const resultBox = document.getElementById("resultBox");
+    const resTitle = document.getElementById("resTitle");
+    const resValue = document.getElementById("resValue");
+
+    if (!encText || !pin) {
+      alert("Harap isi teks terenkripsi dan PIN!");
+      return;
+    }
+
+    if (encText.startsWith("ENC:")) {
+      encText = encText.replace("ENC:", "");
+    }
+
+    try {
+      const bytes = CryptoJS.AES.decrypt(encText, pin);
+      const originalPkey = bytes.toString(CryptoJS.enc.Utf8);
+
+      if (originalPkey && originalPkey.length > 0) {
+        resultBox.className = "result-box success";
+        resTitle.textContent = "🔓 SUKSES! PRIVATE KEY MENTAH:";
+        resValue.textContent = originalPkey;
+      } else {
+        resultBox.className = "result-box error";
+        resTitle.textContent = "❌ DEKRIPSI GAGAL:";
+        resValue.textContent = "PIN salah atau format data tidak valid.";
+      }
+    } catch (e) {
+      resultBox.className = "result-box error";
+      resTitle.textContent = "❌ ERROR:";
+      resValue.textContent = "Gagal memproses kode terenkripsi.";
+    }
+  }
+</script>
+
+</body>
+</html>
