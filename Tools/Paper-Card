@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nusacoin Paper Wallet Card Generator - Manual Edition</title>
+  
+  <!-- CDN QRCode.js & html2canvas -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Crypto-JS untuk Enkripsi & Hashing -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <!-- Elliptic.js untuk Kurva secp256k1 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/elliptic/6.5.4/elliptic.min.js"></script>
+
+  <style>
+    :root {
+      --nux-green: #27ae60;
+      --nux-green-dark: #1e8449;
+      --nux-green-deep: #0f3d26;
+      --gold: #d4a017;
+      --white: #ffffff;
+      --green-pale: #eafff2;
+      --green-ring: rgba(39, 174, 96, 0.18);
+      --shadow: rgba(15, 61, 38, 0.18);
+      --bg: #f7f5ef;
+      --surface: #ffffff;
+      --surface-2: #f0efe6;
+      --ink: #16231c;
+      --ink-soft: #56645c;
+      --border: #e3ded0;
+    }
+
+    html[data-theme="dark"] {
+      --bg: #0d1712;
+      --surface: #142219;
+      --surface-2: #182a1e;
+      --ink: #eef3ec;
+      --ink-soft: #9db3a4;
+      --border: #24382c;
+      --shadow: rgba(0, 0, 0, 0.55);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--ink);
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px 10px;
+    }
+
+    .controls-container {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .lang-switcher {
+      display: flex;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 2px;
+    }
+
+    .lang-btn {
+      background: transparent;
+      border: none;
+      color: var(--ink-soft);
+      padding: 4px 8px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+
+    .lang-btn.active {
+      background: var(--nux-green);
+      color: var(--white);
+    }
+
+    .theme-toggle-btn {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--gold);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .generator-wrapper {
+      margin: 0 auto !important;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center !important;
+      justify-content: center;
+      width: 100%;
+      max-width: 800px;
+      text-align: center;
+    }
+
+    .app-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 24px;
+      width: 100%;
+    }
+    
+    .app-logo {
+      width: 64px;
+      height: 64px;
+      object-fit: contain;
+      margin: 0 auto 12px auto;
+    }
+
+    .app-header h1 {
+      margin: 0 0 6px 0;
+      font-size: 26px;
+      color: var(--nux-green);
+    }
+
+    .form-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 24px;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 520px;
+      margin: 0 auto 32px auto;
+      box-shadow: 0 10px 25px -5px var(--shadow);
+      text-align: left;
+    }
+
+    .form-group { margin-bottom: 16px; }
+
+    .form-card label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+      text-transform: uppercase;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .form-card input, .form-card select {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--ink);
+      font-size: 14px;
+      outline: none;
+      font-family: monospace;
+    }
+
+    .form-card input:focus, .form-card select:focus {
+      border-color: var(--nux-green);
+      box-shadow: 0 0 0 3px var(--green-ring);
+    }
+
+    .toggle-btn {
+      position: absolute;
+      right: 10px;
+      background: none;
+      border: none;
+      color: var(--ink-soft);
+      cursor: pointer;
+      font-size: 12px;
+      padding: 4px 8px;
+    }
+
+    .security-banner {
+      background: var(--green-pale);
+      border: 1px solid var(--nux-green);
+      color: var(--nux-green-dark);
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      margin-bottom: 20px;
+    }
+
+    .enc-box {
+      background: rgba(212, 160, 23, 0.1);
+      border: 1px solid var(--gold);
+      padding: 14px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .enc-box small {
+      display: block;
+      margin-top: 6px;
+      color: var(--ink-soft);
+      font-size: 11px;
+    }
+
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-auto {
+      background: var(--surface-2);
+      color: var(--ink);
+      border: 1px solid var(--border);
+    }
+
+    .btn-download {
+      background: var(--nux-green);
+      color: var(--white);
+    }
+
+    .preview-title {
+      font-size: 14px;
+      color: var(--ink-soft);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+
+    .print-sheet {
+      display: flex;
+      flex-direction: row;
+      width: 647px;
+      height: 204px;
+      box-shadow: 0 15px 30px var(--shadow);
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 0 auto !important;
+      position: relative;
+    }
+
+    .card-half {
+      position: relative;
+      width: 323.5px;
+      height: 204px;
+      overflow: hidden;
+    }
+
+    .card-bg-img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 1;
+    }
+
+    .divider {
+      position: absolute;
+      left: 323.5px;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      border-left: 1px dashed rgba(255,255,255,0.4);
+      z-index: 3;
+    }
+
+    .text-content-left {
+      position: absolute;
+      left: 22px;
+      top: 50%;
+      transform: translateY(-50%);
+      max-width: 180px;
+      text-align: left;
+      z-index: 2;
+    }
+
+    .overlay-public-qr, .overlay-private-qr {
+      position: absolute;
+      right: 22px;
+      top: 90px;
+      width: 82px;
+      height: 82px;
+      background: #ffffff;
+      padding: 4px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+    }
+
+    .overlay-public-name {
+      font-size: 13px;
+      font-weight: bold;
+      color: #ffffff;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .overlay-public-address, .overlay-private-key {
+      font-family: monospace;
+      font-size: 8px;
+      color: #e2e8f0;
+      word-break: break-all;
+      line-height: 1.2;
+    }
+
+    .qr-box canvas, .qr-box img {
+      width: 74px !important;
+      height: 74px !important;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+<div class="controls-container">
+  <div class="lang-switcher">
+    <button id="btnIN" class="lang-btn active" onclick="setLanguage('id')">IN</button>
+    <button id="btnEN" class="lang-btn" onclick="setLanguage('en')">EN</button>
+  </div>
+  <button onclick="toggleTheme()" class="theme-toggle-btn" id="themeBtn">
+    <i id="theme-icon" class="fa-solid fa-sun"></i>
+    <span id="theme-text">Light</span>
+  </button>
+</div>
+
+<div class="generator-wrapper">
+
+  <div class="app-header">
+    <img src="https://iili.io/CNJKhKu.th.png" alt="Nusacoin Logo" class="app-logo">
+    <h1 id="appTitle">Nusacoin Wallet Generator</h1>
+    <p id="appDesc">Paper Wallet Card Generator (100% Kompatibel Nusacoin)</p>
+  </div>
+
+  <div class="form-card">
+    <div id="securityBanner" class="security-banner">
+      🛡️ <strong>100% Sesuai Parameter Nusacoin:</strong> Diproses lokal & aman.
+    </div>
+
+    <div class="form-group">
+      <label id="lblInputName" for="inputName">Nama Pemilik Kartu</label>
+      <div class="input-wrapper">
+        <input type="text" id="inputName" placeholder="Masukkan nama pemilik..." value="" style="font-family: sans-serif;">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label id="lblAddressType" for="selectAddrType">Format Alamat Jaringan</label>
+      <div class="input-wrapper">
+        <select id="selectAddrType">
+          <option value="bech32" selected>Bech32 Native SegWit (Awalan 'nu1q...')</option>
+          <option value="p2pkh">Legacy P2PKH (Awalan 'N...')</option>
+          <option value="p2sh">P2SH Script (Awalan 'X...')</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label id="lblInputAddress" for="inputAddress">Alamat Wallet (Public Address)</label>
+      <div class="input-wrapper">
+        <input type="text" id="inputAddress" placeholder="Klik 'Generate Wallet Otomatis'..." value="">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label id="lblInputPkey" for="inputPkey">Private Key WIF (Prefix 0x57)</label>
+      <div class="input-wrapper">
+        <input type="password" id="inputPkey" placeholder="Klik 'Generate Wallet Otomatis'..." value="">
+        <button type="button" class="toggle-btn" id="togglePkey">Show</button>
+      </div>
+    </div>
+
+    <div class="enc-box">
+      <label id="lblInputPin" for="inputPin"><i class="fa-solid fa-lock"></i> PIN Pengaman Print (Opsional)</label>
+      <div class="input-wrapper">
+        <input type="password" id="inputPin" placeholder="Masukkan PIN / Password...">
+      </div>
+      <small id="descInputPin">
+        *Jika PIN diisi, Private Key WIF yang dicetak akan dienkripsi (AES-256).
+      </small>
+    </div>
+
+    <div class="button-group">
+      <button class="btn btn-auto" id="btnGenerateAuto" onclick="generateRandomWallet()">
+        <i class="fa-solid fa-wand-magic-sparkles"></i> <span id="lblBtnAuto">Generate Wallet Otomatis</span>
+      </button>
+      <button class="btn btn-download" id="btnDownload" onclick="downloadImage()">
+        📸 <span id="lblBtnDownload">Unduh Kartu (PNG)</span>
+      </button>
+    </div>
+  </div>
+
+  <div id="previewTitle" class="preview-title">PREVIEW KARTU DEPAN & BELAKANG</div>
+
+  <div class="print-sheet" id="cardSheet">
+    
+    <!-- KARTU DEPAN -->
+    <div class="card-half">
+      <img src="https://i.ibb.co.com/8LMbPhqY/KARTU-DEPAN.jpg" crossorigin="anonymous" class="card-bg-img" alt="Kartu Depan">
+      <div class="overlay-public-qr qr-box" id="qrPublic"></div>
+      
+      <div class="text-content-left">
+        <div class="overlay-public-name" id="displayName">-</div>
+        <div class="overlay-public-address" id="displayAddress">-</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- KARTU BELAKANG -->
+    <div class="card-half">
+      <img src="https://i.ibb.co.com/G4SqY4Nb/KART-BELAKANG.jpg" crossorigin="anonymous" class="card-bg-img" alt="Kartu Belakang">
+      <div class="overlay-private-qr qr-box" id="qrPrivate"></div>
+      
+      <div class="text-content-left">
+        <div class="overlay-private-key" id="displayPkey">-</div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+  let currentLang = 'id';
+
+  // NUSACOIN NETWORK PARAMETERS
+  const NUSACOIN_PARAMS = {
+    bech32: 'nu',
+    pubKeyHash: 0x35, // Awalan 'N'
+    scriptHash: 0x4b, // Awalan 'X'
+    wif: 0x57         // Prefix WIF Nusacoin
+  };
+
+  const BECH32_CHARSET = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l';
+  const ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+
+  function polymod(values) {
+    let chk = 1;
+    for (let p = 0; p < values.length; ++p) {
+      let top = chk >> 25;
+      chk = ((chk & 0x1ffffff) << 5) ^ values[p];
+      if ((top >> 0) & 1) chk ^= 0x3b6a57b2;
+      if ((top >> 1) & 1) chk ^= 0x26508e6d;
+      if ((top >> 2) & 1) chk ^= 0x1ea119fa;
+      if ((top >> 3) & 1) chk ^= 0x3d4233dd;
+      if ((top >> 4) & 1) chk ^= 0x2a1462b3;
+    }
+    return chk;
+  }
+
+  function hrpExpand(hrp) {
+    let ret = [];
+    for (let i = 0; i < hrp.length; ++i) ret.push(hrp.charCodeAt(i) >> 5);
+    ret.push(0);
+    for (let i = 0; i < hrp.length; ++i) ret.push(hrp.charCodeAt(i) & 31);
+    return ret;
+  }
+
+  function convertBits(data, frombits, tobits, pad = true) {
+    let acc = 0, bits = 0, ret = [], maxv = (1 << tobits) - 1;
+    for (let i = 0; i < data.length; ++i) {
+      let value = data[i];
+      if (value < 0 || value >> frombits !== 0) return null;
+      acc = (acc << frombits) | value;
+      bits += frombits;
+      while (bits >= tobits) {
+        bits -= tobits;
+        ret.push((acc >> bits) & maxv);
+      }
+    }
+    if (pad) {
+      if (bits > 0) ret.push((acc << (tobits - bits)) & maxv);
+    } else if (bits >= frombits || ((acc << (tobits - bits)) & maxv)) {
+      return null;
+    }
+    return ret;
+  }
+
+  function toBech32(hrp, version, program) {
+    let data = [version].concat(convertBits(program, 8, 5, true));
+    let checksumData = hrpExpand(hrp).concat(data).concat([0, 0, 0, 0, 0, 0]);
+    let mod = polymod(checksumData) ^ 1;
+    let ret = hrp + '1';
+    for (let p = 0; p < data.length; ++p) ret += BECH32_CHARSET.charAt(data[p]);
+    for (let p = 0; p < 6; ++p) ret += BECH32_CHARSET.charAt((mod >> (5 * (5 - p))) & 31);
+    return ret;
+  }
+
+  function toBase58(buffer) {
+    let digits = [0];
+    for (let i = 0; i < buffer.length; i++) {
+      for (let j = 0; j < digits.length; j++) digits[j] <<= 8;
+      digits[0] += buffer[i];
+      let carry = 0;
+      for (let j = 0; j < digits.length; ++j) {
+        digits[j] += carry;
+        carry = (digits[j] / 58) | 0;
+        digits[j] %= 58;
+      }
+      while (carry) {
+        digits.push(carry % 58);
+        carry = (carry / 58) | 0;
+      }
+    }
+    for (let i = 0; buffer[i] === 0 && i < buffer.length - 1; i++) digits.push(0);
+    return digits.reverse().map(d => ALPHABET[d]).join('');
+  }
+
+  function toBase58Check(payload) {
+    const sha1 = CryptoJS.SHA256(CryptoJS.lib.WordArray.create(payload));
+    const sha2 = CryptoJS.SHA256(sha1);
+    
+    const checksum = sha2.words.slice(0, 1);
+    const checksumBytes = [
+      (checksum[0] >>> 24) & 0xff,
+      (checksum[0] >>> 16) & 0xff,
+      (checksum[0] >>> 8) & 0xff,
+      checksum[0] & 0xff
+    ];
+
+    const fullPayload = new Uint8Array(payload.length + 4);
+    fullPayload.set(payload);
+    fullPayload.set(checksumBytes, payload.length);
+
+    return toBase58(fullPayload);
+  }
+
+  let qrPublicInstance = new QRCode(document.getElementById("qrPublic"), {
+    width: 128, height: 128, correctLevel: QRCode.CorrectLevel.M
+  });
+
+  let qrPrivateInstance = new QRCode(document.getElementById("qrPrivate"), {
+    width: 128, height: 128, correctLevel: QRCode.CorrectLevel.M
+  });
+
+  function updateCard() {
+    const name = document.getElementById("inputName").value.trim() || "-";
+    const address = document.getElementById("inputAddress").value.trim() || "-";
+    const rawPkey = document.getElementById("inputPkey").value.trim() || "-";
+    const pin = document.getElementById("inputPin").value.trim();
+
+    let finalPkey = rawPkey;
+
+    if (pin !== "" && rawPkey !== "-") {
+      const encrypted = CryptoJS.AES.encrypt(rawPkey, pin).toString();
+      finalPkey = "ENC:" + encrypted;
+    }
+
+    document.getElementById("displayName").textContent = name;
+    document.getElementById("displayAddress").textContent = address;
+    document.getElementById("displayPkey").textContent = finalPkey;
+
+    qrPublicInstance.clear();
+    qrPublicInstance.makeCode(address);
+
+    qrPrivateInstance.clear();
+    qrPrivateInstance.makeCode(finalPkey);
+  }
+
+  function generateRandomWallet() {
+    try {
+      const addrType = document.getElementById("selectAddrType").value;
+
+      // 1. Generate Raw Private Key 32 Byte (Cryptographically Secure)
+      const rawPrivKey = new Uint8Array(32);
+      window.crypto.getRandomValues(rawPrivKey);
+
+      // 2. Format WIF Nusacoin (Prefix 0x57 + Compressed 0x01)
+      const wifPayload = new Uint8Array(34);
+      wifPayload[0] = NUSACOIN_PARAMS.wif;
+      wifPayload.set(rawPrivKey, 1);
+      wifPayload[33] = 0x01; // Compressed
+      const wifPrivateKey = toBase58Check(wifPayload);
+
+      // 3. Compute Public Key Menggunakan Elliptic.js
+      const ec = new elliptic.ec('secp256k1');
+      const keyPair = ec.keyFromPrivate(rawPrivKey);
+      const pubKeyHex = keyPair.getPublic(true, 'hex'); // Compressed Public Key
+      
+      const pubKeyWordArray = CryptoJS.enc.Hex.parse(pubKeyHex);
+
+      // 4. HASH160 = RIPEMD160(SHA256(PubKey))
+      const shaHash = CryptoJS.SHA256(pubKeyWordArray);
+      const ripemdHash = CryptoJS.RIPEMD160(shaHash);
+
+      const pubKeyHash = new Uint8Array(20);
+      for (let i = 0; i < 20; i++) {
+        pubKeyHash[i] = (ripemdHash.words[i >>> 2] >>> (24 - (i % 4) * 8)) & 0xff;
+      }
+
+      // 5. Generate Address
+      let generatedAddress = "";
+      if (addrType === "p2pkh") {
+        const p2pkhPayload = new Uint8Array(21);
+        p2pkhPayload[0] = NUSACOIN_PARAMS.pubKeyHash; // 0x35
+        p2pkhPayload.set(pubKeyHash, 1);
+        generatedAddress = toBase58Check(p2pkhPayload);
+      } else if (addrType === "p2sh") {
+        const p2shPayload = new Uint8Array(21);
+        p2shPayload[0] = NUSACOIN_PARAMS.scriptHash; // 0x4b
+        p2shPayload.set(pubKeyHash, 1);
+        generatedAddress = toBase58Check(p2shPayload);
+      } else {
+        generatedAddress = toBech32(NUSACOIN_PARAMS.bech32, 0, pubKeyHash); // 'nu1q...'
+      }
+
+      document.getElementById("inputAddress").value = generatedAddress;
+      document.getElementById("inputPkey").value = wifPrivateKey;
+      
+      updateCard();
+    } catch (err) {
+      console.error("Gagal generate wallet:", err);
+      alert("Terjadi kesalahan teknis: " + err.message);
+    }
+  }
+
+  const toggleBtn = document.getElementById("togglePkey");
+  const pkeyInput = document.getElementById("inputPkey");
+
+  toggleBtn.addEventListener("click", () => {
+    if (pkeyInput.type === "password") {
+      pkeyInput.type = "text";
+      toggleBtn.textContent = "Hide";
+    } else {
+      pkeyInput.type = "password";
+      toggleBtn.textContent = "Show";
+    }
+  });
+
+  function downloadImage() {
+    const btn = document.getElementById('btnDownload');
+    const lblBtn = document.getElementById('lblBtnDownload');
+    lblBtn.textContent = "⏳ Memproses Gambar...";
+    btn.disabled = true;
+
+    const element = document.getElementById('cardSheet');
+    const holderName = document.getElementById('inputName').value.trim() || 'Nusacoin';
+
+    html2canvas(element, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: false,
+      backgroundColor: null
+    }).then(canvas => {
+      const imageURL = canvas.toDataURL("image/png");
+      const downloadLink = document.createElement("a");
+      downloadLink.href = imageURL;
+      downloadLink.download = `Nusacoin_Card_${holderName}.png`;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+
+      lblBtn.textContent = "Unduh Kartu (PNG)";
+      btn.disabled = false;
+    }).catch(err => {
+      console.error("Gagal mengunduh gambar:", err);
+      alert("Gagal mengunduh gambar.");
+      lblBtn.textContent = "Unduh Kartu (PNG)";
+      btn.disabled = false;
+    });
+  }
+
+  document.getElementById("inputName").addEventListener("input", updateCard);
+  document.getElementById("inputAddress").addEventListener("input", updateCard);
+  document.getElementById("inputPkey").addEventListener("input", updateCard);
+  document.getElementById("inputPin").addEventListener("input", updateCard);
+
+  // Inisialisasi tampilan awal (kartu kosong sampai user menekan tombol Generate)
+  window.addEventListener("DOMContentLoaded", () => {
+    updateCard();
+  });
+</script>
+</body>
+</html>
