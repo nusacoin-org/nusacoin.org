@@ -519,6 +519,42 @@
       font-size: 12px;
       font-weight: bold;
     }
+
+    /* Modal Simpan Gambar di TMA */
+    .img-modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.85);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      padding: 16px;
+    }
+    .img-modal-content {
+      max-width: 100%;
+      max-height: 75vh;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    }
+    .img-modal-info {
+      color: #ffffff;
+      font-size: 12px;
+      margin-top: 12px;
+      text-align: center;
+    }
+    .img-modal-close {
+      margin-top: 16px;
+      background: var(--red);
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 12px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -761,6 +797,13 @@
 
 </div>
 
+<!-- MODAL UNTUK SIMPAN GAMBAR DI TELEGRAM MINI APP -->
+<div id="imgModal" class="img-modal-overlay">
+  <img id="imgModalTarget" class="img-modal-content" src="" alt="Kartu Nusacoin">
+  <div class="img-modal-info">💡 <b>Tekan dan tahan gambar</b> di atas, lalu pilih <b>"Simpan Gambar"</b> ke Galeri HP Anda.</div>
+  <button class="img-modal-close" onclick="closeImgModal()">Tutup</button>
+</div>
+
 <script>
   let currentLang = 'id';
   let html5QrCode = null;
@@ -875,8 +918,7 @@
     tg.ready();
     tg.expand();
     if(tg.colorScheme === 'dark') {
-      htmlEl = document.documentElement;
-      htmlEl.setAttribute("data-theme", "dark");
+      document.documentElement.setAttribute("data-theme", "dark");
       document.getElementById("theme-icon").className = "fa-solid fa-moon";
       document.getElementById("theme-text").textContent = "Dark";
     }
@@ -1152,6 +1194,7 @@
     }
   });
 
+  // FUNGSI UNTUK MENGUNDUH/MENAMPILKAN GAMBAR (Mendukung Telegram Mini App & Browser Web)
   async function downloadImage() {
     const btn = document.getElementById('btnDownload');
     const lblBtn = document.getElementById('lblBtnDownload');
@@ -1173,19 +1216,30 @@
 
       const imageURL = canvas.toDataURL("image/png");
       
-      const downloadLink = document.createElement("a");
-      downloadLink.href = imageURL;
-      downloadLink.download = `Nusacoin_Card_${holderName}.png`;
-      document.body.appendChild(downloadLink);
-      downloadLink.click();
-      document.body.removeChild(downloadLink);
+      // Jika dibuka di Telegram Mini App, tampilkan modal interaktif (karena WebView memblokir autodownload link)
+      if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) {
+        document.getElementById('imgModalTarget').src = imageURL;
+        document.getElementById('imgModal').style.display = 'flex';
+      } else {
+        // Jika dibuka di Browser Biasa, langsung Trigger Unduh
+        const downloadLink = document.createElement("a");
+        downloadLink.href = imageURL;
+        downloadLink.download = `Nusacoin_Card_${holderName}.png`;
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+      }
 
     } catch (err) {
-      alert("Gagal mengunduh gambar: " + err.message);
+      alert("Gagal memproses gambar: " + err.message);
     } finally {
       lblBtn.textContent = currentText;
       btn.disabled = false;
     }
+  }
+
+  function closeImgModal() {
+    document.getElementById('imgModal').style.display = 'none';
   }
 
   // LIVE WALLET FUNCTIONS
