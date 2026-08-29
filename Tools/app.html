@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NusaChain Mobile DApp</title>
+    
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Titillium+Web:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        nusa: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            400: '#34d399',
+                            500: '#10b981',
+                            600: '#059669',
+                            800: '#065f46',
+                            900: '#064e3b',
+                            950: '#022c22',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .dark .nusa-card-gradient {
+            background: linear-gradient(135deg, #0d2b26 0%, #064e3b 50%, #022c22 100%);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+        }
+        .light .nusa-card-gradient {
+            background: linear-gradient(135deg, #059669 0%, #10b981 50%, #34d399 100%);
+            border: 1px solid rgba(5, 150, 105, 0.2);
+        }
+        
+        .nusa-glow-btn {
+            background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+            box-shadow: 0px 4px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .nusa-vote-btn {
+            background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%);
+            box-shadow: 0px 4px 15px rgba(245, 158, 11, 0.3);
+        }
+
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body class="dark bg-[#0b0f19] text-gray-100 dark:bg-[#0b0f19] dark:text-gray-100 min-h-screen pb-20">
+
+    <!-- Header Utama Aplikasi -->
+    <div id="appHeader" class="max-w-md mx-auto px-4 pt-4 sticky top-0 z-30 dark:bg-[#0b0f19]/90 bg-white/90 backdrop-blur-md pb-2 border-b dark:border-gray-800/50 border-gray-100">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center dark:bg-emerald-500/20 dark:border-emerald-500/40 bg-emerald-100 border-emerald-300">
+                    <i class="fa-solid fa-cube text-emerald-500 dark:text-emerald-400 text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-wide dark:text-white text-gray-900" id="headerTitle">NusaChain DApps</h1>
+                    <p class="text-xs dark:text-gray-400 text-gray-500" id="headerSubTitle" data-lang-en="Discover trusted applications across chains" data-lang-id="Jelajahi aplikasi terpercaya antar jaringan">Jelajahi aplikasi terpercaya antar jaringan</p>
+                </div>
+            </div>
+            <!-- Tombol Pengaturan Cepat -->
+            <button onclick="toggleModal(true)" class="w-9 h-9 rounded-xl dark:bg-gray-900 bg-gray-100 border dark:border-gray-800 border-gray-200 flex items-center justify-center text-gray-600 dark:text-gray-300 active:scale-95 transition">
+                <i class="fa-solid fa-sliders text-sm"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- WADAH UTAMA KONTEN -->
+    <div class="max-w-md mx-auto">
+
+        <!-- TAB DAPPS DIRECTORY (HALAMAN UTAMA) -->
+        <div id="tab-dapps" class="tab-content active px-4 pt-3">
+            
+            <!-- Hero Card Banner -->
+            <div class="nusa-card-gradient rounded-3xl p-5 mb-4 relative overflow-hidden shadow-xl text-white">
+                <div class="flex justify-between items-center mb-3">
+                    <div class="inline-block px-3 py-1 rounded-full bg-emerald-950/60 border border-emerald-400/30 text-[10px] font-semibold text-emerald-200 tracking-wider uppercase">
+                        NUSACHAIN WALLET DAPPS
+                    </div>
+                </div>
+
+                <h2 class="text-2xl font-extrabold leading-tight mb-2" data-lang-en="Welcome To NusaChain DApps" data-lang-id="Selamat Datang di NusaChain DApps">
+                    Selamat Datang di NusaChain DApps
+                </h2>
+                <p class="text-xs text-emerald-50/90 leading-relaxed mb-5" data-lang-en="Access trusted applications, products, and community destinations connected to NusaChain in one place." data-lang-id="Akses aplikasi, produk, dan destinasi komunitas terpercaya yang terhubung ke NusaChain dalam satu tempat.">
+                    Akses aplikasi, produk, dan destinasi komunitas terpercaya yang terhubung ke NusaChain dalam satu tempat.
+                </p>
+
+                <!-- Tombol Aksi Utama + Tombol Vote -->
+                <div class="flex flex-col gap-2.5">
+                    <div class="flex gap-2.5">
+                        <button onclick="switchTab('wallet', 'https://www.nusachain.org/Tools/Nusa-Card.html')" class="flex-1 nusa-glow-btn text-white text-xs font-semibold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 transition active:scale-95">
+                            <i class="fa-regular fa-circle-question"></i> <span data-lang-en="Learn More" data-lang-id="Pelajari Lebih">Pelajari Lebih</span>
+                        </button>
+                        <a href="https://t.me/NusacoinX11" target="_blank" class="flex-1 bg-emerald-950/80 border border-emerald-400/30 text-emerald-200 text-xs font-semibold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 transition active:scale-95">
+                            <i class="fa-paper-plane"></i> <span data-lang-en="Community" data-lang-id="Komunitas">Komunitas</span>
+                        </a>
+                    </div>
+
+                    <!-- TOMBOL VOTE IN-APP MODAL -->
+                    <button onclick="openVoteModal()" class="w-full nusa-vote-btn text-white text-xs font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 transition active:scale-95">
+                        <i class="fa-solid fa-check-to-slot text-sm"></i>
+                        <span data-lang-en="Vote NusaCoin on Blockspot" data-lang-id="Dukung & Vote NusaCoin di Blockspot">Dukung & Vote NusaCoin di Blockspot</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Browse By Category (Kategori Lengkap) -->
+            <div class="mb-5">
+                <h3 class="text-xs font-bold text-emerald-500 dark:text-emerald-400 tracking-wider uppercase mb-3" data-lang-en="CATEGORIES" data-lang-id="KATEGORI UTAMA">KATEGORI UTAMA</h3>
+                <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+                    <button onclick="filterCategory('all')" class="cat-btn bg-emerald-500 text-white font-bold px-4 py-2 rounded-full text-xs shrink-0" data-lang-en="All" data-lang-id="Semua">Semua</button>
+                    <button onclick="filterCategory('tools')" class="cat-btn dark:bg-gray-900 bg-gray-100 border dark:border-gray-800 border-gray-200 dark:text-gray-300 text-gray-700 font-medium px-4 py-2 rounded-full text-xs shrink-0">Tools & Portal</button>
+                    <button onclick="filterCategory('explorers')" class="cat-btn dark:bg-gray-900 bg-gray-100 border dark:border-gray-800 border-gray-200 dark:text-gray-300 text-gray-700 font-medium px-4 py-2 rounded-full text-xs shrink-0">Explorers</button>
+                    <button onclick="filterCategory('pools')" class="cat-btn dark:bg-gray-900 bg-gray-100 border dark:border-gray-800 border-gray-200 dark:text-gray-300 text-gray-700 font-medium px-4 py-2 rounded-full text-xs shrink-0">Mining Pools</button>
+                    <button onclick="filterCategory('resources')" class="cat-btn dark:bg-gray-900 bg-gray-100 border dark:border-gray-800 border-gray-200 dark:text-gray-300 text-gray-700 font-medium px-4 py-2 rounded-full text-xs shrink-0">Sumber Daya</button>
+                    <button onclick="filterCategory('intro')" class="cat-btn dark:bg-gray-900 bg-gray-100 border dark:border-gray-800 border-gray-200 dark:text-gray-300 text-gray-700 font-medium px-4 py-2 rounded-full text-xs shrink-0">Perkenalan</button>
+                </div>
+            </div>
+
+            <!-- Input Pencarian -->
+            <div class="relative mb-6">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                <input type="text" id="searchInput" onkeyup="searchCards()" placeholder="Cari dapps, kategori, atau tools..." data-placeholder-en="Search dapps, categories, or tools..." data-placeholder-id="Cari dapps, kategori, atau tools..." class="w-full dark:bg-gray-900/90 bg-white border dark:border-gray-800 border-gray-200 rounded-2xl py-3 pl-10 pr-4 text-xs dark:text-white text-gray-900 placeholder-gray-400 focus:outline-none focus:border-emerald-500 shadow-sm">
+            </div>
+
+            <!-- Direktori Header -->
+            <div class="mb-4 flex items-center justify-between">
+                <div>
+                    <h2 class="text-lg font-bold dark:text-white text-gray-900" data-lang-en="DApps Directory" data-lang-id="Direktori DApps">Direktori Ekosistem</h2>
+                    <p class="text-xs dark:text-gray-400 text-gray-500" id="itemCountText">38 Layanan Terintegrasi</p>
+                </div>
+            </div>
+
+            <!-- WADAH KARTU DAFTAR LAYANAN TERINTEGRASI -->
+            <div id="dapps-container" class="space-y-3.5">
+
+                <!-- ITEM 1: BLOCKSPOT VOTE -->
+                <div class="dapp-item cat-tools dark:bg-gray-900/60 bg-white border dark:border-gray-800 border-gray-200 rounded-3xl p-4 relative shadow-sm">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 text-2xl">
+                            <i class="fa-solid fa-check-to-slot"></i>
+                        </div>
+                        <span class="bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[10px] font-semibold px-2.5 py-1 rounded-full">Vote Resmi</span>
+                    </div>
+                    <h3 class="text-base font-bold dark:text-white text-gray-900 mb-1 item-title">Blockspot.io Voting</h3>
+                    <p class="text-xs dark:text-gray-400 text-gray-600 leading-relaxed mb-4" data-lang-en="Vote and support NusaCoin on Blockspot.io crypto directory." data-lang-id="Dukung dan berikan vote untuk NusaCoin di direktori kripto Blockspot.io.">Dukung dan berikan vote untuk NusaCoin di direktori kripto Blockspot.io.</p>
+                    <div class="flex items-center justify-between">
+                        <span class="dark:bg-gray-800/80 bg-gray-100 dark:text-gray-300 text-gray-700 text-[10px] px-3 py-1.5 rounded-full font-medium"><i class="fa-solid fa-cube text-emerald-500"></i> NusaChain</span>
+                        <button onclick="openVoteModal()" class="nusa-vote-btn text-white text-xs font-semibold px-4 py-2 rounded-xl flex items-center gap-1.5"><span data-lang-en="Vote Now" data-lang-id="Vote Sekarang">Vote Sekarang</span> <i class="fa-solid fa-chevron-right text-[10px]"></i></button>
+                    </div>
+                </div>
+
+                <!-- BAGIAN TOOLS & DEVELOPER PORTAL -->
+                <div class="dapp-item cat-tools dark:bg-gray-900/60 bg-white border dark:border-gray-800 border-gray-200 rounded-3xl p-4 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 text-xl"><i class="fa-solid fa-file-contract"></i></div>
+                        <span class="dark:bg-gray-800 bg-gray-100 text-gray-500 text-[10px] px-2.5 py-1 rounded-full font-medium">Mainnet Tool</span>
+                    </div>
+                    <h3 class="text-sm font-bold dark:text-white text-gray-900 mb-1 item-title">VeriSign Mainnet</h3>
+                    <p class="text-xs dark:text-gray-400 text-gray-600 mb-3" data-lang-id="Layanan verifikasi dan validasi tanda tangan digital dokumen atau transaksi pada jaringan utama Nusachain.">Layanan verifikasi dan validasi tanda tangan digital dokumen atau transaksi pada jaringan utama (Mainnet) Nusachain.</p>
+                    <a href="https://www.nusachain.org/Tools/VeriSign-Mainnet.html" target="_blank" class="nusa-glow-btn text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl inline-flex items-center gap-1.5">Buka Alat <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                </div>
+
+                <div class="dapp-item cat-tools dark:bg-gray-900/60 bg-white border dark:border-gray-800 border-gray-200 rounded-3xl p-4 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 text-xl"><i class="fa-solid fa-vial"></i></div>
+                        <span class="dark:bg-gray-800 bg-gray-100 text-gray-500 text-[10px] px-2.5 py-1 rounded-full font-medium">Testnet Tool</span>
+                    </div>
+                    <h3 class="text-sm font-bold dark:text-white text-gray-900 mb-1 item-title">VeriSign Testnet</h3>
+                    <p class="text-xs dark:text-gray-400 text-gray-600 mb-3" data-lang-id="Lingkungan pengujian (Testnet) untuk verifikasi tanda tangan digital bagi pengembang.">Lingkungan pengujian (Testnet) untuk verifikasi tanda tangan digital bagi pengembang sebelum melakukan rilis di Mainnet.</p>
+                    <a href="https://www.nusachain.org/Tools/VeriSign-Testnet.html" target="_blank" class="nusa-glow-btn text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl inline-flex items-center gap-1.5">Buka Alat <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                </div>
+
+                <div class="dapp-item cat-tools dark:bg-gray-900/60 bg-white border dark:border-gray-800 border-gray-200 rounded-3xl p-4 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 text-xl"><i class="fa-solid fa-id-card"></i></div>
+                        <span class="dark:bg-gray-800 bg-gray-100 text-gray-500 text-[10px] px-2.5 py-1 rounded-full font-medium">Identitas</span>
+                    </div>
+                    <h3 class="text-sm font-bold dark:text-white text-gray-900 mb-1 item-title">Nusa Card Tool</h3>
+                    <p class="text-xs dark:text-gray-400 text-gray-600 mb-3" data-lang-id="Modul manajemen identitas berbasis kartu digital yang terhubung dengan aset dan ekosistem Nusachain.">Modul manajemen identitas berbasis kartu digital yang terhubung dengan aset dan ekosistem Nusachain.</p>
+                    <button onclick="switchTab('wallet', 'https://www.nusachain.org/Tools/Nusa-Card.html')" class="nusa-glow-btn text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl inline-flex items-center gap-1.5">Buka DApp <i class="fa-solid fa-arrow-right text-[10px]"></i></button>
+                </div>
+
+                <div class="dapp-item cat-tools dark:bg-gray-900/60 bg-white border dark:border-gray-800 border-gray-200 rounded-3xl p-4 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 text-xl"><i class="fa-solid fa-file-signature"></i></div>
+                        <span class="dark:bg-gray-800 bg-gray-100 text-gray-500 text-[10px] px-2.5 py-1 rounded-full font-medium">Layanan Desa</span>
+                    </div>
+                    <h3 class="text-sm font-bold dark:text-white text-gray-900 mb-1 item-title">Paya Chain</h3>
+                    <p class="text-xs dark:text-gray-400 text-gray-600 mb-3" data-lang-id="Konsep Layanan verifikasi dan validasi tanda tangan digital dokumen desa pada jaringan utama Nusachain.">Konsep Layanan verifikasi dan validasi tanda tangan digital dokumen desa pada jaringan utama (Mainnet) Nusachain.</p>
+                    <a href="https://www.nusachain.org/Tools/Paya-Chain.html" target="_blank" class="nusa-glow-btn text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl inline-flex items-center gap-1.5">Buka Alat <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                </div>
+
+                <div class="dapp-item cat-tools dark:bg-gray-900/60 bg-white border dark:border-gray-800 border-gray-200 rounded-3xl p-4 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 text-xl"><i class="fa-solid fa-file-audio"></i></div>
+                        <span class="dark:bg-gray-800 bg-gray-100 text-gray-500 text-[10px] px-2.5 py-1 rounded-full font-medium">Audio Reader</span>
+                    </div>
+                    <h3 class="text-sm font-bold dark:text-white text-gray-900 mb-1 item-title">Read This File</h3>
+                    <p class="text-xs dark:text-gray-400 text-gray-600 mb-3" data-lang-id="Alat untuk membaca file dokumen apapun dengan fitur suara.">Alat untuk membaca file dokumen apapun dengan fitur suara.</p>
+                    <a href="https://www.nusachain.org/Tools/Read-This-File.html" target="_blank" class="nusa-glow-btn text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl inline-flex items-center gap-1.5">Buka Alat <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                </div>
+
+                <div class="dapp-item cat-tools dark:bg-gray-900/60 bg-white border dark:border-gray-800 border-gray-200 rounded-3xl p-4 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 text-xl"><i class="fa-solid fa-cube"></i></div>
+                        <span class="dark:bg-gray-800 bg-gray-100 text-gray-500 text-[10px] px-2.5 py-1 rounded-full font-medium">3D / AI Tool</span>
+                    </div>
+                    <h3 class="text-sm font-bold dark:text-white text-gray-900 mb-1 item-title">TA Render</h3>
+                    <p class="text-xs dark:text-gray-400 text-gray-600 mb-3" data-lang-id="Alat prompting visualisasi rendering untuk pekerjaan 3d modeling arsitektur untuk gemini ai.">Alat prompting visualisasi rendering untuk pekerjaan 3d modeling arsitektur untuk gemini ai.</p>
+                    <a href="https://ta-render.nusachain.org/" target="_blank" class="nusa-glow-btn text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl inline-flex items-center gap-1.5">Buka Alat <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                </div>
+
+                <div class="dapp-item cat-tools dark:bg-gray-900/60 bg-white border dark:border-gray-800 border-gray-200 rounded-3xl p-4 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 text-xl"><i class="fa-solid fa-robot"></i></div>
+                        <span class="dark:bg-gray-800 bg-gray-100 text-gray-500 text-[10px] px-2.5 py-1 rounded-full font-medium">AI Bot</span>
+                    </div>
+                    <h3 class="text-sm font-bold dark:text-white text-gray-900 mb-1 item-title">Tanya Nusa</h3>
+                    <p class="text-xs dark:text-gray-400 text-gray-600 mb-3" data-lang-id="Sebuah halaman bot untuk menjawab semua pertanyaan terkait Nusachain serta membagikan panduan Doa sehari-hari.">Sebuah halaman bot untuk menjawab semua pertanyaan terkait Nusachain serta membagikan panduan Doa sehari-hari.</p>
+                    <a href="https://tanya.nusachain.site/" target="_blank" class="nusa-glow-btn text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl inline-flex items-center gap-1.5">Buka Alat <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                </div>
+
+                <div class="dapp-item cat-tools dark:bg-gray-900/60 bg-white border dark:border-gray-800 border-gray-200 rounded-3xl p-4 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 text-xl"><i class="fa-solid fa-hashtag"></i></div>
+                        <span class="dark:bg-gray-800 bg-gray-100 text-gray-500 text-[10px] px-2.5 py-1 rounded-full font-medium">Hash Tool</span>
+                    </div>
+                    <h3 class="text-sm font-bold dark:text-white text-gray-900 mb-1 item-title">Blog Hash Generator</h3>
+                    <p class="text-xs dark:text-gray-400 text-gray-600 mb-3" data-lang-id="Alat untuk memunculkan hash kriptografi khusus dari postingan blog guna memastikan keaslian konten.">Alat untuk memunculkan hash kriptografi khusus dari postingan blog guna memastikan keaslian konten di blockchain.</p>
+                    <a href="https://www.nusachain.org/Tools/Blog-Hash-Generator.html" target="_blank" class="nusa-glow-btn text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl inline-flex items-center gap-1.5">Buka Alat <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                </div>
+
+                <!-- BAGIAN EXPLORERS -->
+                <div class="dapp-item cat-explorers dark:bg-gray-900/60 bg-white border dark:border-gray-800 border-gray-200 rounded-3xl p-4 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 text-xl"><i class="fa-solid fa-cubes"></i></div>
+                        <span class="dark:bg-gray-800 bg-gray-100 text-gray-500 text-[10px] px-2.5 py-1 rounded-full font-medium">Explorer</span>
+                    </div>
+                    <h3 class="text-sm font-bold dark:text-white text-gray-900 mb-1 item-title">Scan Nusacoin (Explorer 1)</h3>
+                    <p class="text-xs dark:text-gray-400 text-gray-600 mb-3">Pemantau jaringan transaksi dan blok utama Nusacoin scan.nusacoin.org.</p>
+                    <a href="https://scan.nusacoin.org" target="_blank" class="nusa-glow-btn text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl inline-flex items-center gap-1.5">Buka Explorer <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                </div>
+
+                <div class="dapp-item cat-explorers dark:bg-gray-900/60 bg-white border dark:border-gray-800 border-gray-200 rounded-3xl p-4 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 text-xl"><i class="fa-solid fa-network-wired"></i></div>
+                        <span class="dark:bg-gray-800 bg-gray-100 text-gray-500 text-[10px] px-2.5 py-1 rounded-full font-medium">Explorer</span>
+                    </div>
+                    <h3 class="text-sm font-bold dark:text-white text-gray-900 mb-1 item-title">Taobot Explorer (Explorer 2)</h3>
+                    <p class="text-xs dark:text-gray-400 text-gray-600 mb-3">Nusacoin block explorer alternatif dari jaringan Taobot explorer.taobot.org.</p>
+                    <a href="https://explorer.taobot.org" target="_blank" class="nusa-glow-btn text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl inline-flex items-center gap-1.5">Buka Explorer <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                </div>
+
+                <div class="dapp-item cat-explorers dark:bg-gray-900/60 bg-white border dark:border-gray-800 border-gray-200 rounded-3xl p-4 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 text-xl"><i class="fa-solid fa-link"></i></div>
+                        <span class="dark:bg-gray-800 bg-gray-100 text-gray-500 text-[10px] px-2.5 py-1 rounded-full font-medium">Explorer</span>
+                    </div>
+                    <h3 class="text-sm font-bold dark:text-white text-gray-900 mb-1 item-title">Chain Nusacoin (Explorer 3)</h3>
+                    <p class="text-xs dark:text-gray-400 text-gray-600 mb-3">Layanan pelacak blok dan transaksi chain.nusacoin.org.</p>
+                    <a href="https://chain.nusacoin.org" target="_blank" class="nusa-glow-btn text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl inline-flex items-center gap-1.5">Buka Explorer <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                </div>
+
+                <div class="dapp-item cat-explorers dark:bg-gray-900/60 bg-white border dark:border-gray-800 border-gray-200 rounded-3xl p-4 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 text-xl"><i class="fa-solid fa-globe"></i></div>
+                        <span class="dark:bg-gray-800 bg-gray-100 text-gray-500 text-[10px] px-2.5 py-1 rounded-full font-medium">Explorer</span>
+                    </div>
+                    <h3 class="text-sm font-bold dark:text-white text-gray-900 mb-1 item-title">Nusacoin Main Explorer (Explorer 4)</h3>
+                    <p class="text-xs dark:text-gray-400 text-gray-600 mb-3">Portal explorer publik utama explorer.nusacoin.org.</p>
+                    <a href="https://explorer.nusacoin.org" target="_blank" class="nusa-glow-btn text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl inline-flex items-center gap-1.5">Buka Explorer <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                </div>
+
+                <div class="dapp-item cat-explorers dark:bg-gray-900/60 bg-white border dark:border-gray-800 border-gray-200 rounded-3xl p-4 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 text-xl"><i class="fa-solid fa-book"></i></div>
+                        <span class="dark:bg-gray-800 bg-gray-100 text-gray-500 text-[10px] px-2.5 py-1 rounded-full font-medium">Explorer</span>
+                    </div>
+                    <h3 class="text-sm font-bold dark:text-white text-gray-900 mb-1 item-title">Taobot Book (Explorer 5)</h3>
+                    <p class="text-xs dark:text-gray-400 text-gray-600 mb-3">Buku catatan transaksi dan riwayat ledger book.taobot.org.</p>
+                    <a href="https://book.taobot.org" target="_blank" class="nusa-glow-btn text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl inline-flex items-center gap-1.5">Buka Explorer <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                </div>
+
+                <div class="dapp-item cat-explorers dark:bg-gray-900/60 bg-white border dark:border-gray-800 border-gray-200 rounded-3xl p-4 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 text-xl"><i class="fa-solid fa-microscope"></i></div>
+                        <span class="dark:bg-gray-800 bg-gray-100 text-gray-500 text-[10px] px-2.5 py-1 rounded-full font-medium">Explorer</span>
+                    </div>
+                    <h3 class="text-sm font-bold dark:text-white text-gray-900 mb-1 item-title">NusaScan (Explorer 6)</h3>
+                    <p class="text-xs dark:text-gray-400 text-gray-600 mb-3">Portal explorer nusascan.site.</p>
+                    <a href="https://www.nusascan.site" target="_blank" class="nusa-glow-btn text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl inline-flex items-center gap-1.5">Buka Explorer <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                </div>
+
+                <div class="dapp-item cat-explorers dark:bg-gray-900/60 bg-white border dark:border-gray-800 border-gray-200 rounded-3xl p-4 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 text-xl"><i class="fa-solid fa-layer-group"></i></div>
+                        <span class="dark:bg-gray-800 bg-gray-100 text-gray-500 text-[10px] px-2.5 py-1 rounded-full font-medium">Explorer</span>
+                    </div>
+                    <h3 class="text-sm font-bold dark:text-white text-gray-900 mb-1 item-title">Block NusaScan (Explorer 7)</h3>
+                    <p class="text-xs dark:text-gray-400 text-gray-600 mb-3">Layanan inspeksi data blok block.nusascan.site.</p>
+                    <a href="https://block.nusascan.site" target="_blank" class="nusa-glow-btn text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl inline-flex items-center gap-1.5">Buka Explorer <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                </div>
+
+                <div class="dapp-item cat-explorers dark:bg-gray-900/60 bg-white border dark:border-gray-800 border-gray-200 rounded-3xl p-4 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 text-xl"><i class="fa-solid fa-vial"></i></div>
+                        <span class="dark:bg-gray-800 bg-gray-100 text-gray-500 text-[10px] px-2.5 py-1 rounded-full font-medium">Testnet</span>
+                    </div>
+                    <h3 class="text-sm font-bold dark:text-white text-gray-900 mb-1 item-title">Testnet Explorer</h3>
+                    <p class="text-xs dark:text-gray-400 text-gray-600 mb-3">Portal penjelajah blok jaringan uji coba testscan.nusacoin.org.</p>
+                    <a href="https://testscan.nusacoin.org" target="_blank" class="nusa-glow-btn text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl inline-flex items-center gap-1.5">Buka Explorer <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                </div>
+
+                <!-- BAGIAN MINING POOLS -->
+                <div class="dapp-item cat-pools dark:bg-gray-900/60 bg-white border dark:border-gray-800 border-gray-200 rounded-3xl p-4 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 text-xl"><i class="fa-solid fa-hammer"></i></div>
+                        <span class="dark:bg-gray-800 bg-gray-100 text-gray-500 text-[10px] px-2.5 py-1 rounded-full font-medium">Official Pool</span>
+                    </div>
+                    <h3 class="text-sm font-bold dark:text-white text-gray-900 mb-1 item-title">Nusacoin Official Pool</h3>
+                    <p class="text-xs dark:text-gray-400 text-gray-600 mb-3">Mining pool resmi Nusacoin pool.nusacoin.org.</p>
+                    <a href="https://pool.nusacoin.org/" target="_blank" class="nusa-glow-btn text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl inline-flex items-center gap-1.5">Buka Pool <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                </div>
+
+                <div class="dapp-item cat-pools dark:bg-gray-900/60 bg-white border dark:border-gray-800 border-gray-200 rounded-3xl p-4 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 text-xl"><i class="fa-solid fa-server"></i></div>
+                        <span class="dark:bg-gray-800 bg-gray-100 text-gray-500 text-[10px] px-2.5 py-1 rounded-full font-medium">Java Pool</span>
+                    </div>
+                    <h3 class="text-sm font-bold dark:text-white text-gray-900 mb-1 item-title">Nusacoin Java Pool</h3>
+                    <p class="text-xs dark:text-gray-400 text-gray-600 mb-3">Mining pool server wilayah Jawa pooljava.nusacoin.org.</p>
+                    <a href="https://pooljava.nusacoin.org/" target="_blank" class="nusa-glow-btn text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl inline-flex items-center gap-1.5">Buka Pool <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                </div>
+
+                <div class="dapp-item cat-pools dark:bg-gray-900/60 bg-white border dark:border-gray-800 border-gray-200 rounded-3xl p-4 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 text-xl"><i class="fa-solid fa-network-wired"></i></div>
+                        <span class="dark:bg-gray-800 bg-gray-100 text-gray-500 text-[10px] px-2.5 py-1 rounded-full font-medium">Taobot Pool</span>
+                    </div>
+                    <h3 class="text-sm font-bold dark:text-white text-gray-900 mb-1 item-title">Taobot Pool</h3>
+                    <p class="text-xs dark:text-gray-400 text-gray-600 mb-3">Mining pool komunitas Taobot pool.taobot.org:8443.</p>
+                    <a href="https://pool.taobot.org:8443/" target="_blank" class="nusa-glow-btn text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl inline-flex items-center gap-1.5">Buka Pool <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                </div>
+
+                <div class="dapp-item cat-pools dark:bg-gray-900/60 bg-white border dark:border-gray-800 border-gray-200 rounded-3xl p-4 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 text-xl"><i class="fa-solid fa-microchip"></i></div>
+                        <span class="dark:bg-gray-800 bg-gray-100 text-gray-500 text-[10px] px-2.5 py-1 rounded-full font-medium">Mitra Pool</span>
+                    </div>
+                    <h3 class="text-sm font-bold dark:text-white text-gray-900 mb-1 item-title">ALR8 Pool</h3>
+                    <p class="text-xs dark:text-gray-400 text-gray-600 mb-3">Mining pool publik eksternal alr8.net.</p>
+                    <a href="https://alr8.net/" target="_blank" class="nusa-glow-btn text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl inline-flex items-center gap-1.5">Buka Pool <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                </div>
+
+                <div class="dapp-item cat-pools dark:bg-gray-900/60 bg-white border dark:border-gray-800 border-gray-200 rounded-3xl p-4 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 text-xl"><i class="fa-solid fa-coins"></i></div>
+                        <span class="dark:bg-gray-800 bg-gray-100 text-gray-500 text-[10px] px-2.5 py-1 rounded-full font-medium">Mitra Pool</span>
+                    </div>
+                    <h3 class="text-sm font-bold dark:text-white text-gray-900 mb-1 item-title">Koinium Pool</h3>
+                    <p class="text-xs dark:text-gray-400 text-gray-600 mb-3">Mining pool mitra koinium.it.</p>
+                    <a href="https://koinium.it/" target="_blank" class="nusa-glow-btn text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl inline-flex items-center gap-1.5">Buka Pool <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                </div>
+
+                <!-- BAGIAN SUMBER DAYA & DOMPET -->
+                <div class="dapp-item cat-resources dark:bg-gray-900/60 bg-white border dark:border-gray-800 border-gray-200 rounded-3xl p-4 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 text-xl"><i class="fa-brands fa-windows"></i></div>
+                        <span class="dark:bg-gray-800 bg-gray-100 text-gray-500 text-[10px] px-2.5 py-1 rounded-full font-medium">Wallet Software</span>
+                    </div>
+                    <h3 class="text-sm font-bold dark:text-white text-gray-900 mb-1 item-title">Nusacoin Core Win</h3>
+                    <p class="text-xs dark:text-gray-400 text-gray-600 mb-3">Aplikasi dompet Nusacoin Core resmi untuk sistem operasi Windows.</p>
+                    <a href="https://www.nusacoin.org/p/nusacoin-core.html" target="_blank" class="nusa-glow-btn text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl inline-flex items-center gap-1.5">Buka Sumber Daya <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                </div>
+
+                <div class="dapp-item cat-resources dark:bg-gray-900/60 bg-white border dark:border-gray-800 border-gray-200 rounded-3xl p-4 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 text-xl"><i class="fa-brands fa-linux"></i></div>
+                        <span class="dark:bg-gray-800 bg-gray-100 text-gray-500 text-[10px] px-2.5 py-1 rounded-full font-medium">Wallet Software</span>
+                    </div>
+                    <h3 class="text-sm font-bold dark:text-white text-gray-900 mb-1 item-title">Nusacoin Core Linux</h3>
+                    <p class="text-xs dark:text-gray-400 text-gray-600 mb-3">Aplikasi dompet Nusacoin Core resmi untuk sistem operasi Linux.</p>
+                    <a href="https://www.nusachain.org/Pages/Developer.html" target="_blank" class="nusa-glow-btn text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl inline-flex items-center gap-1.5">Buka Sumber Daya <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                </div>
+
+                <div class="dapp-item cat-resources dark:bg-gray-900/60 bg-white border dark:border-gray-800 border-gray-200 rounded-3xl p-4 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 text-xl"><i class="fa-solid fa-wallet"></i></div>
+                        <span class="dark:bg-gray-800 bg-gray-100 text-gray-500 text-[10px] px-2.5 py-1 rounded-full font-medium">Wallet</span>
+                    </div>
+                    <h3 class="text-sm font-bold dark:text-white text-gray-900 mb-1 item-title">Nusacoin Wallet</h3>
+                    <p class="text-xs dark:text-gray-400 text-gray-600 mb-3">Portal aplikasi dompet utama wallet.nusacoin.org.</p>
+                    <a href="https://wallet.nusacoin.org/" target="_blank" class="nusa-glow-btn text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl inline-flex items-center gap-1.5">Buka Sumber Daya <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                </div>
+
+                <div class="dapp-item cat-resources dark:bg-gray-900/60 bg-white border dark:border-gray-800 border-gray-200 rounded-3xl p-4 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 text-xl"><i class="fa-solid fa-note-sticky"></i></div>
+                        <span class="dark:bg-gray-800 bg-gray-100 text-gray-500 text-[10px] px-2.5 py-1 rounded-full font-medium">Cold Storage</span>
+                    </div>
+                    <h3 class="text-sm font-bold dark:text-white text-gray-900 mb-1 item-title">Nusacoin Paper Wallet</h3>
+                    <p class="text-xs dark:text-gray-400 text-gray-600 mb-3">Layanan pembuat dompet kertas offline paper.nusacoin.org.</p>
+                    <a href="https://paper.nusacoin.org/" target="_blank" class="nusa-glow-btn text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl inline-flex items-center gap-1.5">Buka Sumber Daya <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                </div>
+
+                <div class="dapp-item cat-resources dark:bg-gray-900/60 bg-white border dark:border-gray-800 border-gray-200 rounded-3xl p-4 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 text-xl"><i class="fa-solid fa-leaf"></i></div>
+                        <span class="dark:bg-gray-800 bg-gray-100 text-gray-500 text-[10px] px-2.5 py-1 rounded-full font-medium">Green Wallet</span>
+                    </div>
+                    <h3 class="text-sm font-bold dark:text-white text-gray-900 mb-1 item-title">Nusacoin Green Wallet</h3>
+                    <p class="text-xs dark:text-gray-400 text-gray-600 mb-3">Aplikasi dompet ramah lingkungan green.nusacoin.org.</p>
+                    <a href="https://green.nusacoin.org/" target="_blank" class="nusa-glow-btn text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl inline-flex items-center gap-1.5">Buka Sumber Daya <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                </div>
+
+                <div class="dapp-item cat-resources dark:bg-gray-900/60 bg-white border dark:border-gray-800 border-gray-200 rounded-3xl p-4 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 text-xl"><i class="fa-solid fa-globe"></i></div>
+                        <span class="dark:bg-gray-800 bg-gray-100 text-gray-500 text-[10px] px-2.5 py-1 rounded-full font-medium">Web Wallet</span>
+                    </div>
+                    <h3 class="text-sm font-bold dark:text-white text-gray-900 mb-1 item-title">Nusacoin Dompet Web</h3>
+                    <p class="text-xs dark:text-gray-400 text-gray-600 mb-3">Dompet berbasis browser langsung dompet.nusacoin.org.</p>
+                    <a href="https://dompet.nusacoin.org/" target="_blank" class="nusa-glow-btn text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl inline-flex items-center gap-1.5">Buka Sumber Daya <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                </div>
+
+                <div class="dapp-item cat-resources dark:bg-gray-900/60 bg-white border dark:border-gray-800 border-gray-200 rounded-3xl p-4 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 text-xl"><i class="fa-solid fa-mobile-screen-button"></i></div>
+                        <span class="dark:bg-gray-800 bg-gray-100 text-gray-500 text-[10px] px-2.5 py-1 rounded-full font-medium">Mobile App</span>
+                    </div>
+                    <h3 class="text-sm font-bold dark:text-white text-gray-900 mb-1 item-title">Taobot Wallet App</h3>
+                    <p class="text-xs dark:text-gray-400 text-gray-600 mb-3">Aplikasi mobile wallet dari ekosistem Taobot.</p>
+                    <a href="https://www.nusachain.org/Pages/Taobot-App.html" target="_blank" class="nusa-glow-btn text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl inline-flex items-center gap-1.5">Buka Sumber Daya <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                </div>
+
+                <div class="dapp-item cat-resources dark:bg-gray-900/60 bg-white border dark:border-gray-800 border-gray-200 rounded-3xl p-4 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 text-xl"><i class="fa-solid fa-microchip"></i></div>
+                        <span class="dark:bg-gray-800 bg-gray-100 text-gray-500 text-[10px] px-2.5 py-1 rounded-full font-medium">Mining Tool</span>
+                    </div>
+                    <h3 class="text-sm font-bold dark:text-white text-gray-900 mb-1 item-title">CPU Miner</h3>
+                    <p class="text-xs dark:text-gray-400 text-gray-600 mb-3">Software penambangan khusus prosesor (CPU Multi x64).</p>
+                    <a href="https://github.com/TaobotX11/nusacoin/releases/download/0.25.99/cpuminer-multi-rel1.3.1-x64.rar" target="_blank" class="nusa-glow-btn text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl inline-flex items-center gap-1.5">Unduh Miner <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                </div>
+
+                <div class="dapp-item cat-resources dark:bg-gray-900/60 bg-white border dark:border-gray-800 border-gray-200 rounded-3xl p-4 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 text-xl"><i class="fa-solid fa-memory"></i></div>
+                        <span class="dark:bg-gray-800 bg-gray-100 text-gray-500 text-[10px] px-2.5 py-1 rounded-full font-medium">Mining Tool</span>
+                    </div>
+                    <h3 class="text-sm font-bold dark:text-white text-gray-900 mb-1 item-title">GPU Miner</h3>
+                    <p class="text-xs dark:text-gray-400 text-gray-600 mb-3">Software penambangan GPU berbasis CUDA (CCMiner).</p>
+                    <a href="https://github.com/TaobotX11/nusacoin/releases/download/0.25.99/ccminer-2.3.1-gpucuda10.rar" target="_blank" class="nusa-glow-btn text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl inline-flex items-center gap-1.5">Unduh Miner <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                </div>
+
+                <div class="dapp-item cat-resources cat-intro dark:bg-gray-900/60 bg-white border dark:border-gray-800 border-gray-200 rounded-3xl p-4 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 text-xl"><i class="fa-solid fa-spell-check"></i></div>
+                        <span class="dark:bg-gray-800 bg-gray-100 text-gray-500 text-[10px] px-2.5 py-1 rounded-full font-medium">Edukasi</span>
+                    </div>
+                    <h3 class="text-sm font-bold dark:text-white text-gray-900 mb-1 item-title">Kosa Kata Nusacoin</h3>
+                    <p class="text-xs dark:text-gray-400 text-gray-600 mb-3">Glosarium istilah teknologi kripto dan blockchain Nusacoin.</p>
+                    <a href="https://www.nusachain.org/Pages/Kosa-Kata.html" target="_blank" class="nusa-glow-btn text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl inline-flex items-center gap-1.5">Buka Halaman <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                </div>
+
+                <div class="dapp-item cat-resources dark:bg-gray-900/60 bg-white border dark:border-gray-800 border-gray-200 rounded-3xl p-4 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 text-xl"><i class="fa-solid fa-image"></i></div>
+                        <span class="dark:bg-gray-800 bg-gray-100 text-gray-500 text-[10px] px-2.5 py-1 rounded-full font-medium">Aset Brand</span>
+                    </div>
+                    <h3 class="text-sm font-bold dark:text-white text-gray-900 mb-1 item-title">Nusacoin Logo Drive</h3>
+                    <p class="text-xs dark:text-gray-400 text-gray-600 mb-3">Google Drive direktori logo resmi Nusacoin format transparan & vektor.</p>
+                    <a href="https://drive.google.com/drive/folders/1LmQlGZTI6SdM3PY_l0Jfp873t0QLfiEJ?usp=sharing" target="_blank" class="nusa-glow-btn text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl inline-flex items-center gap-1.5">Buka Drive <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                </div>
+
+                <div class="dapp-item cat-resources dark:bg-gray-900/60 bg-white border dark:border-gray-800 border-gray-200 rounded-3xl p-4 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 text-xl"><i class="fa-solid fa-music"></i></div>
+                        <span class="dark:bg-gray-800 bg-gray-100 text-gray-500 text-[10px] px-2.5 py-1 rounded-full font-medium">Aset Komunitas</span>
+                    </div>
+                    <h3 class="text-sm font-bold dark:text-white text-gray-900 mb-1 item-title">Nusacoin Musik Drive</h3>
+                    <p class="text-xs dark:text-gray-400 text-gray-600 mb-3">Google Drive berkas lagu dan audio tema ekosistem Nusacoin.</p>
+                    <a href="https://drive.google.com/drive/folders/1ActY7EKiuLERqJTSjLRU0JKidSmWhiNL" target="_blank" class="nusa-glow-btn text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl inline-flex items-center gap-1.5">Buka Drive <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                </div>
+
+                <!-- BAGIAN PERKENALAN & INFOTAINMENT -->
+                <div class="dapp-item cat-intro dark:bg-gray-900/60 bg-white border dark:border-gray-800 border-gray-200 rounded-3xl p-4 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 text-xl"><i class="fa-solid fa-user"></i></div>
+                        <span class="dark:bg-gray-800 bg-gray-100 text-gray-500 text-[10px] px-2.5 py-1 rounded-full font-medium">Panduan</span>
+                    </div>
+                    <h3 class="text-sm font-bold dark:text-white text-gray-900 mb-1 item-title">Individu</h3>
+                    <p class="text-xs dark:text-gray-400 text-gray-600 mb-3">Panduan penggunaan dan manfaat Nusacoin untuk individu.</p>
+                    <a href="https://www.nusachain.org/Pages/Individu.html" target="_blank" class="nusa-glow-btn text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl inline-flex items-center gap-1.5">Buka Halaman <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                </div>
+
+                <div class="dapp-item cat-intro dark:bg-gray-900/60 bg-white border dark:border-gray-800 border-gray-200 rounded-3xl p-4 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 text-xl"><i class="fa-solid fa-briefcase"></i></div>
+                        <span class="dark:bg-gray-800 bg-gray-100 text-gray-500 text-[10px] px-2.5 py-1 rounded-full font-medium">Panduan</span>
+                    </div>
+                    <h3 class="text-sm font-bold dark:text-white text-gray-900 mb-1 item-title">Bisnis</h3>
+                    <p class="text-xs dark:text-gray-400 text-gray-600 mb-3">Integrasi pembayaran serta utilitas blockchain untuk sektor bisnis.</p>
+                    <a href="https://www.nusachain.org/Pages/Bisnis.html" target="_blank" class="nusa-glow-btn text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl inline-flex items-center gap-1.5">Buka Halaman <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                </div>
+
+                <div class="dapp-item cat-intro dark:bg-gray-900/60 bg-white border dark:border-gray-800 border-gray-200 rounded-3xl p-4 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 text-xl"><i class="fa-solid fa-code"></i></div>
+                        <span class="dark:bg-gray-800 bg-gray-100 text-gray-500 text-[10px] px-2.5 py-1 rounded-full font-medium">Pengembang</span>
+                    </div>
+                    <h3 class="text-sm font-bold dark:text-white text-gray-900 mb-1 item-title">Developer Portal</h3>
+                    <p class="text-xs dark:text-gray-400 text-gray-600 mb-3">Portal dokumentasi teknis dan integrasi API Nusacoin.</p>
+                    <a href="https://www.nusachain.org/Pages/Developer.html" target="_blank" class="nusa-glow-btn text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl inline-flex items-center gap-1.5">Buka Halaman <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                </div>
+
+                <div class="dapp-item cat-intro dark:bg-gray-900/60 bg-white border dark:border-gray-800 border-gray-200 rounded-3xl p-4 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 text-xl"><i class="fa-solid fa-rocket"></i></div>
+                        <span class="dark:bg-gray-800 bg-gray-100 text-gray-500 text-[10px] px-2.5 py-1 rounded-full font-medium">Awal</span>
+                    </div>
+                    <h3 class="text-sm font-bold dark:text-white text-gray-900 mb-1 item-title">Memulai Nusacoin</h3>
+                    <p class="text-xs dark:text-gray-400 text-gray-600 mb-3">Langkah awal berkenalan dan berpartisipasi dalam ekosistem.</p>
+                    <a href="https://www.nusachain.org/Pages/Memulai.html" target="_blank" class="nusa-glow-btn text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl inline-flex items-center gap-1.5">Buka Halaman <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                </div>
+
+                <div class="dapp-item cat-intro dark:bg-gray-900/60 bg-white border dark:border-gray-800 border-gray-200 rounded-3xl p-4 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 text-xl"><i class="fa-solid fa-map"></i></div>
+                        <span class="dark:bg-gray-800 bg-gray-100 text-gray-500 text-[10px] px-2.5 py-1 rounded-full font-medium">Roadmap</span>
+                    </div>
+                    <h3 class="text-sm font-bold dark:text-white text-gray-900 mb-1 item-title">Visi Misi & Roadmap</h3>
+                    <p class="text-xs dark:text-gray-400 text-gray-600 mb-3">Peta jalan pengembangan dan arah masa depan proyek Nusacoin.</p>
+                    <a href="https://www.nusachain.org/Pages/Visi-Misi.html" target="_blank" class="nusa-glow-btn text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl inline-flex items-center gap-1.5">Buka Halaman <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                </div>
+
+                <div class="dapp-item cat-intro dark:bg-gray-900/60 bg-white border dark:border-gray-800 border-gray-200 rounded-3xl p-4 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 text-xl"><i class="fa-solid fa-gears"></i></div>
+                        <span class="dark:bg-gray-800 bg-gray-100 text-gray-500 text-[10px] px-2.5 py-1 rounded-full font-medium">Sistem</span>
+                    </div>
+                    <h3 class="text-sm font-bold dark:text-white text-gray-900 mb-1 item-title">Cara Kerja Nusacoin</h3>
+                    <p class="text-xs dark:text-gray-400 text-gray-600 mb-3">Penjelasan teknis mekanisme konsensus dan algoritma X11 Nusacoin.</p>
+                    <a href="https://www.nusachain.org/Pages/Cara-Kerja.html" target="_blank" class="nusa-glow-btn text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl inline-flex items-center gap-1.5">Buka Halaman <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                </div>
+
+                <div class="dapp-item cat-intro cat-resources dark:bg-gray-900/60 bg-white border dark:border-gray-800 border-gray-200 rounded-3xl p-4 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 text-xl"><i class="fa-solid fa-file-pdf"></i></div>
+                        <span class="dark:bg-gray-800 bg-gray-100 text-gray-500 text-[10px] px-2.5 py-1 rounded-full font-medium">Dokumen IN</span>
+                    </div>
+                    <h3 class="text-sm font-bold dark:text-white text-gray-900 mb-1 item-title">Whitepaper IN</h3>
+                    <p class="text-xs dark:text-gray-400 text-gray-600 mb-3">Dokumen teknis putih resmi Nusacoin bahasa Indonesia.</p>
+                    <a href="https://docs.google.com/viewer?url=https://raw.githubusercontent.com/nusacoin-org/nusacoin.org/main/Pages/Whitepaper_Nusacoin_in.pdf" target="_blank" class="nusa-glow-btn text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl inline-flex items-center gap-1.5">Buka Dokumen <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                </div>
+
+                <div class="dapp-item cat-intro cat-resources dark:bg-gray-900/60 bg-white border dark:border-gray-800 border-gray-200 rounded-3xl p-4 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 text-xl"><i class="fa-solid fa-file-pdf"></i></div>
+                        <span class="dark:bg-gray-800 bg-gray-100 text-gray-500 text-[10px] px-2.5 py-1 rounded-full font-medium">Dokumen EN</span>
+                    </div>
+                    <h3 class="text-sm font-bold dark:text-white text-gray-900 mb-1 item-title">Whitepaper EN</h3>
+                    <p class="text-xs dark:text-gray-400 text-gray-600 mb-3">Official technical Whitepaper document in English.</p>
+                    <a href="https://docs.google.com/viewer?url=https://raw.githubusercontent.com/nusacoin-org/nusacoin.org/main/Pages/Whitepaper_Nusacoin_en.pdf" target="_blank" class="nusa-glow-btn text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl inline-flex items-center gap-1.5">Buka Dokumen <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- TAB EMBEDDED WALLET -->
+        <div id="tab-wallet" class="tab-content relative h-[calc(100vh-130px)] w-full">
+            <iframe id="iframe-wallet" class="w-full h-full border-0" src="about:blank"></iframe>
+        </div>
+
+        <!-- TAB NATIVE NEWS FEED (NusaCoin Blog Terhubung) -->
+        <div id="tab-news" class="tab-content px-4 pt-3">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h2 class="text-lg font-bold dark:text-white text-gray-900" data-lang-en="NusaCoin Articles" data-lang-id="Artikel NusaCoin">Artikel NusaCoin</h2>
+                    <p class="text-xs dark:text-gray-400 text-gray-500" data-lang-en="Latest updates & ecosystem news" data-lang-id="Kabar terbaru & edukasi ekosistem">Kabar terbaru & edukasi ekosistem</p>
+                </div>
+                <button onclick="fetchNusaNews()" class="text-xs text-emerald-500 font-semibold flex items-center gap-1.5 active:scale-95 transition bg-emerald-500/10 px-3 py-1.5 rounded-full">
+                    <i class="fa-solid fa-rotate-right"></i> Refresh
+                </button>
+            </div>
+
+            <!-- Wadah Daftar Artikel Feed -->
+            <div id="news-list-container" class="space-y-4">
+                <div class="animate-pulse dark:bg-gray-900/60 bg-white border dark:border-gray-800 border-gray-200 rounded-3xl p-4">
+                    <div class="dark:bg-gray-800 bg-gray-200 h-44 rounded-2xl mb-3"></div>
+                    <div class="h-3 dark:bg-gray-800 bg-gray-200 rounded w-1/3 mb-2"></div>
+                    <div class="h-4 dark:bg-gray-800 bg-gray-200 rounded w-5/6 mb-2"></div>
+                    <div class="h-3 dark:bg-gray-800 bg-gray-200 rounded w-1/2"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB EMBEDDED SHOP (DISAMPING BERITA) -->
+        <div id="tab-shop" class="tab-content relative h-[calc(100vh-130px)] w-full">
+            <iframe id="iframe-shop" class="w-full h-full border-0" src="about:blank"></iframe>
+        </div>
+
+        <!-- TAB EMBEDDED SWAP -->
+        <div id="tab-swap" class="tab-content relative h-[calc(100vh-130px)] w-full">
+            <iframe id="iframe-swap" class="w-full h-full border-0" src="about:blank"></iframe>
+        </div>
+
+    </div>
+
+    <!-- MODAL POPUP FULLSCREEN UNTUK VOTE BLOCKSPOT IN-APP -->
+    <div id="voteModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex flex-col max-w-md mx-auto transition-all duration-300">
+        <div class="flex items-center justify-between px-4 py-3 dark:bg-gray-900 bg-emerald-950 border-b dark:border-gray-800 border-emerald-800 text-white">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-check-to-slot text-amber-400"></i>
+                <span class="text-xs font-bold tracking-wide">Blockspot.io Voting</span>
+            </div>
+            <button onclick="closeVoteModal()" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-gray-300 hover:text-white active:scale-95 transition">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+        </div>
+        <div class="flex-1 w-full bg-white relative">
+            <iframe id="voteIframe" class="w-full h-full border-0" src="about:blank"></iframe>
+        </div>
+    </div>
+
+    <!-- Modal Pengaturan Sheet -->
+    <div id="settingsModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end justify-center hidden opacity-0 transition-opacity duration-300" onclick="if(event.target === this) toggleModal(false)">
+        <div class="w-full max-w-md dark:bg-gray-900 bg-white border-t dark:border-gray-800 border-gray-200 rounded-t-3xl p-6 shadow-2xl transform transition-transform duration-300 translate-y-full" id="modalContainer">
+            <div class="flex items-center justify-between mb-6 pb-3 border-b dark:border-gray-800 border-gray-100">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-gear text-emerald-500 text-lg"></i>
+                    <h3 class="text-base font-bold dark:text-white text-gray-900" data-lang-en="Settings" data-lang-id="Pengaturan">Pengaturan</h3>
+                </div>
+                <button onclick="toggleModal(false)" class="text-gray-400 hover:text-gray-600 dark:hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Dark / Light Theme Toggle -->
+            <div class="flex items-center justify-between py-3 mb-4">
+                <div>
+                    <p class="text-sm font-semibold dark:text-white text-gray-900" data-lang-en="Appearance" data-lang-id="Tampilan Tema">Tampilan Tema</p>
+                    <p class="text-xs dark:text-gray-400 text-gray-500" id="themeStatusText">Gelap (Dark)</p>
+                </div>
+                <button id="themeToggleBtn" onclick="toggleTheme()" class="w-14 h-8 bg-emerald-600 rounded-full p-1 flex items-center transition duration-300">
+                    <div id="themeToggleCircle" class="w-6 h-6 bg-white rounded-full shadow-md transform translate-x-6 flex items-center justify-center text-xs text-gray-800">
+                        <i id="themeIcon" class="fa-solid fa-moon"></i>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Language Switcher (ID / EN) -->
+            <div class="flex items-center justify-between py-3 mb-6">
+                <div>
+                    <p class="text-sm font-semibold dark:text-white text-gray-900" data-lang-en="Language" data-lang-id="Bahasa Aplikasi">Bahasa Aplikasi</p>
+                    <p class="text-xs dark:text-gray-400 text-gray-500" id="langStatusText">Indonesia (ID)</p>
+                </div>
+                <div class="flex dark:bg-gray-800 bg-gray-100 p-1 rounded-xl border dark:border-gray-700 border-gray-200">
+                    <button id="langBtnID" onclick="setLanguage('id')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition bg-emerald-500 text-white shadow-sm">ID</button>
+                    <button id="langBtnEN" onclick="setLanguage('en')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition text-gray-500 hover:text-gray-900 dark:hover:text-white">EN</button>
+                </div>
+            </div>
+
+            <button onclick="toggleModal(false)" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-2xl text-xs transition" data-lang-en="Done" data-lang-id="Selesai">
+                Selesai
+            </button>
+        </div>
+    </div>
+
+    <!-- Mobile Bottom Navigation Bar -->
+    <div class="fixed bottom-0 left-0 right-0 dark:bg-gray-950/95 bg-white/95 border-t dark:border-gray-800/80 border-gray-200 backdrop-blur-lg px-2 py-2 z-40">
+        <div class="max-w-md mx-auto flex justify-around items-center text-center">
+            
+            <button onclick="switchTab('wallet', 'https://www.nusachain.org/Tools/Nusa-Card.html')" id="nav-wallet" class="nav-item flex flex-col items-center gap-1 dark:text-gray-400 text-gray-500 hover:text-emerald-500 transition">
+                <div class="icon-container px-2.5 py-0.5 rounded-full">
+                    <i class="fa-solid fa-wallet text-base"></i>
+                </div>
+                <span class="text-[10px] font-medium" data-lang-en="Wallet" data-lang-id="Dompet">Dompet</span>
+            </button>
+
+            <button onclick="switchTab('news')" id="nav-news" class="nav-item flex flex-col items-center gap-1 dark:text-gray-400 text-gray-500 hover:text-emerald-500 transition">
+                <div class="icon-container px-2.5 py-0.5 rounded-full">
+                    <i class="fa-solid fa-newspaper text-base"></i>
+                </div>
+                <span class="text-[10px] font-medium" data-lang-en="News" data-lang-id="Berita">Berita</span>
+            </button>
+
+            <!-- MENU SHOP BARU -->
+            <button onclick="switchTab('shop', 'https://shop.nusachain.org/')" id="nav-shop" class="nav-item flex flex-col items-center gap-1 dark:text-gray-400 text-gray-500 hover:text-emerald-500 transition">
+                <div class="icon-container px-2.5 py-0.5 rounded-full">
+                    <i class="fa-solid fa-bag-shopping text-base"></i>
+                </div>
+                <span class="text-[10px] font-medium" data-lang-en="Shop" data-lang-id="Toko">Shop</span>
+            </button>
+
+            <button onclick="switchTab('swap', 'https://qutrade.io/en/?market=nux_usdt')" id="nav-swap" class="nav-item flex flex-col items-center gap-1 dark:text-gray-400 text-gray-500 hover:text-emerald-500 transition">
+                <div class="icon-container px-2.5 py-0.5 rounded-full">
+                    <i class="fa-solid fa-right-left text-base"></i>
+                </div>
+                <span class="text-[10px] font-medium" data-lang-en="Swap" data-lang-id="Tukar">Tukar</span>
+            </button>
+
+            <button onclick="switchTab('dapps')" id="nav-dapps" class="nav-item flex flex-col items-center gap-1 text-emerald-500 dark:text-emerald-400 font-semibold">
+                <div class="icon-container dark:bg-emerald-500/20 bg-emerald-100 px-2.5 py-0.5 rounded-full">
+                    <i class="fa-solid fa-globe text-base text-emerald-500 dark:text-emerald-400"></i>
+                </div>
+                <span class="text-[10px]" data-lang-en="DApps" data-lang-id="DApps">DApps</span>
+            </button>
+
+            <button onclick="toggleModal(true)" class="flex flex-col items-center gap-1 dark:text-gray-400 text-gray-500 hover:text-emerald-500 transition">
+                <div class="px-2.5 py-0.5 rounded-full">
+                    <i class="fa-solid fa-gear text-base"></i>
+                </div>
+                <span class="text-[10px] font-medium" data-lang-en="Settings" data-lang-id="Pengaturan">Pengaturan</span>
+            </button>
+
+        </div>
+    </div>
+
+    <!-- JavaScript Logika Aplikasi (Terhubung ke Blog Nusacoin) -->
+    <script>
+        let currentLang = 'id';
+        let isDarkMode = true;
+
+        // Data 7 Artikel Utama dengan Tautan Asli untuk Fallback
+        const mockNewsData = [
+            {
+                title: "Mengapa Bisnis Memilih OP_RETURN di Blockchain?",
+                link: "https://www.nusacoin.org/2026/08/mengapa-bisnis-memilih-opreturn.html",
+                category: "Artikel,Mesh,Taobot",
+                date: "11/08/2026 06:01",
+                image: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=80&w=600&auto=format&fit=crop"
+            },
+            {
+                title: "Kemampuan Transaksi Offline UTXO & Keunggulannya",
+                link: "https://www.nusacoin.org/2026/08/kemampuan-transaksi-offline-utxo.html",
+                category: "Artikel,Mesh,Taobot",
+                date: "10/08/2026 14:20",
+                image: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?q=80&w=600&auto=format&fit=crop"
+            },
+            {
+                title: "Mengurai Teknologi Gema Taobot: Cara Kerja & Integrasi",
+                link: "https://www.nusacoin.org/2026/08/mengurai-teknologi-gema-taobot-cara.html",
+                category: "Artikel,Taobot",
+                date: "08/08/2026 09:15",
+                image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600&auto=format&fit=crop"
+            },
+            {
+                title: "Panduan Mining NusaCoin Lengkap",
+                link: "https://www.nusacoin.org/2026/08/panduan-mining-nusacoin.html",
+                category: "Mining",
+                date: "05/08/2026 18:00",
+                image: "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=600&auto=format&fit=crop"
+            },
+            {
+                title: "Cara Kerja Sistem Voting di Blockchain",
+                link: "https://www.nusacoin.org/2026/07/cara-kerja-sistem-voting-di-blockchain.html",
+                category: "Governance",
+                date: "28/07/2026 11:30",
+                image: "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?q=80&w=600&auto=format&fit=crop"
+            },
+            {
+                title: "Cara Kerja Verifikasi Ijazah di Blockchain",
+                link: "https://www.nusacoin.org/2026/07/cara-kerja-verifikasi-ijazah-di.html",
+                category: "Edukasi",
+                date: "20/07/2026 15:45",
+                image: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=600&auto=format&fit=crop"
+            },
+            {
+                title: "Tutorial Mining NusaCoin (NUX)",
+                link: "https://www.nusacoin.org/2026/06/tutorial-mining-nusacoin-nux.html",
+                category: "Tutorial",
+                date: "15/06/2026 10:00",
+                image: "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?q=80&w=600&auto=format&fit=crop"
+            }
+        ];
+
+        // Pengendali Modal Vote In-App
+        function openVoteModal() {
+            const modal = document.getElementById('voteModal');
+            const iframe = document.getElementById('voteIframe');
+            iframe.src = 'https://blockspot.io/coin/nusacoin/';
+            modal.classList.remove('hidden');
+        }
+
+        function closeVoteModal() {
+            const modal = document.getElementById('voteModal');
+            const iframe = document.getElementById('voteIframe');
+            modal.classList.add('hidden');
+            iframe.src = 'about:blank';
+        }
+
+        // Pengendali Filter Kategori DApp
+        function filterCategory(cat) {
+            const items = document.querySelectorAll('.dapp-item');
+            const buttons = document.querySelectorAll('.cat-btn');
+
+            buttons.forEach(btn => {
+                btn.className = "cat-btn dark:bg-gray-900 bg-gray-100 border dark:border-gray-800 border-gray-200 dark:text-gray-300 text-gray-700 font-medium px-4 py-2 rounded-full text-xs shrink-0";
+            });
+            event.target.className = "cat-btn bg-emerald-500 text-white font-bold px-4 py-2 rounded-full text-xs shrink-0";
+
+            let count = 0;
+            items.forEach(item => {
+                if (cat === 'all' || item.classList.contains('cat-' + cat)) {
+                    item.style.display = "block";
+                    count++;
+                } else {
+                    item.style.display = "none";
+                }
+            });
+
+            document.getElementById('itemCountText').innerText = count + " Layanan Ditemukan";
+        }
+
+        // Search Filter
+        function searchCards() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const items = document.querySelectorAll('.dapp-item');
+            let count = 0;
+
+            items.forEach(item => {
+                const title = item.querySelector('.item-title') ? item.querySelector('.item-title').innerText.toLowerCase() : '';
+                const desc = item.querySelector('p') ? item.querySelector('p').innerText.toLowerCase() : '';
+
+                if (title.includes(query) || desc.includes(query)) {
+                    item.style.display = "block";
+                    count++;
+                } else {
+                    item.style.display = "none";
+                }
+            });
+
+            document.getElementById('itemCountText').innerText = count + " Layanan Ditemukan";
+        }
+
+        // Pengendali Navigasi Tab Utama
+        function switchTab(tabId, targetUrl = '') {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(nav => {
+                nav.className = "nav-item flex flex-col items-center gap-1 dark:text-gray-400 text-gray-500 hover:text-emerald-500 transition";
+                const iconBox = nav.querySelector('.icon-container');
+                if (iconBox) iconBox.className = "icon-container px-2.5 py-0.5 rounded-full";
+            });
+
+            const activeTab = document.getElementById('tab-' + tabId);
+            if (activeTab) activeTab.classList.add('active');
+
+            const activeNav = document.getElementById('nav-' + tabId);
+            if (activeNav) {
+                activeNav.className = "nav-item flex flex-col items-center gap-1 text-emerald-500 dark:text-emerald-400 font-semibold";
+                const iconBox = activeNav.querySelector('.icon-container');
+                if (iconBox) iconBox.className = "icon-container dark:bg-emerald-500/20 bg-emerald-100 px-2.5 py-0.5 rounded-full";
+            }
+
+            if (targetUrl !== '') {
+                const iframe = document.getElementById('iframe-' + tabId);
+                if (iframe && iframe.src === 'about:blank') {
+                    iframe.src = targetUrl;
+                }
+            }
+
+            const headerTitle = document.getElementById('headerTitle');
+            const headerSub = document.getElementById('headerSubTitle');
+            
+            if (tabId === 'dapps') {
+                headerTitle.innerText = "NusaChain DApps";
+                headerSub.innerText = currentLang === 'id' ? "Jelajahi aplikasi terpercaya antar jaringan" : "Discover trusted applications across chains";
+            } else if (tabId === 'wallet') {
+                headerTitle.innerText = "Nusa Card Wallet";
+                headerSub.innerText = "www.nusachain.org";
+            } else if (tabId === 'news') {
+                headerTitle.innerText = "NusaCoin News";
+                headerSub.innerText = "nusacoin.org";
+                fetchNusaNews();
+            } else if (tabId === 'shop') {
+                headerTitle.innerText = "NusaChain Shop";
+                headerSub.innerText = "shop.nusachain.org";
+            } else if (tabId === 'swap') {
+                headerTitle.innerText = "QuTrade Swap";
+                headerSub.innerText = "qutrade.io";
+            }
+        }
+
+        // Mengambil Postingan Terkini dari Blogger secara Dinamis (Blogger Feed API)
+        async function fetchNusaNews() {
+            const container = document.getElementById('news-list-container');
+            if (!container) return;
+
+            container.innerHTML = `
+                <div class="animate-pulse dark:bg-gray-900/60 bg-white border dark:border-gray-800 border-gray-200 rounded-3xl p-4">
+                    <div class="dark:bg-gray-800 bg-gray-200 h-44 rounded-2xl mb-3"></div>
+                    <div class="h-3 dark:bg-gray-800 bg-gray-200 rounded w-1/3 mb-2"></div>
+                    <div class="h-4 dark:bg-gray-800 bg-gray-200 rounded w-5/6 mb-2"></div>
+                    <div class="h-3 dark:bg-gray-800 bg-gray-200 rounded w-1/2"></div>
+                </div>
+            `;
+
+            // Blogger JSONP Request
+            const blogUrl = "https://www.nusacoin.org";
+            const feedUrl = `${blogUrl}/feeds/posts/default?alt=json-in-script&max-results=10&callback=handleBloggerNewsResponse`;
+
+            const oldScript = document.getElementById('blogger-jsonp-script');
+            if (oldScript) oldScript.remove();
+
+            const script = document.createElement('script');
+            script.id = 'blogger-jsonp-script';
+            script.src = feedUrl;
+            script.onerror = function() {
+                // Tampilkan daftar tautan asli jika offline / bermasalah
+                container.innerHTML = '';
+                mockNewsData.forEach(item => {
+                    renderArticleCard(container, item.title, item.link, item.category, item.date, item.image);
+                });
+            };
+            
+            document.body.appendChild(script);
+        }
+
+        // Callback Pengolah Data JSON dari Blogger
+        function handleBloggerNewsResponse(data) {
+            const container = document.getElementById('news-list-container');
+            if (!container) return;
+
+            const entries = data && data.feed ? data.feed.entry : null;
+
+            if (!entries || entries.length === 0) {
+                container.innerHTML = '';
+                mockNewsData.forEach(item => {
+                    renderArticleCard(container, item.title, item.link, item.category, item.date, item.image);
+                });
+                return;
+            }
+
+            container.innerHTML = '';
+
+            entries.forEach(entry => {
+                const title = entry.title.$t;
+
+                let link = '#';
+                if (entry.link) {
+                    const alternateLink = entry.link.find(l => l.rel === 'alternate');
+                    if (alternateLink) link = alternateLink.href;
+                }
+
+                const publishedDate = new Date(entry.published.$t);
+                const formattedDate = publishedDate.toLocaleDateString('id-ID', {
+                    day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                });
+
+                let category = 'Artikel,Mesh,Taobot';
+                if (entry.category && entry.category.length > 0) {
+                    category = entry.category.map(c => c.term).join(', ');
+                }
+
+                let image = "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=80&w=600&auto=format&fit=crop";
+                if (entry.media$thumbnail) {
+                    image = entry.media$thumbnail.url.replace('/s72-c/', '/w600-h340-c/');
+                } else if (entry.content && entry.content.$t.includes('<img')) {
+                    const imgMatch = entry.content.$t.match(/src=["']([^"']+)["']/);
+                    if (imgMatch) image = imgMatch[1];
+                }
+
+                renderArticleCard(container, title, link, category, formattedDate, image);
+            });
+        }
+
+        // Render Kartu Artikel Berita
+        function renderArticleCard(container, title, link, category, date, image) {
+            const cardHTML = `
+                <div class="dark:bg-gray-900/60 bg-white border dark:border-gray-800 border-gray-200 rounded-3xl p-4 shadow-sm relative overflow-hidden transition hover:border-emerald-500/40">
+                    <div class="relative w-full h-44 rounded-2xl overflow-hidden mb-3 border border-emerald-500/30">
+                        <img src="${image}" alt="News Image" class="w-full h-full object-cover">
+                    </div>
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-[11px] font-semibold text-emerald-500 dark:text-emerald-400 truncate max-w-[200px]">${category}</span>
+                        <button onclick="shareLink('${link}')" class="text-gray-400 hover:text-emerald-500 p-1"><i class="fa-solid fa-share-nodes text-sm"></i></button>
+                    </div>
+                    <a href="${link}" target="_blank" rel="noopener noreferrer" class="block">
+                        <h3 class="text-base font-bold dark:text-white text-gray-900 leading-snug mb-2 hover:text-emerald-500 transition">${title}</h3>
+                    </a>
+                    <div class="flex items-center gap-2 text-[10px] text-gray-400">
+                        <span class="truncate max-w-[170px]">${link}</span>
+                        <span>•</span>
+                        <span>${date}</span>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', cardHTML);
+        }
+
+        function shareLink(url) {
+            if (navigator.share) {
+                navigator.share({ title: 'NusaCoin News', url: url });
+            } else {
+                navigator.clipboard.writeText(url);
+                alert('Tautan disalin ke papan klip!');
+            }
+        }
+
+        function toggleModal(show) {
+            const modal = document.getElementById('settingsModal');
+            const container = document.getElementById('modalContainer');
+            if (show) {
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modal.classList.remove('opacity-0');
+                    container.classList.remove('translate-y-full');
+                }, 10);
+            } else {
+                modal.classList.add('opacity-0');
+                container.classList.add('translate-y-full');
+                setTimeout(() => modal.classList.add('hidden'), 300);
+            }
+        }
+
+        function toggleTheme() {
+            isDarkMode = !isDarkMode;
+            const body = document.body;
+            const toggleCircle = document.getElementById('themeToggleCircle');
+            const themeBtn = document.getElementById('themeToggleBtn');
+            const themeIcon = document.getElementById('themeIcon');
+            const themeStatusText = document.getElementById('themeStatusText');
+
+            if (isDarkMode) {
+                body.classList.add('dark');
+                body.classList.remove('light');
+                toggleCircle.classList.add('translate-x-6');
+                toggleCircle.classList.remove('translate-x-0');
+                themeBtn.classList.replace('bg-gray-300', 'bg-emerald-600');
+                themeIcon.classList.replace('fa-sun', 'fa-moon');
+                themeStatusText.innerText = currentLang === 'id' ? 'Gelap (Dark)' : 'Dark Theme';
+            } else {
+                body.classList.remove('dark');
+                body.classList.add('light');
+                toggleCircle.classList.remove('translate-x-6');
+                toggleCircle.classList.add('translate-x-0');
+                themeBtn.classList.replace('bg-emerald-600', 'bg-gray-300');
+                themeIcon.classList.replace('fa-moon', 'fa-sun');
+                themeStatusText.innerText = currentLang === 'id' ? 'Terang (Light)' : 'Light Theme';
+            }
+        }
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            const btnID = document.getElementById('langBtnID');
+            const btnEN = document.getElementById('langBtnEN');
+            const langStatusText = document.getElementById('langStatusText');
+
+            if (lang === 'id') {
+                btnID.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition bg-emerald-500 text-white shadow-sm";
+                btnEN.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition text-gray-500 hover:text-gray-900 dark:hover:text-white";
+                langStatusText.innerText = "Indonesia (ID)";
+            } else {
+                btnEN.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition bg-emerald-500 text-white shadow-sm";
+                btnID.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition text-gray-500 hover:text-gray-900 dark:hover:text-white";
+                langStatusText.innerText = "English (EN)";
+            }
+
+            document.querySelectorAll('[data-lang-id]').forEach(el => {
+                el.innerText = lang === 'en' ? el.getAttribute('data-lang-en') : el.getAttribute('data-lang-id');
+            });
+
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.placeholder = lang === 'en' 
+                    ? searchInput.getAttribute('data-placeholder-en') 
+                    : searchInput.getAttribute('data-placeholder-id');
+            }
+
+            const themeStatusText = document.getElementById('themeStatusText');
+            if (isDarkMode) {
+                themeStatusText.innerText = lang === 'id' ? 'Gelap (Dark)' : 'Dark Theme';
+            } else {
+                themeStatusText.innerText = lang === 'id' ? 'Terang (Light)' : 'Light Theme';
+            }
+        }
+    </script>
+</body>
+</html>
