@@ -1,0 +1,2268 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nusacoin Wallet & Decrypter Suite</title>
+  
+  <!-- CDN QRCode.js & html2canvas -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Crypto-JS untuk Enkripsi, Dekripsi & Hashing -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <!-- Elliptic.js untuk Kurva secp256k1 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/elliptic/6.5.4/elliptic.min.js"></script>
+  <!-- HTML5 QR Code Scanner Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+
+  <style>
+    :root {
+      --nux-green: #27ae60;
+      --nux-green-dark: #1e8449;
+      --nux-green-deep: #0f3d26;
+      --gold: #d4a017;
+      --red: #e74c3c;
+      --white: #ffffff;
+      --green-pale: #eafff2;
+      --green-ring: rgba(39, 174, 96, 0.18);
+      --shadow: rgba(15, 61, 38, 0.18);
+      --bg: #f7f5ef;
+      --surface: #ffffff;
+      --surface-2: #f0efe6;
+      --ink: #16231c;
+      --ink-soft: #56645c;
+      --border: #e3ded0;
+    }
+
+    html[data-theme="dark"] {
+      --bg: #0d1712;
+      --surface: #142219;
+      --surface-2: #182a1e;
+      --ink: #eef3ec;
+      --ink-soft: #9db3a4;
+      --border: #24382c;
+      --shadow: rgba(0, 0, 0, 0.55);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--ink);
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px 10px;
+    }
+
+    .controls-container {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .lang-switcher {
+      display: flex;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 2px;
+    }
+
+    .lang-btn {
+      background: transparent;
+      border: none;
+      color: var(--ink-soft);
+      padding: 4px 8px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+
+    .lang-btn.active {
+      background: var(--nux-green);
+      color: var(--white);
+    }
+
+    .theme-toggle-btn {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--gold);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .app-wrapper {
+      margin: 0 auto !important;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center !important;
+      justify-content: center;
+      width: 100%;
+      max-width: 800px;
+      text-align: center;
+    }
+
+    .app-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 20px;
+      width: 100%;
+    }
+    
+    .app-logo {
+      width: 64px;
+      height: 64px;
+      object-fit: contain;
+      margin: 0 auto 12px auto;
+    }
+
+    .app-header h1 {
+      margin: 0 0 6px 0;
+      font-size: 26px;
+      color: var(--nux-green);
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 24px;
+      background: var(--surface-2);
+      padding: 6px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .tab-btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--ink-soft);
+      font-weight: bold;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background: var(--nux-green);
+      color: var(--white);
+    }
+
+    .tab-content {
+      display: none;
+      width: 100%;
+    }
+
+    .tab-content.active {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .form-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 24px;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 520px;
+      margin: 0 auto 32px auto;
+      box-shadow: 0 10px 25px -5px var(--shadow);
+      text-align: left;
+    }
+
+    .form-group { margin-bottom: 16px; }
+
+    .form-card label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+      text-transform: uppercase;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .form-card input, .form-card select, .form-card textarea {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--ink);
+      font-size: 14px;
+      outline: none;
+      font-family: monospace;
+    }
+
+    .form-card textarea {
+      resize: vertical;
+      height: 70px;
+    }
+
+    .form-card input:focus, .form-card select:focus, .form-card textarea:focus {
+      border-color: var(--nux-green);
+      box-shadow: 0 0 0 3px var(--green-ring);
+    }
+
+    .toggle-btn {
+      position: absolute;
+      right: 10px;
+      background: none;
+      border: none;
+      color: var(--ink-soft);
+      cursor: pointer;
+      font-size: 12px;
+      padding: 4px 8px;
+    }
+
+    .security-banner {
+      background: var(--green-pale);
+      border: 1px solid var(--nux-green);
+      color: var(--nux-green-dark);
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      margin-bottom: 20px;
+    }
+
+    .enc-box {
+      background: rgba(212, 160, 23, 0.1);
+      border: 1px solid var(--gold);
+      padding: 14px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .enc-box small {
+      display: block;
+      margin-top: 6px;
+      color: var(--ink-soft);
+      font-size: 11px;
+    }
+
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-auto {
+      background: var(--surface-2);
+      color: var(--ink);
+      border: 1px solid var(--border);
+    }
+
+    .btn-download, .btn-decrypt, .btn-action {
+      background: var(--nux-green);
+      color: var(--white);
+    }
+
+    .btn-download:hover, .btn-decrypt:hover, .btn-action:hover {
+      background: var(--nux-green-dark);
+    }
+
+    .preview-title {
+      font-size: 14px;
+      color: var(--ink-soft);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+
+    .print-sheet {
+      display: flex;
+      flex-direction: column;
+      width: 323.5px;
+      box-shadow: 0 15px 30px var(--shadow);
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 0 auto !important;
+      position: relative;
+    }
+
+    .card-half {
+      position: relative;
+      width: 323.5px;
+      height: 204px;
+      overflow: hidden;
+    }
+
+    .card-bg-img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 1;
+    }
+
+    .divider {
+      position: relative;
+      width: 100%;
+      height: 1px;
+      border-top: 1px dashed rgba(255,255,255,0.4);
+      z-index: 3;
+    }
+
+    .text-content-left {
+      position: absolute;
+      left: 22px;
+      top: 50%;
+      transform: translateY(-50%);
+      max-width: 180px;
+      text-align: left;
+      z-index: 2;
+    }
+
+    .overlay-public-qr, .overlay-private-qr {
+      position: absolute;
+      right: 22px;
+      top: 90px;
+      width: 82px;
+      height: 82px;
+      background: #ffffff;
+      padding: 4px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+    }
+
+    .overlay-public-name {
+      font-size: 13px;
+      font-weight: bold;
+      color: #ffffff;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .overlay-public-address, .overlay-private-key {
+      font-family: monospace;
+      font-size: 8px;
+      color: #e2e8f0;
+      word-break: break-all;
+      line-height: 1.2;
+    }
+
+    .qr-box canvas, .qr-box img {
+      width: 74px !important;
+      height: 74px !important;
+      display: block;
+    }
+
+    .balance-card {
+      background: linear-gradient(135deg, var(--nux-green-dark), var(--nux-green-deep));
+      color: white;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .balance-val {
+      font-size: 26px;
+      font-weight: bold;
+      margin: 8px 0;
+    }
+
+    .wallet-subtext {
+      font-size: 12px;
+      opacity: 0.8;
+      word-break: break-all;
+    }
+
+    .wallet-actions {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .tx-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+    }
+
+    .tx-type-in { color: var(--nux-green); font-weight: bold; }
+    .tx-type-out { color: var(--red); font-weight: bold; }
+
+    .qr-actions {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .btn-secondary {
+      flex: 1;
+      padding: 10px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--ink);
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary:hover {
+      background: var(--border);
+    }
+
+    #reader {
+      width: 100%;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 15px;
+      display: none;
+    }
+
+    .result-box {
+      margin-top: 24px;
+      padding: 16px;
+      border-radius: 8px;
+      display: none;
+      word-break: break-all;
+    }
+
+    .result-box.success {
+      display: block;
+      background: #eafff2;
+      border: 1px solid var(--nux-green);
+      color: var(--nux-green-dark);
+    }
+
+    .result-box.error {
+      display: block;
+      background: #fdf2f2;
+      border: 1px solid var(--red);
+      color: var(--red);
+    }
+
+    .result-title {
+      font-size: 11px;
+      font-weight: bold;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .result-value {
+      font-family: monospace;
+      font-size: 14px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<div class="controls-container">
+  <div class="lang-switcher">
+    <button id="btnIN" class="lang-btn active" onclick="setLanguage('id')">IN</button>
+    <button id="btnEN" class="lang-btn" onclick="setLanguage('en')">EN</button>
+  </div>
+  <button onclick="toggleTheme()" class="theme-toggle-btn" id="themeBtn">
+    <i id="theme-icon" class="fa-solid fa-sun"></i>
+    <span id="theme-text">Light</span>
+  </button>
+</div>
+
+<div class="app-wrapper">
+
+  <div class="app-header">
+    <img src="https://iili.io/CNJKhKu.th.png" alt="Nusacoin Logo" class="app-logo">
+    <h1 id="appTitle">Nusacoin Card & Decrypter Suite</h1>
+    <p id="appDesc">Pembuat Paper Wallet & Dekripsi Private Key Nusacoin</p>
+  </div>
+
+  <div class="nav-tabs">
+    <button class="tab-btn active" onclick="switchTab('cardTab', this)">
+      <i class="fa-solid fa-credit-card"></i> Card Generator
+    </button>
+    <button class="tab-btn" onclick="switchTab('walletTab', this)">
+      <i class="fa-solid fa-wallet"></i> Live Wallet
+    </button>
+    <button class="tab-btn" onclick="switchTab('decodeTab', this)">
+      <i class="fa-solid fa-key"></i> Decode Menu
+    </button>
+  </div>
+
+  <!-- TAB 1: CARD GENERATOR -->
+  <div id="cardTab" class="tab-content active">
+    <div class="form-card">
+      <div id="securityBanner" class="security-banner">
+        🛡️ <strong>100% Sesuai Parameter Nusacoin:</strong> Diproses lokal & aman.
+      </div>
+
+      <div class="form-group">
+        <label id="lblInputName" for="inputName">Nama Pemilik Kartu</label>
+        <div class="input-wrapper">
+          <input type="text" id="inputName" placeholder="Masukkan nama pemilik..." value="" style="font-family: sans-serif;">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label id="lblAddressType" for="selectAddrType">Format Alamat Jaringan</label>
+        <div class="input-wrapper">
+          <select id="selectAddrType">
+            <option value="bech32" selected>Bech32 Native SegWit (Awalan 'nu1q...')</option>
+            <option value="p2pkh">Legacy P2PKH (Awalan 'N...')</option>
+            <option value="p2sh">P2SH Script (Awalan 'X...')</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label id="lblInputAddress" for="inputAddress">Alamat Wallet (Public Address)</label>
+        <div class="input-wrapper">
+          <input type="text" id="inputAddress" placeholder="Klik 'Generate Wallet Otomatis'..." value="">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label id="lblInputPkey" for="inputPkey">Private Key WIF (Prefix 0x57)</label>
+        <div class="input-wrapper">
+          <input type="password" id="inputPkey" placeholder="Klik 'Generate Wallet Otomatis'..." value="">
+          <button type="button" class="toggle-btn" id="togglePkey">Show</button>
+        </div>
+      </div>
+
+      <div class="enc-box">
+        <label id="lblInputPin" for="inputPin"><i class="fa-solid fa-lock"></i> PIN Pengaman Print (Opsional)</label>
+        <div class="input-wrapper">
+          <input type="password" id="inputPin" placeholder="Masukkan PIN / Password...">
+        </div>
+        <small id="descInputPin">
+          *Jika PIN diisi, Private Key WIF yang dicetak akan dienkripsi (AES-256).
+        </small>
+      </div>
+
+      <div class="button-group">
+        <button class="btn btn-auto" id="btnGenerateAuto" onclick="generateRandomWallet()">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> <span id="lblBtnAuto">Generate Wallet Otomatis</span>
+        </button>
+        <button class="btn btn-download" id="btnDownload" onclick="downloadImage()">
+          📸 <span id="lblBtnDownload">Unduh Kartu (PNG)</span>
+        </button>
+      </div>
+    </div>
+
+    <div id="previewTitle" class="preview-title">PREVIEW KARTU (ATAS: DEPAN / BAWAH: BELAKANG)</div>
+
+    <div class="print-sheet" id="cardSheet">
+      <div class="card-half">
+        <img src="https://i.ibb.co.com/8LMbPhqY/KARTU-DEPAN.jpg" crossorigin="anonymous" class="card-bg-img" alt="Kartu Depan">
+        <div class="overlay-public-qr qr-box" id="qrPublic"></div>
+        
+        <div class="text-content-left">
+          <div class="overlay-public-name" id="displayName">-</div>
+          <div class="overlay-public-address" id="displayAddress">-</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="card-half">
+        <img src="https://i.ibb.co.com/G4SqY4Nb/KART-BELAKANG.jpg" crossorigin="anonymous" class="card-bg-img" alt="Kartu Belakang">
+        <div class="overlay-private-qr qr-box" id="qrPrivate"></div>
+        
+        <div class="text-content-left">
+          <div class="overlay-private-key" id="displayPkey">-</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: LIVE WALLET MENU -->
+  <div id="walletTab" class="tab-content">
+    <div class="form-card">
+      <div id="walletImportSection">
+        <div class="form-group">
+          <label>Import Private Key / Encrypted Key</label>
+          <input type="password" id="walletPkeyInput" placeholder="Masukkan WIF (0x57) atau ENC:...">
+        </div>
+
+        <div class="form-group">
+          <label id="lblWalletAddrType">Pilih Format Alamat Import</label>
+          <div class="input-wrapper">
+            <select id="selectWalletAddrType">
+              <option value="bech32" selected>Bech32 Native SegWit (Awalan 'nu1q...')</option>
+              <option value="p2pkh">Legacy P2PKH (Awalan 'N...')</option>
+              <option value="p2sh">P2SH Script (Awalan 'X...')</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>PIN (Jika Key Terenkripsi)</label>
+          <input type="password" id="walletPinInput" placeholder="Masukkan PIN jika kunci dienkripsi">
+        </div>
+
+        <div class="form-group">
+          <label>URL Node Explorer API</label>
+          <input type="text" id="nodeApiUrl" value="https://explorer.nusacoin.org">
+        </div>
+
+        <button class="btn btn-action" onclick="importLiveWallet()">
+          <i class="fa-solid fa-right-to-bracket"></i> Buka Wallet
+        </button>
+      </div>
+
+      <div id="walletActiveSection" style="display:none;">
+        <div class="balance-card">
+          <div class="wallet-subtext">TOTAL SALDO NUSACOIN</div>
+          <div class="balance-val" id="walletBalance">0.0000 NUX</div>
+          <div class="wallet-subtext" id="liveWalletAddress">-</div>
+        </div>
+
+        <div class="wallet-actions">
+          <button class="btn-secondary" onclick="showWalletSubTab('receive')"><i class="fa-solid fa-arrow-down"></i> Terima</button>
+          <button class="btn-secondary" onclick="showWalletSubTab('send')"><i class="fa-solid fa-arrow-up"></i> Kirim</button>
+          <button class="btn-secondary" onclick="fetchWalletData()"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+        </div>
+
+        <!-- SUB TAB: TERIMA -->
+        <div id="subTabReceive" style="display:none; text-align:center;" class="form-group">
+          <label>Alamat Anda</label>
+          <div id="receiveQr" style="display:flex; justify-content:center; margin: 10px 0;"></div>
+          <input type="text" id="receiveAddressVal" readonly style="text-align:center;">
+          <button class="btn-secondary" style="margin-top:10px;" onclick="copyAddress()"><i class="fa-solid fa-copy"></i> Salin Alamat</button>
+        </div>
+
+        <!-- SUB TAB: KIRIM -->
+        <div id="subTabSend" style="display:none;">
+          <div class="form-group">
+            <label>Alamat Penerima</label>
+            <input type="text" id="sendToAddress" placeholder="Masukkan alamat NUX tujuan...">
+          </div>
+          <div class="form-group">
+            <label>Jumlah (NUX)</label>
+            <input type="number" step="0.00000001" id="sendAmount" placeholder="0.00">
+          </div>
+          <div class="form-group">
+            <label>Biaya Jaringan / Fee (NUX)</label>
+            <input type="number" step="0.00000001" id="sendFee" value="0.0001">
+          </div>
+          <div style="margin-bottom:12px;">
+            <button type="button" class="btn-secondary" onclick="refreshUtxoSummary()">Cek UTXO (terkonfirmasi / belum)</button>
+            <div id="sendUtxoSummary" style="margin-top:8px; font-size:13px; line-height:1.6;"></div>
+          </div>
+          <details style="margin-bottom:16px;">
+            <summary style="cursor:pointer; font-size:13px; font-weight:600; color:var(--nux-green);">Pengaturan Lanjutan (API &amp; UTXO)</summary>
+            <div class="form-group" style="margin-top:12px;">
+              <label>URL Nusacoin API (broadcast)</label>
+              <input type="text" id="sendApiUrl" value="https://api.nusacoin.org">
+            </div>
+            <div class="form-group">
+              <label>Template URL UTXO (opsional)</label>
+              <input type="text" id="sendUtxoTemplate" placeholder="https://api.nusacoin.org/.../{address}">
+            </div>
+            <div class="form-group">
+              <label>UTXO Manual (JSON, opsional)</label>
+              <textarea id="sendManualUtxo" placeholder='[{"txid":"...","vout":0,"amount":1.5}]'></textarea>
+            </div>
+            <div class="form-group">
+              <label>TXID transaksi pending (opsional)</label>
+              <input type="text" id="sendPendingTxid" placeholder="txid TX yang belum terkonfirmasi, untuk lanjut dari kembaliannya">
+            </div>
+            <label style="display:flex; gap:8px; align-items:center; text-transform:none; font-weight:500; margin-bottom:8px;">
+              <input type="checkbox" id="sendAllowUnconfirmed" style="width:auto;" checked> Izinkan belanjakan UTXO belum terkonfirmasi (spend unconfirmed change)
+            </label>
+            <label style="display:flex; gap:8px; align-items:center; text-transform:none; font-weight:500;">
+              <input type="checkbox" id="sendSignOnly" style="width:auto;"> Hanya tanda tangani (jangan broadcast otomatis)
+            </label>
+          </details>
+          <button class="btn btn-action" id="btnSendReal" onclick="sendNUX()"><i class="fa-solid fa-paper-plane"></i> Kirim NUX Sekarang</button>
+          <div id="sendResult" style="display:none; margin-top:14px;"></div>
+        </div>
+
+        <h4 style="margin-top:20px;">Riwayat Transaksi</h4>
+        <div id="txHistoryContainer">
+          <div style="font-size:12px; color:var(--ink-soft); text-align:center;">Belum ada riwayat transaksi.</div>
+        </div>
+
+        <button class="btn-secondary" style="margin-top:20px; width:100%; color:var(--red);" onclick="logoutWallet()">
+          <i class="fa-solid fa-power-off"></i> Keluar / Kunci Wallet
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: DECODE MENU -->
+  <div id="decodeTab" class="tab-content">
+    <div class="form-card">
+      <div class="qr-actions">
+        <button class="btn-secondary" onclick="toggleCamera()">
+          <i class="fa-solid fa-camera"></i> Scan Kamera
+        </button>
+        <label class="btn-secondary" style="margin:0;">
+          <i class="fa-solid fa-upload"></i> Upload QR
+          <input type="file" id="qrFileInput" accept="image/*" style="display:none;" onchange="uploadQR(event)">
+        </label>
+      </div>
+
+      <div id="reader"></div>
+
+      <div class="form-group">
+        <label for="encText">Teks / Hasil Scan QR Terenkripsi</label>
+        <textarea id="encText" placeholder="Tempelkan teks hasil scan di sini (contoh: ENC:U2FsdGVkX1...)"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="pinInput">PIN Pengaman</label>
+        <input type="password" id="pinInput" placeholder="Masukkan PIN saat pembuatan kartu">
+      </div>
+
+      <button class="btn btn-decrypt" onclick="decryptKey()">
+        <i class="fa-solid fa-lock-open"></i> Dekripsi Private Key
+      </button>
+
+      <div id="resultBox" class="result-box">
+        <div class="result-title" id="resTitle">PRIVATE KEY ASLI:</div>
+        <div class="result-value" id="resValue">-</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let currentLang = 'id';
+  let html5QrCode = null;
+  let isScanning = false;
+  let liveWalletData = {
+    pkey: null,
+    address: null,
+    balance: 0
+  };
+
+  const translations = {
+    id: {
+      appTitle: "Nusacoin Card & Decrypter Suite",
+      appDesc: "Pembuat Paper Wallet & Dekripsi Private Key Nusacoin",
+      securityBanner: "🛡️ <strong>100% Sesuai Parameter Nusacoin:</strong> Diproses lokal & aman.",
+      lblInputName: "Nama Pemilik Kartu",
+      placeholderName: "Masukkan nama pemilik...",
+      lblAddressType: "Format Alamat Jaringan",
+      lblInputAddress: "Alamat Wallet (Public Address)",
+      placeholderAddress: "Klik 'Generate Wallet Otomatis'...",
+      lblInputPkey: "Private Key WIF (Prefix 0x57)",
+      placeholderPkey: "Klik 'Generate Wallet Otomatis'...",
+      lblInputPin: '<i class="fa-solid fa-lock"></i> PIN Pengaman Print (Opsional)',
+      placeholderPin: "Masukkan PIN / Password...",
+      descInputPin: "*Jika PIN diisi, Private Key WIF yang dicetak akan dienkripsi (AES-256).",
+      lblBtnAuto: "Generate Wallet Otomatis",
+      lblBtnDownload: "Unduh Kartu (PNG)",
+      lblBtnProcessing: "⏳ Memproses Gambar...",
+      previewTitle: "PREVIEW KARTU (ATAS: DEPAN / BAWAH: BELAKANG)",
+      optBech32: "Bech32 Native SegWit (Awalan 'nu1q...')",
+      optP2pkh: "Legacy P2PKH (Awalan 'N...')",
+      optP2sh: "P2SH Script (Awalan 'X...')"
+    },
+    en: {
+      appTitle: "Nusacoin Card & Decrypter Suite",
+      appDesc: "Paper Wallet Card Generator & Private Key Decrypter",
+      securityBanner: "🛡️ <strong>100% Nusacoin Compliant:</strong> Processed locally & secure.",
+      lblInputName: "Cardholder Name",
+      placeholderName: "Enter cardholder name...",
+      lblAddressType: "Network Address Format",
+      lblInputAddress: "Wallet Address (Public Address)",
+      placeholderAddress: "Click 'Auto Generate Wallet'...",
+      lblInputPkey: "Private Key WIF (Prefix 0x57)",
+      placeholderPkey: "Click 'Auto Generate Wallet'...",
+      lblInputPin: '<i class="fa-solid fa-lock"></i> Print Security PIN (Optional)',
+      placeholderPin: "Enter PIN / Password...",
+      descInputPin: "*If PIN is set, printed Private Key WIF will be encrypted (AES-256).",
+      lblBtnAuto: "Auto Generate Wallet",
+      lblBtnDownload: "Download Card (PNG)",
+      lblBtnProcessing: "⏳ Processing Image...",
+      previewTitle: "CARD PREVIEW (TOP: FRONT / BOTTOM: BACK)",
+      optBech32: "Bech32 Native SegWit (Prefix 'nu1q...')",
+      optP2pkh: "Legacy P2PKH (Prefix 'N...')",
+      optP2sh: "P2SH Script (Prefix 'X...')"
+    }
+  };
+
+  function switchTab(tabId, btnElement) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    
+    document.getElementById(tabId).classList.add('active');
+    btnElement.classList.add('active');
+
+    if (tabId !== 'decodeTab') {
+      stopCamera();
+    }
+  }
+
+  function setLanguage(lang) {
+    currentLang = lang;
+    const t = translations[lang];
+
+    document.getElementById("btnIN").classList.toggle("active", lang === 'id');
+    document.getElementById("btnEN").classList.toggle("active", lang === 'en');
+
+    document.getElementById("appTitle").textContent = t.appTitle;
+    document.getElementById("appDesc").textContent = t.appDesc;
+    document.getElementById("securityBanner").innerHTML = t.securityBanner;
+    document.getElementById("lblInputName").textContent = t.lblInputName;
+    document.getElementById("inputName").placeholder = t.placeholderName;
+    document.getElementById("lblAddressType").textContent = t.lblAddressType;
+    document.getElementById("lblInputAddress").textContent = t.lblInputAddress;
+    document.getElementById("inputAddress").placeholder = t.placeholderAddress;
+    document.getElementById("lblInputPkey").textContent = t.lblInputPkey;
+    document.getElementById("inputPkey").placeholder = t.placeholderPkey;
+    document.getElementById("lblInputPin").innerHTML = t.lblInputPin;
+    document.getElementById("inputPin").placeholder = t.placeholderPin;
+    document.getElementById("descInputPin").textContent = t.descInputPin;
+    document.getElementById("lblBtnAuto").textContent = t.lblBtnAuto;
+    document.getElementById("lblBtnDownload").textContent = t.lblBtnDownload;
+    document.getElementById("previewTitle").textContent = t.previewTitle;
+
+    const select = document.getElementById("selectAddrType");
+    select.options[0].text = t.optBech32;
+    select.options[1].text = t.optP2pkh;
+    select.options[2].text = t.optP2sh;
+
+    const selectWallet = document.getElementById("selectWalletAddrType");
+    if(selectWallet) {
+      selectWallet.options[0].text = t.optBech32;
+      selectWallet.options[1].text = t.optP2pkh;
+      selectWallet.options[2].text = t.optP2sh;
+    }
+  }
+
+  function toggleTheme() {
+    const htmlEl = document.documentElement;
+    const currentTheme = htmlEl.getAttribute("data-theme");
+    const newTheme = currentTheme === "dark" ? "light" : "dark";
+    htmlEl.setAttribute("data-theme", newTheme);
+
+    const themeIcon = document.getElementById("theme-icon");
+    const themeText = document.getElementById("theme-text");
+
+    if (newTheme === "dark") {
+      themeIcon.className = "fa-solid fa-moon";
+      themeText.textContent = "Dark";
+    } else {
+      themeIcon.className = "fa-solid fa-sun";
+      themeText.textContent = "Light";
+    }
+  }
+
+  const NUSACOIN_PARAMS = {
+    bech32: 'nu',
+    pubKeyHash: 0x35, // Awalan 'N'
+    scriptHash: 0x4b, // Awalan 'X'
+    wif: 0x57         // Prefix WIF Nusacoin
+  };
+
+  const BECH32_CHARSET = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l';
+  const ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+
+  function polymod(values) {
+    let chk = 1;
+    for (let p = 0; p < values.length; ++p) {
+      let top = chk >> 25;
+      chk = ((chk & 0x1ffffff) << 5) ^ values[p];
+      if ((top >> 0) & 1) chk ^= 0x3b6a57b2;
+      if ((top >> 1) & 1) chk ^= 0x26508e6d;
+      if ((top >> 2) & 1) chk ^= 0x1ea119fa;
+      if ((top >> 3) & 1) chk ^= 0x3d4233dd;
+      if ((top >> 4) & 1) chk ^= 0x2a1462b3;
+    }
+    return chk;
+  }
+
+  function hrpExpand(hrp) {
+    let ret = [];
+    for (let i = 0; i < hrp.length; ++i) ret.push(hrp.charCodeAt(i) >> 5);
+    ret.push(0);
+    for (let i = 0; i < hrp.length; ++i) ret.push(hrp.charCodeAt(i) & 31);
+    return ret;
+  }
+
+  function convertBits(data, frombits, tobits, pad = true) {
+    let acc = 0, bits = 0, ret = [], maxv = (1 << tobits) - 1;
+    for (let i = 0; i < data.length; ++i) {
+      let value = data[i];
+      if (value < 0 || value >> frombits !== 0) return null;
+      acc = (acc << frombits) | value;
+      bits += frombits;
+      while (bits >= tobits) {
+        bits -= tobits;
+        ret.push((acc >> bits) & maxv);
+      }
+    }
+    if (pad) {
+      if (bits > 0) ret.push((acc << (tobits - bits)) & maxv);
+    } else if (bits >= frombits || ((acc << (tobits - bits)) & maxv)) {
+      return null;
+    }
+    return ret;
+  }
+
+  function toBech32(hrp, version, program) {
+    let data = [version].concat(convertBits(program, 8, 5, true));
+    let checksumData = hrpExpand(hrp).concat(data).concat([0, 0, 0, 0, 0, 0]);
+    let mod = polymod(checksumData) ^ 1;
+    let ret = hrp + '1';
+    for (let p = 0; p < data.length; ++p) ret += BECH32_CHARSET.charAt(data[p]);
+    for (let p = 0; p < 6; ++p) ret += BECH32_CHARSET.charAt((mod >> (5 * (5 - p))) & 31);
+    return ret;
+  }
+
+  function toBase58(buffer) {
+    let digits = [0];
+    for (let i = 0; i < buffer.length; i++) {
+      for (let j = 0; j < digits.length; j++) digits[j] <<= 8;
+      digits[0] += buffer[i];
+      let carry = 0;
+      for (let j = 0; j < digits.length; ++j) {
+        digits[j] += carry;
+        carry = (digits[j] / 58) | 0;
+        digits[j] %= 58;
+      }
+      while (carry) {
+        digits.push(carry % 58);
+        carry = (carry / 58) | 0;
+      }
+    }
+    for (let i = 0; buffer[i] === 0 && i < buffer.length - 1; i++) digits.push(0);
+    return digits.reverse().map(d => ALPHABET[d]).join('');
+  }
+
+  function fromBase58(string) {
+    let bytes = [0];
+    for (let i = 0; i < string.length; i++) {
+      let c = string[i];
+      let value = ALPHABET.indexOf(c);
+      if (value === -1) throw new Error("Karakter Base58 tidak valid");
+      for (let j = 0; j < bytes.length; j++) bytes[j] *= 58;
+      bytes[0] += value;
+      let carry = 0;
+      for (let j = 0; j < bytes.length; ++j) {
+        bytes[j] += carry;
+        carry = bytes[j] >> 8;
+        bytes[j] &= 0xff;
+      }
+      while (carry) {
+        bytes.push(carry & 0xff);
+        carry >>= 8;
+      }
+    }
+    for (let i = 0; string[i] === '1' && i < string.length - 1; i++) bytes.push(0);
+    return new Uint8Array(bytes.reverse());
+  }
+
+  function toBase58Check(payload) {
+    const sha1 = CryptoJS.SHA256(CryptoJS.lib.WordArray.create(payload));
+    const sha2 = CryptoJS.SHA256(sha1);
+    
+    const checksum = sha2.words.slice(0, 1);
+    const checksumBytes = [
+      (checksum[0] >>> 24) & 0xff,
+      (checksum[0] >>> 16) & 0xff,
+      (checksum[0] >>> 8) & 0xff,
+      checksum[0] & 0xff
+    ];
+
+    const fullPayload = new Uint8Array(payload.length + 4);
+    fullPayload.set(payload);
+    fullPayload.set(checksumBytes, payload.length);
+
+    return toBase58(fullPayload);
+  }
+
+  function getAddressFromWif(wif, addrType = "bech32") {
+    try {
+      const decoded = fromBase58(wif);
+      const rawPrivKey = decoded.slice(1, 33);
+      
+      const ec = new elliptic.ec('secp256k1');
+      const keyPair = ec.keyFromPrivate(rawPrivKey);
+      const pubKeyHex = keyPair.getPublic(true, 'hex');
+      const pubKeyWordArray = CryptoJS.enc.Hex.parse(pubKeyHex);
+
+      const shaHash = CryptoJS.SHA256(pubKeyWordArray);
+      const ripemdHash = CryptoJS.RIPEMD160(shaHash);
+
+      const pubKeyHash = new Uint8Array(20);
+      for (let i = 0; i < 20; i++) {
+        pubKeyHash[i] = (ripemdHash.words[i >>> 2] >>> (24 - (i % 4) * 8)) & 0xff;
+      }
+
+      if (addrType === "p2pkh") {
+        const p2pkhPayload = new Uint8Array(21);
+        p2pkhPayload[0] = NUSACOIN_PARAMS.pubKeyHash;
+        p2pkhPayload.set(pubKeyHash, 1);
+        return toBase58Check(p2pkhPayload);
+      } else if (addrType === "p2sh") {
+        const p2shPayload = new Uint8Array(21);
+        p2shPayload[0] = NUSACOIN_PARAMS.scriptHash;
+        p2shPayload.set(pubKeyHash, 1);
+        return toBase58Check(p2shPayload);
+      } else {
+        return toBech32(NUSACOIN_PARAMS.bech32, 0, pubKeyHash);
+      }
+    } catch(err) {
+      console.error("Gagal mendapatkan alamat dari WIF:", err);
+      return wif;
+    }
+  }
+
+  let qrPublicInstance = new QRCode(document.getElementById("qrPublic"), {
+    width: 128, height: 128, correctLevel: QRCode.CorrectLevel.M
+  });
+
+  let qrPrivateInstance = new QRCode(document.getElementById("qrPrivate"), {
+    width: 128, height: 128, correctLevel: QRCode.CorrectLevel.M
+  });
+
+  let receiveQrInstance = null;
+
+  function updateCard() {
+    const name = document.getElementById("inputName").value.trim() || "-";
+    const address = document.getElementById("inputAddress").value.trim() || "-";
+    const rawPkey = document.getElementById("inputPkey").value.trim() || "-";
+    const pin = document.getElementById("inputPin").value.trim();
+
+    let finalPkey = rawPkey;
+
+    if (pin !== "" && rawPkey !== "-") {
+      const encrypted = CryptoJS.AES.encrypt(rawPkey, pin).toString();
+      finalPkey = "ENC:" + encrypted;
+    }
+
+    document.getElementById("displayName").textContent = name;
+    document.getElementById("displayAddress").textContent = address;
+    document.getElementById("displayPkey").textContent = finalPkey;
+
+    qrPublicInstance.clear();
+    qrPublicInstance.makeCode(address);
+
+    qrPrivateInstance.clear();
+    qrPrivateInstance.makeCode(finalPkey);
+  }
+
+  function generateRandomWallet() {
+    try {
+      const addrType = document.getElementById("selectAddrType").value;
+
+      const rawPrivKey = new Uint8Array(32);
+      window.crypto.getRandomValues(rawPrivKey);
+
+      const wifPayload = new Uint8Array(34);
+      wifPayload[0] = NUSACOIN_PARAMS.wif;
+      wifPayload.set(rawPrivKey, 1);
+      wifPayload[33] = 0x01;
+      const wifPrivateKey = toBase58Check(wifPayload);
+
+      const ec = new elliptic.ec('secp256k1');
+      const keyPair = ec.keyFromPrivate(rawPrivKey);
+      const pubKeyHex = keyPair.getPublic(true, 'hex');
+      
+      const pubKeyWordArray = CryptoJS.enc.Hex.parse(pubKeyHex);
+
+      const shaHash = CryptoJS.SHA256(pubKeyWordArray);
+      const ripemdHash = CryptoJS.RIPEMD160(shaHash);
+
+      const pubKeyHash = new Uint8Array(20);
+      for (let i = 0; i < 20; i++) {
+        pubKeyHash[i] = (ripemdHash.words[i >>> 2] >>> (24 - (i % 4) * 8)) & 0xff;
+      }
+
+      let generatedAddress = "";
+      if (addrType === "p2pkh") {
+        const p2pkhPayload = new Uint8Array(21);
+        p2pkhPayload[0] = NUSACOIN_PARAMS.pubKeyHash;
+        p2pkhPayload.set(pubKeyHash, 1);
+        generatedAddress = toBase58Check(p2pkhPayload);
+      } else if (addrType === "p2sh") {
+        const p2shPayload = new Uint8Array(21);
+        p2shPayload[0] = NUSACOIN_PARAMS.scriptHash;
+        p2shPayload.set(pubKeyHash, 1);
+        generatedAddress = toBase58Check(p2shPayload);
+      } else {
+        generatedAddress = toBech32(NUSACOIN_PARAMS.bech32, 0, pubKeyHash);
+      }
+
+      document.getElementById("inputAddress").value = generatedAddress;
+      document.getElementById("inputPkey").value = wifPrivateKey;
+      
+      updateCard();
+    } catch (err) {
+      console.error("Gagal generate wallet:", err);
+      alert("Terjadi kesalahan teknis: " + err.message);
+    }
+  }
+
+  const toggleBtn = document.getElementById("togglePkey");
+  const pkeyInput = document.getElementById("inputPkey");
+
+  toggleBtn.addEventListener("click", () => {
+    if (pkeyInput.type === "password") {
+      pkeyInput.type = "text";
+      toggleBtn.textContent = "Hide";
+    } else {
+      pkeyInput.type = "password";
+      toggleBtn.textContent = "Show";
+    }
+  });
+
+  function downloadImage() {
+    const btn = document.getElementById('btnDownload');
+    const lblBtn = document.getElementById('lblBtnDownload');
+    const currentText = translations[currentLang].lblBtnDownload;
+    
+    lblBtn.textContent = translations[currentLang].lblBtnProcessing;
+    btn.disabled = true;
+
+    const element = document.getElementById('cardSheet');
+    const holderName = document.getElementById('inputName').value.trim() || 'Nusacoin';
+
+    html2canvas(element, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: false,
+      backgroundColor: null
+    }).then(canvas => {
+      const imageURL = canvas.toDataURL("image/png");
+      const downloadLink = document.createElement("a");
+      downloadLink.href = imageURL;
+      downloadLink.download = `Nusacoin_Card_${holderName}.png`;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+
+      lblBtn.textContent = currentText;
+      btn.disabled = false;
+    }).catch(err => {
+      console.error("Gagal mengunduh gambar:", err);
+      alert("Gagal mengunduh gambar.");
+      lblBtn.textContent = currentText;
+      btn.disabled = false;
+    });
+  }
+
+  // LIVE WALLET FUNCTIONS
+  function importLiveWallet() {
+    let pkey = document.getElementById("walletPkeyInput").value.trim();
+    const pin = document.getElementById("walletPinInput").value.trim();
+    const addrType = document.getElementById("selectWalletAddrType").value;
+
+    if (!pkey) {
+      alert("Masukkan Private Key WIF, Teks ENC, atau Alamat Nusacoin!");
+      return;
+    }
+
+    if (pkey.startsWith("ENC:")) {
+      if (!pin) {
+        alert("PIN dibutuhkan untuk mendekripsi kunci ini.");
+        return;
+      }
+      try {
+        const bytes = CryptoJS.AES.decrypt(pkey.replace("ENC:", ""), pin);
+        pkey = bytes.toString(CryptoJS.enc.Utf8);
+        if (!pkey) throw new Error("PIN Salah");
+      } catch (e) {
+        alert("Gagal mendekripsi: PIN salah.");
+        return;
+      }
+    }
+
+    if (pkey.startsWith("N") || pkey.startsWith("X") || pkey.startsWith("nu1")) {
+      liveWalletData.pkey = null;
+      liveWalletData.address = pkey;
+    } else {
+      liveWalletData.pkey = pkey;
+      liveWalletData.address = getAddressFromWif(pkey, addrType);
+    }
+
+    document.getElementById("walletImportSection").style.display = "none";
+    document.getElementById("walletActiveSection").style.display = "block";
+    document.getElementById("liveWalletAddress").textContent = liveWalletData.address;
+
+    document.getElementById("receiveAddressVal").value = liveWalletData.address;
+    if(!receiveQrInstance) {
+      receiveQrInstance = new QRCode(document.getElementById("receiveQr"), {
+        text: liveWalletData.address, width: 128, height: 128
+      });
+    } else {
+      receiveQrInstance.clear();
+      receiveQrInstance.makeCode(liveWalletData.address);
+    }
+
+    fetchWalletData();
+  }
+
+  function logoutWallet() {
+    liveWalletData = { pkey: null, address: null, balance: 0 };
+    pendingUtxos = [];
+    pendingSpent.clear();
+    try { localStorage.removeItem('nusacard_pending_v1'); } catch (e) {}
+    document.getElementById("walletPkeyInput").value = "";
+    document.getElementById("walletPinInput").value = "";
+    document.getElementById("walletActiveSection").style.display = "none";
+    document.getElementById("walletImportSection").style.display = "block";
+  }
+
+  function showWalletSubTab(sub) {
+    document.getElementById("subTabReceive").style.display = sub === 'receive' ? 'block' : 'none';
+    document.getElementById("subTabSend").style.display = sub === 'send' ? 'block' : 'none';
+  }
+
+  function copyAddress() {
+    const copyText = document.getElementById("receiveAddressVal");
+    copyText.select();
+    document.execCommand("copy");
+    alert("Alamat berhasil disalin!");
+  }
+
+  // PEMBACAAN AKURAT VIA IQUIDUS API (DENGAN DETEKSI DETAIL /ext/gettx/)
+  async function fetchWalletData() {
+    let baseUrl = document.getElementById("nodeApiUrl").value.trim();
+    if (baseUrl.endsWith('/')) baseUrl = baseUrl.slice(0, -1);
+    if (baseUrl.endsWith('/api')) baseUrl = baseUrl.replace(/\/api$/, '');
+
+    const addr = liveWalletData.address;
+
+    try {
+      // 1. Ambil Saldo via /ext/getbalance/
+      const res = await fetch(`${baseUrl}/ext/getbalance/${addr}`);
+      if (!res.ok) throw new Error("Gagal mengambil data saldo.");
+      
+      const balanceText = await res.text();
+      const balanceVal = parseFloat(balanceText);
+
+      liveWalletData.balance = isNaN(balanceVal) ? 0 : balanceVal;
+      document.getElementById("walletBalance").textContent = `${liveWalletData.balance} NUX`;
+
+      // 2. Ambil Ringkasan Transaksi via /ext/getaddresstxs/
+      const txRes = await fetch(`${baseUrl}/ext/getaddresstxs/${addr}/0/20`);
+      if (txRes.ok) {
+        const rawData = await txRes.json();
+        
+        let txList = [];
+        if (Array.isArray(rawData)) {
+          txList = rawData;
+        } else if (rawData && Array.isArray(rawData.data)) {
+          txList = rawData.data;
+        } else if (rawData && Array.isArray(rawData.records)) {
+          txList = rawData.records;
+        }
+
+        // 3. Ambil Detail Input (vin) & Output (vout) Setiap Transaksi via /ext/gettx/
+        const detailedTxs = await Promise.all(
+          txList.slice(0, 15).map(async (item) => {
+            const txid = item.txid || item.addresses || (typeof item === 'string' ? item : null);
+            if (!txid) return item;
+
+            try {
+              const detailRes = await fetch(`${baseUrl}/ext/gettx/${txid}`);
+              if (detailRes.ok) {
+                const detailData = await detailRes.json();
+                return detailData.tx ? detailData.tx : detailData;
+              }
+            } catch (e) {
+              console.warn("Gagal fetch detail tx:", txid);
+            }
+            return item;
+          })
+        );
+
+        renderTxHistory(detailedTxs);
+      }
+    } catch (err) {
+      console.warn("API Node Offline / Error Fetching:", err);
+      document.getElementById("walletBalance").textContent = "0.0000 NUX (Offline)";
+    }
+  }
+
+  function renderTxHistory(txs) {
+    const container = document.getElementById("txHistoryContainer");
+    const myAddress = liveWalletData.address;
+    
+    if (!txs || !Array.isArray(txs) || txs.length === 0) {
+      container.innerHTML = '<div style="font-size:12px; color:var(--ink-soft); text-align:center;">Belum ada riwayat transaksi.</div>';
+      return;
+    }
+
+    let html = "";
+    txs.forEach(tx => {
+      const txid = tx.txid || tx.hash || 'Unknown TX';
+      const shortTxid = typeof txid === 'string' ? `${txid.substring(0, 8)}...${txid.substring(txid.length - 4)}` : 'Transaction';
+
+      let amountSatoshis = 0;
+      let isReceive = true;
+
+      // Evaluasi Input (vin) & Output (vout) untuk Memisahkan Kirim dan Terima
+      if (tx.vin && Array.isArray(tx.vin) && tx.vout && Array.isArray(tx.vout)) {
+        const isSender = tx.vin.some(input => input.addresses === myAddress);
+
+        if (isSender) {
+          isReceive = false;
+          tx.vout.forEach(out => {
+            if (out.addresses !== myAddress) {
+              amountSatoshis += parseFloat(out.amount || 0);
+            }
+          });
+        } else {
+          isReceive = true;
+          tx.vout.forEach(out => {
+            if (out.addresses === myAddress) {
+              amountSatoshis += parseFloat(out.amount || 0);
+            }
+          });
+        }
+      } else {
+        let rawAmount = tx.amount || tx.total || 0;
+        amountSatoshis = rawAmount > 1e4 ? rawAmount / 1e8 : rawAmount;
+        isReceive = tx.type === 'vin' || tx.type === 'in' || rawAmount > 0;
+      }
+
+      const amountNux = amountSatoshis > 1e4 ? (amountSatoshis / 1e8) : amountSatoshis;
+
+      html += `
+        <div class="tx-item">
+          <div>
+            <div class="${isReceive ? 'tx-type-in' : 'tx-type-out'}">
+              ${isReceive ? '↓ TERIMA' : '↑ KIRIM'}
+            </div>
+            <small><a href="https://explorer.nusacoin.org/tx/${txid}" target="_blank" style="color:inherit; text-decoration:none;">${shortTxid}</a></small>
+          </div>
+          <div style="font-weight:bold; font-family:monospace;">
+            ${isReceive ? '+' : '-'}${amountNux.toFixed(8)} NUX
+          </div>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+  }
+
+  // ================== TRANSAKSI NUX (SIGN LOKAL + BROADCAST) ==================
+  const DUST_SATS = 546;
+  // Kembalian (change) dari transaksi yang baru di-broadcast, agar bisa langsung dibelanjakan sebelum terkonfirmasi
+  let pendingUtxos = [];          // {address, txid, vout, value}
+  const pendingSpent = new Map(); // "txid:vout" -> waktu dipakai (ms), untuk transaksi yang baru di-broadcast
+  const PENDING_TTL_MS = 15 * 60 * 1000;
+  const PENDING_STORE_KEY = 'nusacard_pending_v1';
+  const PENDING_UTXO_TTL_MS = 60 * 60 * 1000;
+  function persistPending() {
+    try {
+      localStorage.setItem(PENDING_STORE_KEY, JSON.stringify({ a: liveWalletData.address, spent: Array.from(pendingSpent), utxos: pendingUtxos }));
+    } catch (e) {}
+  }
+  function loadPending() {
+    try {
+      const d = JSON.parse(localStorage.getItem(PENDING_STORE_KEY) || 'null');
+      if (!d || d.a !== liveWalletData.address) return;
+      const now = Date.now();
+      (d.spent || []).forEach(([k, t]) => { if (now - t <= PENDING_TTL_MS && !pendingSpent.has(k)) pendingSpent.set(k, t); });
+      (d.utxos || []).forEach(u => {
+        if (u.t && now - u.t <= PENDING_UTXO_TTL_MS && !pendingUtxos.some(x => x.txid === u.txid && x.vout === u.vout)) pendingUtxos.push(u);
+      });
+    } catch (e) {}
+  }
+  function markSpent(key) { pendingSpent.set(key, Date.now()); persistPending(); }
+  function isLocallySpent(key) {
+    const t = pendingSpent.get(key);
+    if (t === undefined) return false;
+    if (Date.now() - t > PENDING_TTL_MS) { pendingSpent.delete(key); return false; }
+    return true;
+  }
+
+  function numToLEHex(val, bytes) {
+    let hex = Number(val).toString(16);
+    if (hex.length % 2 !== 0) hex = '0' + hex;
+    while (hex.length < bytes * 2) hex = '0' + hex;
+    return hex.match(/../g).reverse().join('');
+  }
+
+  function numTo64BitLEHex(val) {
+    let hex = BigInt(val).toString(16);
+    while (hex.length < 16) hex = '0' + hex;
+    return hex.match(/../g).reverse().join('');
+  }
+
+  function varIntHex(n) {
+    if (n < 0xfd) return numToLEHex(n, 1);
+    if (n <= 0xffff) return 'fd' + numToLEHex(n, 2);
+    return 'fe' + numToLEHex(n, 4);
+  }
+
+  function bytesToHex(bytes) {
+    return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  function reverseHex(hex) { return hex.match(/../g).reverse().join(''); }
+
+  function sha256dHex(hex) {
+    return CryptoJS.SHA256(CryptoJS.SHA256(CryptoJS.enc.Hex.parse(hex))).toString();
+  }
+
+  function hash160Hex(hex) {
+    return CryptoJS.RIPEMD160(CryptoJS.SHA256(CryptoJS.enc.Hex.parse(hex))).toString();
+  }
+
+  // Alamat Nusacoin -> scriptPubKey (hex). Mendukung P2PKH (N...), P2SH (X...), Bech32 (nu1q...)
+  function addressToScriptHex(address) {
+    const addr = (address || '').trim();
+    if (!addr) throw new Error("Alamat kosong.");
+    const lower = addr.toLowerCase();
+
+    if (lower.startsWith(NUSACOIN_PARAMS.bech32 + '1')) {
+      if (addr !== lower && addr !== addr.toUpperCase()) throw new Error("Alamat bech32 tidak valid (huruf campuran).");
+      const pos = lower.lastIndexOf('1');
+      const hrp = lower.slice(0, pos);
+      if (hrp !== NUSACOIN_PARAMS.bech32) throw new Error("Prefix alamat bech32 bukan Nusacoin.");
+      const data = [];
+      for (const c of lower.slice(pos + 1)) {
+        const v = BECH32_CHARSET.indexOf(c);
+        if (v < 0) throw new Error("Karakter alamat bech32 tidak valid.");
+        data.push(v);
+      }
+      if (data.length < 7) throw new Error("Alamat bech32 terlalu pendek.");
+      if (polymod(hrpExpand(hrp).concat(data)) !== 1) throw new Error("Checksum alamat bech32 salah. Periksa kembali alamat tujuan.");
+      if (data[0] !== 0) throw new Error("Hanya SegWit v0 (nu1q...) yang didukung.");
+      const prog = convertBits(data.slice(1, -6), 5, 8, false);
+      if (!prog) throw new Error("Program alamat bech32 tidak valid.");
+      if (prog.length === 20) return '0014' + bytesToHex(prog);
+      if (prog.length === 32) return '0020' + bytesToHex(prog);
+      throw new Error("Panjang program alamat bech32 tidak valid.");
+    }
+
+    let raw;
+    try { raw = fromBase58(addr); } catch (e) { throw new Error("Alamat tidak valid (bukan Base58/Bech32)."); }
+    if (raw.length !== 25) throw new Error("Panjang alamat tidak valid.");
+    const payload = raw.slice(0, 21);
+    if (sha256dHex(bytesToHex(payload)).slice(0, 8) !== bytesToHex(raw.slice(21))) {
+      throw new Error("Checksum alamat salah. Periksa kembali alamat tujuan.");
+    }
+    const h = bytesToHex(raw.slice(1, 21));
+    if (payload[0] === NUSACOIN_PARAMS.pubKeyHash) return '76a914' + h + '88ac';
+    if (payload[0] === NUSACOIN_PARAMS.scriptHash) return 'a914' + h + '87';
+    throw new Error("Prefix alamat bukan alamat Nusacoin.");
+  }
+
+  // Susun + tanda tangani transaksi. Mendukung input P2PKH (legacy) & P2WPKH (SegWit, BIP143)
+  function buildSignedTransaction(utxos, outputs, privateKeyWif, ownScript) {
+    const decoded = fromBase58(privateKeyWif);
+    const ec = new elliptic.ec('secp256k1');
+    const keyPair = ec.keyFromPrivate(decoded.slice(1, 33));
+    const pubHex = keyPair.getPublic(true, 'hex');
+    const pkh = hash160Hex(pubHex);
+
+    const isSegwit = ownScript === '0014' + pkh;
+    const isLegacy = ownScript === '76a914' + pkh + '88ac';
+    if (!isSegwit && !isLegacy) {
+      throw new Error("Private key tidak cocok dengan alamat wallet, atau tipe alamat (P2SH) tidak bisa dibelanjakan dari kartu ini. Pilih format Bech32 atau P2PKH saat membuka wallet.");
+    }
+
+    const VERSION = '01000000', LOCKTIME = '00000000', SEQ = 'ffffffff', SIGHASH_ALL = '01000000';
+    const outsHex = outputs.map(o => numTo64BitLEHex(o.value) + varIntHex(o.script.length / 2) + o.script).join('');
+    const outsSer = varIntHex(outputs.length) + outsHex;
+    const ins = utxos.map(u => ({ prev: reverseHex(u.txid) + numToLEHex(u.vout, 4), value: u.value }));
+    const signDigest = (digestHex) => keyPair.sign(digestHex, { canonical: true }).toDER('hex') + '01';
+
+    let inputsSer = varIntHex(ins.length);
+    let witness = '';
+
+    if (isLegacy) {
+      ins.forEach((inp, i) => {
+        let pre = VERSION + varIntHex(ins.length);
+        ins.forEach((o, j) => {
+          pre += o.prev + (i === j ? varIntHex(ownScript.length / 2) + ownScript : '00') + SEQ;
+        });
+        pre += outsSer + LOCKTIME + SIGHASH_ALL;
+        const sig = signDigest(sha256dHex(pre));
+        const scriptSig = varIntHex(sig.length / 2) + sig + varIntHex(pubHex.length / 2) + pubHex;
+        inputsSer += inp.prev + varIntHex(scriptSig.length / 2) + scriptSig + SEQ;
+      });
+    } else {
+      const hashPrevouts = sha256dHex(ins.map(x => x.prev).join(''));
+      const hashSequence = sha256dHex(ins.map(() => SEQ).join(''));
+      const hashOutputs = sha256dHex(outsHex);
+      const scriptCode = '1976a914' + pkh + '88ac';
+      ins.forEach(inp => {
+        const pre = VERSION + hashPrevouts + hashSequence + inp.prev + scriptCode +
+                    numTo64BitLEHex(inp.value) + SEQ + hashOutputs + LOCKTIME + SIGHASH_ALL;
+        const sig = signDigest(sha256dHex(pre));
+        witness += '02' + varIntHex(sig.length / 2) + sig + varIntHex(pubHex.length / 2) + pubHex;
+        inputsSer += inp.prev + '00' + SEQ;
+      });
+    }
+
+    const legacySer = VERSION + inputsSer + outsSer + LOCKTIME;
+    const raw = isSegwit ? VERSION + '0001' + inputsSer + outsSer + witness + LOCKTIME : legacySer;
+    const txid = reverseHex(sha256dHex(legacySer));
+    return { raw, txid };
+  }
+
+  // --- Ambil UTXO ---
+  function normalizeUtxos(data, ownAddr) {
+    let arr = data;
+    if (data && !Array.isArray(data)) {
+      arr = data.result ?? data.utxos ?? data.unspent ?? data.unspents ?? data.data ?? data.unspent_outputs ?? null;
+      if (arr && !Array.isArray(arr)) arr = arr.utxos ?? arr.unspents ?? arr.unspent ?? null;
+    }
+    if (!Array.isArray(arr)) return null;
+    return arr.map(u => {
+      if (ownAddr && typeof u.address === 'string' && u.address !== ownAddr) return { txid: null };
+      const txid = u.txid || u.tx_hash || u.hash || u.txHash;
+      const vout = [u.vout, u.n, u.tx_output_n, u.tx_pos, u.index, u.outputIndex].find(v => v !== undefined);
+      let value;
+      if (u.satoshis !== undefined) value = Number(u.satoshis);
+      else if (u.amount !== undefined) value = Math.round(Number(u.amount) * 1e8);
+      else if (u.value !== undefined) value = Number.isInteger(Number(u.value)) ? Number(u.value) : Math.round(Number(u.value) * 1e8);
+      let confirmed = true;
+      if (u.confirmations !== undefined) confirmed = Number(u.confirmations) > 0;
+      else if (u.confirmed !== undefined) confirmed = !!u.confirmed;
+      else if (u.status && u.status.confirmed !== undefined) confirmed = !!u.status.confirmed;
+      return { txid, vout: Number(vout), value, confirmed };
+    }).filter(u => typeof u.txid === 'string' && /^[0-9a-fA-F]{64}$/.test(u.txid) &&
+                   Number.isInteger(u.vout) && Number.isFinite(u.value) && u.value > 0);
+  }
+
+  // Total UTXO terkonfirmasi harus sama dengan saldo yang dibaca explorer, supaya tidak salah pakai data
+  function utxoMatchesBalance(list) {
+    const bal = liveWalletData.balance;
+    if (!(bal >= 0)) return true;
+    const total = list.filter(u => u.confirmed !== false).reduce((s, u) => s + u.value, 0) / 1e8;
+    return Math.abs(total - bal) <= Math.max(0.00001, bal * 0.001);
+  }
+
+  // Hitung UTXO dari explorer (Iquidus): ambil transaksi alamat, lalu keluaran milik alamat yang belum dibelanjakan
+  async function fetchUtxosFromExplorer(addr) {
+    let base = document.getElementById("nodeApiUrl").value.trim();
+    if (base.endsWith('/')) base = base.slice(0, -1);
+    if (base.endsWith('/api')) base = base.replace(/\/api$/, '');
+
+    const listRes = await fetch(`${base}/ext/getaddresstxs/${addr}/0/200`);
+    if (!listRes.ok) throw new Error("explorer: daftar transaksi gagal (HTTP " + listRes.status + ")");
+    const raw = await listRes.json();
+    const arr = Array.isArray(raw) ? raw : (raw.data || raw.records || []);
+    const txids = [...new Set(arr.map(i => i.txid || (typeof i === 'string' ? i : null)).filter(Boolean))];
+    if (!txids.length) return [];
+
+    const decoded = await Promise.all(txids.map(async txid => {
+      const r = await fetch(`${base}/api/getrawtransaction?txid=${txid}&decrypt=1`);
+      if (!r.ok) throw new Error("explorer: getrawtransaction gagal (HTTP " + r.status + ")");
+      const t = await r.text();
+      let j; try { j = JSON.parse(t); } catch (e) { throw new Error("explorer: respons getrawtransaction bukan JSON"); }
+      if (!j || !Array.isArray(j.vout)) throw new Error("explorer: detail transaksi tidak lengkap");
+      return j;
+    }));
+
+    const spent = new Set();
+    decoded.forEach(t => (t.vin || []).forEach(v => { if (v.txid !== undefined) spent.add(v.txid + ':' + v.vout); }));
+
+    const out = [];
+    decoded.forEach(t => (t.vout || []).forEach(o => {
+      const spk = o.scriptPubKey || {};
+      const addrs = spk.addresses || (spk.address ? [spk.address] : []);
+      if (addrs.includes(addr) && !spent.has(t.txid + ':' + o.n)) {
+        out.push({ txid: t.txid, vout: o.n, value: Math.round(Number(o.value) * 1e8), confirmed: true });
+      }
+    }));
+    return out.filter(u => u.value > 0);
+  }
+
+  async function fetchUtxos(apiBase, address) {
+    const manual = document.getElementById('sendManualUtxo').value.trim();
+    if (manual) {
+      let parsed;
+      try { parsed = JSON.parse(manual); } catch (e) { throw new Error("UTXO manual bukan JSON yang valid."); }
+      const list = normalizeUtxos(parsed, address);
+      if (!list) throw new Error("Format UTXO manual tidak dikenali.");
+      return list;
+    }
+
+    const enc = encodeURIComponent(address);
+    const tpl = document.getElementById('sendUtxoTemplate').value.trim();
+    const sources = [];
+    if (tpl) sources.push([tpl, async () => { const r = await fetch(tpl.split('{address}').join(enc)); if (!r.ok) throw new Error('HTTP ' + r.status); return normalizeUtxos(await r.json(), address); }]);
+    ['utxos', 'unspent', 'utxo', 'getutxo'].forEach(pth => sources.push([`${apiBase}/${pth}/${enc}`, async () => {
+      const r = await fetch(`${apiBase}/${pth}/${enc}`); if (!r.ok) throw new Error('HTTP ' + r.status); return normalizeUtxos(await r.json(), address);
+    }]));
+    sources.push(['explorer', () => fetchUtxosFromExplorer(address)]);
+
+    const notes = [];
+    for (const [name, fn] of sources) {
+      try {
+        const list = await fn();
+        if (!list) { notes.push(name + ': format tidak dikenali'); continue; }
+        if (!utxoMatchesBalance(list)) {
+          const tot = list.reduce((s, u) => s + u.value, 0) / 1e8;
+          notes.push(`${name}: total ${tot} NUX tidak cocok dengan saldo ${liveWalletData.balance} NUX (ditolak)`);
+          continue;
+        }
+        return list;
+      } catch (e) {
+        notes.push(name + ': ' + e.message);
+      }
+    }
+    throw new Error("Tidak ada sumber UTXO yang valid.\n- " + notes.join("\n- ") + "\n\nIsi 'Template URL UTXO' atau tempel UTXO manual di Pengaturan Lanjutan.");
+  }
+
+  // --- Dekode raw transaction (legacy & segwit) -> input & output (nilai dalam satoshi) ---
+  function decodeRawTxHex(hex) {
+    let p = 0;
+    const rd = n => { const h = hex.substr(p, n * 2); p += n * 2; return h; };
+    const rdVar = () => {
+      const b = parseInt(rd(1), 16);
+      if (b < 0xfd) return b;
+      if (b === 0xfd) return parseInt(reverseHex(rd(2)), 16);
+      if (b === 0xfe) return parseInt(reverseHex(rd(4)), 16);
+      return Number(BigInt('0x' + reverseHex(rd(8))));
+    };
+    rd(4); // version
+    if (hex.substr(p, 4) === '0001') p += 4; // marker+flag segwit
+    const nIn = rdVar(), ins = [];
+    for (let i = 0; i < nIn; i++) {
+      const prev = reverseHex(rd(32));
+      const vout = parseInt(reverseHex(rd(4)), 16);
+      rd(rdVar());
+      const seq = parseInt(reverseHex(rd(4)), 16);
+      ins.push({ txid: prev, vout, seq });
+    }
+    const nOut = rdVar(), outs = [];
+    for (let i = 0; i < nOut; i++) {
+      const value = Number(BigInt('0x' + reverseHex(rd(8))));
+      const script = rd(rdVar());
+      outs.push({ n: i, value, script });
+    }
+    if (!ins.length || !outs.length) throw new Error('raw TX tidak valid');
+    return { ins, outs, size: hex.length / 2 };
+  }
+
+  // Normalisasi objek transaksi hasil decode node (vin/vout) ke format yang sama
+  function detailFromObject(o) {
+    const ins = (o.vin || o.inputs || o.vins || []).map(v => ({
+      txid: v.txid || v.prev_txid || v.hash,
+      vout: [v.vout, v.n, v.index].find(x => x !== undefined),
+      seq: v.sequence
+    })).filter(v => v.txid && v.vout !== undefined);
+    const outs = (o.vout || o.outputs || []).map((x, idx) => {
+      const spk = x.scriptPubKey || {};
+      return {
+        n: x.n !== undefined ? x.n : idx,
+        value: Math.round(Number(x.value) * 1e8),
+        script: spk.hex || null,
+        addrs: spk.addresses || (spk.address ? [spk.address] : (x.address ? [x.address] : []))
+      };
+    });
+    return { ins, outs, size: Number(o.size || o.vsize || 0) };
+  }
+
+  const HEX_RE = /^[0-9a-fA-F]{20,}$/;
+
+  // Ambil detail 1 transaksi (mempool) dari beberapa sumber; kembalikan {ins, outs} atau null
+  async function getPendingTxDetail(apiBase, explorer, txid) {
+    const urls = [
+      `${explorer}/api/getrawtransaction?txid=${txid}&decrypt=0`,
+      `${explorer}/api/getrawtransaction?txid=${txid}`,
+      `${apiBase}/rawtransaction/${txid}`,
+      `${apiBase}/tx/${txid}`,
+      `${apiBase}/transaction/${txid}`,
+      `${explorer}/api/getrawtransaction?txid=${txid}&decrypt=1`
+    ];
+    for (const u of urls) {
+      try {
+        const r = await fetch(u);
+        if (!r.ok) continue;
+        const t = (await r.text()).trim();
+        let hex = null, obj = null;
+        if (HEX_RE.test(t)) hex = t;
+        else {
+          let j; try { j = JSON.parse(t); } catch (e) { continue; }
+          const v = (j && j.result !== undefined) ? j.result : j;
+          if (typeof v === 'string' && HEX_RE.test(v)) hex = v;
+          else if (v && typeof v === 'object') {
+            const h = v.hex || v.raw || v.rawtx;
+            if (typeof h === 'string' && HEX_RE.test(h)) hex = h;
+            else if (v.vin || v.inputs || v.vins) obj = v;
+          }
+        }
+        if (hex) return decodeRawTxHex(hex);
+        if (obj) return detailFromObject(obj);
+      } catch (e) { /* coba sumber berikutnya */ }
+    }
+    return null;
+  }
+
+  async function mapLimit(arr, fn, limit) {
+    let i = 0;
+    const workers = Array.from({ length: Math.min(limit, arr.length) }, async () => {
+      while (i < arr.length) { const k = i++; await fn(arr[k]); }
+    });
+    await Promise.all(workers);
+  }
+
+  // Daftar txid di mempool node (tanpa filter alamat). Dicoba dari beberapa endpoint; kosong bila tidak tersedia.
+  async function listNodeMempool(apiBase, explorer) {
+    const urls = [`${explorer}/api/getrawmempool`, `${apiBase}/rawmempool`];
+    for (const u of urls) {
+      try {
+        const r = await fetch(u);
+        if (!r.ok) continue;
+        const j = await r.json();
+        let v = (j && j.result !== undefined) ? j.result : j;
+        if (v && !Array.isArray(v) && typeof v === 'object') v = v.tx || v.txs || Object.keys(v);
+        if (Array.isArray(v)) {
+          const ids = v.map(x => typeof x === 'string' ? x : (x && x.txid)).filter(x => typeof x === 'string' && /^[0-9a-fA-F]{64}$/.test(x));
+          if (ids.length) return ids;
+        }
+      } catch (e) { /* coba endpoint berikutnya */ }
+    }
+    return [];
+  }
+
+  // --- Cek mempool: input yang sedang dibelanjakan TX unconfirmed + output unconfirmed (change) milik alamat ini ---
+  // GET {api}/mempool/{address} -> result.tx (daftar txid atau objek transaksi)
+  async function fetchMempoolState(apiBase, address, ownScript) {
+    const state = { spent: new Set(), incoming: [], ok: false, undecoded: 0, count: 0, txs: {}, contested: new Set() };
+    try {
+      const r = await fetch(`${apiBase}/mempool/${encodeURIComponent(address)}`);
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const j = await r.json();
+      const res = (j && j.result !== undefined) ? j.result : j;
+      const list = Array.isArray(res) ? res : ((res && (res.tx || res.txs || res.transactions)) || []);
+      const explorer = document.getElementById('nodeApiUrl').value.trim().replace(/\/+$/, '').replace(/\/api$/, '');
+      state.count = list.length;
+      const items = list.slice();
+      const seen = new Set(items.map(x => typeof x === 'string' ? x : (x && (x.txid || x.hash))).filter(Boolean));
+
+      // TXID pending yang diisi manual di Pengaturan Lanjutan
+      const manualEl = document.getElementById('sendPendingTxid');
+      ((manualEl && manualEl.value) || '').split(/[\s,;]+/).forEach(t => {
+        t = t.trim().toLowerCase();
+        if (/^[0-9a-f]{64}$/.test(t) && !seen.has(t)) { seen.add(t); items.push(t); }
+      });
+
+      // Cadangan: endpoint per-alamat kosong -> pindai seluruh mempool node (maks. 300 TX)
+      if (!list.length) {
+        const all = await listNodeMempool(apiBase, explorer);
+        all.slice(0, 300).forEach(t => { if (!seen.has(t)) { seen.add(t); items.push(t); } });
+      }
+
+      await mapLimit(items, async item => {
+        const txid = typeof item === 'string' ? item : (item && (item.txid || item.hash));
+        let d = null;
+        if (item && typeof item === 'object') {
+          const h = item.hex || item.raw || item.rawtx;
+          try {
+            if (typeof h === 'string' && HEX_RE.test(h)) d = decodeRawTxHex(h);
+            else if (item.vin || item.inputs || item.vins) d = detailFromObject(item);
+          } catch (e) { d = null; }
+        }
+        if (!d && txid) d = await getPendingTxDetail(apiBase, explorer, txid);
+        if (!d || !txid) { state.undecoded++; return; }
+        state.txs[txid] = { ins: d.ins, size: d.size || 0, rbf: d.ins.some(i => i.seq !== undefined && i.seq < 0xfffffffe) };
+        d.ins.forEach(v => state.spent.add(v.txid + ':' + v.vout));
+        d.outs.forEach(o => {
+          const mine = (o.script && o.script === ownScript) || (o.addrs && o.addrs.includes(address));
+          if (mine && o.value > 0) state.incoming.push({ txid, vout: o.n, value: o.value, confirmed: false });
+        });
+      }, 8);
+      // Double-spend di mempool: outpoint yang sama diklaim >1 TX -> hanya satu yang menang, semuanya dianggap rapuh
+      const claims = {};
+      Object.keys(state.txs).forEach(id => state.txs[id].ins.forEach(i => {
+        const k = i.txid + ':' + i.vout;
+        (claims[k] = claims[k] || new Set()).add(id);
+      }));
+      Object.values(claims).forEach(set => { if (set.size > 1) set.forEach(id => state.contested.add(id)); });
+      state.ok = true;
+    } catch (e) {
+      console.warn('Cek mempool gagal:', e.message);
+    }
+    // Output pending yang ternyata sudah dibelanjakan TX pending lain tidak boleh dipakai
+    state.incoming = state.incoming.filter(u => !state.spent.has(u.txid + ':' + u.vout));
+    return state;
+  }
+
+  const MAX_UNCONF_ANCESTORS = 25;         // default Bitcoin Core: maks 25 TX (termasuk TX ini) per rantai unconfirmed
+  const MAX_UNCONF_PACKAGE_BYTES = 101000; // default: ~101 kB per paket
+  const WARN_UNCONF_ANCESTORS = 15;
+
+  // TX mempool "rapuh" bila dirinya atau leluhurnya ikut double-spend (outpoint sama diklaim TX lain)
+  function isFragile(txid, mp, seen) {
+    seen = seen || new Set();
+    if (seen.has(txid)) return false;
+    seen.add(txid);
+    const t = mp.txs[txid];
+    if (!t) return false;
+    if (mp.contested.has(txid)) return true;
+    return t.ins.some(i => isFragile(i.txid, mp, seen));
+  }
+
+  // Hitung panjang/ukuran rantai unconfirmed di belakang input yang dipilih + flag RBF
+  function unconfirmedChainInfo(selected, mp) {
+    const set = new Set();
+    let size = 0, localAnc = 0, localSize = 0, rbf = false;
+    const walk = txid => {
+      if (set.has(txid)) return;
+      const t = mp.txs[txid];
+      if (!t) return;
+      set.add(txid);
+      size += t.size || 0;
+      if (t.rbf) rbf = true;
+      t.ins.forEach(i => walk(i.txid));
+    };
+    selected.forEach(u => {
+      if (u.confirmed !== false) return;
+      if (mp.txs[u.txid]) walk(u.txid);
+      else { localAnc = Math.max(localAnc, u.anc || 1); localSize = Math.max(localSize, u.size || 0); }
+    });
+    return { anc: set.size + localAnc, size: size + localSize, rbf };
+  }
+
+  // Gabungkan di layer aplikasi: UTXO confirmed (API UTXO) - input yang dipakai TX mempool + output TX mempool (0 konfirmasi)
+  async function collectPool(apiBase, allowUnconf, ownScript) {
+    loadPending();
+    const utxos = await fetchUtxos(apiBase, liveWalletData.address);
+    const mp = await fetchMempoolState(apiBase, liveWalletData.address, ownScript);
+
+    let pool = utxos.filter(u => allowUnconf || u.confirmed !== false);
+    if (allowUnconf) {
+      // Kembalian lokal dari TX yang baru dikirim + output unconfirmed dari mempool
+      pendingUtxos.filter(pu => pu.address === liveWalletData.address).forEach(pu => {
+        if (!pool.some(u => u.txid === pu.txid && u.vout === pu.vout)) pool.push({ txid: pu.txid, vout: pu.vout, value: pu.value, confirmed: false, anc: pu.anc, size: pu.size });
+      });
+      mp.incoming.forEach(iu => {
+        if (!pool.some(u => u.txid === iu.txid && u.vout === iu.vout)) pool.push(iu);
+      });
+    }
+    let mpBlocked = 0, localBlocked = 0, fragileBlocked = 0, blockedValue = 0;
+    const blockedInfo = [];
+    pool = pool.filter(u => {
+      const key = u.txid + ':' + u.vout;
+      const short = key.slice(0, 10) + '…';
+      if (mp.spent.has(key)) { mpBlocked++; blockedValue += u.value; blockedInfo.push(short + ' (dipakai TX pending di mempool)'); return false; }
+      if (isLocallySpent(key)) { localBlocked++; blockedValue += u.value; blockedInfo.push(short + ' (dikunci lokal: baru dikirim / ditolak konflik)'); return false; }
+      if (u.confirmed === false && mp.txs[u.txid] && isFragile(u.txid, mp)) { fragileBlocked++; blockedValue += u.value; blockedInfo.push(short + ' (TX induk bentrok/double-spend di mempool)'); return false; }
+      return true;
+    });
+    return { utxos, mp, pool, mpBlocked, localBlocked, fragileBlocked, blocked: mpBlocked + localBlocked + fragileBlocked, blockedValue, blockedInfo };
+  }
+
+  // Ringkasan berlabel: confirmed vs unconfirmed vs terkunci (tidak digabung jadi satu angka)
+  async function refreshUtxoSummary() {
+    const el = document.getElementById('sendUtxoSummary');
+    if (!el) return;
+    if (!liveWalletData.address) { el.textContent = 'Buka wallet dulu.'; return; }
+    el.textContent = 'Memeriksa UTXO dan mempool...';
+    try {
+      const apiBase = document.getElementById('sendApiUrl').value.trim().replace(/\/+$/, '');
+      const ownScript = addressToScriptHex(liveWalletData.address);
+      const allow = document.getElementById('sendAllowUnconfirmed').checked;
+      const r = await collectPool(apiBase, allow, ownScript);
+      const fmt = v => (v / 1e8).toFixed(8).replace(/\.?0+$/, '');
+      const sum = a => a.reduce((t, u) => t + u.value, 0);
+      const conf = r.pool.filter(u => u.confirmed !== false);
+      const unc = r.pool.filter(u => u.confirmed === false);
+      const chain = unconfirmedChainInfo(unc, r.mp);
+      const lines = [];
+      lines.push('✅ Terkonfirmasi: ' + fmt(sum(conf)) + ' NUX (' + conf.length + ' UTXO)');
+      if (allow) {
+        lines.push('⏳ Belum terkonfirmasi (0 konf., mempool): ' + fmt(sum(unc)) + ' NUX (' + unc.length + ' UTXO)' +
+          (unc.length ? ' — rantai ' + chain.anc + ' TX' + (chain.rbf ? ', RBF (rapuh)' : '') : ''));
+      } else {
+        lines.push('⏳ Belum terkonfirmasi: tidak dihitung (opsi "spend unconfirmed" nonaktif)');
+      }
+      lines.push('🔒 Terkunci (dipakai TX pending / bentrok): ' + fmt(r.blockedValue) + ' NUX (' + r.blocked + ' UTXO)');
+      if (!r.mp.ok) lines.push('⚠️ Cek mempool API gagal, status unconfirmed tidak terverifikasi.');
+      if (r.mp.undecoded > 0) lines.push('⚠️ ' + r.mp.undecoded + ' TX pending tidak bisa dibaca detailnya.');
+      if (r.mp.contested.size > 0) lines.push('⚠️ ' + r.mp.contested.size + ' TX di mempool saling bentrok (double-spend).');
+      el.innerHTML = '';
+      lines.forEach(t => { const d = document.createElement('div'); d.textContent = t; el.appendChild(d); });
+    } catch (e) {
+      el.textContent = 'Gagal memeriksa UTXO: ' + e.message;
+    }
+  }
+
+  const CONFLICT_RE = /conflict|missing-?inputs|missingorspent|already spent|double.?spend|txn-mempool/i;
+
+  // --- Broadcast via POST /broadcast (parameter: raw) ---
+  async function broadcastRawTx(apiBase, rawHex, expectedTxid) {
+    const url = `${apiBase}/broadcast`;
+    const enc = encodeURIComponent(rawHex);
+    const attempts = [
+      ['form', () => fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'raw=' + enc })],
+      ['json', () => fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ raw: rawHex }) })],
+      ['multipart', () => { const fd = new FormData(); fd.append('raw', rawHex); return fetch(url, { method: 'POST', body: fd }); }],
+      ['query-post', () => fetch(`${url}?raw=${enc}`, { method: 'POST' })],
+      ['query-get', () => fetch(`${url}?raw=${enc}`)]
+    ];
+    // Error yang menandakan server tidak membaca parameter (format request salah), bukan penolakan node
+    const formatErr = /expected type|got null|got undefined|param|argument|no raw/i;
+    const notes = [];
+    for (const [name, attempt] of attempts) {
+      let res;
+      try { res = await attempt(); } catch (e) { notes.push(name + ': ' + e.message); continue; }
+      const text = await res.text();
+      let json = null;
+      try { json = JSON.parse(text); } catch (e) {}
+      if (json && typeof json === 'object' && ('result' in json || 'error' in json)) {
+        if (json.error) {
+          const msg = typeof json.error === 'object' ? (json.error.message || JSON.stringify(json.error)) : String(json.error);
+          if (formatErr.test(msg)) { notes.push(name + ': ' + msg); continue; }
+          // TX yang sama sudah ada di mempool/blok = sukses (bukan konflik)
+          if (expectedTxid && !CONFLICT_RE.test(msg) && /already|known|duplicate/i.test(msg)) return expectedTxid;
+          const err = new Error(msg);
+          err.conflict = CONFLICT_RE.test(msg);
+          throw err;
+        }
+        if (json.result) return String(json.result);
+      }
+      notes.push(`${name}: HTTP ${res.status} ${text.slice(0, 100)}`);
+    }
+    const cors = notes.some(n => /failed to fetch|networkerror|load failed/i.test(n))
+      ? "\nKemungkinan diblokir CORS oleh browser: centang 'Hanya tanda tangani', lalu tempel raw TX ke halaman /broadcast di api.nusacoin.org."
+      : "";
+    const finalErr = new Error("Broadcast gagal.\n- " + notes.join("\n- ") + cors);
+    finalErr.conflict = notes.some(n => CONFLICT_RE.test(n));
+    throw finalErr;
+  }
+
+  function showSendResult(title, raw, txid, broadcastedTxid) {
+    const box = document.getElementById('sendResult');
+    box.style.display = 'block';
+    box.innerHTML = '';
+    const wrap = document.createElement('div');
+    wrap.className = 'security-banner';
+    const h = document.createElement('div');
+    h.style.fontWeight = '700';
+    h.textContent = title;
+    wrap.appendChild(h);
+    if (broadcastedTxid) {
+      const t = document.createElement('div');
+      t.style.cssText = 'margin-top:6px; word-break:break-all; font-family:monospace;';
+      t.textContent = 'TXID: ' + broadcastedTxid;
+      wrap.appendChild(t);
+    } else if (txid) {
+      const t = document.createElement('div');
+      t.style.cssText = 'margin-top:6px; word-break:break-all; font-family:monospace;';
+      t.textContent = 'Perkiraan TXID: ' + txid;
+      wrap.appendChild(t);
+    }
+    if (raw) {
+      const ta = document.createElement('textarea');
+      ta.readOnly = true;
+      ta.id = 'sendRawOut';
+      ta.style.cssText = 'margin-top:8px; height:90px; width:100%;';
+      ta.value = raw;
+      wrap.appendChild(ta);
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'btn-secondary';
+      b.style.marginTop = '8px';
+      b.textContent = 'Salin Raw TX';
+      b.onclick = () => { ta.select(); document.execCommand('copy'); alert('Raw TX disalin!'); };
+      wrap.appendChild(b);
+    }
+    box.appendChild(wrap);
+  }
+
+  // --- FUNGSI KIRIM NUX ---
+  async function sendNUX() {
+    const btnSend = document.getElementById("btnSendReal");
+    const idleLabel = `<i class="fa-solid fa-paper-plane"></i> Kirim NUX Sekarang`;
+    const toAddr = document.getElementById("sendToAddress").value.trim();
+    const amount = parseFloat(document.getElementById("sendAmount").value);
+    const feeNUX = parseFloat(document.getElementById("sendFee").value);
+    const signOnly = document.getElementById("sendSignOnly").checked;
+    let apiBase = document.getElementById("sendApiUrl").value.trim();
+    if (apiBase.endsWith('/')) apiBase = apiBase.slice(0, -1);
+
+    if (!liveWalletData.pkey) {
+      alert("Wallet ini mode baca-saja (hanya alamat). Buka wallet dengan Private Key WIF untuk mengirim NUX.");
+      return;
+    }
+    if (!toAddr || isNaN(amount) || amount <= 0) {
+      alert("Masukkan alamat tujuan dan jumlah NUX yang valid!");
+      return;
+    }
+    if (isNaN(feeNUX) || feeNUX < 0) {
+      alert("Fee tidak valid.");
+      return;
+    }
+
+    const amountSats = Math.round(amount * 1e8);
+    const feeSats = Math.round(feeNUX * 1e8);
+    if (amountSats < DUST_SATS) { alert("Jumlah terlalu kecil (di bawah batas dust)."); return; }
+
+    btnSend.disabled = true;
+    btnSend.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Memproses Transaksi...`;
+    document.getElementById('sendResult').style.display = 'none';
+
+    try {
+      const toScript = addressToScriptHex(toAddr);          // validasi alamat tujuan
+      const ownScript = addressToScriptHex(liveWalletData.address);
+
+      loadPending();
+      const allowUnconf = document.getElementById('sendAllowUnconfirmed').checked;
+      let userConfirmed = false;
+      let raw, txid, sentTxid, selected, change, realFee, chain;
+
+      for (let attempt = 0; attempt < 3; attempt++) {
+        // Confirmed (API UTXO) - input yang dipakai TX mempool + output TX mempool (0 konfirmasi)
+        const { utxos, mp, pool, mpBlocked, localBlocked, fragileBlocked, blocked, blockedInfo } = await collectPool(apiBase, allowUnconf, ownScript);
+        if (!utxos.length) throw new Error("Tidak ada UTXO tersedia. Saldo NUX tidak cukup.");
+
+        if (!pool.length) {
+          if (blocked > 0) {
+            throw new Error("Semua UTXO sedang terkunci (" + blocked + " UTXO):\n- " + blockedInfo.join("\n- ") +
+              "\n\nTunggu konfirmasi sekitar 1 blok lalu coba lagi." +
+              (blocked > 0 && mp.incoming.length === 0 && allowUnconf && fragileBlocked === 0 ? "\nSisa dana dari TX pending belum terdeteksi: isi TXID transaksi pending itu di Pengaturan Lanjutan (kolom 'TXID transaksi pending'), lalu kirim lagi." : "") +
+              (fragileBlocked > 0 ? "\nSebagian dana berasal dari TX pending yang bentrok (double-spend) di mempool, jadi tidak dipakai sampai jelas mana yang menang." : "") +
+              (localBlocked > 0 && mpBlocked === 0 && fragileBlocked === 0 ? "\nKunci ini hanya lokal (mempool tidak menampilkannya). Jika TX sebelumnya sudah dicek tidak ada/gagal, klik Keluar lalu buka wallet lagi untuk membuka kunci." : "") +
+              (mp.undecoded > 0 ? "\n(" + mp.undecoded + " TX pending tidak bisa dibaca detailnya, jadi kembaliannya tidak terdeteksi. Detail: buka console browser.)" : "") +
+              (mp.ok ? "" : "\n(Peringatan: cek mempool API gagal, status mempool tidak terverifikasi.)"));
+          }
+          throw new Error("Tidak ada UTXO yang bisa dibelanjakan" + (allowUnconf ? "." : " (aktifkan 'spend unconfirmed' untuk memakai dana belum terkonfirmasi)."));
+        }
+
+        // Utamakan UTXO terkonfirmasi, lalu yang terbesar; unconfirmed hanya dipakai bila yang confirmed tidak cukup
+        pool.sort((a, b) => ((a.confirmed === false) - (b.confirmed === false)) || (b.value - a.value));
+        selected = [];
+        let acc = 0;
+        for (const u of pool) {
+          selected.push(u);
+          acc += u.value;
+          if (acc >= amountSats + feeSats) break;
+        }
+        if (acc < amountSats + feeSats) {
+          throw new Error(`Saldo tersedia tidak mencukupi untuk ${amount} NUX + fee ${feeNUX} NUX.` +
+            (blocked > 0 ? ` (${blocked} UTXO sedang terkunci di mempool, tunggu konfirmasi.)` : ""));
+        }
+
+        const outputs = [{ value: amountSats, script: toScript }];
+        change = acc - amountSats - feeSats;
+        realFee = feeSats;
+        if (change >= DUST_SATS) outputs.push({ value: change, script: ownScript });
+        else { realFee += change; change = 0; }
+
+        ({ raw, txid } = buildSignedTransaction(selected, outputs, liveWalletData.pkey, ownScript));
+
+        // Rantai unconfirmed: batas default Bitcoin Core (25 TX / ~101 kB). Lewat batas = TX ditolak atau child terpental dari mempool
+        const rawBytes = raw.length / 2;
+        chain = unconfirmedChainInfo(selected, mp);
+        chain.rawBytes = rawBytes;
+        const ancCount = chain.anc + 1, pkgBytes = chain.size + rawBytes;
+        if (ancCount > MAX_UNCONF_ANCESTORS || pkgBytes > MAX_UNCONF_PACKAGE_BYTES) {
+          throw new Error(`Rantai transaksi belum terkonfirmasi terlalu panjang (${ancCount} TX, ~${Math.round(pkgBytes / 1000)} kB; batas default ${MAX_UNCONF_ANCESTORS} TX / ~101 kB). Tunggu konfirmasi dulu supaya TX tidak ditolak atau terpental dari mempool.`);
+        }
+        const warns = [];
+        if (selected.some(u => u.confirmed === false)) {
+          warns.push('Sebagian dana berasal dari TX yang BELUM terkonfirmasi (rantai ' + chain.anc + ' TX). Jika TX induk dibuang/diganti dari mempool, TX ini ikut gagal.');
+        }
+        if (chain.rbf) warns.push('TX induk memberi sinyal RBF (replaceable): bisa diganti kapan saja, sehingga TX ini rapuh.');
+        if (ancCount >= WARN_UNCONF_ANCESTORS || pkgBytes > 80000) warns.push('Rantai unconfirmed sudah panjang (' + ancCount + ' dari maks ' + MAX_UNCONF_ANCESTORS + ' TX).');
+
+        if (signOnly) {
+          showSendResult("Transaksi berhasil ditandatangani (belum dikirim)", raw, txid, null);
+          return;
+        }
+
+        if (!userConfirmed) {
+          const sumC = selected.filter(u => u.confirmed !== false).reduce((t, u) => t + u.value, 0);
+          const sumU = selected.filter(u => u.confirmed === false).reduce((t, u) => t + u.value, 0);
+          const inputSummary = `\n\nInput: ${sumC / 1e8} NUX terkonfirmasi + ${sumU / 1e8} NUX BELUM terkonfirmasi (${selected.length} input)`;
+          const ok = confirm(
+            `Kirim ${amount} NUX ke:\n${toAddr}\n\nFee: ${realFee / 1e8} NUX` +
+            inputSummary + (warns.length ? `\n\n⚠️ ` + warns.join(`\n⚠️ `) : ``) +
+            `\nTransaksi tidak bisa dibatalkan.`
+          );
+          if (!ok) { showSendResult("Dibatalkan. Raw TX belum dikirim:", raw, txid, null); return; }
+          userConfirmed = true;
+        }
+
+        try {
+          sentTxid = await broadcastRawTx(apiBase, raw, txid);
+          break; // sukses
+        } catch (e) {
+          if (e.conflict && attempt < 2) {
+            // Input bentrok dengan TX lain di mempool / sudah terpakai: kunci input ini, ulangi dengan UTXO lain
+            // Input unconfirmed gagal = TX induknya terpental/diganti (eviksi/double-spend): buang yang itu saja.
+            // Jika semua input confirmed, kunci input tsb (dipakai TX lain yang tidak terlihat API).
+            const failedUnconf = selected.filter(u => u.confirmed === false);
+            (failedUnconf.length ? failedUnconf : selected).forEach(u => markSpent(u.txid + ':' + u.vout));
+            pendingUtxos = pendingUtxos.filter(pu => !isLocallySpent(pu.txid + ':' + pu.vout));
+            persistPending();
+            btnSend.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Konflik mempool, mencoba UTXO lain...`;
+            continue;
+          }
+          showSendResult("Broadcast gagal. Raw TX tersimpan di bawah:", raw, txid, null);
+          if (e.conflict) e.message += "\n\nUTXO Anda sedang dipakai transaksi lain yang belum terkonfirmasi. Tunggu 1 blok lalu coba lagi.";
+          throw e;
+        }
+      }
+
+      selected.forEach(u => markSpent(u.txid + ':' + u.vout));
+      pendingUtxos = pendingUtxos.filter(pu => !isLocallySpent(pu.txid + ':' + pu.vout));
+      if (change > 0) pendingUtxos.push({ address: liveWalletData.address, txid, vout: 1, value: change, t: Date.now(), anc: chain.anc + 1, size: chain.size + chain.rawBytes });
+      persistPending();
+
+      showSendResult("🎉 Transaksi berhasil di-broadcast!", raw, txid, sentTxid);
+      document.getElementById("sendToAddress").value = "";
+      document.getElementById("sendAmount").value = "";
+      setTimeout(fetchWalletData, 3000);
+    } catch (e) {
+      alert("❌ Gagal Mengirim Transaksi: " + e.message);
+    } finally {
+      btnSend.disabled = false;
+      btnSend.innerHTML = idleLabel;
+    }
+  }
+
+  // LOGIKA DECRYPTER
+  function toggleCamera() {
+    const readerDiv = document.getElementById("reader");
+
+    if (isScanning) {
+      stopCamera();
+    } else {
+      readerDiv.style.display = "block";
+      if (!html5QrCode) {
+        html5QrCode = new Html5Qrcode("reader");
+      }
+      
+      html5QrCode.start(
+        { facingMode: "environment" }, 
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        (decodedText) => {
+          document.getElementById("encText").value = decodedText;
+          stopCamera();
+        },
+        (errorMessage) => {}
+      ).catch(err => {
+        alert("Gagal mengakses kamera: " + err);
+        readerDiv.style.display = "none";
+      });
+
+      isScanning = true;
+    }
+  }
+
+  function stopCamera() {
+    if (html5QrCode && isScanning) {
+      html5QrCode.stop().then(() => {
+        document.getElementById("reader").style.display = "none";
+        isScanning = false;
+      }).catch(err => console.error(err));
+    }
+  }
+
+  function uploadQR(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!html5QrCode) {
+      html5QrCode = new Html5Qrcode("reader");
+    }
+
+    html5QrCode.scanFile(file, true)
+      .then(decodedText => {
+        document.getElementById("encText").value = decodedText;
+      })
+      .catch(err => {
+        alert("Gagal membaca QR Code dari gambar. Pastikan gambar jelas.");
+      });
+  }
+
+  function decryptKey() {
+    let encText = document.getElementById("encText").value.trim();
+    const pin = document.getElementById("pinInput").value.trim();
+    const resultBox = document.getElementById("resultBox");
+    const resTitle = document.getElementById("resTitle");
+    const resValue = document.getElementById("resValue");
+
+    if (!encText || !pin) {
+      alert("Harap isi teks terenkripsi dan PIN!");
+      return;
+    }
+
+    if (encText.startsWith("ENC:")) {
+      encText = encText.replace("ENC:", "");
+    }
+
+    try {
+      const bytes = CryptoJS.AES.decrypt(encText, pin);
+      const originalPkey = bytes.toString(CryptoJS.enc.Utf8);
+
+      if (originalPkey && originalPkey.length > 0) {
+        resultBox.className = "result-box success";
+        resTitle.textContent = "🔓 SUKSES! PRIVATE KEY MENTAH:";
+        resValue.textContent = originalPkey;
+      } else {
+        resultBox.className = "result-box error";
+        resTitle.textContent = "❌ DEKRIPSI GAGAL:";
+        resValue.textContent = "PIN salah atau format data tidak valid.";
+      }
+    } catch (e) {
+      resultBox.className = "result-box error";
+      resTitle.textContent = "❌ ERROR:";
+      resValue.textContent = "Gagal memproses kode terenkripsi.";
+    }
+  }
+
+  document.getElementById("inputName").addEventListener("input", updateCard);
+  document.getElementById("inputAddress").addEventListener("input", updateCard);
+  document.getElementById("inputPkey").addEventListener("input", updateCard);
+  document.getElementById("inputPin").addEventListener("input", updateCard);
+
+  window.addEventListener("DOMContentLoaded", () => {
+    updateCard();
+  });
+</script>
+</body>
+</html>
