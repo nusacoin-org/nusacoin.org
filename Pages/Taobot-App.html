@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nusacoin (NUX) - TaobotApp v1.7.0 Latest</title>
+    
+    <!-- Google Fonts & FontAwesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Titillium+Web:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- CSS Styling -->
+    <style>
+        /* HAPUS NAVBAR BLOGGER / GHOST */
+        #navbar-iframe, .navbar, .navbar-ghost { 
+            display: none !important; 
+            height: 0 !important; 
+            visibility: hidden !important; 
+        }
+
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+
+        /* Variabel Warna Hijau Nusacoin (Bebas Oranye/Kuning) */
+        :root {
+            --primary: #27ae60;
+            --primary-dark: #1e8449;
+            --bg-body: #ffffff;
+            --bg-card: #ffffff;
+            --bg-card-sub: #f8fafc;
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --bg-light: #f8fafc;
+            --border: #e2e8f0;
+            --title-green: #1e8449;
+            --link-green: #27ae60;
+            --badge-bg: #e8f5e9;
+            --badge-text: #1e8449;
+        }
+
+        body.dark-mode {
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --bg-card-sub: #0f172a;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --bg-light: #1e293b;
+            --border: #334155;
+            --title-green: #4ade80;
+            --link-green: #4ade80;
+            --badge-bg: #14532d;
+            --badge-text: #4ade80;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            color: var(--text-main); 
+            line-height: 1.6; 
+            overflow-x: hidden;
+            background-color: var(--bg-body);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background-color: var(--primary-dark);
+            color: white;
+            padding: 8px 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .top-bar-container {
+            max-width: 1250px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .top-bar-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Lang Switcher */
+        .lang-switch {
+            display: flex;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+            padding: 2px;
+        }
+
+        .lang-btn {
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.8);
+            padding: 2px 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: all 0.2s;
+        }
+
+        .lang-btn.active, .lang-btn:hover {
+            background: #ffffff;
+            color: var(--primary-dark);
+        }
+
+        /* Theme Toggle Button (Icon Only) */
+        .theme-toggle-btn {
+            background: rgba(0, 0, 0, 0.2);
+            border: none;
+            color: #ffffff;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        .theme-toggle-btn:hover {
+            background: rgba(0, 0, 0, 0.4);
+            transform: scale(1.08);
+        }
+
+        /* Main Content Container */
+        main {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .release-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .header-area {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+        }
+
+        .page-title {
+            font-family: 'Titillium Web', sans-serif;
+            font-size: 2rem;
+            color: var(--title-green);
+            font-weight: 700;
+        }
+
+        .version-badge {
+            background-color: var(--badge-bg);
+            color: var(--badge-text);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .section-title {
+            font-family: 'Titillium Web', sans-serif;
+            font-size: 1.3rem;
+            color: var(--title-green);
+            margin: 25px 0 12px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sub-title {
+            font-family: 'Titillium Web', sans-serif;
+            font-size: 1.08rem;
+            color: var(--text-main);
+            margin: 18px 0 8px;
+            font-weight: 700;
+        }
+
+        ul ul {
+            margin: 6px 0 4px 20px;
+        }
+
+        p {
+            font-size: 1rem;
+            color: var(--text-main);
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        ul, ol {
+            margin: 10px 0 20px 25px;
+            color: var(--text-main);
+        }
+
+        ul li, ol li {
+            margin-bottom: 8px;
+            font-size: 0.98rem;
+            line-height: 1.6;
+            text-align: justify;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-weight: 700;
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-download {
+            background-color: var(--primary);
+            color: #ffffff !important;
+        }
+
+        .btn-download:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-telegram {
+            background-color: transparent;
+            color: var(--link-green) !important;
+            border: 2px solid var(--link-green);
+        }
+
+        .btn-telegram:hover {
+            background-color: var(--badge-bg);
+        }
+
+        .warning-box {
+            background-color: var(--bg-card-sub);
+            border-left: 4px solid var(--primary);
+            padding: 15px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 20px 0;
+            font-size: 0.95rem;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--bg-light);
+            border-top: 1px solid var(--border);
+            padding: 60px 20px 20px;
+            margin-top: 60px;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .footer-grid {
+            max-width: 1250px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 40px;
+        }
+
+        .footer-brand h2 {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-family: 'Titillium Web', sans-serif;
+        }
+
+        .footer-brand p {
+            color: var(--text-sub);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .footer-col h3 {
+            font-size: 1.1rem;
+            color: var(--text-main);
+            margin-bottom: 15px;
+            font-family: 'Titillium Web', sans-serif;
+        }
+
+        .footer-col ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .footer-col ul li {
+            margin-bottom: 10px;
+        }
+
+        .footer-col ul li a {
+            color: var(--text-sub);
+            text-decoration: none;
+            transition: color 0.2s;
+            font-size: 0.95rem;
+        }
+
+        .footer-col ul li a:hover {
+            color: var(--primary);
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .social-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-main);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .social-box:hover {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .footer-bottom {
+            max-width: 1250px;
+            margin: 40px auto 0;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-sub);
+            font-size: 0.85rem;
+        }
+
+        .mono {
+            font-family: monospace;
+        }
+
+        @media (max-width: 768px) {
+            .release-card {
+                padding: 25px 20px;
+            }
+            .page-title {
+                font-size: 1.6rem;
+            }
+            .btn-action {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Bar dengan Saklar Bahasa IN/EN & Tema Simbol -->
+    <div class="top-bar">
+        <div class="top-bar-container">
+            <span id="topBarHelp">Nusacoin.org membutuhkan bantuan anda!</span>
+            
+            <div class="top-bar-controls">
+                <!-- Pilihan Bahasa IN / EN -->
+                <div class="lang-switch">
+                    <button class="lang-btn active" id="btnIN" onclick="switchLanguage('id')">IN</button>
+                    <button class="lang-btn" id="btnEN" onclick="switchLanguage('en')">EN</button>
+                </div>
+
+                <!-- Tombol Tema (Simbol Moon/Sun) -->
+                <button class="theme-toggle-btn" id="themeToggle" onclick="toggleTheme()" aria-label="Ganti Tema" title="Ganti Tema">
+                    <i class="fa-solid fa-moon" id="themeIcon"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main>
+        <div class="release-card">
+            <div class="header-area">
+                <h1 class="page-title" id="appTitle">TaobotApp v1.7.0 Latest</h1>
+                <span class="version-badge" id="badgeText">Rilis Terbaru</span>
+            </div>
+
+            <h2 class="section-title"><span id="secWhatsNew">📱 Apa yang Baru</span></h2>
+
+            <p id="releaseIntro">Pembaruan besar ini memperkenalkan fitur keamanan blockchain yang canggih, antarmuka yang didesain ulang sepenuhnya, dan fitur interaktif TaobotTV yang disempurnakan.</p>
+
+            <h2 class="section-title"><span id="secV170">🎉 Rilis v1.7.0</span></h2>
+
+            <h3 class="sub-title"><span id="subAudio">🎧 Pemutar &amp; Audio</span></h3>
+
+            <ul>
+                <li id="a1">🔊 Penguat Audio di LiveTV</li>
+                <li id="a2">🎚️ Decoder MPEG-L2 pada player TV</li>
+                <li id="a3">💬 Subtitle pada saluran TV yang menyediakan</li>
+            </ul>
+
+            <h3 class="sub-title"><span id="subNux">🗳️ NUX</span></h3>
+
+            <ul>
+                <li id="n1">✅ Tombol vote NUX kini tersedia langsung di dalam aplikasi</li>
+            </ul>
+
+            <h3 class="sub-title"><span id="subQutrade">📈 Trading Qutrade (melalui API)</span></h3>
+
+            <ul>
+                <li id="q1">🟢🟠 Pasang order Beli / Jual</li>
+                <li id="q2">💰 Lihat saldo dan harga dalam Rupiah</li>
+                <li id="q3">🏦 Lihat alamat deposit Qutrade</li>
+                <li id="q4">📊 Trading dari Orderbook</li>
+                <li id="q5">📋 Buka Pesanan &amp; ❌ Batalkan Pesanan</li>
+            </ul>
+
+            <h3 class="sub-title"><span id="subFix170">🛠️ Perbaikan</span></h3>
+
+            <ul>
+                <li id="x1">🐞 Beberapa perbaikan kecil</li>
+                <li id="x2">⚡ Peningkatan kinerja</li>
+            </ul>
+
+            <h2 class="section-title"><span id="secHow">📦 Pembaruan Cara</span></h2>
+
+            <ol>
+                <li id="h1">Unduh file di bawah ⬇️</li>
+                <li id="h2">Instal/perbarui aplikasi</li>
+                <li id="h3">Nikmati fitur barunya! 🎉</li>
+            </ol>
+
+            <h2 class="section-title"><span id="sec1640">🚀 Catatan Perubahan - Versi 1.6.40</span></h2>
+
+            <ul>
+                <li id="v1">✅ Perbaikan: Mode Teater (Layar Ganda)</li>
+                <li id="v2">🔍 Tambahkan: cari saluran di Layar Penuh</li>
+                <li id="v3">💥 Jadwal langsung</li>
+                <li id="v4">🎉 Perbaikan &amp; Peningkatan Lainnya</li>
+            </ul>
+
+            <h2 class="section-title"><span id="sec1638">🚀 Catatan Perubahan - Versi 1.6.38</span></h2>
+
+            <h3 class="sub-title"><span id="subTheater">Baru: Mode Teater TaobotTV</span></h3>
+
+            <ul>
+                <li><strong id="th1Title">Mode Teater Aliran Ganda:</strong> <span id="th1Desc">Memperkenalkan tata letak pemutar streaming video berdampingan yang imersif dan dioptimalkan untuk tampilan lanskap.</span></li>
+                <li><strong id="th2Title">Pengaturan Fokus Audio Cerdas:</strong> <span id="th2Desc">Menerapkan pengelola audio otomatis yang mencegah tumpang tindih suara dengan membisukan pemutar sekunder dan secara dinamis menggeser prioritas audio berdasarkan pilihan pengguna atau penutupan aliran.</span></li>
+                <li><strong id="th3Title">Pemilih Episode Dinamis:</strong> <span id="th3Desc">Menambahkan rel navigasi episode horizontal yang rapi khusus untuk saluran non-TV (Serial) yang tersusun rapi di bawah layar aktif.</span></li>
+                <li><strong id="th4Title">Penguncian Saluran Cerdas:</strong> <span id="th4Desc">Mengintegrasikan pengamanan validasi yang mengunci saluran yang sedang diputar untuk mencegah penayangan ganda pada slot yang berlawanan.</span></li>
+            </ul>
+
+            <h3 class="sub-title"><span id="subOpt">Perbaikan &amp; Optimasi</span></h3>
+
+            <ul>
+                <li id="o1">Pindai QR</li>
+                <li><strong id="o2Title">Mesin Optimasi Memori:</strong> <span id="o2Desc">Menambahkan pengelola latar belakang terpusat (_stopAndResetSlot) untuk langsung menghancurkan instance TVPlayer asli yang aktif dan membersihkan memori cache token saat aliran ditutup atau beralih ke layar penuh.</span></li>
+            </ul>
+
+            <h2 class="section-title"><span id="sec1637">v1.6.37</span></h2>
+
+            <ul>
+                <li id="w1">Pencarian Saluran TV</li>
+                <li><strong id="w2Title">Transaksi Offline (GEMA):</strong> <span id="w2Desc">Menambahkan pengalaman pengguna baru (NUX) untuk menangani transaksi offline melalui audio.</span></li>
+                <li><strong id="w3Title">Siaran Hex QR:</strong> <span id="w3Desc">Mengaktifkan penyiaran dan berbagi data hex secara instan dengan memindai kode QR.</span></li>
+                <li><strong id="w4Title">Pemutaran TV dalam Obrolan:</strong> <span id="w4Desc">Menambahkan dukungan untuk memutar siaran TV langsung di dalam layar obrolan.</span></li>
+            </ul>
+
+            <h3 class="sub-title"><span id="subBug">🐛 Perbaikan Bug &amp; Peningkatan</span></h3>
+
+            <ul>
+                <li id="b1">Performa yang dioptimalkan untuk pengenalan audio.</li>
+                <li id="b2">Fokus pemindai kode QR dan kecepatan pembacaan yang ditingkatkan dalam kondisi cahaya rendah.</li>
+                <li id="b3">Masalah kecil pada perataan UI di antarmuka obrolan telah teratasi.</li>
+            </ul>
+
+            <h2 class="section-title"><span id="secChain">🔐 Fitur Blockchain Nusa</span></h2>
+
+            <ul>
+                <li><strong id="c1Title">Penandatanganan File:</strong> <span id="c1Desc">Tandatangani file apa pun secara digital untuk mengamankan kepemilikan Anda.</span></li>
+                <li><strong id="c2Title">Bukti Keberadaan:</strong> <span id="c2Desc">Verifikasi file di Blockchain Nusa untuk membuktikan keberadaannya pada titik waktu tertentu.</span></li>
+            </ul>
+
+            <h2 class="section-title"><span id="secTV">📺 Pemutar TV &amp; Media Sosial</span></h2>
+
+            <ul>
+                <li><strong id="tv1Title">Obrolan TV Langsung:</strong> <span id="tv1Desc">Berbincang secara langsung dan anonim dalam Taobot TV secara real-time.</span></li>
+                <li><strong id="tv2Title">Siaran TV Langsung:</strong> <span id="tv2Desc">Miniscreen Taobot TV, memungkinkan Anda melakukan banyak tugas sekaligus saat menonton TV.</span></li>
+            </ul>
+
+            <h2 class="section-title"><span id="secUI">🎨 UI &amp; Penjelajahan</span></h2>
+
+            <ul>
+                <li><strong id="ui1Title">Desain UI Baru:</strong> <span id="ui1Desc">Perombakan antarmuka pengguna yang bersih, modern, dan sangat intuitif (UI berbasis tab).</span></li>
+                <li><strong id="ui2Title">Browser Dalam Aplikasi:</strong> <span id="ui2Desc">Browser bawaan baru untuk navigasi web yang lancar tanpa perlu keluar dari aplikasi.</span></li>
+                <li><strong id="ui3Title">Konten Dinamis Aplikasi/dApps:</strong> <span id="ui3Desc">Lewati Panduan Instalasi jika Anda memperbarui menggunakan Pembaruan Otomatis bawaan di aplikasi (tekan lama pada teks yang sedang berjalan di menu utama).</span></li>
+            </ul>
+
+            <h2 class="section-title"><span id="secInst">📦 Panduan Instalasi</span></h2>
+
+            <ol>
+                <li><span id="i1">Unduh aset app-release.apk yang tercantum di bawah ini.</span>
+                    <ul>
+                        <li id="i1a">Catatan: app-arm64-v8a-release.apk untuk perangkat Android yang lebih baru.</li>
+                        <li id="i1b">app-armeabi-v7a-release.apk untuk perangkat Android lama</li>
+                    </ul>
+                </li>
+                <li id="i2">Buka file tersebut di perangkat Android Anda.</li>
+                <li id="i3">Aktifkan "Instal dari Sumber Tidak Dikenal" jika diminta oleh sistem Anda.</li>
+                <li id="i4">Ikuti petunjuk di layar untuk memperbarui atau menginstal.</li>
+            </ol>
+
+            <div class="warning-box">
+                <strong id="warnTitle">⚠️ Persyaratan Minimum:</strong> <span id="warnDesc">Android Versi Minimal 7.0+</span>
+            </div>
+
+            <h2 class="section-title"><span id="secFeedback">🤝 Umpan Balik &amp; Dukungan</span></h2>
+
+            <p id="feedbackDesc">Menemukan bug? Laporkan masalah di halaman kami atau bergabunglah dalam diskusi komunitas kami!</p>
+
+            <div class="action-buttons">
+                <a href="https://github.com/TaobotX11/nusacoin/releases/download/TaobotApp/app-arm64-v8a-release.apk" target="_blank" class="btn-action btn-download" id="btnAppDownload">
+                    <i class="fa-solid fa-download"></i> Unduh Taobot App
+                </a>
+                <a href="https://telegram.me/NusacoinX11" target="_blank" class="btn-action btn-telegram" id="btnTelegramLink">
+                    <i class="fa-brands fa-telegram"></i> Saluran Telegram
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <h2>Nusacoin Network</h2>
+                <p id="footerDesc">Blockchain milik rakyat dengan prinsip crypto yang adil. Terdesentralisasi, aman, dan dapat diakses semua orang.</p>
+                <div class="social-icons">
+                    <a href="https://x.com/Nusacoin_chain" target="_blank" class="social-box" aria-label="Twitter"><i class="fab fa-x-twitter"></i></a>
+                    <a href="https://www.threads.net/@nusa_coin" target="_blank" class="social-box" aria-label="Threads"><i class="fab fa-threads"></i></a>
+                    <a href="https://discord.gg/NcKKZFBzJ" target="_blank" class="social-box" aria-label="Discord"><i class="fab fa-discord"></i></a>
+                    <a href="https://telegram.me/NusacoinX11" target="_blank" class="social-box" aria-label="Telegram"><i class="fab fa-telegram-plane"></i></a>
+                    <a href="https://www.reddit.com/r/Nusacoin" target="_blank" class="social-box" aria-label="Reddit"><i class="fab fa-reddit-alien"></i></a>
+                    <a href="https://github.com/TaobotX11/nusacoin" target="_blank" class="social-box" aria-label="GitHub"><i class="fab fa-github"></i></a>
+                </div>
+            </div>
+
+            <div class="footer-col">
+                <h3 id="footerQuickTitle">Tautan Cepat</h3>
+                <ul>
+                    <li><a href="https://explorer.nusacoin.org" target="_blank">Explorer</a></li>
+                    <li><a href="https://dompet.nusacoin.org" target="_blank">Nusacoin Web Wallet</a></li>
+                    <li><a href="https://github.com/TaobotX11/nusacoin" target="_blank">Nusacoin Core</a></li>
+                    <li><a href="https://green.nusacoin.org" target="_blank">Nusacoin Green Wallet</a></li>
+                    <li><a href="/Pages/Visi-Misi.html" target="_blank">Roadmap</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h3 id="footerResTitle">Sumber Daya</h3>
+                <ul>
+                    <li><a href="https://paper.nusacoin.org" target="_blank">Paper Wallet</a></li>
+                    <li><a href="https://pooljava.nusacoin.org" target="_blank">Mining Pool</a></li>
+                    <li><a href="https://ijol.nusacoin.org" target="_blank">Ijol Nusacoin (P2P)</a></li>
+                    <li><a href="https://t.me/rdnmesin_bot" target="_blank">Nusacard RDN Bot</a></li>
+                    <li><a href="/Pages/Kosa-Kata.html" target="_blank" id="menuGlossary">Kosa Kata</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h3 id="footerDocsTitle">Dokumen &amp; Keamanan</h3>
+                <ul>
+                    <li><a href="/Pages/Whitepaper_Nusacoin_in.pdf">Whitepaper IN</a></li>
+                    <li><a href="/Pages/Whitepaper_Nusacoin_en.pdf">Whitepaper EN</a></li>
+                    <li><a href="/Pages/Amankan-Wallet.html" target="_blank" id="menuSecure">Amankan Wallet</a></li>
+                    <li><a href="/Pages/Lindungi-Privasi-Anda.html" target="_blank" id="menuPrivacy">Lindungi Privasi</a></li>
+                    <li><a href="/Pages/FAQ.html" target="_blank">FAQ</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <span id="footerCopyright">© 2026 Nusacoin Project. Dibangun untuk desentralisasi.</span>
+            <span class="mono"> · NUX / X11</span>
+        </div>
+    </footer>
+
+    <!-- JavaScript Translasi & Theme Switcher -->
+    <script>
+        const translations = {
+            id: {
+                topBarHelp: "Nusacoin.org membutuhkan bantuan anda!",
+                appTitle: "TaobotApp v1.7.0 Latest",
+                badgeText: "Rilis Terbaru",
+                secWhatsNew: "📱 Apa yang Baru",
+                releaseIntro: "Pembaruan besar ini memperkenalkan fitur keamanan blockchain yang canggih, antarmuka yang didesain ulang sepenuhnya, dan fitur interaktif TaobotTV yang disempurnakan.",
+                secV170: "🎉 Rilis v1.7.0",
+                subAudio: "🎧 Pemutar & Audio",
+                a1: "🔊 Penguat Audio di LiveTV",
+                a2: "🎚️ Decoder MPEG-L2 pada player TV",
+                a3: "💬 Subtitle pada saluran TV yang menyediakan",
+                subNux: "🗳️ NUX",
+                n1: "✅ Tombol vote NUX kini tersedia langsung di dalam aplikasi",
+                subQutrade: "📈 Trading Qutrade (melalui API)",
+                q1: "🟢🟠 Pasang order Beli / Jual",
+                q2: "💰 Lihat saldo dan harga dalam Rupiah",
+                q3: "🏦 Lihat alamat deposit Qutrade",
+                q4: "📊 Trading dari Orderbook",
+                q5: "📋 Buka Pesanan & ❌ Batalkan Pesanan",
+                subFix170: "🛠️ Perbaikan",
+                x1: "🐞 Beberapa perbaikan kecil",
+                x2: "⚡ Peningkatan kinerja",
+                secHow: "📦 Pembaruan Cara",
+                h1: "Unduh file di bawah ⬇️",
+                h2: "Instal/perbarui aplikasi",
+                h3: "Nikmati fitur barunya! 🎉",
+                sec1640: "🚀 Catatan Perubahan - Versi 1.6.40",
+                v1: "✅ Perbaikan: Mode Teater (Layar Ganda)",
+                v2: "🔍 Tambahkan: cari saluran di Layar Penuh",
+                v3: "💥 Jadwal langsung",
+                v4: "🎉 Perbaikan & Peningkatan Lainnya",
+                sec1638: "🚀 Catatan Perubahan - Versi 1.6.38",
+                subTheater: "Baru: Mode Teater TaobotTV",
+                th1Title: "Mode Teater Aliran Ganda:",
+                th1Desc: "Memperkenalkan tata letak pemutar streaming video berdampingan yang imersif dan dioptimalkan untuk tampilan lanskap.",
+                th2Title: "Pengaturan Fokus Audio Cerdas:",
+                th2Desc: "Menerapkan pengelola audio otomatis yang mencegah tumpang tindih suara dengan membisukan pemutar sekunder dan secara dinamis menggeser prioritas audio berdasarkan pilihan pengguna atau penutupan aliran.",
+                th3Title: "Pemilih Episode Dinamis:",
+                th3Desc: "Menambahkan rel navigasi episode horizontal yang rapi khusus untuk saluran non-TV (Serial) yang tersusun rapi di bawah layar aktif.",
+                th4Title: "Penguncian Saluran Cerdas:",
+                th4Desc: "Mengintegrasikan pengamanan validasi yang mengunci saluran yang sedang diputar untuk mencegah penayangan ganda pada slot yang berlawanan.",
+                subOpt: "Perbaikan & Optimasi",
+                o1: "Pindai QR",
+                o2Title: "Mesin Optimasi Memori:",
+                o2Desc: "Menambahkan pengelola latar belakang terpusat (_stopAndResetSlot) untuk langsung menghancurkan instance TVPlayer asli yang aktif dan membersihkan memori cache token saat aliran ditutup atau beralih ke layar penuh.",
+                sec1637: "v1.6.37",
+                w1: "Pencarian Saluran TV",
+                w2Title: "Transaksi Offline (GEMA):",
+                w2Desc: "Menambahkan pengalaman pengguna baru (NUX) untuk menangani transaksi offline melalui audio.",
+                w3Title: "Siaran Hex QR:",
+                w3Desc: "Mengaktifkan penyiaran dan berbagi data hex secara instan dengan memindai kode QR.",
+                w4Title: "Pemutaran TV dalam Obrolan:",
+                w4Desc: "Menambahkan dukungan untuk memutar siaran TV langsung di dalam layar obrolan.",
+                subBug: "🐛 Perbaikan Bug & Peningkatan",
+                b1: "Performa yang dioptimalkan untuk pengenalan audio.",
+                b2: "Fokus pemindai kode QR dan kecepatan pembacaan yang ditingkatkan dalam kondisi cahaya rendah.",
+                b3: "Masalah kecil pada perataan UI di antarmuka obrolan telah teratasi.",
+                secChain: "🔐 Fitur Blockchain Nusa",
+                c1Title: "Penandatanganan File:",
+                c1Desc: "Tandatangani file apa pun secara digital untuk mengamankan kepemilikan Anda.",
+                c2Title: "Bukti Keberadaan:",
+                c2Desc: "Verifikasi file di Blockchain Nusa untuk membuktikan keberadaannya pada titik waktu tertentu.",
+                secTV: "📺 Pemutar TV & Media Sosial",
+                tv1Title: "Obrolan TV Langsung:",
+                tv1Desc: "Berbincang secara langsung dan anonim dalam Taobot TV secara real-time.",
+                tv2Title: "Siaran TV Langsung:",
+                tv2Desc: "Miniscreen Taobot TV, memungkinkan Anda melakukan banyak tugas sekaligus saat menonton TV.",
+                secUI: "🎨 UI & Penjelajahan",
+                ui1Title: "Desain UI Baru:",
+                ui1Desc: "Perombakan antarmuka pengguna yang bersih, modern, dan sangat intuitif (UI berbasis tab).",
+                ui2Title: "Browser Dalam Aplikasi:",
+                ui2Desc: "Browser bawaan baru untuk navigasi web yang lancar tanpa perlu keluar dari aplikasi.",
+                ui3Title: "Konten Dinamis Aplikasi/dApps:",
+                ui3Desc: "Lewati Panduan Instalasi jika Anda memperbarui menggunakan Pembaruan Otomatis bawaan di aplikasi (tekan lama pada teks yang sedang berjalan di menu utama).",
+                secInst: "📦 Panduan Instalasi",
+                i1: "Unduh aset app-release.apk yang tercantum di bawah ini.",
+                i1a: "Catatan: app-arm64-v8a-release.apk untuk perangkat Android yang lebih baru.",
+                i1b: "app-armeabi-v7a-release.apk untuk perangkat Android lama",
+                i2: "Buka file tersebut di perangkat Android Anda.",
+                i3: "Aktifkan \"Instal dari Sumber Tidak Dikenal\" jika diminta oleh sistem Anda.",
+                i4: "Ikuti petunjuk di layar untuk memperbarui atau menginstal.",
+                warnTitle: "⚠️ Persyaratan Minimum:",
+                warnDesc: "Android Versi Minimal 7.0+",
+                secFeedback: "🤝 Umpan Balik & Dukungan",
+                feedbackDesc: "Menemukan bug? Laporkan masalah di halaman kami atau bergabunglah dalam diskusi komunitas kami!",
+                btnAppDownload: "Unduh Taobot App",
+                btnTelegramLink: "Saluran Telegram",
+                footerDesc: "Blockchain milik rakyat dengan prinsip crypto yang adil. Terdesentralisasi, aman, dan dapat diakses semua orang.",
+                footerQuickTitle: "Tautan Cepat",
+                footerResTitle: "Sumber Daya",
+                footerDocsTitle: "Dokumen & Keamanan",
+                menuGlossary: "Kosa Kata",
+                menuSecure: "Amankan Wallet",
+                menuPrivacy: "Lindungi Privasi",
+                footerCopyright: "© 2026 Nusacoin Project. Dibangun untuk desentralisasi."
+            },
+            en: {
+                topBarHelp: "Nusacoin.org needs your help!",
+                appTitle: "TaobotApp v1.7.0 Latest",
+                badgeText: "Latest Release",
+                secWhatsNew: "📱 What's New",
+                releaseIntro: "This major update introduces advanced blockchain security features, a completely redesigned interface, and enhanced interactive TaobotTV features.",
+                secV170: "🎉 Release v1.7.0",
+                subAudio: "🎧 Player & Audio",
+                a1: "🔊 Audio Booster on LiveTV",
+                a2: "🎚️ MPEG-L2 decoder on the TV player",
+                a3: "💬 Subtitles on TV channels that provide them",
+                subNux: "🗳️ NUX",
+                n1: "✅ The NUX vote button is now available directly inside the app",
+                subQutrade: "📈 Qutrade Trading (via API)",
+                q1: "🟢🟠 Place Buy / Sell orders",
+                q2: "💰 View balance and prices in Rupiah",
+                q3: "🏦 View Qutrade deposit address",
+                q4: "📊 Trade from the Orderbook",
+                q5: "📋 Open Orders & ❌ Cancel Orders",
+                subFix170: "🛠️ Fixes",
+                x1: "🐞 Several minor fixes",
+                x2: "⚡ Performance improvements",
+                secHow: "📦 How to Update",
+                h1: "Download the file below ⬇️",
+                h2: "Install/update the app",
+                h3: "Enjoy the new features! 🎉",
+                sec1640: "🚀 Changelog - Version 1.6.40",
+                v1: "✅ Fix: Theater Mode (Dual Screen)",
+                v2: "🔍 Added: search channels in Fullscreen",
+                v3: "💥 Live schedule",
+                v4: "🎉 Other Fixes & Improvements",
+                sec1638: "🚀 Changelog - Version 1.6.38",
+                subTheater: "New: TaobotTV Theater Mode",
+                th1Title: "Dual Stream Theater Mode:",
+                th1Desc: "Introduces an immersive side-by-side video streaming player layout optimized for landscape view.",
+                th2Title: "Smart Audio Focus Settings:",
+                th2Desc: "Implements an automatic audio manager that prevents overlapping sound by muting the secondary player and dynamically shifting audio priority based on user choice or stream closure.",
+                th3Title: "Dynamic Episode Picker:",
+                th3Desc: "Adds a neat horizontal episode navigation rail exclusively for non-TV (Series) channels, placed neatly beneath the active screen.",
+                th4Title: "Smart Channel Locking:",
+                th4Desc: "Integrates validation safeguards that lock the currently playing channel to prevent duplicate playback in the opposite slot.",
+                subOpt: "Fixes & Optimizations",
+                o1: "QR Scan",
+                o2Title: "Memory Optimization Engine:",
+                o2Desc: "Adds a centralized background manager (_stopAndResetSlot) to instantly destroy the active native TVPlayer instance and clear token cache memory when a stream is closed or switched to fullscreen.",
+                sec1637: "v1.6.37",
+                w1: "TV Channel Search",
+                w2Title: "Offline Transactions (GEMA):",
+                w2Desc: "Added a new user experience (NUX) for handling offline transactions via audio.",
+                w3Title: "QR Hex Broadcast:",
+                w3Desc: "Enabled instant broadcasting and sharing of hex data by scanning QR codes.",
+                w4Title: "In-Chat TV Playback:",
+                w4Desc: "Added support for playing live TV broadcasts directly inside the chat screen.",
+                subBug: "🐛 Bug Fixes & Improvements",
+                b1: "Optimized performance for audio recognition.",
+                b2: "Improved QR code scanner focus and reading speed in low-light conditions.",
+                b3: "Minor UI alignment issues in the chat interface have been resolved.",
+                secChain: "🔐 Nusa Blockchain Features",
+                c1Title: "File Signing:",
+                c1Desc: "Digitally sign any file to secure your ownership.",
+                c2Title: "Proof of Existence:",
+                c2Desc: "Verify files on the Nusa Blockchain to prove they existed at a specific point in time.",
+                secTV: "📺 TV Player & Social Media",
+                tv1Title: "Live TV Chat:",
+                tv1Desc: "Chat live and anonymously inside Taobot TV in real time.",
+                tv2Title: "Live TV Broadcast:",
+                tv2Desc: "Taobot TV miniscreen, letting you multitask while watching TV.",
+                secUI: "🎨 UI & Browsing",
+                ui1Title: "New UI Design:",
+                ui1Desc: "A clean, modern, and highly intuitive user interface overhaul (tab-based UI).",
+                ui2Title: "In-App Browser:",
+                ui2Desc: "A new built-in browser for smooth web navigation without leaving the app.",
+                ui3Title: "Dynamic App/dApps Content:",
+                ui3Desc: "Skip the Installation Guide if you update using the built-in Auto Update in the app (long-press the running text on the main menu).",
+                secInst: "📦 Installation Guide",
+                i1: "Download the app-release.apk asset listed below.",
+                i1a: "Note: app-arm64-v8a-release.apk for newer Android devices.",
+                i1b: "app-armeabi-v7a-release.apk for older Android devices",
+                i2: "Open the file on your Android device.",
+                i3: "Enable \"Install from Unknown Sources\" if prompted by your system.",
+                i4: "Follow the on-screen instructions to update or install.",
+                warnTitle: "⚠️ Minimum Requirements:",
+                warnDesc: "Android Version 7.0+",
+                secFeedback: "🤝 Feedback & Support",
+                feedbackDesc: "Found a bug? Report an issue on our page or join our community discussions!",
+                btnAppDownload: "Download Taobot App",
+                btnTelegramLink: "Telegram Channel",
+                footerDesc: "The people's blockchain built on fair crypto principles. Decentralized, secure, and accessible to everyone.",
+                footerQuickTitle: "Quick Links",
+                footerResTitle: "Resources",
+                footerDocsTitle: "Docs & Security",
+                menuGlossary: "Glossary",
+                menuSecure: "Secure Wallet",
+                menuPrivacy: "Protect Privacy",
+                footerCopyright: "© 2026 Nusacoin Project. Built for decentralization."
+            }
+        };
+
+        function switchLanguage(lang) {
+            document.getElementById('btnIN').classList.toggle('active', lang === 'id');
+            document.getElementById('btnEN').classList.toggle('active', lang === 'en');
+
+            const t = translations[lang];
+            for (let id in t) {
+                const el = document.getElementById(id);
+                if (el) {
+                    if (el.tagName === 'A' && el.querySelector('i')) {
+                        const icon = el.querySelector('i').outerHTML;
+                        el.innerHTML = icon + ' ' + t[id];
+                    } else {
+                        el.textContent = t[id];
+                    }
+                }
+            }
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const icon = document.getElementById('themeIcon');
+            
+            body.classList.toggle('dark-mode');
+            
+            if (body.classList.contains('dark-mode')) {
+                icon.className = 'fa-solid fa-sun';
+            } else {
+                icon.className = 'fa-solid fa-moon';
+            }
+        }
+    </script>
+</body>
+</html>
