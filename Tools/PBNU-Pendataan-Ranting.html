@@ -1,0 +1,2380 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PBNU - Pendataan Ranting & Nusachain Ledger</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Crypto-JS, Elliptic.js, QRCode CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/elliptic/6.5.4/elliptic.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+    <style>
+        :root {
+            --primary: #27ae60;
+            --primary-dark: #1e8449;
+            --bg-body: #f1f5f9;
+            --bg-card: #ffffff;
+            --bg-card-sub: #f8fafc;
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --border: #e2e8f0;
+        }
+
+        body.dark-mode {
+            --primary: #27ae60;
+            --primary-dark: #1e8449;
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --bg-card-sub: #0f172a;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --border: #334155;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .theme-card {
+            background-color: var(--bg-card);
+            border-color: var(--border);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .theme-subcard {
+            background-color: var(--bg-card-sub);
+            border-color: var(--border);
+        }
+
+        /* Kontrol form (ikut mode gelap/terang lewat CSS variable) */
+        .fld { width: 100%; padding: .625rem 1rem; border-radius: .75rem; border: 1px solid #cbd5e1; background: var(--bg-card); color: var(--text-main); font-size: .75rem; }
+        .fld:focus { outline: 2px solid var(--primary); outline-offset: 0; border-color: transparent; }
+        body.dark-mode .fld { border-color: #475569; }
+        .lbl { display: block; font-size: .75rem; font-weight: 600; color: var(--text-sub); margin-bottom: .25rem; }
+        .lnk { display: flex; align-items: center; justify-content: space-between; gap: .75rem; width: 100%; text-align: left; padding: .75rem 1rem; border-radius: .75rem; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-main); font-size: .75rem; font-weight: 600; transition: border-color .2s, color .2s; }
+        .lnk small { display: block; font-weight: 400; color: var(--text-sub); margin-top: .125rem; }
+        .lnk:hover { border-color: var(--primary); color: var(--primary); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans">
+
+    <!-- Header / Navbar -->
+    <header class="bg-[var(--primary-dark)] text-white shadow-lg sticky top-0 z-50 transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white text-[var(--primary-dark)] p-2.5 rounded-xl font-bold text-xl shadow-md flex items-center justify-center">
+                    <i class="fa-solid fa-network-wired"></i>
+                </div>
+                <div>
+                    <h1 id="navTitle" class="text-lg font-bold tracking-tight">PBNU - Pendataan Ranting Nusachain</h1>
+                    <p id="navSubtitle" class="text-xs text-emerald-200">Sistem Ledger Pengurus Ranting & Live Wallet</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <!-- Status Wallet Badge di Navbar -->
+                <div id="navWalletStatus" class="hidden items-center gap-2 bg-emerald-900/60 px-3 py-1.5 rounded-xl border border-emerald-500/30 text-xs font-mono">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span id="navWalletAddrShort" class="text-emerald-100">nu1q...</span>
+                </div>
+                <!-- Toggle Bahasa IN/EN -->
+                <div class="flex bg-black/20 p-1 rounded-xl border border-white/10">
+                    <button id="btnIN" onclick="switchLanguage('id')" class="px-2.5 py-1 text-xs font-bold rounded-lg bg-[var(--primary-dark)] text-white transition">IN</button>
+                    <button id="btnEN" onclick="switchLanguage('en')" class="px-2.5 py-1 text-xs font-bold rounded-lg text-emerald-200 transition">EN</button>
+                </div>
+                <!-- Tombol Toggle Mode Gelap / Terang -->
+                <button onclick="toggleTheme()" class="bg-black/20 hover:bg-black/30 text-white p-2.5 rounded-xl transition border border-white/10 flex items-center justify-center" title="Ubah Tema">
+                    <i id="themeIcon" class="fa-solid fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs / Menu Bar -->
+    <nav class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm sticky top-[73px] z-40 overflow-x-auto">
+        <div class="max-w-7xl mx-auto px-4 flex gap-1 py-2.5 whitespace-nowrap">
+            <button onclick="switchTab('wallet')" id="tabBtn-wallet" class="px-4 py-2 rounded-xl text-xs font-bold transition bg-[var(--primary)] text-white flex items-center gap-2">
+                <i class="fa-solid fa-wallet"></i> 1. Koneksi Wallet & Saldo
+            </button>
+            <button onclick="switchTab('ranting')" id="tabBtn-ranting" class="px-4 py-2 rounded-xl text-xs font-bold transition bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-emerald-50 flex items-center gap-2">
+                <i class="fa-solid fa-building-columns"></i> 2. Ranting & Monografi
+            </button>
+            <button onclick="switchTab('sk')" id="tabBtn-sk" class="px-4 py-2 rounded-xl text-xs font-bold transition bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-emerald-50 flex items-center gap-2">
+                <i class="fa-solid fa-file-contract"></i> 3. SK Ranting
+            </button>
+            <button onclick="switchTab('anggota')" id="tabBtn-anggota" class="px-4 py-2 rounded-xl text-xs font-bold transition bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-emerald-50 flex items-center gap-2">
+                <i class="fa-solid fa-users"></i> 4. Buku Induk Anggota
+            </button>
+            <button onclick="switchTab('tanah')" id="tabBtn-tanah" class="px-4 py-2 rounded-xl text-xs font-bold transition bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-emerald-50 flex items-center gap-2">
+                <i class="fa-solid fa-map-location-dot"></i> 5. Aset Tanah
+            </button>
+            <button onclick="switchTab('bangunan')" id="tabBtn-bangunan" class="px-4 py-2 rounded-xl text-xs font-bold transition bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-emerald-50 flex items-center gap-2">
+                <i class="fa-solid fa-house-chimney"></i> 6. Aset Bangunan
+            </button>
+            <button onclick="switchTab('kendaraan')" id="tabBtn-kendaraan" class="px-4 py-2 rounded-xl text-xs font-bold transition bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-emerald-50 flex items-center gap-2">
+                <i class="fa-solid fa-car"></i> 7. Aset Kendaraan
+            </button>
+            <button onclick="switchTab('peralatan')" id="tabBtn-peralatan" class="px-4 py-2 rounded-xl text-xs font-bold transition bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-emerald-50 flex items-center gap-2">
+                <i class="fa-solid fa-boxes-stacked"></i> 8. Aset Peralatan
+            </button>
+            <button onclick="switchTab('verify')" id="tabBtn-verify" class="px-4 py-2 rounded-xl text-xs font-bold transition bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-emerald-50 flex items-center gap-2">
+                <i class="fa-solid fa-shield-halved"></i> 9. Verifikasi Hash
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="max-w-5xl mx-auto px-4 py-8 flex-grow w-full">
+
+        <!-- TAB 1: KONEKSI WALLET -->
+        <div id="content-wallet" class="tab-content space-y-6">
+            <div class="theme-card p-6 md:p-8 rounded-2xl shadow-sm border">
+                <div class="text-center mb-6">
+                    <h2 class="text-2xl font-bold text-[var(--primary)] uppercase">Koneksi Live Wallet Nusachain</h2>
+                    <p class="text-sm text-[var(--text-sub)] mt-1">Impor Private Key WIF Anda untuk mengaktifkan injeksi data dari file Excel langsung ke blockchain.</p>
+                </div>
+
+                <div class="bg-emerald-50 dark:bg-slate-800 border border-emerald-300 dark:border-emerald-600/40 p-6 rounded-2xl shadow-sm">
+                    <div id="walletImportSection">
+                        <h3 class="font-bold text-emerald-900 dark:text-emerald-400 text-base mb-3"><i class="fa-solid fa-wallet mr-2 text-[var(--primary)]"></i> Buka Live Wallet Nusacoin</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                            <div>
+                                <label class="block text-xs font-bold text-emerald-900 dark:text-emerald-300 uppercase mb-1">Private Key WIF (0x57...) / ENC / Alamat</label>
+                                <div class="flex gap-2">
+                                    <input type="password" id="walletPkeyInput" placeholder="Masukkan WIF, ENC, atau Alamat..." class="flex-1 min-w-0 px-4 py-2.5 rounded-xl border border-emerald-200 dark:border-slate-700 bg-white dark:bg-slate-900 dark:text-white text-xs font-mono focus:ring-2 focus:ring-[var(--primary)] focus:outline-none">
+                                    <button type="button" onclick="openQrScanner()" title="Scan QR / barcode" class="px-3 rounded-xl bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-white text-xs font-bold flex items-center gap-1.5 shrink-0"><i class="fa-solid fa-qrcode"></i> Scan</button>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-emerald-900 dark:text-emerald-300 uppercase mb-1">PIN (Jika Terenkripsi)</label>
+                                <input type="password" id="walletPinInput" placeholder="PIN opsional..." class="w-full px-4 py-2.5 rounded-xl border border-emerald-200 dark:border-slate-700 bg-white dark:bg-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-[var(--primary)] focus:outline-none">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                            <div>
+                                <label class="block text-xs font-bold text-emerald-900 dark:text-emerald-300 uppercase mb-1">Format Jaringan Alamat</label>
+                                <select id="selectWalletAddrType" class="w-full px-3 py-2.5 rounded-xl border border-emerald-200 dark:border-slate-700 bg-white dark:bg-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-[var(--primary)] focus:outline-none">
+                                    <option value="bech32" selected>Bech32 Native SegWit (nu1q...)</option>
+                                    <option value="p2pkh">Legacy P2PKH (N...)</option>
+                                    <option value="p2sh">P2SH Script (X...)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-emerald-900 dark:text-emerald-300 uppercase mb-1">URL Node Blockchain Asli (Explorer API)</label>
+                                <input type="text" id="nodeApiUrl" value="https://explorer.nusacoin.org" class="w-full px-4 py-2.5 rounded-xl border border-emerald-200 dark:border-slate-700 bg-white dark:bg-slate-900 dark:text-white text-xs font-mono focus:ring-2 focus:ring-[var(--primary)] focus:outline-none">
+                            </div>
+                        </div>
+                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                            <div>
+                                <label class="block text-xs font-bold text-emerald-900 dark:text-emerald-300 uppercase mb-1">URL UTXO ({node}, {addr}) - kosongkan = otomatis</label>
+                                <input type="text" id="utxoUrl" value="" placeholder="kosong = otomatis via API explorer (getaddresstxs + getrawtransaction)" class="fld font-mono">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-emerald-900 dark:text-emerald-300 uppercase mb-1">URL Broadcast ({node}, {hex}) - opsional</label>
+                                <input type="text" id="broadcastUrl" value="https://api.nusacoin.org/broadcast" class="fld font-mono">
+                                <select id="broadcastFmt" class="fld mt-2">
+                                    <option value="docraw" selected>Field "raw" (sesuai dokumentasi API)</option>
+                                    <option value="auto">Format body: otomatis (coba banyak format)</option>
+                                    <option value="hex">JSON {"hex": ...}</option>
+                                    <option value="rawtx">JSON {"rawtx": ...}</option>
+                                    <option value="rawTx">JSON {"rawTx": ...}</option>
+                                    <option value="tx">JSON {"tx": ...}</option>
+                                    <option value="text">Teks polos (hex saja)</option>
+                                    <option value="f:rawtx">Form rawtx=... (gaya coinbin)</option>
+                                    <option value="f:hex">Form hex=...</option>
+                                    <option value="custom">JSON dengan nama field sendiri...</option>
+                                </select>
+                                <input type="text" id="broadcastField" placeholder="nama field JSON, mis. hexstring" class="fld font-mono mt-2">
+                                <textarea id="broadcastBody" rows="2" placeholder='Body request persis dari dokumentasi API (opsional), tulis {hex} sebagai tempat hex. Contoh: {"method":"sendrawtransaction","params":["{hex}"]}' class="fld font-mono mt-2"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-emerald-900 dark:text-emerald-300 uppercase mb-1">Satuan nilai UTXO dari API</label>
+                                <select id="utxoUnit" class="fld"><option value="sat" selected>Satoshi (bilangan bulat)</option><option value="coin">NUX (desimal)</option></select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-emerald-900 dark:text-emerald-300 uppercase mb-1">Fee per transaksi (NUX)</label>
+                                <input type="number" id="feeNux" value="0.001" step="0.0001" min="0" class="fld">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-bold text-emerald-900 dark:text-emerald-300 uppercase mb-1">URL Riwayat Transaksi ({node}, {addr}) - opsional</label>
+                                <input type="text" id="historyUrl" value="{node}/ext/getaddresstxs/{addr}/0/25" class="fld font-mono">
+                            </div>
+                        </div>
+                        <button type="button" onclick="importLiveWallet()" class="w-full bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-white font-bold py-3 rounded-xl text-xs transition shadow flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-right-to-bracket"></i> Buka Wallet & Muat Saldo Blockchain Asli
+                        </button>
+                    </div>
+
+                    <!-- OPSI RAW TX / FALLBACK BROADCAST -->
+                    <div class="mb-4 p-4 rounded-xl border border-amber-300 bg-amber-50 dark:bg-slate-800 dark:border-amber-700 space-y-3">
+                        <label class="flex items-start gap-2 text-xs font-bold text-amber-900 dark:text-amber-300">
+                            <input type="checkbox" id="rawOnly" class="mt-0.5">
+                            <span>Mode raw saja: tandatangani transaksi TANPA broadcast, lalu unduh file raw TX untuk disiarkan di tempat lain.<br><span class="font-normal">Jika tidak dicentang, aplikasi tetap mencoba broadcast; bila gagal, file raw TX otomatis disediakan.</span></span>
+                        </label>
+                        <div>
+                            <label class="block text-xs font-bold text-amber-900 dark:text-amber-300 uppercase mb-1">UTXO manual (opsional, jika node/explorer tidak bisa diakses dari browser)</label>
+                            <textarea id="manualUtxo" rows="3" placeholder="txid,vout,nilai_satoshi  (satu baris per UTXO)" class="fld font-mono"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- PENGATURAN UTXO & MEMPOOL -->
+                    <div class="mb-4 p-4 rounded-xl border border-emerald-300 bg-white dark:bg-slate-800 dark:border-emerald-700 space-y-3">
+                        <h4 class="font-bold text-xs uppercase text-emerald-900 dark:text-emerald-300"><i class="fa-solid fa-coins mr-1"></i> Pengaturan UTXO & Mempool</h4>
+                        <div>
+                            <label class="block text-xs font-bold text-emerald-900 dark:text-emerald-300 uppercase mb-1">URL API Nusacoin (UTXO & mempool)</label>
+                            <input type="text" id="apiBaseUrl" value="https://api.nusacoin.org" class="fld font-mono">
+                        </div>
+                        <label class="flex items-start gap-2 text-xs font-bold text-emerald-900 dark:text-emerald-300">
+                            <input type="checkbox" id="allowUnconf" checked class="mt-0.5">
+                            <span>Pakai sisa dana dari transaksi mempool yang belum terkonfirmasi (tanpa menunggu 1 blok)<br><span class="font-normal">UTXO yang sedang dipakai TX pending otomatis dilewati supaya tidak terjadi error txn-mempool-conflict.</span></span>
+                        </label>
+                        <div>
+                            <label class="block text-xs font-bold text-emerald-900 dark:text-emerald-300 uppercase mb-1">TXID transaksi pending (opsional)</label>
+                            <input type="text" id="pendingTxid" placeholder="txid TX yang belum terkonfirmasi, pisahkan dengan spasi atau koma" class="fld font-mono">
+                        </div>
+                        <div class="flex gap-2 flex-wrap">
+                            <button type="button" onclick="refreshUtxoSummary()" class="px-3 py-2 rounded-lg bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-white text-xs font-bold"><i class="fa-solid fa-magnifying-glass mr-1"></i> Cek UTXO</button>
+                            <button type="button" onclick="resetPendingLocks()" class="px-3 py-2 rounded-lg bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-white text-xs font-bold"><i class="fa-solid fa-lock-open mr-1"></i> Buka kunci UTXO lokal</button>
+                        </div>
+                        <div id="utxoSummary" class="text-xs leading-relaxed"></div>
+                    </div>
+
+                    <!-- ACTIVE WALLET VIEW -->
+                    <div id="walletActiveSection" style="display:none;">
+                        <div class="bg-gradient-to-r from-emerald-800 to-emerald-950 text-white p-5 rounded-xl text-center mb-4 shadow">
+                            <div class="text-xs tracking-wider opacity-80 uppercase font-semibold">Total Saldo Real NUX (Blockchain Asli)</div>
+                            <div class="text-3xl font-extrabold my-1" id="walletBalance">0.0000 NUX</div>
+                            <div class="text-xs font-mono opacity-90 truncate bg-emerald-900/60 py-1.5 px-3 rounded-lg mt-2" id="liveWalletAddress">-</div>
+                        </div>
+
+                        <div class="flex gap-2 mb-4">
+                            <button class="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-2 rounded-lg text-xs" onclick="fetchWalletData()"><i class="fa-solid fa-rotate-right mr-1"></i> Refresh Saldo & Riwayat</button>
+                            <button class="flex-1 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-white font-bold py-2 rounded-lg text-xs" onclick="logoutWallet()"><i class="fa-solid fa-power-off mr-1"></i> Keluar / Kunci Wallet</button>
+                        </div>
+
+                        <h4 class="font-bold text-xs uppercase text-slate-700 dark:text-slate-300 mb-2">Riwayat Transaksi Blockchain Asli</h4>
+                        <div id="txHistoryContainer" class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-3 max-h-48 overflow-y-auto">
+                            <div style="font-size:12px; color:#64748b; text-align:center;">Belum ada riwayat transaksi.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: Input Data Ranting & Monografi -->
+        <div id="content-ranting" class="tab-content space-y-6" style="display:none;">
+            <div class="theme-card p-6 md:p-8 rounded-2xl shadow-sm border">
+                <h2 class="text-xl font-bold text-[var(--primary)] uppercase mb-4"><i class="fa-solid fa-building-columns mr-2"></i> Input Data Ranting & Monografi</h2>
+                <form id="formRanting" class="space-y-6">
+                    <fieldset class="border theme-subcard rounded-2xl p-5 space-y-4"><legend class="font-bold text-[var(--primary)] px-3 theme-card rounded-lg border text-sm">1 - 3. Identitas Ranting</legend><div class="grid grid-cols-1 md:grid-cols-3 gap-4"><div ><label class="lbl" for="namaRanting">1. NAMA RANTING</label><input type="text" id="namaRanting" class="fld" required ></div><div ><label class="lbl" for="mwc">2. MWC</label><input type="text" id="mwc" class="fld" required ></div><div ><label class="lbl" for="pcnu">3. PCNU</label><input type="text" id="pcnu" class="fld" required ></div></div></fieldset>
+<fieldset class="border theme-subcard rounded-2xl p-5 space-y-4"><legend class="font-bold text-[var(--primary)] px-3 theme-card rounded-lg border text-sm">Wilayah Ranting</legend><div data-wilayah="ranting"></div></fieldset>
+<fieldset class="border theme-subcard rounded-2xl p-5 space-y-4"><legend class="font-bold text-[var(--primary)] px-3 theme-card rounded-lg border text-sm">6 - 11. Monografi Kelurahan / Desa</legend><p class="text-xs text-[var(--text-sub)] mt-2">Sumber data: monografi kelurahan/desa.</p><div class="grid grid-cols-1 md:grid-cols-3 gap-4"><div ><label class="lbl" for="pendudukTotal">6. JUMLAH PENDUDUK KELURAHAN/DESA</label><input type="number" id="pendudukTotal" class="fld" min="0"></div><div ><label class="lbl" for="pendudukLaki">7. JUMLAH PENDUDUK KELURAHAN/DESA LAKI-LAKI</label><input type="number" id="pendudukLaki" class="fld" min="0"></div><div ><label class="lbl" for="pendudukPerempuan">8. JUMLAH PENDUDUK KELURAHAN/DESA PEREMPUAN</label><input type="number" id="pendudukPerempuan" class="fld" min="0"></div></div><div class="grid grid-cols-1 md:grid-cols-3 gap-4"><div ><label class="lbl" for="jumlahKk">9. JUMLAH KK</label><input type="number" id="jumlahKk" class="fld" min="0"></div><div ><label class="lbl" for="pendudukMuslim">10. JUMLAH PENDUDUK MUSLIM</label><input type="number" id="pendudukMuslim" class="fld" min="0"></div><div ><label class="lbl" for="pendudukNonMuslim">11. JUMLAH PENDUDUK NON MUSLIM</label><input type="number" id="pendudukNonMuslim" class="fld" min="0"></div></div></fieldset>
+<fieldset class="border theme-subcard rounded-2xl p-5 space-y-4"><legend class="font-bold text-[var(--primary)] px-3 theme-card rounded-lg border text-sm">12. Laporan Keuangan</legend><div class="grid grid-cols-1 md:grid-cols-3 gap-4"><div ><label class="lbl" for="laporanKeuangan">12. LAPORAN KEUANGAN TAHUNAN</label><select id="laporanKeuangan" data-ref="laporanKeuangan" class="fld"></select></div></div></fieldset>
+<button type="button" onclick="injectData('Ranting', 'formRanting')" class="w-full bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-white font-bold py-3.5 rounded-xl transition shadow text-sm"><i class="fa-solid fa-cube mr-2"></i> Inject Data Ranting ke Blockchain Nusachain</button>
+                    <div id="status-formRanting" class="mt-4 p-4 rounded-xl hidden text-sm leading-relaxed"></div>
+                </form>
+            </div>
+        </div>
+
+        <!-- TAB: Input Data SK Kepengurusan -->
+        <div id="content-sk" class="tab-content space-y-6" style="display:none;">
+            <div class="theme-card p-6 md:p-8 rounded-2xl shadow-sm border">
+                <h2 class="text-xl font-bold text-[var(--primary)] uppercase mb-4"><i class="fa-solid fa-file-contract mr-2"></i> Input Data SK Kepengurusan</h2>
+                <form id="formSK" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4"><div ><label class="lbl" for="skNo">NO</label><input type="number" id="skNo" class="fld" min="1" value="1" data-no="1"></div><div ><label class="lbl" for="skPeriode">PERIODE KEPENGURUSAN</label><input type="text" id="skPeriode" class="fld" placeholder="Contoh: 2023 - 2028" ></div><div ><label class="lbl" for="skNomor">NO SK</label><input type="text" id="skNomor" class="fld" placeholder="No. SK Kepengurusan" ></div></div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div ><label class="lbl" for="skTanggal">TGL SK</label><input type="date" id="skTanggal" class="fld" ></div><div ><label class="lbl" for="skBerlaku">TGL BERLAKU</label><input type="date" id="skBerlaku" class="fld" ></div></div>
+<fieldset class="border theme-subcard rounded-2xl p-5 space-y-4"><legend class="font-bold text-[var(--primary)] px-3 theme-card rounded-lg border text-sm">Wilayah Kepengurusan</legend><div data-wilayah="sk"></div></fieldset>
+<button type="button" onclick="injectData('SK', 'formSK')" class="w-full bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-white font-bold py-3.5 rounded-xl transition shadow text-sm"><i class="fa-solid fa-cube mr-2"></i> Inject Data SK ke Blockchain Nusachain</button>
+                    <div id="status-formSK" class="mt-4 p-4 rounded-xl hidden text-sm leading-relaxed"></div>
+                </form>
+            </div>
+        </div>
+
+        <!-- TAB: Input Buku Induk Anggota NU -->
+        <div id="content-anggota" class="tab-content space-y-6" style="display:none;">
+            <div class="theme-card p-6 md:p-8 rounded-2xl shadow-sm border">
+                <h2 class="text-xl font-bold text-[var(--primary)] uppercase mb-4"><i class="fa-solid fa-users mr-2"></i> Input Buku Induk Anggota NU</h2>
+                <form id="formAnggota" class="space-y-6">
+                    <fieldset class="border theme-subcard rounded-2xl p-5 space-y-4"><legend class="font-bold text-[var(--primary)] px-3 theme-card rounded-lg border text-sm">Identitas</legend><div class="grid grid-cols-1 md:grid-cols-3 gap-4"><div ><label class="lbl" for="agtNo">NO</label><input type="number" id="agtNo" class="fld" min="1" value="1" data-no="1"></div><div ><label class="lbl" for="agtNama">NAMA</label><input type="text" id="agtNama" class="fld" required ></div><div ><label class="lbl" for="agtNik">NO NIK</label><input type="text" id="agtNik" class="fld" required inputmode="numeric" maxlength="16"></div></div><div class="grid grid-cols-1 md:grid-cols-3 gap-4"><div ><label class="lbl" for="agtJk">JENIS KELAMIN</label><select id="agtJk" data-ref="jk" class="fld"></select></div><div ><label class="lbl" for="agtTempatLahir">TEMPAT LAHIR</label><input type="text" id="agtTempatLahir" class="fld" ></div><div ><label class="lbl" for="agtTglLahir">TGL LAHIR</label><input type="date" id="agtTglLahir" class="fld" ></div></div></fieldset>
+<fieldset class="border theme-subcard rounded-2xl p-5 space-y-4"><legend class="font-bold text-[var(--primary)] px-3 theme-card rounded-lg border text-sm">Alamat</legend><div class="md:col-span-3"><label class="lbl" for="agtAlamat">ALAMAT</label><textarea id="agtAlamat" rows="2" class="fld"></textarea></div><div data-wilayah="agt" data-upper></div><div ><label class="lbl" for="agtEmail">EMAIL</label><input type="email" id="agtEmail" class="fld" placeholder="nama@email.com" ></div></fieldset>
+<fieldset class="border theme-subcard rounded-2xl p-5 space-y-4"><legend class="font-bold text-[var(--primary)] px-3 theme-card rounded-lg border text-sm">Pendidikan, Keahlian & Pekerjaan</legend><div class="grid grid-cols-1 md:grid-cols-3 gap-4"><div ><label class="lbl" for="agtPendidikan">PENDIDIKAN TERAKHIR</label><select id="agtPendidikan" data-ref="pendidikan" class="fld"></select></div><div ><label class="lbl" for="agtKeahlian">BIDANG KEAHLIAN</label><select id="agtKeahlian" data-ref="keahlian" class="fld"></select></div><div ><label class="lbl" for="agtPekerjaan">PEKERJAAN</label><select id="agtPekerjaan" data-ref="pekerjaan" class="fld"></select></div></div><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div ><label class="lbl" for="agtPesantren">PENDIDIKAN TERAKHIR DI PESANTREN</label><select id="agtPesantren" data-ref="pesantren" class="fld"></select></div><div ><label class="lbl" for="agtKaderisasi">KADERISASI YANG PERNAH DIIKUTI</label><select id="agtKaderisasi" data-ref="kaderisasi" class="fld"></select></div></div></fieldset>
+<button type="button" onclick="injectData('Anggota', 'formAnggota')" class="w-full bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-white font-bold py-3.5 rounded-xl transition shadow text-sm"><i class="fa-solid fa-cube mr-2"></i> Inject Data Anggota ke Blockchain Nusachain</button>
+                    <div id="status-formAnggota" class="mt-4 p-4 rounded-xl hidden text-sm leading-relaxed"></div>
+                </form>
+            </div>
+        </div>
+
+        <!-- TAB: Input Inventaris Aset Tanah -->
+        <div id="content-tanah" class="tab-content space-y-6" style="display:none;">
+            <div class="theme-card p-6 md:p-8 rounded-2xl shadow-sm border">
+                <h2 class="text-xl font-bold text-[var(--primary)] uppercase mb-4"><i class="fa-solid fa-map-location-dot mr-2"></i> Input Inventaris Aset Tanah</h2>
+                <form id="formTanah" class="space-y-6">
+                    <fieldset class="border theme-subcard rounded-2xl p-5 space-y-4"><legend class="font-bold text-[var(--primary)] px-3 theme-card rounded-lg border text-sm">Identitas Aset</legend><div class="grid grid-cols-1 md:grid-cols-3 gap-4"><div ><label class="lbl" for="tanahNo">No</label><input type="number" id="tanahNo" class="fld" min="1" value="1" data-no="1"></div><div ><label class="lbl" for="tanahPemilik">Pemilik</label><input type="text" id="tanahPemilik" class="fld" ></div><div ><label class="lbl" for="tanahNama">Nama Aset</label><input type="text" id="tanahNama" class="fld" ></div></div></fieldset>
+<fieldset class="border theme-subcard rounded-2xl p-5 space-y-4"><legend class="font-bold text-[var(--primary)] px-3 theme-card rounded-lg border text-sm">Alas Hak & Perolehan</legend><div class="grid grid-cols-1 md:grid-cols-3 gap-4"><div ><label class="lbl" for="tanahAlasHak">Jenis Alas Hak</label><select id="tanahAlasHak" data-ref="alasHak" class="fld"></select></div><div ><label class="lbl" for="tanahNoSertifikat">No Alas Hak (Sertifikat)</label><input type="text" id="tanahNoSertifikat" class="fld" ></div><div ><label class="lbl" for="tanahTglAlasHak">Tgl Alas Hak (Sertifikat)</label><input type="date" id="tanahTglAlasHak" class="fld" ></div></div><div class="grid grid-cols-1 md:grid-cols-3 gap-4"><div ><label class="lbl" for="tanahLuas">Luas Tanah (m²)</label><input type="number" id="tanahLuas" class="fld" min="0" step="any"></div><div ><label class="lbl" for="tanahAsalPerolehan">Asal Perolehan</label><select id="tanahAsalPerolehan" data-ref="asal" class="fld"></select></div><div ><label class="lbl" for="tanahNjop">NJOP (Rp)</label><input type="number" id="tanahNjop" class="fld" min="0"></div></div><div class="md:col-span-3"><label class="lbl" for="tanahPeruntukan">Peruntukan</label><input type="text" id="tanahPeruntukan" class="fld" ></div></fieldset>
+<fieldset class="border theme-subcard rounded-2xl p-5 space-y-4"><legend class="font-bold text-[var(--primary)] px-3 theme-card rounded-lg border text-sm">Lokasi</legend><div class="md:col-span-3"><label class="lbl" for="tanahAlamat">Alamat Detail</label><textarea id="tanahAlamat" rows="2" class="fld"></textarea></div><div data-wilayah="tanah"></div><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div ><label class="lbl" for="tanahLat">Latitude</label><input type="number" id="tanahLat" class="fld" placeholder="-6.200000" step="any"></div><div ><label class="lbl" for="tanahLng">Longitude</label><input type="number" id="tanahLng" class="fld" placeholder="106.816666" step="any"></div></div></fieldset>
+<button type="button" onclick="injectData('Tanah', 'formTanah')" class="w-full bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-white font-bold py-3.5 rounded-xl transition shadow text-sm"><i class="fa-solid fa-cube mr-2"></i> Inject Data Aset Tanah ke Blockchain Nusachain</button>
+                    <div id="status-formTanah" class="mt-4 p-4 rounded-xl hidden text-sm leading-relaxed"></div>
+                </form>
+            </div>
+        </div>
+
+        <!-- TAB: Input Inventaris Aset Bangunan -->
+        <div id="content-bangunan" class="tab-content space-y-6" style="display:none;">
+            <div class="theme-card p-6 md:p-8 rounded-2xl shadow-sm border">
+                <h2 class="text-xl font-bold text-[var(--primary)] uppercase mb-4"><i class="fa-solid fa-house-chimney mr-2"></i> Input Inventaris Aset Bangunan</h2>
+                <form id="formBangunan" class="space-y-6">
+                    <fieldset class="border theme-subcard rounded-2xl p-5 space-y-4"><legend class="font-bold text-[var(--primary)] px-3 theme-card rounded-lg border text-sm">Identitas Aset</legend><div class="grid grid-cols-1 md:grid-cols-3 gap-4"><div ><label class="lbl" for="bgnNo">No</label><input type="number" id="bgnNo" class="fld" min="1" value="1" data-no="1"></div><div ><label class="lbl" for="bgnPemilik">Pemilik</label><input type="text" id="bgnPemilik" class="fld" ></div><div ><label class="lbl" for="bgnNama">Nama Aset Bangunan</label><input type="text" id="bgnNama" class="fld" ></div></div></fieldset>
+<fieldset class="border theme-subcard rounded-2xl p-5 space-y-4"><legend class="font-bold text-[var(--primary)] px-3 theme-card rounded-lg border text-sm">Perizinan & Spesifikasi</legend><div class="grid grid-cols-1 md:grid-cols-3 gap-4"><div ><label class="lbl" for="bgnImb">No IMB</label><input type="text" id="bgnImb" class="fld" ></div><div ><label class="lbl" for="bgnTglImb">Tgl IMB</label><input type="date" id="bgnTglImb" class="fld" ></div><div ><label class="lbl" for="bgnLuas">Luas Bangunan (m²)</label><input type="number" id="bgnLuas" class="fld" min="0" step="any"></div></div><div class="grid grid-cols-1 md:grid-cols-3 gap-4"><div ><label class="lbl" for="bgnTingkat">Jumlah Tingkat</label><input type="number" id="bgnTingkat" class="fld" min="1"></div><div ><label class="lbl" for="bgnKonstruksi">Jenis Konstruksi</label><select id="bgnKonstruksi" data-ref="konstruksi" class="fld"></select></div><div ><label class="lbl" for="bgnStatus">Status Bangunan</label><select id="bgnStatus" data-ref="alasHak" class="fld"></select></div></div></fieldset>
+<fieldset class="border theme-subcard rounded-2xl p-5 space-y-4"><legend class="font-bold text-[var(--primary)] px-3 theme-card rounded-lg border text-sm">Perolehan & Peruntukan</legend><div class="grid grid-cols-1 md:grid-cols-3 gap-4"><div ><label class="lbl" for="bgnAsal">Asal Perolehan</label><select id="bgnAsal" data-ref="asal" class="fld"></select></div><div ><label class="lbl" for="bgnNilai">Nilai Bangunan (Rp)</label><input type="number" id="bgnNilai" class="fld" min="0"></div><div ><label class="lbl" for="bgnPeruntukan">Peruntukan</label><input type="text" id="bgnPeruntukan" class="fld" ></div></div><div class="grid grid-cols-1 md:grid-cols-3 gap-4"><div ><label class="lbl" for="bgnNoTanah">Berdiri di Atas Tanah No Tanah</label><input type="number" id="bgnNoTanah" class="fld" placeholder="Isi No dari form Aset Tanah" min="1"></div></div></fieldset>
+<fieldset class="border theme-subcard rounded-2xl p-5 space-y-4"><legend class="font-bold text-[var(--primary)] px-3 theme-card rounded-lg border text-sm">Lokasi</legend><div class="md:col-span-3"><label class="lbl" for="bgnAlamat">Alamat Detail</label><textarea id="bgnAlamat" rows="2" class="fld"></textarea></div><div data-wilayah="bgn"></div><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div ><label class="lbl" for="bgnLat">Latitude</label><input type="number" id="bgnLat" class="fld" placeholder="-6.200000" step="any"></div><div ><label class="lbl" for="bgnLng">Longitude</label><input type="number" id="bgnLng" class="fld" placeholder="106.816666" step="any"></div></div></fieldset>
+<button type="button" onclick="injectData('Bangunan', 'formBangunan')" class="w-full bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-white font-bold py-3.5 rounded-xl transition shadow text-sm"><i class="fa-solid fa-cube mr-2"></i> Inject Data Aset Bangunan ke Blockchain Nusachain</button>
+                    <div id="status-formBangunan" class="mt-4 p-4 rounded-xl hidden text-sm leading-relaxed"></div>
+                </form>
+            </div>
+        </div>
+
+        <!-- TAB: Input Inventaris Aset Kendaraan -->
+        <div id="content-kendaraan" class="tab-content space-y-6" style="display:none;">
+            <div class="theme-card p-6 md:p-8 rounded-2xl shadow-sm border">
+                <h2 class="text-xl font-bold text-[var(--primary)] uppercase mb-4"><i class="fa-solid fa-car mr-2"></i> Input Inventaris Aset Kendaraan</h2>
+                <form id="formKendaraan" class="space-y-6">
+                    <fieldset class="border theme-subcard rounded-2xl p-5 space-y-4"><legend class="font-bold text-[var(--primary)] px-3 theme-card rounded-lg border text-sm">Identitas Kendaraan</legend><div class="grid grid-cols-1 md:grid-cols-3 gap-4"><div ><label class="lbl" for="kendNo">No</label><input type="number" id="kendNo" class="fld" min="1" value="1" data-no="1"></div><div ><label class="lbl" for="kendNama">Nama Barang</label><input type="text" id="kendNama" class="fld" placeholder="Contoh: Motor Operasional" ></div><div ><label class="lbl" for="kendTglPembukuan">Tgl Pembukuan</label><input type="date" id="kendTglPembukuan" class="fld" ></div></div><div class="grid grid-cols-1 md:grid-cols-3 gap-4"><div ><label class="lbl" for="kendMerk">Merk</label><input type="text" id="kendMerk" class="fld" placeholder="Honda, Yamaha, dll" ></div><div ><label class="lbl" for="kendType">Type</label><input type="text" id="kendType" class="fld" ></div><div ><label class="lbl" for="kendKapasitas">Kapasitas/Ukuran</label><input type="text" id="kendKapasitas" class="fld" placeholder="Contoh: 150 cc" ></div></div></fieldset>
+<fieldset class="border theme-subcard rounded-2xl p-5 space-y-4"><legend class="font-bold text-[var(--primary)] px-3 theme-card rounded-lg border text-sm">Nomor Dokumen</legend><div class="grid grid-cols-1 md:grid-cols-3 gap-4"><div ><label class="lbl" for="kendRangka">No Rangka</label><input type="text" id="kendRangka" class="fld" ></div><div ><label class="lbl" for="kendMesin">No Mesin</label><input type="text" id="kendMesin" class="fld" ></div><div ><label class="lbl" for="kendBpkb">No BPKB</label><input type="text" id="kendBpkb" class="fld" ></div></div><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div ><label class="lbl" for="kendBahanBakar">Bahan Bakar</label><input type="text" id="kendBahanBakar" class="fld" placeholder="Bensin / Solar / Listrik" ></div><div ><label class="lbl" for="kendStnk">Tgl Berlaku STNK</label><input type="date" id="kendStnk" class="fld" ></div></div></fieldset>
+<fieldset class="border theme-subcard rounded-2xl p-5 space-y-4"><legend class="font-bold text-[var(--primary)] px-3 theme-card rounded-lg border text-sm">Perolehan & Peruntukan</legend><div class="grid grid-cols-1 md:grid-cols-3 gap-4"><div ><label class="lbl" for="kendAsal">Asal Perolehan</label><select id="kendAsal" data-ref="asal" class="fld"></select></div><div ><label class="lbl" for="kendNilai">Nilai Perolehan (Rp)</label><input type="number" id="kendNilai" class="fld" min="0"></div><div ><label class="lbl" for="kendPeruntukan">Peruntukan</label><input type="text" id="kendPeruntukan" class="fld" ></div></div><div class="md:col-span-3"><label class="lbl" for="kendKeterangan">Keterangan</label><textarea id="kendKeterangan" rows="2" class="fld"></textarea></div></fieldset>
+<fieldset class="border theme-subcard rounded-2xl p-5 space-y-4"><legend class="font-bold text-[var(--primary)] px-3 theme-card rounded-lg border text-sm">Wilayah / Lokasi Kendaraan</legend><div data-wilayah="kend"></div></fieldset>
+<button type="button" onclick="injectData('Kendaraan', 'formKendaraan')" class="w-full bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-white font-bold py-3.5 rounded-xl transition shadow text-sm"><i class="fa-solid fa-cube mr-2"></i> Inject Data Aset Kendaraan ke Blockchain Nusachain</button>
+                    <div id="status-formKendaraan" class="mt-4 p-4 rounded-xl hidden text-sm leading-relaxed"></div>
+                </form>
+            </div>
+        </div>
+
+        <!-- TAB: Input Inventaris Aset Peralatan -->
+        <div id="content-peralatan" class="tab-content space-y-6" style="display:none;">
+            <div class="theme-card p-6 md:p-8 rounded-2xl shadow-sm border">
+                <h2 class="text-xl font-bold text-[var(--primary)] uppercase mb-4"><i class="fa-solid fa-boxes-stacked mr-2"></i> Input Inventaris Aset Peralatan</h2>
+                <form id="formPeralatan" class="space-y-6">
+                    <fieldset class="border theme-subcard rounded-2xl p-5 space-y-4"><legend class="font-bold text-[var(--primary)] px-3 theme-card rounded-lg border text-sm">Identitas Peralatan</legend><div class="grid grid-cols-1 md:grid-cols-3 gap-4"><div ><label class="lbl" for="peralatanNo">No</label><input type="number" id="peralatanNo" class="fld" min="1" value="1" data-no="1"></div><div ><label class="lbl" for="peralatanNama">Nama Aset Peralatan</label><input type="text" id="peralatanNama" class="fld" placeholder="Contoh: Laptop / Sound System" ></div><div ><label class="lbl" for="peralatanMerk">Merk</label><input type="text" id="peralatanMerk" class="fld" ></div></div><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div ><label class="lbl" for="peralatanType">Type</label><input type="text" id="peralatanType" class="fld" ></div><div ><label class="lbl" for="peralatanKapasitas">Kapasitas</label><input type="text" id="peralatanKapasitas" class="fld" ></div></div></fieldset>
+<fieldset class="border theme-subcard rounded-2xl p-5 space-y-4"><legend class="font-bold text-[var(--primary)] px-3 theme-card rounded-lg border text-sm">Perolehan & Peruntukan</legend><div class="grid grid-cols-1 md:grid-cols-3 gap-4"><div ><label class="lbl" for="peralatanNilai">Nilai Perolehan (Rp)</label><input type="number" id="peralatanNilai" class="fld" min="0"></div><div ><label class="lbl" for="peralatanAsal">Asal Perolehan</label><select id="peralatanAsal" data-ref="asal" class="fld"></select></div><div ><label class="lbl" for="peralatanPeruntukan">Peruntukan</label><input type="text" id="peralatanPeruntukan" class="fld" ></div></div></fieldset>
+<fieldset class="border theme-subcard rounded-2xl p-5 space-y-4"><legend class="font-bold text-[var(--primary)] px-3 theme-card rounded-lg border text-sm">Wilayah / Lokasi Peralatan</legend><div data-wilayah="peralatan"></div></fieldset>
+<button type="button" onclick="injectData('Peralatan', 'formPeralatan')" class="w-full bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-white font-bold py-3.5 rounded-xl transition shadow text-sm"><i class="fa-solid fa-cube mr-2"></i> Inject Data Aset Peralatan ke Blockchain Nusachain</button>
+                    <div id="status-formPeralatan" class="mt-4 p-4 rounded-xl hidden text-sm leading-relaxed"></div>
+                </form>
+            </div>
+        </div>
+
+        <!-- TAB: Verifikasi Hash -->
+        <div id="content-verify" class="tab-content space-y-6" style="display:none;">
+            <div class="theme-card p-6 md:p-8 rounded-2xl shadow-sm border">
+                <h2 class="text-xl font-bold text-[var(--primary)] uppercase mb-2"><i class="fa-solid fa-shield-halved mr-2"></i> Verifikasi Hash Data dengan Blockchain</h2>
+                <p class="text-sm text-[var(--text-sub)] mb-4">Unggah file data asli (.json) hasil Inject. Aplikasi menghitung SHA-256 isi file lalu mencarinya di OP_RETURN transaksi blockchain Nusacoin, lengkap dengan Tx ID dan blok.</p>
+                <div class="space-y-4">
+                    <div>
+                        <label class="lbl" for="verifyFiles">FILE DATA ASLI (.JSON)</label>
+                        <input type="file" id="verifyFiles" accept=".json,application/json" multiple class="fld">
+                        <p class="text-xs text-[var(--text-sub)] mt-1">Hash dihitung dari teks file persis seperti diunduh. Jangan menyimpan ulang atau memformat ulang file; satu karakter berbeda menghasilkan hash yang berbeda.</p>
+                    </div>
+                    <div>
+                        <label class="lbl" for="verifyHash">ATAU TEMPEL HASH SHA-256 (OPSIONAL)</label>
+                        <input type="text" id="verifyHash" class="fld font-mono" placeholder="64 karakter hex, pisahkan dengan spasi jika lebih dari satu">
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="lbl" for="verifyAddress">ALAMAT SIGNER (PENGIRIM INJECT)</label>
+                            <input type="text" id="verifyAddress" class="fld font-mono" placeholder="kosong = alamat wallet yang sedang dibuka">
+                        </div>
+                        <div>
+                            <label class="lbl" for="verifyTxid">TXID (OPSIONAL, JIKA SUDAH TAHU)</label>
+                            <input type="text" id="verifyTxid" class="fld font-mono" placeholder="txid transaksi Inject, pisahkan dengan spasi atau koma">
+                        </div>
+                    </div>
+                    <button type="button" onclick="runVerify()" class="w-full bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-white font-bold py-3.5 rounded-xl transition shadow text-sm"><i class="fa-solid fa-magnifying-glass mr-2"></i> Verifikasi dengan Blockchain</button>
+                    <div id="verifyProgress" class="text-xs text-[var(--text-sub)]"></div>
+                    <div id="verifyResult" class="space-y-3"></div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-[var(--primary-dark)] text-emerald-200 py-6 mt-auto border-t border-emerald-800 transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs">
+            &copy; 2026 Pengurus Besar Nahdlatul Ulama (PBNU) &bull; Didukung oleh Nusachain Ledger Infrastructure.
+        </div>
+    </footer>
+
+    <script>
+        // Tab Switcher
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('nav button').forEach(btn => {
+                btn.className = "px-4 py-2 rounded-xl text-xs font-bold transition bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-emerald-50 flex items-center gap-2";
+            });
+
+            document.getElementById(`content-${tabId}`).style.display = 'block';
+            document.getElementById(`tabBtn-${tabId}`).className = "px-4 py-2 rounded-xl text-xs font-bold transition bg-[var(--primary)] text-white flex items-center gap-2";
+        }
+
+        // Dark/Light Theme Toggle
+        function toggleTheme() {
+            const body = document.body;
+            const icon = document.getElementById('themeIcon');
+            body.classList.toggle('dark-mode');
+            icon.className = body.classList.contains('dark-mode') ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+        }
+
+        // Bahasa IN/EN: logika terjemahan ada di modul i18n (akhir halaman)
+        function switchLanguage(lang) {
+            if (window.__setLang) window.__setLang(lang);
+        }
+
+        let liveWalletData = { pkey: null, address: null, balance: 0 };
+
+        const NUSACOIN_PARAMS = { bech32: 'nu', pubKeyHash: 0x35, scriptHash: 0x4b, wif: 0x57 };
+        const BECH32_CHARSET = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l';
+        const ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+
+        function polymod(values) {
+            let chk = 1;
+            for (let p = 0; p < values.length; ++p) {
+                let top = chk >> 25;
+                chk = ((chk & 0x1ffffff) << 5) ^ values[p];
+                if ((top >> 0) & 1) chk ^= 0x3b6a57b2;
+                if ((top >> 1) & 1) chk ^= 0x26508e6d;
+                if ((top >> 2) & 1) chk ^= 0x1ea119fa;
+                if ((top >> 3) & 1) chk ^= 0x3d4233dd;
+                if ((top >> 4) & 1) chk ^= 0x2a1462b3;
+            }
+            return chk;
+        }
+
+        function hrpExpand(hrp) {
+            let ret = [];
+            for (let i = 0; i < hrp.length; ++i) ret.push(hrp.charCodeAt(i) >> 5);
+            ret.push(0);
+            for (let i = 0; i < hrp.length; ++i) ret.push(hrp.charCodeAt(i) & 31);
+            return ret;
+        }
+
+        function convertBits(data, frombits, tobits, pad = true) {
+            let acc = 0, bits = 0, ret = [], maxv = (1 << tobits) - 1;
+            for (let i = 0; i < data.length; ++i) {
+                let value = data[i];
+                if (value < 0 || value >> frombits !== 0) return null;
+                acc = (acc << frombits) | value;
+                bits += frombits;
+                while (bits >= tobits) {
+                    bits -= tobits;
+                    ret.push((acc >> bits) & maxv);
+                }
+            }
+            if (pad && bits > 0) ret.push((acc << (tobits - bits)) & maxv);
+            return ret;
+        }
+
+        function toBech32(hrp, version, program) {
+            let data = [version].concat(convertBits(program, 8, 5, true));
+            let checksumData = hrpExpand(hrp).concat(data).concat([0, 0, 0, 0, 0, 0]);
+            let mod = polymod(checksumData) ^ 1;
+            let ret = hrp + '1';
+            for (let p = 0; p < data.length; ++p) ret += BECH32_CHARSET.charAt(data[p]);
+            for (let p = 0; p < 6; ++p) ret += BECH32_CHARSET.charAt((mod >> (5 * (5 - p))) & 31);
+            return ret;
+        }
+
+        function fromBase58(string) {
+            let bytes = [0];
+            for (let i = 0; i < string.length; i++) {
+                let value = ALPHABET.indexOf(string[i]);
+                if (value === -1) throw new Error("Karakter Base58 tidak valid");
+                for (let j = 0; j < bytes.length; j++) bytes[j] *= 58;
+                bytes[0] += value;
+                let carry = 0;
+                for (let j = 0; j < bytes.length; ++j) {
+                    bytes[j] += carry;
+                    carry = bytes[j] >> 8;
+                    bytes[j] &= 0xff;
+                }
+                while (carry) { bytes.push(carry & 0xff); carry >>= 8; }
+            }
+            for (let i = 0; string[i] === '1' && i < string.length - 1; i++) bytes.push(0);
+            return new Uint8Array(bytes.reverse());
+        }
+
+        function toBase58(buffer) {
+            let digits = [0];
+            for (let i = 0; i < buffer.length; i++) {
+                for (let j = 0; j < digits.length; j++) digits[j] <<= 8;
+                digits[0] += buffer[i];
+                let carry = 0;
+                for (let j = 0; j < digits.length; ++j) {
+                    digits[j] += carry;
+                    carry = (digits[j] / 58) | 0;
+                    digits[j] %= 58;
+                }
+                while (carry) { digits.push(carry % 58); carry = (carry / 58) | 0; }
+            }
+            for (let i = 0; buffer[i] === 0 && i < buffer.length - 1; i++) digits.push(0);
+            return digits.reverse().map(d => ALPHABET[d]).join('');
+        }
+
+        function toBase58Check(payload) {
+            const sha1 = CryptoJS.SHA256(CryptoJS.lib.WordArray.create(payload));
+            const sha2 = CryptoJS.SHA256(sha1);
+            const checksum = sha2.words.slice(0, 1);
+            const checksumBytes = [(checksum[0] >>> 24) & 0xff, (checksum[0] >>> 16) & 0xff, (checksum[0] >>> 8) & 0xff, checksum[0] & 0xff];
+            const fullPayload = new Uint8Array(payload.length + 4);
+            fullPayload.set(payload);
+            fullPayload.set(checksumBytes, payload.length);
+            return toBase58(fullPayload);
+        }
+
+        function getAddressFromWif(wif, addrType = "bech32") {
+            try {
+                const decoded = fromBase58(wif);
+                const rawPrivKey = decoded.slice(1, 33);
+                const ec = new elliptic.ec('secp256k1');
+                const keyPair = ec.keyFromPrivate(rawPrivKey);
+                const pubKeyHex = keyPair.getPublic(true, 'hex');
+                const pubKeyWordArray = CryptoJS.enc.Hex.parse(pubKeyHex);
+                const shaHash = CryptoJS.SHA256(pubKeyWordArray);
+                const ripemdHash = CryptoJS.RIPEMD160(shaHash);
+
+                const pubKeyHash = new Uint8Array(20);
+                for (let i = 0; i < 20; i++) pubKeyHash[i] = (ripemdHash.words[i >>> 2] >>> (24 - (i % 4) * 8)) & 0xff;
+
+                if (addrType === "p2pkh") {
+                    const p2pkhPayload = new Uint8Array(21);
+                    p2pkhPayload[0] = NUSACOIN_PARAMS.pubKeyHash;
+                    p2pkhPayload.set(pubKeyHash, 1);
+                    return toBase58Check(p2pkhPayload);
+                } else if (addrType === "p2sh") {
+                    const p2shPayload = new Uint8Array(21);
+                    p2shPayload[0] = NUSACOIN_PARAMS.scriptHash;
+                    p2shPayload.set(pubKeyHash, 1);
+                    return toBase58Check(p2shPayload);
+                } else {
+                    return toBech32(NUSACOIN_PARAMS.bech32, 0, pubKeyHash);
+                }
+            } catch (err) {
+                return wif;
+            }
+        }
+
+        function importLiveWallet() {
+            let pkey = document.getElementById("walletPkeyInput").value.trim();
+            const addrType = document.getElementById("selectWalletAddrType").value;
+
+            if (!pkey) {
+                alert("Masukkan Private Key WIF atau Alamat Nusacoin!");
+                return;
+            }
+
+            if (pkey.startsWith("N") || pkey.startsWith("X") || pkey.startsWith("nu1")) {
+                liveWalletData.pkey = null;
+                liveWalletData.address = pkey;
+                liveWalletData.addrType = null;
+            } else {
+                liveWalletData.pkey = pkey;
+                liveWalletData.address = getAddressFromWif(pkey, addrType);
+                liveWalletData.addrType = addrType;
+            }
+
+            document.getElementById("walletImportSection").style.display = "none";
+            document.getElementById("walletActiveSection").style.display = "block";
+            document.getElementById("liveWalletAddress").textContent = "Alamat: " + liveWalletData.address;
+
+            // Tampilkan di Navbar
+            document.getElementById("navWalletStatus").classList.remove("hidden");
+            document.getElementById("navWalletStatus").classList.add("flex");
+            document.getElementById("navWalletAddrShort").textContent = liveWalletData.address.substring(0, 8) + '...';
+
+            fetchWalletData();
+            alert("Live Wallet berhasil dibuka!");
+        }
+
+        async function fetchWalletData() {
+            const addr = liveWalletData.address; if (!addr) return;
+            const base = getNodeBase();
+            const balEl = document.getElementById("walletBalance");
+            let bal = null;
+            try {
+                const res = await fetch(`${base}/ext/getbalance/${encodeURIComponent(addr)}`);
+                if (!res.ok) throw new Error();
+                const v = parseFloat((await res.text()).replace(/"/g, ''));
+                if (isNaN(v)) throw new Error();
+                bal = v;
+            } catch (e) {
+                try { const u = await fetchUtxos(addr); bal = Number(u.reduce((x, y) => x + y.value, 0n)) / 1e8; } catch (e2) { }
+            }
+            if (bal === null) balEl.textContent = "0.0000 NUX (Offline Node)";
+            else { liveWalletData.balance = bal; balEl.textContent = `${bal} NUX`; }
+            await fetchHistory(addr);
+        }
+
+        window.lastHistory = { items: [], error: null, loading: false };
+
+        function historyCandidates(base, addr) {
+            const a = encodeURIComponent(addr);
+            const cfg = (document.getElementById('historyUrl') || { value: '' }).value.trim();
+            const list = [];
+            if (cfg) list.push(cfg.replace('{node}', base).replace('{addr}', a));
+            list.push(`${base}/ext/getaddresstxs/${a}/0/25`);                    // eIquidus (sesuai halaman /info)
+            list.push(`${base}/ext/getaddress/${a}`);                            // eIquidus (lama)
+            list.push(`${base}/api/v2/address/${a}?details=txs&pageSize=25`);   // Blockbook (cadangan)
+            return [...new Set(list)];
+        }
+
+        function parseHistory(j, addr) {
+            const out = [];
+            const txs = Array.isArray(j) ? j : (j.transactions || j.data || j.txs || j.last_txs || []);
+            for (const t of txs) {
+                if (typeof t === 'string') { out.push({ txid: t }); continue; }
+                const txid = t.txid || t.hash || t.addresses;
+                if (!txid || typeof txid !== 'string') continue;
+                const item = { txid, time: t.blockTime || t.timestamp || t.time || null, conf: t.confirmations };
+                if (t.received !== undefined && t.sent !== undefined) item.net = BigInt(Math.round((Number(t.received) - Number(t.sent)) * 1e8));
+                if (Array.isArray(t.vout) && Array.isArray(t.vin)) {
+                    try {
+                        let net = 0n;
+                        t.vout.forEach(o => { if ((o.addresses || []).includes(addr)) net += BigInt(String(o.value || 0)); });
+                        t.vin.forEach(i => { if ((i.addresses || []).includes(addr)) net -= BigInt(String(i.value || 0)); });
+                        item.net = net;
+                    } catch (e) { }
+                }
+                out.push(item);
+            }
+            if (!out.length && Array.isArray(j.txids)) j.txids.forEach(id => out.push({ txid: id }));
+            return out;
+        }
+
+        async function fetchHistory(addr) {
+            const box = document.getElementById("txHistoryContainer");
+            const base = getNodeBase();
+            window.lastHistory = { items: [], error: null, loading: true };
+            box.innerHTML = '<div style="font-size:12px;color:#64748b;text-align:center;">Memuat riwayat transaksi...</div>';
+            let lastErr = null;
+            for (const url of historyCandidates(base, addr)) {
+                try {
+                    const res = await fetch(url);
+                    if (!res.ok) { lastErr = `HTTP ${res.status} dari ${url}`; continue; }
+                    const items = parseHistory(await res.json(), addr);
+                    if (items.length || url === historyCandidates(base, addr)[0]) {
+                        window.lastHistory = { items, error: null, loading: false };
+                        renderHistory(); return;
+                    }
+                } catch (e) { lastErr = `${e.message || e} (${url})`; }
+            }
+            window.lastHistory = { items: [], error: lastErr || 'Tidak ada respons dari node.', loading: false };
+            renderHistory();
+        }
+
+        function renderHistory() {
+            const box = document.getElementById("txHistoryContainer");
+            const addr = liveWalletData.address; const base = getNodeBase();
+            const h = window.lastHistory || { items: [], error: null };
+            const pending = (window.rawQueue || []).filter(q => !h.items.some(i => i.txid === q.txid));
+            const row = (inner) => `<div style="padding:8px 0;border-bottom:1px solid #e2e8f0;font-size:12px;">${inner}</div>`;
+            let html = '';
+            pending.forEach(q => {
+                html += row(`<span style="background:#fef3c7;color:#92400e;padding:1px 6px;border-radius:6px;font-weight:700;">Belum disiarkan #${q.seq}</span> <span style="color:#64748b;">${esc(q.sheet)}</span><br><span style="font-family:monospace;word-break:break-all;">${q.txid}</span>`);
+            });
+            h.items.forEach(i => {
+                const id = esc(i.txid);
+                let t = ''; if (i.time) { const ms = Number(i.time) < 1e12 ? Number(i.time) * 1000 : Number(i.time); t = new Date(ms).toLocaleString((window.LANG && window.LANG.cur === 'en') ? 'en-US' : 'id-ID'); }
+                let amt = '';
+                if (i.net !== undefined) { const v = Number(i.net) / 1e8; amt = `<strong style="color:${v >= 0 ? '#047857' : '#b91c1c'};">${v >= 0 ? '+' : ''}${v} NUX</strong> `; }
+                const conf = i.conf !== undefined ? ` <span style="color:#64748b;">(${i.conf} konfirmasi)</span>` : '';
+                html += row(`${amt}<span style="color:#64748b;">${esc(t)}</span>${conf}<br><a href="${esc(base)}/tx/${id}" target="_blank" style="font-family:monospace;word-break:break-all;text-decoration:underline;">${id}</a>`);
+            });
+            if (h.error) {
+                html += `<div style="font-size:12px;color:#92400e;padding:8px 0;">Riwayat tidak bisa dimuat dari node: ${esc(h.error)}.<br>Kemungkinan diblokir CORS atau endpoint explorer berbeda; atur "URL Riwayat Transaksi" di pengaturan wallet, atau buka <a href="${esc(base)}/address/${encodeURIComponent(addr || '')}" target="_blank" style="text-decoration:underline;">halaman alamat di explorer</a>.</div>`;
+            } else if (!h.items.length && !pending.length) {
+                html += '<div style="font-size:12px;color:#64748b;text-align:center;">Belum ada riwayat transaksi untuk alamat ini.</div>';
+            }
+            box.innerHTML = html;
+        }
+
+        function logoutWallet() {
+            liveWalletData = { pkey: null, address: null, balance: 0 };
+            document.getElementById("walletPkeyInput").value = "";
+            document.getElementById("walletActiveSection").style.display = "none";
+            document.getElementById("walletImportSection").style.display = "block";
+            document.getElementById("navWalletStatus").classList.add("hidden");
+        }
+
+        // FUNGSI INJEKSI DATA DINAMIS BERDASARKAN SHEET EXCEL
+        // ===== OP_RETURN: hanya hash SHA-256 dari data form =====
+const TX = {
+    sha256: (hex) => CryptoJS.SHA256(CryptoJS.enc.Hex.parse(hex)).toString(),
+    dsha: (hex) => TX.sha256(TX.sha256(hex)),
+    rev: (hex) => hex.match(/../g).reverse().join(''),
+    u32: (n) => [n & 255, (n >>> 8) & 255, (n >>> 16) & 255, (n >>> 24) & 255].map(b => b.toString(16).padStart(2, '0')).join(''),
+    u64: (v) => { let out = ''; let x = BigInt(v); for (let i = 0; i < 8; i++) { out += Number(x & 255n).toString(16).padStart(2, '0'); x >>= 8n; } return out; },
+    varint: (n) => n < 0xfd ? n.toString(16).padStart(2, '0') : 'fd' + [n & 255, (n >>> 8) & 255].map(b => b.toString(16).padStart(2, '0')).join(''),
+    push: (hex) => TX.varint(hex.length / 2) + hex,
+    hash160: (pubHex) => CryptoJS.RIPEMD160(CryptoJS.SHA256(CryptoJS.enc.Hex.parse(pubHex))).toString(),
+    sign: (privHex, hashHex) => {
+        const ec = new elliptic.ec('secp256k1');
+        return ec.keyFromPrivate(privHex, 'hex').sign(hashHex, { canonical: true }).toDER('hex') + '01';
+    }
+};
+
+function getNodeBase() {
+    let b = document.getElementById("nodeApiUrl").value.trim();
+    if (b.endsWith('/')) b = b.slice(0, -1);
+    if (b.endsWith('/api')) b = b.replace(/\/api$/, '');
+    return b;
+}
+
+function keyInfoFromWallet() {
+    if (!liveWalletData.pkey) throw new Error("Wallet dibuka dengan alamat saja (tanpa Private Key WIF), sehingga tidak bisa menandatangani transaksi.");
+    const type = liveWalletData.addrType || 'bech32';
+    if (type === 'p2sh') throw new Error("Format P2SH belum didukung untuk penandatanganan. Pilih Bech32 atau Legacy P2PKH.");
+    const d = fromBase58(liveWalletData.pkey);
+    if (d.length !== 38 || d[0] !== NUSACOIN_PARAMS.wif || d[33] !== 1) throw new Error("WIF tidak valid: harus WIF terkompresi Nusacoin (prefix 0x57).");
+    const privHex = Array.from(d.slice(1, 33)).map(b => b.toString(16).padStart(2, '0')).join('');
+    const pubHex = new elliptic.ec('secp256k1').keyFromPrivate(privHex, 'hex').getPublic(true, 'hex');
+    return { type, privHex, pubHex, h160: TX.hash160(pubHex) };
+}
+
+async function explorerJson(url) {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status} dari ${url}`);
+    const t = await res.text();
+    try { return JSON.parse(t); } catch (e) { throw new Error(`Respons bukan JSON dari ${url}`); }
+}
+
+// UTXO diturunkan dari endpoint yang ada di https://explorer.nusacoin.org/info:
+//   /ext/getaddresstxs/{addr}/{start}/{len}  -> daftar txid (terbaru dulu)
+//   /api/getrawtransaction?txid=..&decrypt=1 -> vout (n, value, scriptPubKey) & vin (txid, vout)
+// Output milik alamat dikurangi output yang sudah dibelanjakan oleh tx lain = UTXO.
+async function fetchUtxosExplorer(addr) {
+    const base = getNodeBase(), a = encodeURIComponent(addr);
+    let ownHex = null;
+    try { const ki = keyInfoFromWallet(); ownHex = ki.type === 'bech32' ? '0014' + ki.h160 : '76a914' + ki.h160 + '88ac'; } catch (e) { }
+    const feeSat = BigInt(Math.round((parseFloat(document.getElementById("feeNux").value) || 0) * 1e8));
+    const target = feeSat * 50n > 100000000n ? feeSat * 50n : 100000000n;   // cukup untuk beberapa inject
+    const MIN_CONF = 100;                                                   // kematangan coinbase/coinstake
+    const PAGE = 40, MAX = 400, CONC = 8;
+    const isMine = (o) => { const sp = o.scriptPubKey || {}; return (ownHex && sp.hex === ownHex) || sp.address === addr || (Array.isArray(sp.addresses) && sp.addresses.includes(addr)); };
+    const toSat = (v) => BigInt(Math.round(Number(v) * 1e8));
+
+    const cands = new Map(), spent = new Set();
+    let unreadable = 0, scanned = 0;
+    const unspent = () => [...cands.values()].filter(u => !spent.has(u.txid + ':' + u.vout));
+    const spendable = () => unspent().filter(u => !u.immature);
+
+    for (let start = 0; start < MAX; start += PAGE) {
+        const page = await explorerJson(`${base}/ext/getaddresstxs/${a}/${start}/${PAGE}`);
+        if (!Array.isArray(page) || !page.length) break;
+        for (let i = 0; i < page.length; i += CONC) {
+            const chunk = page.slice(i, i + CONC);
+            const raws = await Promise.all(chunk.map(t => explorerJson(`${base}/api/getrawtransaction?txid=${t.txid}&decrypt=1`).catch(() => null)));
+            raws.forEach((r, k) => {
+                scanned++;
+                if (!r || typeof r !== 'object' || !Array.isArray(r.vout)) { unreadable++; return; }
+                const txid = r.txid || chunk[k].txid;
+                (r.vin || []).forEach(v => { if (v.txid !== undefined && v.vout !== undefined) spent.add(v.txid + ':' + v.vout); });
+                const coinbase = !!(r.vin && r.vin[0] && r.vin[0].coinbase !== undefined);
+                const v0 = r.vout[0] || {};
+                const coinstake = !coinbase && r.vout.length > 1 && toSat(v0.value || 0) === 0n && (v0.scriptPubKey || {}).hex === '';
+                const immature = (coinbase || coinstake) && r.confirmations !== undefined && r.confirmations < MIN_CONF;
+                r.vout.forEach(o => {
+                    const value = toSat(o.value || 0);
+                    if (value > 0n && isMine(o)) cands.set(txid + ':' + o.n, { txid, vout: Number(o.n), value, immature });
+                });
+            });
+        }
+        // Halaman diproses terbaru->lama, jadi pembelanjaan suatu output selalu sudah terlihat. Aman berhenti bila saldo cukup.
+        if (spendable().reduce((x, y) => x + y.value, 0n) >= target) break;
+        if (page.length < PAGE) break;
+    }
+    if (scanned > 0 && unreadable === scanned)
+        throw new Error('API getrawtransaction explorer tidak mengembalikan data transaksi (null). Isi "UTXO manual" (txid,vout,satoshi) dari halaman explorer.');
+    const ok = spendable();
+    if (!ok.length && unspent().some(u => u.immature))
+        throw new Error(`Semua saldo masih berupa reward mining/staking yang belum matang (butuh ${MIN_CONF} konfirmasi). Tunggu atau gunakan alamat lain.`);
+    return ok;
+}
+
+async function fetchUtxos(addr) {
+    const cfgUrl = document.getElementById("utxoUrl").value.trim();
+    if (!cfgUrl || cfgUrl.toLowerCase() === 'auto') {
+        try { return await fetchUtxosApi(addr); }
+        catch (e) { console.warn('API UTXO gagal, memakai explorer:', e.message || e); return fetchUtxosExplorer(addr); }
+    }
+    const url = document.getElementById("utxoUrl").value.trim().replace('{node}', getNodeBase()).replace('{addr}', encodeURIComponent(addr));
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Gagal mengambil UTXO (HTTP ${res.status}) dari ${url}`);
+    let j = await res.json();
+    if (!Array.isArray(j)) j = j.utxos || j.unspent_outputs || j.unspent || j.result || [];
+    const unit = document.getElementById("utxoUnit").value;
+    return j.map(u => {
+        const txid = u.txid || u.tx_hash || u.hash;
+        const vout = u.vout ?? u.n ?? u.tx_pos ?? u.output_n ?? u.index;
+        const raw = u.value ?? u.satoshis ?? u.amount;
+        if (!txid || vout === undefined || raw === undefined) return null;
+        const value = unit === 'coin' ? BigInt(Math.round(parseFloat(raw) * 1e8)) : BigInt(String(raw));
+        return { txid, vout: Number(vout), value };
+    }).filter(Boolean);
+}
+
+function buildSignedTx(utxos, ki, hashHex, feeSat) {
+    const isSeg = ki.type === 'bech32';
+    const ownScript = isSeg ? '0014' + ki.h160 : '76a914' + ki.h160 + '88ac';
+    const DUST = 546n;
+
+    // Utamakan UTXO terkonfirmasi, lalu yang terbesar; unconfirmed hanya dipakai bila yang confirmed tidak cukup
+    const sorted = [...utxos].sort((a, b) => ((a.confirmed === false) - (b.confirmed === false)) || (b.value > a.value ? 1 : b.value < a.value ? -1 : 0));
+    const picked = []; let total = 0n;
+    for (const u of sorted) { picked.push(u); total += u.value; if (total >= feeSat + DUST) break; }
+    if (total < feeSat) throw new Error(`Saldo UTXO tidak cukup untuk fee. Tersedia ${Number(total) / 1e8} NUX, fee ${Number(feeSat) / 1e8} NUX.`);
+
+    let fee = feeSat; let change = total - fee;
+    if (change < DUST) { fee = total; change = 0n; }
+
+    const outs = [];
+    outs.push(TX.u64(0n) + TX.varint(34) + '6a20' + hashHex);               // OP_RETURN <32 byte hash>
+    if (change > 0n) outs.push(TX.u64(change) + TX.varint(ownScript.length / 2) + ownScript);
+    const outputsHex = outs.join('');
+    const outCount = TX.varint(outs.length);
+    const ver = TX.u32(2), lock = TX.u32(0), seq = 'ffffffff';
+    const outpoints = picked.map(u => TX.rev(u.txid) + TX.u32(u.vout));
+
+    if (!isSeg) {
+        const scriptSigs = picked.map((u, i) => {
+            const pre = ver + TX.varint(picked.length) +
+                picked.map((_, j) => outpoints[j] + (j === i ? TX.varint(ownScript.length / 2) + ownScript : '00') + seq).join('') +
+                outCount + outputsHex + lock + TX.u32(1);
+            const sig = TX.sign(ki.privHex, TX.dsha(pre));
+            return TX.push(sig) + TX.push(ki.pubHex);
+        });
+        const raw = ver + TX.varint(picked.length) +
+            picked.map((_, j) => outpoints[j] + TX.varint(scriptSigs[j].length / 2) + scriptSigs[j] + seq).join('') +
+            outCount + outputsHex + lock;
+        return { hex: raw, txid: TX.rev(TX.dsha(raw)), fee, picked, change };
+    }
+
+    // P2WPKH (BIP143)
+    const hashPrevouts = TX.dsha(outpoints.join(''));
+    const hashSequence = TX.dsha(picked.map(() => seq).join(''));
+    const hashOutputs = TX.dsha(outputsHex);
+    const scriptCode = '1976a914' + ki.h160 + '88ac';
+    const witnesses = picked.map((u, i) => {
+        const pre = ver + hashPrevouts + hashSequence + outpoints[i] + scriptCode + TX.u64(u.value) + seq + hashOutputs + lock + TX.u32(1);
+        const sig = TX.sign(ki.privHex, TX.dsha(pre));
+        return '02' + TX.push(sig) + TX.push(ki.pubHex);
+    });
+    const inputsNoSig = picked.map((_, j) => outpoints[j] + '00' + seq).join('');
+    const base = ver + TX.varint(picked.length) + inputsNoSig + outCount + outputsHex + lock;
+    const hex = ver + '0001' + TX.varint(picked.length) + inputsNoSig + outCount + outputsHex + witnesses.join('') + lock;
+    return { hex, txid: TX.rev(TX.dsha(base)), fee, picked, change };
+}
+
+async function broadcastHex(hex, expectedTxid) {
+    const tpl = document.getElementById("broadcastUrl").value.trim().replace('{node}', getNodeBase());
+    if (!tpl) throw new Error('URL Broadcast kosong.');
+    const fmt = (document.getElementById("broadcastFmt") || { value: 'auto' }).value;
+    const JH = { 'Content-Type': 'application/json' };
+    const J = (k) => ({ headers: JH, body: JSON.stringify({ [k]: hex }) });
+    const F = (k) => ({ headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: k + '=' + hex });   // gaya coinbin: $.ajax POST data {rawtx: ...}
+    const Q = (k) => ({ url: tpl + (tpl.includes('?') ? '&' : '?') + k + '=' + hex, headers: {}, body: undefined });
+    const BUILD = {
+        text: () => ({ headers: { 'Content-Type': 'text/plain' }, body: hex }),
+        form: () => ({ headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'hex=' + hex }),
+        rpc: () => ({ headers: JH, body: JSON.stringify({ jsonrpc: '1.0', id: 'pbnu', method: 'sendrawtransaction', params: [hex] }) }),
+        rpcparams: () => ({ headers: JH, body: JSON.stringify({ params: [hex] }) }),
+        path: () => ({ url: tpl.replace(/\/+$/, '') + '/' + hex, headers: {}, body: undefined })
+    };
+    const JKEYS = ['hex', 'rawtx', 'rawTx', 'tx', 'hexstring', 'hexString', 'rawtransaction', 'rawTransaction', 'raw', 'data', 'transaction',
+        'txhex', 'txHex', 'tx_hex', 'raw_tx', 'rawTxHex', 'signedTx', 'signedHex', 'signed', 'rawhex', 'serialized', 'payload', 'transactionHex', 'transaction_hex'];
+    const QKEYS = ['hex', 'rawtx', 'rawTx', 'tx', 'hexstring', 'rawtransaction', 'raw', 'data'];
+    const FKEYS = ['raw', 'rawtx', 'hex', 'rawTx', 'tx', 'hexstring', 'rawtransaction', 'data', 'transaction', 'txhex'];
+    FKEYS.forEach(k => { BUILD['f:' + k] = () => F(k); });
+    BUILD['m:raw'] = () => { const fd = new FormData(); fd.append('raw', hex); return { headers: {}, body: fd }; };   // multipart/form-data
+    JKEYS.forEach(k => { BUILD[k] = () => J(k); });
+    QKEYS.forEach(k => { BUILD['?' + k] = () => Q(k); });
+    const custom = ((document.getElementById("broadcastField") || { value: '' }).value || '').trim();
+    if (fmt === 'custom') { if (!custom) throw new Error('Isi nama field JSON untuk format kustom.'); BUILD[custom] = () => J(custom); }
+    const tplBody = ((document.getElementById("broadcastBody") || { value: '' }).value || '').trim();
+    if (tplBody) BUILD.tpl = () => {
+        const body = tplBody.split('{hex}').join(hex);
+        const ct = /^[\[{]/.test(body) ? 'application/json' : (body.includes('=') ? 'application/x-www-form-urlencoded' : 'text/plain');
+        return { headers: { 'Content-Type': ct }, body };
+    };
+    const order = tplBody ? ['tpl'] : fmt === 'docraw' ? ['f:raw', 'm:raw', '?raw', 'raw'] : fmt === 'auto'
+        ? [...FKEYS.map(k => 'f:' + k), ...JKEYS, 'rpc', 'rpcparams', 'text', ...QKEYS.map(k => '?' + k), 'path']
+        : (fmt === 'custom' ? [custom] : [fmt]);
+    const FATAL = /bad-txns|missingorspent|missing[- ]inputs|mempool|insufficient|dust|mandatory|scriptsig|signature|non-final|already spent|conflict|min relay|fee too low|absurdly/i;
+    const ALREADY = /already|known|duplicate|exists/i;
+    const errors = [];
+
+    for (const key of order) {
+        let res, text;
+        try {
+            if (tpl.includes('{hex}')) res = await fetch(tpl.replace('{hex}', hex));
+            else { const r = BUILD[key](); res = await fetch(r.url || tpl, { method: 'POST', headers: r.headers, body: r.body }); }
+            text = (await res.text()).trim();
+        } catch (e) {
+            throw new Error('Tidak bisa menghubungi endpoint broadcast (kemungkinan diblokir CORS atau jaringan): ' + (e.message || e));
+        }
+        let j = null; try { j = JSON.parse(text); } catch (e) { }
+        let msg = '';
+        if (j) {
+            const er = j.error || ((j.success === false || j.status === 'error') ? (j.message || 'gagal') : '');
+            msg = er ? (typeof er === 'string' ? er : (er.message || JSON.stringify(er))) : '';
+        } else if (!res.ok) msg = text.slice(0, 200);
+
+        if (res.ok && !msg) {
+            let id = j ? (j.txid || j.result || j.tx || j.hash || (j.data && (j.data.txid || j.data)) || '') : text;
+            id = String(id).replace(/"/g, '').trim();
+            if (/^[0-9a-fA-F]{64}$/.test(id)) return id.toLowerCase();
+            if (expectedTxid) return expectedTxid;   // sukses tanpa Tx ID di respons: pakai hitungan lokal
+            throw new Error('Respons tanpa Tx ID: ' + text.slice(0, 200));
+        }
+        if (ALREADY.test(msg) && !CONFLICT_RE.test(msg) && expectedTxid) return expectedTxid;
+        errors.push({ key, status: res.status, msg: (msg || text).slice(0, 160) });
+        if (FATAL.test(msg) || res.status >= 500) break;   // node menolak isi transaksi, bukan masalah format
+    }
+    const uniq = [...new Set(errors.map(e => `HTTP ${e.status}: ${e.msg}`))];
+    if (uniq.length === 1 && errors.length > 1)
+        throw new Error(`Broadcast ditolak. Semua ${errors.length} format body menghasilkan jawaban yang sama -> ${uniq[0]}. Nama parameter yang diharapkan API belum cocok; butuh format request dari pembuat API.`);
+    throw new Error('Broadcast ditolak. ' + errors.map(e => `[${e.key}] HTTP ${e.status}: ${e.msg}`).join(' | '));
+}
+
+async function checkTxStatus(txid, boxId) {
+    const box = document.getElementById(boxId); if (!box) return;
+    box.textContent = 'Memeriksa explorer...';
+    try {
+        const j = await explorerJson(`${getNodeBase()}/ext/gettx/${txid}`);
+        if (j && j.tx && j.tx.txid === txid) {
+            box.innerHTML = `<strong style="color:#047857;">Tx terdeteksi di blockchain</strong> (${esc(String(j.confirmations ?? 0))} konfirmasi, blok ${esc(String(j.tx.blockindex ?? '-'))}). Hash sudah tercatat.`;
+            if (liveWalletData.address) fetchWalletData();
+        } else box.textContent = 'Belum terdeteksi di explorer. Pastikan raw TX sudah disiarkan, tunggu 1-2 menit, lalu cek lagi.';
+    } catch (e) { box.textContent = 'Belum terdeteksi di explorer (' + (e.message || e) + '). Pastikan sudah disiarkan, lalu cek lagi.'; }
+}
+
+window.lastRecords = {};
+window.rawQueue = [];          // antrean raw TX yang belum disiarkan (urut)
+// Kunci UTXO lokal: "txid:vout" -> {t, raw}. raw=true = TX belum disiarkan (hanya di memori, tanpa kedaluwarsa);
+// selain itu disimpan di browser dan kedaluwarsa otomatis.
+window.pendingSpent = new Map();
+window.pendingUtxos = [];      // change dari TX buatan aplikasi: {addr, txid, vout, value(BigInt), t, raw, anc, size}
+
+const MAX_UNCONF_ANCESTORS = 25;          // default Bitcoin Core: maks 25 TX (termasuk TX ini) per rantai unconfirmed
+const MAX_UNCONF_PACKAGE_BYTES = 101000;  // default: ~101 kB per paket
+const WARN_UNCONF_ANCESTORS = 15;
+const MIN_COINBASE_CONF = 100;            // kematangan reward mining/staking
+const CONFLICT_RE = /conflict|missing-?inputs|missingorspent|already spent|double.?spend|txn-mempool|premature|immature/i;
+const HEX_RE = /^[0-9a-fA-F]{20,}$/;
+const PENDING_STORE_KEY = 'pbnu_pending_v1';
+const PENDING_TTL_MS = 15 * 60 * 1000;        // kunci UTXO dari TX yang sudah disiarkan
+const PENDING_UTXO_TTL_MS = 60 * 60 * 1000;   // change TX yang sudah disiarkan (belum terkonfirmasi)
+
+const esc = (x) => String(x).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+function saveFile(name, text, mime) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([text], { type: mime || 'text/plain' }));
+    a.download = name; a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+function downloadRecord(formId) { const r = window.lastRecords[formId]; if (r) saveFile(r.name, r.json, 'application/json'); }
+function downloadRaw(formId) { const r = window.lastRecords[formId]; if (r && r.rawHex) saveFile(r.rawName, r.rawHex + '\n', 'text/plain'); }
+function downloadAllRaw() {
+    if (!window.rawQueue.length) return;
+    saveFile('PBNU-rawtx-semua.txt', window.rawQueue.map(q => q.hex).join('\n') + '\n', 'text/plain');
+}
+async function copyRaw(formId) {
+    const r = window.lastRecords[formId]; if (!r || !r.rawHex) return;
+    try { await navigator.clipboard.writeText(r.rawHex); alert('Raw TX hex disalin.'); }
+    catch (e) { prompt('Salin raw TX hex berikut:', r.rawHex); }
+}
+
+function parseManualUtxos() {
+    const el = document.getElementById('manualUtxo'); if (!el) return [];
+    return el.value.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#')).map((l, i) => {
+        const p = l.split(/[\s,:;]+/);
+        if (p.length < 3 || !/^[0-9a-fA-F]{64}$/.test(p[0]) || !/^\d+$/.test(p[1]) || !/^\d+$/.test(p[2]))
+            throw new Error(`Baris UTXO manual ke-${i + 1} tidak valid. Format: txid,vout,nilai_satoshi`);
+        return { txid: p[0].toLowerCase(), vout: Number(p[1]), value: BigInt(p[2]) };
+    });
+}
+
+// ===== UTXO & MEMPOOL: gabungkan UTXO confirmed + TX mempool di layer aplikasi =====
+function markSpent(key, raw) {
+    window.pendingSpent.set(key, { t: Date.now(), raw: !!raw });
+    if (!raw) persistPending();
+}
+function isLocallySpent(key) {
+    const e = window.pendingSpent.get(key);
+    if (!e) return false;
+    if (e.raw) return true;
+    if (Date.now() - e.t > PENDING_TTL_MS) { window.pendingSpent.delete(key); return false; }
+    return true;
+}
+function persistPending() {
+    try {
+        const spent = [];
+        window.pendingSpent.forEach((e, k) => { if (!e.raw) spent.push([k, e.t]); });
+        const utxos = window.pendingUtxos.filter(u => !u.raw).map(u => ({ txid: u.txid, vout: u.vout, value: String(u.value), t: u.t, anc: u.anc, size: u.size }));
+        localStorage.setItem(PENDING_STORE_KEY, JSON.stringify({ a: liveWalletData.address, spent, utxos }));
+    } catch (e) { }
+}
+function loadPending() {
+    try {
+        const d = JSON.parse(localStorage.getItem(PENDING_STORE_KEY) || 'null');
+        if (!d || d.a !== liveWalletData.address) return;
+        const now = Date.now();
+        (d.spent || []).forEach(([k, t]) => { if (now - t <= PENDING_TTL_MS && !window.pendingSpent.has(k)) window.pendingSpent.set(k, { t, raw: false }); });
+        (d.utxos || []).forEach(u => {
+            if (u.t && now - u.t <= PENDING_UTXO_TTL_MS && !window.pendingUtxos.some(x => x.txid === u.txid && x.vout === u.vout))
+                window.pendingUtxos.push({ addr: d.a, txid: u.txid, vout: u.vout, value: BigInt(u.value), t: u.t, anc: u.anc, size: u.size });
+        });
+    } catch (e) { }
+}
+function resetPendingLocks() {
+    window.pendingSpent.forEach((e, k) => { if (!e.raw) window.pendingSpent.delete(k); });
+    window.pendingUtxos = window.pendingUtxos.filter(u => u.raw);
+    try { localStorage.removeItem(PENDING_STORE_KEY); } catch (e) { }
+    const el = document.getElementById('utxoSummary');
+    if (el) el.textContent = 'Kunci UTXO lokal dibuka. (Antrean raw TX yang belum disiarkan tetap dikunci.)';
+}
+
+function getApiBase() {
+    let b = ((document.getElementById('apiBaseUrl') || { value: '' }).value || '').trim().replace(/\/+$/, '');
+    if (!b) b = ((document.getElementById('broadcastUrl') || { value: '' }).value || '').trim().replace(/\/broadcast\/?$/, '').replace(/\/+$/, '');
+    return b;
+}
+
+function addressToScriptHex(addr) {
+    const hrp = NUSACOIN_PARAMS.bech32;
+    const a = String(addr || '').trim();
+    if (a.toLowerCase().startsWith(hrp + '1')) {
+        const low = a.toLowerCase(), p = low.lastIndexOf('1');
+        const data = Array.from(low.slice(p + 1)).map(c => BECH32_CHARSET.indexOf(c));
+        if (data.length < 8 || data.some(v => v < 0)) throw new Error('Alamat bech32 tidak valid.');
+        const prog = convertBits(data.slice(1, -6), 5, 8, false);
+        if (!prog || prog.length < 2) throw new Error('Alamat bech32 tidak valid.');
+        const h = prog.map(b => b.toString(16).padStart(2, '0')).join('');
+        return (data[0] === 0 ? '00' : (0x50 + data[0]).toString(16)) + prog.length.toString(16).padStart(2, '0') + h;
+    }
+    const d = fromBase58(a);
+    if (d.length !== 25) throw new Error('Format alamat tidak dikenali.');
+    const hash = Array.from(d.slice(1, 21)).map(b => b.toString(16).padStart(2, '0')).join('');
+    if (d[0] === NUSACOIN_PARAMS.pubKeyHash) return '76a914' + hash + '88ac';
+    if (d[0] === NUSACOIN_PARAMS.scriptHash) return 'a914' + hash + '87';
+    throw new Error('Format alamat tidak dikenali.');
+}
+function getOwnScript() {
+    try { const ki = keyInfoFromWallet(); return ki.type === 'bech32' ? '0014' + ki.h160 : '76a914' + ki.h160 + '88ac'; } catch (e) { }
+    return addressToScriptHex(liveWalletData.address);
+}
+
+// Dekode raw transaction (legacy & segwit): input (+sequence untuk RBF), output (nilai satoshi BigInt), ukuran
+function decodeRawTxHex(hex) {
+    let p = 0;
+    const rd = n => { const h = hex.substr(p, n * 2); p += n * 2; return h; };
+    const rdVar = () => {
+        const b = parseInt(rd(1), 16);
+        if (b < 0xfd) return b;
+        if (b === 0xfd) return parseInt(TX.rev(rd(2)), 16);
+        if (b === 0xfe) return parseInt(TX.rev(rd(4)), 16);
+        return Number(BigInt('0x' + TX.rev(rd(8))));
+    };
+    rd(4);                                              // versi
+    if (hex.substr(p, 4) === '0001') p += 4;            // marker + flag segwit
+    const nIn = rdVar(), ins = [];
+    for (let i = 0; i < nIn; i++) {
+        const prev = TX.rev(rd(32));
+        const vout = parseInt(TX.rev(rd(4)), 16);
+        rd(rdVar());
+        const seq = parseInt(TX.rev(rd(4)), 16);
+        ins.push({ txid: prev, vout, seq });
+    }
+    const nOut = rdVar(), outs = [];
+    for (let i = 0; i < nOut; i++) {
+        const value = BigInt('0x' + TX.rev(rd(8)));
+        const script = rd(rdVar());
+        outs.push({ n: i, value, script });
+    }
+    if (!ins.length || !outs.length) throw new Error('raw TX tidak valid');
+    return { ins, outs, size: hex.length / 2 };
+}
+function detailFromObject(o) {
+    const vin = o.vin || o.inputs || o.vins || [];
+    const ins = vin.map(v => ({ txid: v.txid || v.prev_txid || v.hash, vout: [v.vout, v.n, v.index].find(x => x !== undefined), seq: v.sequence })).filter(v => v.txid && v.vout !== undefined);
+    const outs = (o.vout || o.outputs || []).map((x, idx) => {
+        const spk = x.scriptPubKey || {};
+        return {
+            n: x.n !== undefined ? x.n : idx,
+            value: BigInt(Math.round((Number(x.value) || 0) * 1e8)),
+            script: spk.hex || '',
+            addrs: spk.addresses || (spk.address ? [spk.address] : (x.address ? [x.address] : []))
+        };
+    });
+    return { ins, outs, size: Number(o.size || o.vsize || 0), coinbase: !!(vin[0] && vin[0].coinbase !== undefined) };
+}
+function isCoinbaseOrStake(d) {
+    if (d.coinbase || !d.ins.length || /^0+$/.test(d.ins[0].txid)) return true;
+    return d.outs.length > 1 && d.outs[0].value === 0n && !d.outs[0].script;      // coinstake: output pertama kosong
+}
+
+async function mapLimit(arr, fn, limit) {
+    let i = 0;
+    const workers = Array.from({ length: Math.min(limit, arr.length) }, async () => {
+        while (i < arr.length) { const k = i++; await fn(arr[k]); }
+    });
+    await Promise.all(workers);
+}
+
+// Detail 1 transaksi (termasuk yang masih di mempool) dari beberapa sumber -> {ins, outs, size} atau null
+async function getPendingTxDetail(txid) {
+    const explorer = getNodeBase(), api = getApiBase();
+    const urls = [
+        `${explorer}/api/getrawtransaction?txid=${txid}&decrypt=0`,
+        `${explorer}/api/getrawtransaction?txid=${txid}`,
+        `${api}/rawtransaction/${txid}`,
+        `${api}/tx/${txid}`,
+        `${api}/transaction/${txid}`,
+        `${explorer}/api/getrawtransaction?txid=${txid}&decrypt=1`
+    ];
+    for (const u of urls) {
+        try {
+            const r = await fetch(u);
+            if (!r.ok) continue;
+            const t = (await r.text()).trim();
+            let hex = null, obj = null;
+            if (HEX_RE.test(t)) hex = t;
+            else {
+                let j; try { j = JSON.parse(t); } catch (e) { continue; }
+                const v = (j && j.result !== undefined) ? j.result : j;
+                if (typeof v === 'string' && HEX_RE.test(v)) hex = v;
+                else if (v && typeof v === 'object') {
+                    const h = v.hex || v.raw || v.rawtx;
+                    if (typeof h === 'string' && HEX_RE.test(h)) hex = h;
+                    else if (v.vin || v.inputs || v.vins) obj = v;
+                }
+            }
+            if (hex) return decodeRawTxHex(hex);
+            if (obj) return detailFromObject(obj);
+        } catch (e) { /* coba sumber berikutnya */ }
+    }
+    return null;
+}
+
+// Daftar txid di mempool node (tanpa filter alamat); kosong bila endpoint tidak tersedia
+async function listNodeMempool() {
+    const explorer = getNodeBase(), api = getApiBase();
+    for (const u of [`${explorer}/api/getrawmempool`, `${api}/rawmempool`]) {
+        try {
+            const r = await fetch(u);
+            if (!r.ok) continue;
+            const j = await r.json();
+            let v = (j && j.result !== undefined) ? j.result : j;
+            if (v && !Array.isArray(v) && typeof v === 'object') v = v.tx || v.txs || Object.keys(v);
+            if (Array.isArray(v)) {
+                const ids = v.map(x => typeof x === 'string' ? x : (x && x.txid)).filter(x => typeof x === 'string' && /^[0-9a-fA-F]{64}$/.test(x));
+                if (ids.length) return ids;
+            }
+        } catch (e) { }
+    }
+    return [];
+}
+
+// Status mempool: input yang sedang dibelanjakan TX unconfirmed + output unconfirmed milik alamat ini (0 konfirmasi)
+// GET {api}/mempool/{address} -> result.tx (daftar txid atau objek transaksi)
+async function fetchMempoolState(addr, ownScript) {
+    const state = { spent: new Set(), incoming: [], ok: false, undecoded: 0, count: 0, txs: {}, contested: new Set() };
+    try {
+        const api = getApiBase();
+        const r = await fetch(`${api}/mempool/${encodeURIComponent(addr)}`);
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        const j = await r.json();
+        const res = (j && j.result !== undefined) ? j.result : j;
+        const list = Array.isArray(res) ? res : ((res && (res.tx || res.txs || res.transactions)) || []);
+        state.count = list.length;
+        const items = list.slice();
+        const seen = new Set(items.map(x => typeof x === 'string' ? x : (x && (x.txid || x.hash))).filter(Boolean));
+
+        // TXID pending yang diisi manual
+        const manualEl = document.getElementById('pendingTxid');
+        ((manualEl && manualEl.value) || '').split(/[\s,;]+/).forEach(t => {
+            t = t.trim().toLowerCase();
+            if (/^[0-9a-f]{64}$/.test(t) && !seen.has(t)) { seen.add(t); items.push(t); }
+        });
+        // Cadangan: endpoint per-alamat kosong -> pindai mempool node (maks. 300 TX)
+        if (!list.length) {
+            const all = await listNodeMempool();
+            all.slice(0, 300).forEach(t => { if (!seen.has(t)) { seen.add(t); items.push(t); } });
+        }
+
+        await mapLimit(items, async item => {
+            const txid = typeof item === 'string' ? item : (item && (item.txid || item.hash));
+            let d = null;
+            if (item && typeof item === 'object') {
+                const h = item.hex || item.raw || item.rawtx;
+                try {
+                    if (typeof h === 'string' && HEX_RE.test(h)) d = decodeRawTxHex(h);
+                    else if (item.vin || item.inputs || item.vins) d = detailFromObject(item);
+                } catch (e) { d = null; }
+            }
+            if (!d && txid) d = await getPendingTxDetail(txid);
+            if (!d || !txid) { state.undecoded++; return; }
+            state.txs[txid] = { ins: d.ins, size: d.size || 0, rbf: d.ins.some(i => i.seq !== undefined && i.seq < 0xfffffffe) };
+            d.ins.forEach(v => state.spent.add(v.txid + ':' + v.vout));
+            d.outs.forEach(o => {
+                const mine = (o.script && o.script === ownScript) || (o.addrs && o.addrs.includes(addr));
+                if (mine && o.value > 0n) state.incoming.push({ txid, vout: o.n, value: o.value, confirmed: false });
+            });
+        }, 8);
+
+        // Double-spend di mempool: outpoint yang sama diklaim >1 TX -> hanya satu yang menang, semuanya dianggap rapuh
+        const claims = {};
+        Object.keys(state.txs).forEach(id => state.txs[id].ins.forEach(i => {
+            const k = i.txid + ':' + i.vout;
+            (claims[k] = claims[k] || new Set()).add(id);
+        }));
+        Object.values(claims).forEach(set => { if (set.size > 1) set.forEach(id => state.contested.add(id)); });
+        state.ok = true;
+    } catch (e) {
+        console.warn('Cek mempool gagal:', e.message || e);
+    }
+    state.incoming = state.incoming.filter(u => !state.spent.has(u.txid + ':' + u.vout));
+    return state;
+}
+
+// TX mempool "rapuh" bila dirinya atau leluhurnya ikut double-spend
+function isFragile(txid, mp, seen) {
+    seen = seen || new Set();
+    if (seen.has(txid)) return false;
+    seen.add(txid);
+    const t = mp.txs[txid];
+    if (!t) return false;
+    if (mp.contested.has(txid)) return true;
+    return t.ins.some(i => isFragile(i.txid, mp, seen));
+}
+
+// Panjang/ukuran rantai unconfirmed di belakang input yang dipilih + flag RBF
+function unconfirmedChainInfo(selected, mp) {
+    const set = new Set();
+    let size = 0, localAnc = 0, localSize = 0, rbf = false;
+    const walk = txid => {
+        if (set.has(txid)) return;
+        const t = mp.txs[txid];
+        if (!t) return;
+        set.add(txid);
+        size += t.size || 0;
+        if (t.rbf) rbf = true;
+        t.ins.forEach(i => walk(i.txid));
+    };
+    selected.forEach(u => {
+        if (u.confirmed !== false) return;
+        if (mp.txs[u.txid]) walk(u.txid);
+        else { localAnc = Math.max(localAnc, u.anc || 1); localSize = Math.max(localSize, u.size || 0); }
+    });
+    return { anc: set.size + localAnc, size: size + localSize, rbf };
+}
+
+// UTXO confirmed dari API Nusacoin: GET {api}/utxos/{address} -> result.unspents (amount dalam NUX)
+async function fetchUtxosApi(addr) {
+    const api = getApiBase();
+    if (!api) throw new Error('URL API kosong');
+    const j = await explorerJson(`${api}/utxos/${encodeURIComponent(addr)}`);
+    if (j && j.error) throw new Error(typeof j.error === 'string' ? j.error : JSON.stringify(j.error));
+    const res = (j && j.result !== undefined) ? j.result : j;
+    const arr = res && (res.unspents || res.utxos || res.unspent);
+    if (!Array.isArray(arr)) throw new Error('Format respons /utxos tidak dikenali');
+    const tip = Number(res.height) || 0;
+    const list = [];
+    arr.forEach(u => {
+        const txid = u.txid, vout = u.vout ?? u.n;
+        if (!txid || vout === undefined) return;
+        const value = (u.amount === undefined && u.value !== undefined) ? BigInt(String(u.value)) : BigInt(Math.round((Number(u.amount) || 0) * 1e8));
+        if (value > 0n) list.push({ txid, vout: Number(vout), value, confirmed: true, height: Number(u.height) || 0 });
+    });
+    // Reward mining/staking baru belum boleh dibelanjakan (butuh MIN_COINBASE_CONF konfirmasi)
+    const young = tip ? [...new Set(list.filter(u => u.height && tip - u.height + 1 < MIN_COINBASE_CONF).map(u => u.txid))] : [];
+    const bad = new Set();
+    await mapLimit(young, async txid => {
+        const d = await getPendingTxDetail(txid);
+        if (d && isCoinbaseOrStake(d)) bad.add(txid);
+    }, 6);
+    const ok = list.filter(u => !bad.has(u.txid));
+    if (!ok.length && list.length) throw new Error(`Semua saldo masih berupa reward mining/staking yang belum matang (butuh ${MIN_COINBASE_CONF} konfirmasi). Tunggu atau gunakan alamat lain.`);
+    return ok;
+}
+
+// Kumpulkan UTXO yang bisa dibelanjakan: confirmed (API UTXO) - input yang dipakai TX mempool + output TX mempool (0 konfirmasi)
+async function collectPool(addr, ownScript) {
+    loadPending();
+    const allowUnconf = document.getElementById('allowUnconf').checked;
+    let list = parseManualUtxos();
+    if (!list.length) {
+        try { list = await fetchUtxos(addr); }
+        catch (e) { throw new Error((e.message || String(e)) + ' - Node tidak terjangkau dari browser (mis. CORS). Isi kolom "UTXO manual" di menu Koneksi Wallet lalu klik Inject lagi untuk membuat raw TX secara offline.'); }
+    }
+    const mp = await fetchMempoolState(addr, ownScript);
+
+    let pool = list.map(u => Object.assign({ confirmed: true }, u));
+    const have = (t, v) => pool.some(u => u.txid === t && u.vout === v);
+    // Change lokal: TX yang belum disiarkan (raw) selalu dipakai agar bisa dirantai; TX yang sudah disiarkan hanya bila diizinkan
+    window.pendingUtxos.filter(pu => pu.addr === addr && (pu.raw || allowUnconf)).forEach(pu => {
+        if (!have(pu.txid, pu.vout)) pool.push({ txid: pu.txid, vout: pu.vout, value: pu.value, confirmed: false, anc: pu.anc, size: pu.size });
+    });
+    if (allowUnconf) mp.incoming.forEach(iu => { if (!have(iu.txid, iu.vout)) pool.push(iu); });
+
+    let mpBlocked = 0, localBlocked = 0, fragileBlocked = 0, blockedValue = 0n;
+    const blockedInfo = [];
+    pool = pool.filter(u => {
+        const key = u.txid + ':' + u.vout, short = key.slice(0, 10) + '…';
+        if (mp.spent.has(key)) { mpBlocked++; blockedValue += u.value; blockedInfo.push(short + ' (dipakai TX pending di mempool)'); return false; }
+        if (isLocallySpent(key)) { localBlocked++; blockedValue += u.value; blockedInfo.push(short + ' (dikunci lokal: baru dikirim / ditolak konflik)'); return false; }
+        if (u.confirmed === false && mp.txs[u.txid] && isFragile(u.txid, mp)) { fragileBlocked++; blockedValue += u.value; blockedInfo.push(short + ' (TX induk bentrok/double-spend di mempool)'); return false; }
+        return true;
+    });
+    return { list, mp, pool, allowUnconf, mpBlocked, localBlocked, fragileBlocked, blocked: mpBlocked + localBlocked + fragileBlocked, blockedValue, blockedInfo };
+}
+
+function poolEmptyMessage(pi) {
+    if (pi.blocked > 0) {
+        return 'Semua UTXO sedang terkunci (' + pi.blocked + ' UTXO):\n- ' + pi.blockedInfo.join('\n- ') +
+            '\n\nTunggu konfirmasi sekitar 1 blok lalu coba lagi.' +
+            (pi.allowUnconf && pi.mp.incoming.length === 0 && pi.fragileBlocked === 0 ? '\nSisa dana dari TX pending belum terdeteksi: isi TXID transaksi pending itu di Pengaturan UTXO & Mempool (kolom TXID transaksi pending), lalu klik Inject lagi.' : '') +
+            (pi.fragileBlocked > 0 ? '\nSebagian dana berasal dari TX pending yang bentrok (double-spend) di mempool, jadi tidak dipakai sampai jelas mana yang menang.' : '') +
+            (pi.localBlocked > 0 && pi.mpBlocked === 0 && pi.fragileBlocked === 0 ? '\nKunci ini hanya lokal (mempool tidak menampilkannya). Jika TX sebelumnya sudah dicek tidak ada/gagal, klik "Buka kunci UTXO lokal".' : '') +
+            (pi.mp.undecoded > 0 ? '\n(' + pi.mp.undecoded + ' TX pending tidak bisa dibaca detailnya, jadi kembaliannya tidak terdeteksi.)' : '') +
+            (pi.mp.ok ? '' : '\n(Peringatan: cek mempool API gagal, status mempool tidak terverifikasi.)');
+    }
+    if (!pi.list.length) return 'Tidak ada UTXO (saldo) pada alamat signer.';
+    return 'Tidak ada UTXO yang bisa dibelanjakan' + (pi.allowUnconf ? '.' : " (aktifkan 'Pakai sisa dana dari transaksi mempool' untuk memakai dana belum terkonfirmasi).");
+}
+
+const fmtSats = (v) => { const n = BigInt(v); return (n / 100000000n).toString() + '.' + (n % 100000000n).toString().padStart(8, '0'); };
+
+// Ringkasan berlabel: confirmed vs unconfirmed vs terkunci (tidak digabung jadi satu angka)
+async function refreshUtxoSummary() {
+    const el = document.getElementById('utxoSummary');
+    if (!el) return;
+    if (!liveWalletData.address) { el.textContent = 'Buka wallet dulu.'; return; }
+    el.textContent = 'Memeriksa UTXO dan mempool...';
+    try {
+        const r = await collectPool(liveWalletData.address, getOwnScript());
+        const conf = r.pool.filter(u => u.confirmed !== false), unc = r.pool.filter(u => u.confirmed === false);
+        const sum = a => a.reduce((t, u) => t + u.value, 0n);
+        const chain = unconfirmedChainInfo(unc, r.mp);
+        const lines = [];
+        lines.push('✅ Terkonfirmasi: ' + fmtSats(sum(conf)) + ' NUX (' + conf.length + ' UTXO)');
+        if (r.allowUnconf) lines.push('⏳ Belum terkonfirmasi (0 konf., mempool): ' + fmtSats(sum(unc)) + ' NUX (' + unc.length + ' UTXO)' + (unc.length ? ' — rantai ' + chain.anc + ' TX' + (chain.rbf ? ', RBF (rapuh)' : '') : ''));
+        else lines.push('⏳ Belum terkonfirmasi: tidak dihitung (opsi pakai dana mempool nonaktif)');
+        lines.push('🔒 Terkunci (dipakai TX pending / bentrok): ' + fmtSats(r.blockedValue) + ' NUX (' + r.blocked + ' UTXO)');
+        if (!r.mp.ok) lines.push('⚠️ Cek mempool API gagal, status unconfirmed tidak terverifikasi.');
+        if (r.mp.undecoded > 0) lines.push('⚠️ ' + r.mp.undecoded + ' TX pending tidak bisa dibaca detailnya.');
+        if (r.mp.contested.size > 0) lines.push('⚠️ ' + r.mp.contested.size + ' TX di mempool saling bentrok (double-spend).');
+        el.innerHTML = '';
+        lines.forEach(t => { const d = document.createElement('div'); d.textContent = t; el.appendChild(d); });
+    } catch (e) {
+        el.textContent = 'Gagal memeriksa UTXO: ' + (e.message || e);
+    }
+}
+
+// ===== VERIFIKASI HASH: cocokkan SHA-256 file JSON dengan OP_RETURN (6a20 + hash) di blockchain =====
+function verifyCandidates(text) {
+    const sha = t => CryptoJS.SHA256(t).toString();
+    const list = [{ hash: sha(text), variant: '' }];
+    const add = (t, variant) => { const h = sha(t); if (!list.some(c => c.hash === h)) list.push({ hash: h, variant }); };
+    if (text.charCodeAt(0) === 0xFEFF) add(text.slice(1), 'BOM dihapus');
+    add(text.replace(/\s+$/, ''), 'spasi/baris akhir dibuang');
+    add(text.replace(/\r\n/g, '\n'), 'CRLF diubah ke LF');
+    try { add(JSON.stringify(JSON.parse(text)), 'JSON diserialisasi ulang (compact)'); } catch (e) { }
+    return list;
+}
+
+// Info blok sebuah transaksi: tinggi, hash blok, konfirmasi, waktu
+async function fetchTxChainInfo(txid) {
+    const base = getNodeBase();
+    const info = { txid, confirmations: null, height: null, blockhash: null, time: null };
+    try {
+        const j = await explorerJson(`${base}/ext/gettx/${txid}`);
+        if (j && j.tx && j.tx.txid === txid) {
+            info.height = j.tx.blockindex ?? null; info.blockhash = j.tx.blockhash || null;
+            info.time = j.tx.timestamp || null; info.confirmations = j.confirmations ?? null;
+        }
+    } catch (e) { }
+    try {
+        const r = await explorerJson(`${base}/api/getrawtransaction?txid=${txid}&decrypt=1`);
+        if (r && typeof r === 'object') {
+            info.blockhash = info.blockhash || r.blockhash || null;
+            if (info.confirmations === null && r.confirmations !== undefined) info.confirmations = r.confirmations;
+            info.time = info.time || r.blocktime || r.time || null;
+        }
+    } catch (e) { }
+    if (info.blockhash && (info.height === null || info.height === undefined)) {
+        try { const b = await explorerJson(`${base}/api/getblock?hash=${info.blockhash}`); if (b && b.height !== undefined) info.height = b.height; } catch (e) { }
+    }
+    return info;
+}
+
+// Cari hash di OP_RETURN: (1) TXID manual, (2) mempool alamat, (3) riwayat transaksi alamat (maks. 1000 TX)
+async function findHashesOnChain(hashes, addr, txids, progress) {
+    const want = new Set(hashes), found = new Map(), checked = new Set();
+    const check = async (txid) => {
+        if (checked.has(txid) || found.size === want.size) return;
+        checked.add(txid);
+        const d = await getPendingTxDetail(txid);
+        if (!d) return;
+        d.outs.forEach(o => {
+            const sc = String(o.script || '').toLowerCase();
+            if (!sc.startsWith('6a')) return;
+            want.forEach(h => { if (!found.has(h) && sc.includes(h)) found.set(h, { txid, n: o.n, script: sc }); });
+        });
+    };
+    await mapLimit(txids, check, 4);
+    if (addr && found.size < want.size) {
+        try {
+            const j = await explorerJson(`${getApiBase()}/mempool/${encodeURIComponent(addr)}`);
+            const res = (j && j.result !== undefined) ? j.result : j;
+            const list = Array.isArray(res) ? res : ((res && (res.tx || res.txs)) || []);
+            await mapLimit(list.map(x => typeof x === 'string' ? x : (x && (x.txid || x.hash))).filter(Boolean), check, 6);
+        } catch (e) { }
+    }
+    if (addr && found.size < want.size) {
+        const base = getNodeBase(), a = encodeURIComponent(addr), PAGE = 40, MAX = 1000;
+        let n = 0;
+        for (let start = 0; start < MAX && found.size < want.size; start += PAGE) {
+            let page;
+            try { page = await explorerJson(`${base}/ext/getaddresstxs/${a}/${start}/${PAGE}`); }
+            catch (e) { if (start === 0 && !found.size) throw new Error('Gagal membaca riwayat alamat dari explorer: ' + (e.message || e)); break; }
+            if (!Array.isArray(page) || !page.length) break;
+            await mapLimit(page.map(t => t && t.txid).filter(Boolean), async id => { await check(id); n++; if (progress) progress(n); }, 8);
+            if (page.length < PAGE) break;
+        }
+    }
+    return { found, scanned: checked.size };
+}
+
+async function runVerify() {
+    const out = document.getElementById('verifyResult'), prog = document.getElementById('verifyProgress');
+    const box = (cls, html) => `<div class="p-4 rounded-xl text-sm leading-relaxed border ${cls}">${html}</div>`;
+    out.innerHTML = ''; prog.textContent = '';
+    try {
+        const files = Array.from(document.getElementById('verifyFiles').files || []);
+        const hexList = id => (document.getElementById(id).value || '').split(/[\s,;]+/).map(x => x.trim().toLowerCase()).filter(x => /^[0-9a-f]{64}$/.test(x));
+        const manual = hexList('verifyHash'), txids = hexList('verifyTxid');
+        if (!files.length && !manual.length) { out.innerHTML = box('bg-amber-50 border-amber-300 text-amber-800', 'Pilih file JSON atau tempel hash SHA-256 dulu.'); return; }
+        const addr = (document.getElementById('verifyAddress').value || '').trim() || liveWalletData.address || '';
+        if (!addr && !txids.length) { out.innerHTML = box('bg-amber-50 border-amber-300 text-amber-800', 'Isi alamat signer, buka wallet, atau isi TXID transaksi Inject.'); return; }
+
+        const items = [];
+        for (const f of files) {
+            const text = await f.text();
+            let parsed = null; try { parsed = JSON.parse(text); } catch (e) { }
+            items.push({ label: f.name, parsed, cands: verifyCandidates(text) });
+        }
+        manual.forEach(h => items.push({ label: 'Hash manual', manual: true, parsed: null, cands: [{ hash: h, variant: '' }] }));
+        const hashes = [...new Set(items.flatMap(i => i.cands.map(c => c.hash)))];
+
+        prog.textContent = 'Menghitung hash dan mencari di blockchain...';
+        const res = await findHashesOnChain(hashes, addr, txids, n => { prog.textContent = 'Memeriksa transaksi: ' + n; });
+        prog.textContent = '';
+
+        const base = getNodeBase(), cache = {};
+        const getInfo = async txid => cache[txid] || (cache[txid] = await fetchTxChainInfo(txid));
+        let matched = 0, html = '';
+        for (const it of items) {
+            const hit = it.cands.find(c => res.found.has(c.hash));
+            const parsedOk = it.parsed && typeof it.parsed === 'object' && it.parsed.data && typeof it.parsed.data === 'object';
+            const dataObj = parsedOk ? it.parsed.data : null;
+            const shown = it.cands[0].hash;
+            let card = `<div><strong>${esc(it.label)}</strong></div>`;
+            if (!it.manual && !parsedOk) card += `<div class="text-xs mt-1">File ini bukan JSON hasil Inject (hash tetap dihitung dari isi file apa adanya).</div>`;
+            if (parsedOk) card += `<div class="text-xs mt-1"><strong>Menu:</strong> ${esc(String(it.parsed.menu ?? '-'))} &bull; <strong>Jumlah field:</strong> ${Object.keys(dataObj).length}</div>`;
+            card += `<div class="text-xs mt-1"><strong>${it.manual ? 'SHA-256 (hash manual):' : 'SHA-256 (dihitung dari file):'}</strong> <span class="font-mono break-all">${esc(shown)}</span></div>`;
+
+            let cls;
+            if (hit) {
+                matched++;
+                const f = res.found.get(hit.hash), info = await getInfo(f.txid);
+                const confirmed = !!(info.blockhash || (info.confirmations && info.confirmations > 0));
+                cls = confirmed ? 'bg-emerald-50 border-emerald-300 text-emerald-900' : 'bg-amber-50 border-amber-300 text-amber-900';
+                const head = confirmed ? '✅ COCOK - hash data ini tercatat di blockchain.' : '⏳ COCOK - hash tercatat, tetapi transaksi belum terkonfirmasi (masih di mempool).';
+                card = `<div class="font-bold mb-1">${head}</div>` + card;
+                if (hit.variant) card += `<div class="text-xs mt-1 text-amber-800">Dicocokkan setelah normalisasi (${esc(hit.variant)}); SHA-256 yang cocok: <span class="font-mono break-all">${esc(hit.hash)}</span></div>`;
+                const t = info.time ? new Date((Number(info.time) < 1e12 ? Number(info.time) * 1000 : Number(info.time))).toLocaleString((window.LANG && window.LANG.cur === 'en') ? 'en-US' : 'id-ID') : '-';
+                card += `<div class="text-xs mt-2 space-y-0.5">` +
+                    `<div><strong>Tx ID:</strong> <a href="${esc(base)}/tx/${esc(f.txid)}" target="_blank" class="underline font-bold font-mono break-all">${esc(f.txid)}</a></div>` +
+                    `<div><strong>Blok:</strong> ${info.height !== null && info.height !== undefined ? (info.blockhash ? `<a href="${esc(base)}/block/${esc(info.blockhash)}" target="_blank" class="underline font-bold">${esc(String(info.height))}</a>` : esc(String(info.height))) : (confirmed ? '-' : 'belum ada di blok')}</div>` +
+                    `<div><strong>Hash blok:</strong> <span class="font-mono break-all">${esc(info.blockhash || '-')}</span></div>` +
+                    `<div><strong>Konfirmasi:</strong> ${esc(String(info.confirmations ?? 0))}</div>` +
+                    `<div><strong>Waktu blok:</strong> ${esc(t)}</div>` +
+                    `<div><strong>Output OP_RETURN:</strong> #${esc(String(f.n))} <span class="font-mono break-all">${esc(f.script)}</span></div></div>`;
+            } else {
+                cls = 'bg-red-50 border-red-300 text-red-800';
+                card = `<div class="font-bold mb-1">❌ TIDAK DITEMUKAN - hash ini belum ditemukan di blockchain.</div>` + card +
+                    `<div class="text-xs mt-2">Telah memeriksa ${res.scanned} transaksi. Kemungkinan: (1) alamat signer salah, (2) raw TX belum disiarkan, (3) explorer belum mengindeks (tunggu 1-2 menit), atau (4) file sudah diubah sedikit pun (satu karakter berbeda = hash berbeda). Coba isi TXID transaksi Inject pada kolom TXID.</div>`;
+            }
+            if (dataObj) {
+                const rows = Object.entries(dataObj).filter(([k, v]) => v !== '' && v !== null && v !== undefined)
+                    .map(([k, v]) => `<tr><td class="pr-3 font-semibold align-top">${esc(k)}</td><td class="break-all">${esc(typeof v === 'object' ? JSON.stringify(v) : v)}</td></tr>`).join('');
+                card += `<details class="mt-2 text-xs"><summary class="cursor-pointer font-bold">Lihat isi data (${Object.keys(dataObj).length} field)</summary><table class="mt-1">${rows}</table></details>`;
+            }
+            html += box(cls, card);
+        }
+        out.innerHTML = box('bg-slate-50 border-slate-300 text-slate-800', `<strong>Ringkasan:</strong> ${matched}/${items.length} file cocok dengan blockchain.`) + html;
+    } catch (e) {
+        prog.textContent = '';
+        out.innerHTML = box('bg-red-50 border-red-300 text-red-800', 'Verifikasi gagal: ' + esc(e.message || String(e)));
+    }
+}
+
+function registerPending(tx, raw) {
+    tx.picked.forEach(u => markSpent(u.txid + ':' + u.vout, raw));
+    window.pendingUtxos = window.pendingUtxos.filter(u => !isLocallySpent(u.txid + ':' + u.vout));
+    const ch = tx.chain || { anc: 0, size: 0, rawBytes: 0 };
+    if (tx.change > 0n) window.pendingUtxos.push({ addr: liveWalletData.address, txid: tx.txid, vout: 1, value: tx.change, t: Date.now(), raw: !!raw, anc: ch.anc + 1, size: ch.size + ch.rawBytes }); // output 0 = OP_RETURN, output 1 = change
+    persistPending();
+}
+
+// INJEKSI PER MENU: hash SHA-256 dari data form menu itu sendiri -> OP_RETURN
+async function injectData(sheetName, formId) {
+    const form = document.getElementById(formId);
+    const statusDiv = document.getElementById("status-" + formId);
+    const show = (cls, html) => { statusDiv.style.display = "block"; statusDiv.className = "mt-4 p-4 rounded-xl text-sm leading-relaxed border " + cls; statusDiv.innerHTML = html; };
+    const err = (msg, hash) => show("bg-red-50 border-red-300 text-red-800",
+        `<strong>GAGAL - hash BELUM tercatat di blockchain.</strong> Menu <strong>${esc(sheetName)}</strong>.<br>${esc(msg)}` +
+        (hash ? `<br><span class="text-xs">Hash data: <span class="font-mono break-all">${hash}</span></span>` : '') +
+        `<br>Isian form dipertahankan; perbaiki lalu klik Inject lagi.`);
+
+    if (!liveWalletData.address) {
+        show("bg-amber-50 border-amber-300 text-amber-800", "Wallet belum dibuka. Buka wallet di menu 'Koneksi Wallet & Saldo' sebagai signer, lalu kembali dan klik Inject lagi. Data form ini tidak hilang.");
+        return;
+    }
+
+    // 1. Kumpulkan data HANYA dari form menu ini, lalu hash SHA-256
+    const data = {};
+    form.querySelectorAll('input, select, textarea').forEach(el => { if (el.id) data[el.id] = el.value; });
+    const recordJson = JSON.stringify({ menu: sheetName, data });
+    const dataHash = CryptoJS.SHA256(recordJson).toString();
+
+    show("bg-emerald-50 border-emerald-300 text-emerald-800", `Menyusun transaksi OP_RETURN untuk menu <strong>${esc(sheetName)}</strong>...<br><span class="text-xs">SHA-256: <span class="font-mono break-all">${dataHash}</span></span>`);
+
+    // 2-3. Susun TX dari UTXO (confirmed + mempool), tandatangani, lalu broadcast.
+    //      Bila bentrok di mempool: kunci input yang gagal dan ulangi dengan UTXO lain (maks. 3 percobaan).
+    const rawOnly = document.getElementById("rawOnly").checked;
+    let tx, txid = null, bcErr = null, warns = [];
+    for (let attempt = 0; attempt < 3; attempt++) {
+        txid = null; bcErr = null;
+        try {
+            const ki = keyInfoFromWallet();
+            const feeSat = BigInt(Math.round((parseFloat(document.getElementById("feeNux").value) || 0) * 1e8));
+            const ownScript = ki.type === 'bech32' ? '0014' + ki.h160 : '76a914' + ki.h160 + '88ac';
+            const pi = await collectPool(liveWalletData.address, ownScript);
+            if (!pi.pool.length) throw new Error(poolEmptyMessage(pi));
+            tx = buildSignedTx(pi.pool, ki, dataHash, feeSat);
+
+            // Rantai unconfirmed: batas default Bitcoin Core (25 TX / ~101 kB). Lewat batas = TX ditolak atau terpental dari mempool
+            const rawBytes = tx.hex.length / 2;
+            tx.chain = unconfirmedChainInfo(tx.picked, pi.mp); tx.chain.rawBytes = rawBytes;
+            const ancCount = tx.chain.anc + 1, pkgBytes = tx.chain.size + rawBytes;
+            if (ancCount > MAX_UNCONF_ANCESTORS || pkgBytes > MAX_UNCONF_PACKAGE_BYTES)
+                throw new Error(`Rantai transaksi belum terkonfirmasi terlalu panjang (${ancCount} TX, ~${Math.round(pkgBytes / 1000)} kB; batas default ${MAX_UNCONF_ANCESTORS} TX / ~101 kB). Tunggu konfirmasi dulu supaya TX tidak ditolak atau terpental dari mempool.`);
+            warns = [];
+            if (tx.picked.some(u => u.confirmed === false)) warns.push(`Sebagian dana berasal dari TX yang BELUM terkonfirmasi (rantai ${tx.chain.anc} TX). Jika TX induk dibuang/diganti dari mempool, TX ini ikut gagal.`);
+            if (tx.chain.rbf) warns.push('TX induk memberi sinyal RBF (replaceable): bisa diganti kapan saja, sehingga TX ini rapuh.');
+            if (ancCount >= WARN_UNCONF_ANCESTORS || pkgBytes > 80000) warns.push(`Rantai unconfirmed sudah panjang (${ancCount} dari maks ${MAX_UNCONF_ANCESTORS} TX).`);
+        } catch (e) {
+            err(e.message || "Terjadi kesalahan tak terduga.", dataHash);
+            return;
+        }
+
+        if (rawOnly) break;
+        try { txid = await broadcastHex(tx.hex, tx.txid); break; }
+        catch (e) {
+            bcErr = e.message || String(e);
+            if (CONFLICT_RE.test(bcErr) && attempt < 2) {
+                // Input unconfirmed gagal = TX induknya terpental/diganti: buang yang itu saja. Jika semua input confirmed, kunci input tsb.
+                const failedUnconf = tx.picked.filter(u => u.confirmed === false);
+                (failedUnconf.length ? failedUnconf : tx.picked).forEach(u => markSpent(u.txid + ':' + u.vout));
+                window.pendingUtxos = window.pendingUtxos.filter(pu => !isLocallySpent(pu.txid + ':' + pu.vout));
+                persistPending();
+                show("bg-amber-50 border-amber-300 text-amber-800", `Konflik mempool, mencoba UTXO lain (percobaan ${attempt + 2}/3)...`);
+                continue;
+            }
+            break;
+        }
+    }
+    const warnHtml = warns.length ? `<div class="text-xs mt-2 text-amber-800">⚠️ ${warns.map(esc).join('<br>⚠️ ')}</div>` : '';
+
+    const noEl = form.querySelector('[data-no]');
+    if (noEl) noEl.value = (parseInt(noEl.value, 10) || 0) + 1;
+
+    const shortId = (txid || tx.txid).slice(0, 8);
+    window.lastRecords[formId] = {
+        name: `PBNU-${sheetName}-${shortId}.json`, json: recordJson,
+        rawName: `PBNU-${sheetName}-${shortId}.rawtx.txt`, rawHex: tx.hex
+    };
+
+    const btn = "px-3 py-1.5 rounded-lg text-white text-xs font-bold mr-1 mt-2";
+    const btnRec = `<button type="button" onclick="downloadRecord('${formId}')" class="${btn} bg-[var(--primary)]"><i class="fa-solid fa-download mr-1"></i> Unduh data asli (.json)</button>`;
+    const btnRaw = `<button type="button" onclick="downloadRaw('${formId}')" class="${btn} bg-amber-700"><i class="fa-solid fa-file-code mr-1"></i> Unduh raw TX (.txt)</button>`;
+    const btnCopy = `<button type="button" onclick="copyRaw('${formId}')" class="${btn} bg-slate-600"><i class="fa-solid fa-copy mr-1"></i> Salin hex</button>`;
+
+    if (txid) {
+        registerPending(tx, false);   // change tx ini dipakai TX berikutnya sebelum explorer selesai mengindeks
+        const mismatch = txid !== tx.txid ? `<br><span class="text-xs text-amber-700">Catatan: Tx ID dari node berbeda dengan hitungan lokal; cek di explorer.</span>` : '';
+        show("bg-emerald-50 border-emerald-300 text-emerald-800",
+            `<strong>Berhasil disiarkan ke node.</strong> Hash data menu <strong>${esc(sheetName)}</strong> dikirim ke OP_RETURN.<br>` +
+            `<strong>SHA-256:</strong> <span class="font-mono text-xs break-all">${dataHash}</span><br>` +
+            `<strong>Tx ID:</strong> <a href="https://explorer.nusacoin.org/tx/${txid}" target="_blank" class="underline font-bold break-all">${txid}</a>${mismatch}<br>` +
+            btnRec + btnRaw +
+            `<button type="button" onclick="checkTxStatus('${txid}','chk-${formId}')" class="${btn} bg-emerald-800"><i class="fa-solid fa-magnifying-glass mr-1"></i> Cek di explorer</button>` +
+            `<div id="chk-${formId}" class="text-xs mt-2"></div>` +
+            `<span class="text-xs">Simpan file data: SHA-256 isi file harus sama dengan hash di blockchain.</span>` + warnHtml);
+        return;
+    }
+
+    // 4. Fallback: raw TX untuk disiarkan di tempat lain
+    registerPending(tx, true);
+    const seq = window.rawQueue.length + 1;
+    window.rawQueue.push({ seq, sheet: sheetName, txid: tx.txid, hex: tx.hex });
+    renderHistory();
+    const reason = rawOnly ? 'Mode raw saja aktif - transaksi tidak disiarkan oleh aplikasi.' : `Broadcast ke node gagal: ${esc(bcErr)}`;
+    const nodeBase = esc(getNodeBase());
+    show("bg-amber-50 border-amber-300 text-amber-900",
+        `<strong>Raw TX #${seq} siap disiarkan di tempat lain.</strong> Hash BELUM tercatat di blockchain sebelum raw TX ini disiarkan.<br>` +
+        `<span class="text-xs">${reason}</span><br>` +
+        `<strong>SHA-256:</strong> <span class="font-mono text-xs break-all">${dataHash}</span><br>` +
+        `<strong>Tx ID (hitungan lokal):</strong> <span class="font-mono text-xs break-all">${tx.txid}</span><br>` +
+        `<textarea readonly rows="4" class="fld font-mono mt-2" onclick="this.select()">${tx.hex}</textarea>` +
+        btnRaw + btnCopy + btnRec +
+        `<button type="button" onclick="checkTxStatus('${tx.txid}','chk-${formId}')" class="${btn} bg-emerald-700"><i class="fa-solid fa-magnifying-glass mr-1"></i> Cek status di explorer</button>` +
+        `<div id="chk-${formId}" class="text-xs mt-2"></div>` +
+        (window.rawQueue.length > 1 ? `<button type="button" onclick="downloadAllRaw()" class="${btn} bg-emerald-800"><i class="fa-solid fa-layer-group mr-1"></i> Unduh semua raw TX (${window.rawQueue.length}, urut)</button>` : '') +
+        `<div class="text-xs mt-3 space-y-1">` +
+        `<div><strong>Cara menyiarkan:</strong> (a) console/RPC node Nusacoin: <span class="font-mono">sendrawtransaction &lt;hex&gt;</span>; (b) wallet desktop Nusacoin: Tools &gt; Debug console &gt; <span class="font-mono">sendrawtransaction &lt;hex&gt;</span>; (c) POST hex ke gateway/node milik Anda sendiri (isi "URL Broadcast"). Setelah disiarkan, klik "Cek status di explorer".</div>` +
+        `<div>File raw TX sudah ditandatangani dan <strong>tidak berisi private key</strong>, jadi aman dibawa ke perangkat lain.</div>` +
+        `<div>Jika membuat lebih dari satu raw TX, <strong>siarkan berurutan (#1, #2, ...)</strong>: TX berikutnya memakai sisa saldo TX sebelumnya. Muat ulang halaman akan mereset antrean ini.</div>` +
+        `<div>Simpan file data asli (.json): SHA-256 isinya harus sama dengan hash di OP_RETURN.</div></div>` + warnHtml);
+}
+    </script>
+
+    <script>
+        // Daftar pilihan dropdown (sheet Referensi pada Excel)
+        const REF = {
+        "jk": [
+                "Laki-laki",
+                "Perempuan"
+        ],
+        "pendidikan": [
+                "S3",
+                "S2",
+                "S1/D4",
+                "D3",
+                "SMU",
+                "MA",
+                "SMK",
+                "SMP",
+                "MTs",
+                "MI",
+                "SD"
+        ],
+        "keahlian": [
+                "Arsitektur",
+                "Dokter",
+                "Akuntan",
+                "Ekonomi",
+                "Hukum",
+                "IT"
+        ],
+        "pesantren": [
+                "Ma'had Ali",
+                "Marhalah Ulya",
+                "Marhalah Wustho",
+                "Marhalah Ula"
+        ],
+        "kaderisasi": [
+                "PMK",
+                "PDPKP/PKP/MK",
+                "Kaderisasi Banom"
+        ],
+        "laporanKeuangan": [
+                "KAP",
+                "Auditor Internal",
+                "Tidak di Audit"
+        ],
+        "alasHak": [
+                "SHM",
+                "HGB (Hak Guna Bangunan)",
+                "HGU (Hak Guna Usaha)",
+                "HP (Hak Pakai)",
+                "HPL (Hak Pengelolaan)",
+                "Hak Tanggungan",
+                "GIRIK/PETHOK D",
+                "Pinjaman",
+                "Tidak Ada"
+        ],
+        "asal": [
+                "Swadaya",
+                "Hibah Pemerintah",
+                "Hibah Swasta",
+                "Hibah Perorangan/Wakaf"
+        ],
+        "konstruksi": [
+                "Beton",
+                "Kayu",
+                "Bambu"
+        ],
+        "pekerjaan": [
+                "Belum/Tidak Bekerja",
+                "ASN",
+                "TNI",
+                "POLRI",
+                "Pejabat Negara",
+                "Pejabat Politik",
+                "Tenaga Pengajar",
+                "Wiraswasta",
+                "Petani",
+                "Buruh Tani",
+                "Peternakan",
+                "Nelayan",
+                "Agama dan Kepercayaan",
+                "Pelajar/Mahasiswa",
+                "Tenaga Kesehatan",
+                "Pensiunan",
+                "Lainnya"
+        ]
+};
+        document.querySelectorAll('select[data-ref]').forEach(sel => {
+            sel.innerHTML = '<option value="">-- Pilih --</option>' + (REF[sel.dataset.ref] || [])
+                .map(v => `<option value="${v.replace(/"/g, '&quot;')}">${v}</option>`).join('');
+        });
+    </script>
+
+    <script>
+        // === Integrasi Wilayah Indonesia (Provinsi > Kab/Kota > Kecamatan > Kel/Desa) ===
+        // Sumber data: API Wilayah Indonesia (emsifa) - data kode Kemendagri, statis & CORS-enabled.
+        const WILAYAH_BASES = [
+            'https://emsifa.github.io/api-wilayah-indonesia/api',
+            'https://www.emsifa.com/api-wilayah-indonesia/api'
+        ];
+        const WIL_LEVELS = [
+            { key: 'Provinsi',  lbl: 'Provinsi',  up: 'PROVINSI',        path: () => 'provinces' },
+            { key: 'KabKota',   lbl: 'Kab/Kota',  up: 'KABUPATEN/KOTA',  path: id => 'regencies/' + id },
+            { key: 'Kecamatan', lbl: 'Kecamatan', up: 'KECAMATAN',       path: id => 'districts/' + id },
+            { key: 'KelDesa',   lbl: 'Kel/Desa',  up: 'KELURAHAN/DESA',  path: id => 'villages/' + id }
+        ];
+        const wilCache = {};
+        const wilEsc = x => String(x).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+        function wilFetch(path) {
+            if (wilCache[path]) return wilCache[path];
+            const p = (async () => {
+                let lastErr;
+                for (const base of WILAYAH_BASES) {
+                    try {
+                        const r = await fetch(base + '/' + path + '.json');
+                        if (!r.ok) throw new Error('HTTP ' + r.status);
+                        const j = await r.json();
+                        if (!Array.isArray(j)) throw new Error('Format data tidak dikenal');
+                        return j;
+                    } catch (e) { lastErr = e; }
+                }
+                throw lastErr || new Error('Gagal memuat data wilayah');
+            })();
+            wilCache[path] = p;
+            p.catch(() => { delete wilCache[path]; }); // izinkan coba lagi
+            return p;
+        }
+
+        function initWilayah(box) {
+            const pfx = box.dataset.wilayah;
+            const upper = box.hasAttribute('data-upper');
+            box.innerHTML =
+                '<div class="grid grid-cols-1 md:grid-cols-4 gap-4">' +
+                WIL_LEVELS.map(l => '<div><label class="lbl" for="' + pfx + l.key + '">' + (upper ? l.up : l.lbl) + '</label>' +
+                    '<select id="' + pfx + l.key + '" class="fld"></select></div>').join('') +
+                '</div><input type="hidden" id="' + pfx + 'KodeWilayah">' +
+                '<div id="' + pfx + 'WilStatus" class="text-xs mt-2" style="display:none;"></div>';
+
+            const sels = WIL_LEVELS.map(l => box.querySelector('#' + pfx + l.key));
+            const code = box.querySelector('#' + pfx + 'KodeWilayah');
+            const stat = box.querySelector('#' + pfx + 'WilStatus');
+
+            const setOpts = (i, items, ph, disabled) => {
+                sels[i].innerHTML = '<option value="">' + wilEsc(ph) + '</option>' +
+                    items.map(x => '<option value="' + wilEsc(x.name) + '" data-id="' + wilEsc(x.id) + '">' + wilEsc(x.name) + '</option>').join('');
+                sels[i].disabled = !!disabled;
+            };
+            const phText = i => '-- Pilih ' + WIL_LEVELS[i].lbl + ' --';
+            const resetFrom = i => { for (let k = i; k < sels.length; k++) setOpts(k, [], phText(k), true); };
+            const updateCode = () => {
+                let c = '';
+                sels.forEach(sel => { const o = sel.selectedOptions && sel.selectedOptions[0]; if (o && o.dataset.id) c = o.dataset.id; });
+                code.value = c;
+            };
+            const showStat = (html) => { stat.style.display = 'block'; stat.innerHTML = html; };
+            const hideStat = () => { stat.style.display = 'none'; stat.innerHTML = ''; };
+
+            function manualMode() {
+                WIL_LEVELS.forEach((l, i) => {
+                    const inp = document.createElement('input');
+                    inp.type = 'text'; inp.id = pfx + l.key; inp.className = 'fld'; inp.placeholder = l.lbl;
+                    sels[i].replaceWith(inp);
+                });
+                code.value = '';
+                showStat('<span class="text-amber-700">Mode ketik manual aktif (kode wilayah tidak tercatat). ' +
+                    '<button type="button" class="underline font-bold" data-act="reload">Muat ulang dropdown</button></span>');
+                stat.querySelector('[data-act="reload"]').onclick = () => initWilayah(box);
+            }
+
+            function fail(err) {
+                showStat('<span class="text-red-700">Gagal memuat data wilayah (' + wilEsc(err && err.message || err) + '). Periksa koneksi internet. ' +
+                    '<button type="button" class="underline font-bold" data-act="retry">Coba lagi</button> &bull; ' +
+                    '<button type="button" class="underline font-bold" data-act="manual">Ketik manual</button></span>');
+                stat.querySelector('[data-act="retry"]').onclick = () => initWilayah(box);
+                stat.querySelector('[data-act="manual"]').onclick = manualMode;
+            }
+
+            async function loadLevel(i, parentId) {
+                setOpts(i, [], 'Memuat...', true);
+                try {
+                    const items = await wilFetch(WIL_LEVELS[i].path(parentId));
+                    setOpts(i, items, phText(i), false);
+                    hideStat();
+                } catch (e) {
+                    setOpts(i, [], phText(i), true);
+                    fail(e);
+                }
+            }
+
+            sels.forEach((sel, i) => {
+                sel.addEventListener('change', () => {
+                    resetFrom(i + 1);
+                    updateCode();
+                    const o = sel.selectedOptions[0];
+                    if (i < sels.length - 1 && o && o.dataset.id) loadLevel(i + 1, o.dataset.id);
+                });
+            });
+
+            resetFrom(1);
+            loadLevel(0);
+        }
+        document.querySelectorAll('[data-wilayah]').forEach(initWilayah);
+    </script>
+
+    <!-- SCANNER QR / BARCODE -->
+    <div id="qrScanModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.75);align-items:center;justify-content:center;padding:16px;">
+        <div style="background:#fff;border-radius:16px;max-width:420px;width:100%;padding:16px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                <strong style="font-size:14px;color:#064e3b;">Scan QR / Barcode Private Key</strong>
+                <button type="button" onclick="closeQrScanner()" style="font-size:20px;line-height:1;color:#475569;">&times;</button>
+            </div>
+            <div id="qrReader" style="width:100%;min-height:220px;background:#f1f5f9;border-radius:12px;overflow:hidden;"></div>
+            <div id="qrMsg" style="font-size:12px;color:#475569;margin-top:8px;">Arahkan kamera ke QR/barcode WIF atau alamat.</div>
+            <label style="display:inline-block;margin-top:10px;padding:8px 12px;border-radius:10px;background:#047857;color:#fff;font-size:12px;font-weight:700;cursor:pointer;">
+                Pilih gambar dari galeri
+                <input type="file" accept="image/*" id="qrFile" style="display:none;" onchange="scanQrFile(this.files[0]); this.value='';">
+            </label>
+        </div>
+    </div>
+    <script>
+        let qrInstance = null;
+        function qrFill(text) {
+            let v = String(text || '').trim();
+            v = v.replace(/^(nusacoin|nusa|nux):/i, '').split('?')[0].trim();   // buang prefix URI bila ada
+            const inp = document.getElementById('walletPkeyInput');
+            inp.value = v;
+            closeQrScanner();
+            inp.type = 'password';
+        }
+        async function openQrScanner() {
+            const modal = document.getElementById('qrScanModal'), msg = document.getElementById('qrMsg');
+            modal.style.display = 'flex';
+            if (typeof Html5Qrcode === 'undefined') { msg.textContent = 'Library scanner gagal dimuat (cek koneksi internet).'; return; }
+            if (!window.isSecureContext) { msg.textContent = 'Kamera hanya bisa dipakai lewat HTTPS atau localhost. Gunakan "Pilih gambar dari galeri".'; }
+            try {
+                qrInstance = new Html5Qrcode('qrReader');
+                await qrInstance.start({ facingMode: 'environment' }, { fps: 10, qrbox: { width: 240, height: 240 } },
+                    (txt) => qrFill(txt), () => { });
+            } catch (e) {
+                msg.textContent = 'Kamera tidak bisa dibuka (' + (e.message || e) + '). Izinkan akses kamera atau pilih gambar dari galeri.';
+            }
+        }
+        async function closeQrScanner() {
+            document.getElementById('qrScanModal').style.display = 'none';
+            try { if (qrInstance) { if (qrInstance.isScanning) await qrInstance.stop(); qrInstance.clear(); } } catch (e) { }
+            qrInstance = null;
+        }
+        async function scanQrFile(file) {
+            if (!file) return;
+            const msg = document.getElementById('qrMsg');
+            try {
+                if (qrInstance && qrInstance.isScanning) await qrInstance.stop();
+                const sc = new Html5Qrcode('qrReader');
+                const txt = await sc.scanFile(file, false);
+                qrFill(txt);
+            } catch (e) { msg.textContent = 'Kode tidak terbaca dari gambar. Coba foto yang lebih jelas/terang.'; }
+        }
+    </script>
+<script>
+// ===== i18n IN/EN =====
+// Teks UI statis diterjemahkan lewat kamus (cocok persis); pesan dinamis (status/error) lewat daftar frasa.
+// Nilai (value) opsi dropdown & isi form TIDAK diubah, supaya hash SHA-256 yang dicatat di blockchain sama pada kedua bahasa.
+(function () {
+    const UI = new Map([
+        [`PBNU - Pendataan Ranting Nusachain`, `PBNU - Ranting (Branch) Data Registry on Nusachain`],
+        [`Sistem Ledger Pengurus Ranting & Live Wallet`, `Ranting Board Ledger System & Live Wallet`],
+        [`1. Koneksi Wallet & Saldo`, `1. Wallet Connection & Balance`],
+        [`2. Ranting & Monografi`, `2. Ranting & Monograph`],
+        [`3. SK Ranting`, `3. Ranting Decree (SK)`],
+        [`4. Buku Induk Anggota`, `4. Member Master Book`],
+        [`5. Aset Tanah`, `5. Land Assets`],
+        [`6. Aset Bangunan`, `6. Building Assets`],
+        [`7. Aset Kendaraan`, `7. Vehicle Assets`],
+        [`8. Aset Peralatan`, `8. Equipment Assets`],
+        [`Koneksi Live Wallet Nusachain`, `Nusachain Live Wallet Connection`],
+        [`Impor Private Key WIF Anda untuk mengaktifkan injeksi data dari file Excel langsung ke blockchain.`, `Import your WIF Private Key to enable injecting data from Excel files directly onto the blockchain.`],
+        [`Buka Live Wallet Nusacoin`, `Open Nusacoin Live Wallet`],
+        [`Private Key WIF (0x57...) / ENC / Alamat`, `WIF Private Key (0x57...) / ENC / Address`],
+        [`PIN (Jika Terenkripsi)`, `PIN (If Encrypted)`],
+        [`Format Jaringan Alamat`, `Address Network Format`],
+        [`URL Node Blockchain Asli (Explorer API)`, `Real Blockchain Node URL (Explorer API)`],
+        [`URL UTXO ({node}, {addr}) - kosongkan = otomatis`, `UTXO URL ({node}, {addr}) - leave empty = automatic`],
+        [`URL Broadcast ({node}, {hex}) - opsional`, `Broadcast URL ({node}, {hex}) - optional`],
+        [`Field "raw" (sesuai dokumentasi API)`, `"raw" field (per the API documentation)`],
+        [`Format body: otomatis (coba banyak format)`, `Body format: automatic (tries many formats)`],
+        [`Teks polos (hex saja)`, `Plain text (hex only)`],
+        [`Form rawtx=... (gaya coinbin)`, `Form rawtx=... (coinbin style)`],
+        [`JSON dengan nama field sendiri...`, `JSON with a custom field name...`],
+        [`Satuan nilai UTXO dari API`, `UTXO value unit from the API`],
+        [`Satoshi (bilangan bulat)`, `Satoshi (integer)`],
+        [`NUX (desimal)`, `NUX (decimal)`],
+        [`Fee per transaksi (NUX)`, `Fee per transaction (NUX)`],
+        [`URL Riwayat Transaksi ({node}, {addr}) - opsional`, `Transaction History URL ({node}, {addr}) - optional`],
+        [`Buka Wallet & Muat Saldo Blockchain Asli`, `Open Wallet & Load Real Blockchain Balance`],
+        [`Mode raw saja: tandatangani transaksi TANPA broadcast, lalu unduh file raw TX untuk disiarkan di tempat lain.`, `Raw-only mode: sign the transaction WITHOUT broadcasting, then download the raw TX file to broadcast elsewhere.`],
+        [`Jika tidak dicentang, aplikasi tetap mencoba broadcast; bila gagal, file raw TX otomatis disediakan.`, `If unchecked, the app still tries to broadcast; if that fails, a raw TX file is provided automatically.`],
+        [`UTXO manual (opsional, jika node/explorer tidak bisa diakses dari browser)`, `Manual UTXO (optional, if the node/explorer cannot be reached from the browser)`],
+        [`Pengaturan UTXO & Mempool`, `UTXO & Mempool Settings`],
+        [`URL API Nusacoin (UTXO & mempool)`, `Nusacoin API URL (UTXO & mempool)`],
+        [`Pakai sisa dana dari transaksi mempool yang belum terkonfirmasi (tanpa menunggu 1 blok)`, `Use remaining funds from unconfirmed mempool transactions (without waiting for 1 block)`],
+        [`UTXO yang sedang dipakai TX pending otomatis dilewati supaya tidak terjadi error txn-mempool-conflict.`, `UTXOs already used by a pending TX are skipped automatically to avoid the txn-mempool-conflict error.`],
+        [`TXID transaksi pending (opsional)`, `Pending transaction TXID (optional)`],
+        [`Cek UTXO`, `Check UTXO`],
+        [`Buka kunci UTXO lokal`, `Release local UTXO locks`],
+        [`9. Verifikasi Hash`, `9. Hash Verification`],
+        [`Verifikasi Hash Data dengan Blockchain`, `Verify Data Hash against the Blockchain`],
+        [`Unggah file data asli (.json) hasil Inject. Aplikasi menghitung SHA-256 isi file lalu mencarinya di OP_RETURN transaksi blockchain Nusacoin, lengkap dengan Tx ID dan blok.`, `Upload the original data file (.json) produced by Inject. The app computes the SHA-256 of the file contents, then searches for it in the OP_RETURN of Nusacoin blockchain transactions, complete with the Tx ID and block.`],
+        [`FILE DATA ASLI (.JSON)`, `ORIGINAL DATA FILE (.JSON)`],
+        [`Hash dihitung dari teks file persis seperti diunduh. Jangan menyimpan ulang atau memformat ulang file; satu karakter berbeda menghasilkan hash yang berbeda.`, `The hash is computed from the file text exactly as downloaded. Do not re-save or re-format the file; one different character produces a different hash.`],
+        [`ATAU TEMPEL HASH SHA-256 (OPSIONAL)`, `OR PASTE A SHA-256 HASH (OPTIONAL)`],
+        [`64 karakter hex, pisahkan dengan spasi jika lebih dari satu`, `64 hex characters, separate with spaces if more than one`],
+        [`ALAMAT SIGNER (PENGIRIM INJECT)`, `SIGNER ADDRESS (INJECT SENDER)`],
+        [`kosong = alamat wallet yang sedang dibuka`, `empty = the currently opened wallet address`],
+        [`TXID (OPSIONAL, JIKA SUDAH TAHU)`, `TXID (OPTIONAL, IF KNOWN)`],
+        [`txid transaksi Inject, pisahkan dengan spasi atau koma`, `Inject transaction txid, separated by spaces or commas`],
+        [`Verifikasi dengan Blockchain`, `Verify against Blockchain`],
+        [`Total Saldo Real NUX (Blockchain Asli)`, `Total Real NUX Balance (Real Blockchain)`],
+        [`Refresh Saldo & Riwayat`, `Refresh Balance & History`],
+        [`Keluar / Kunci Wallet`, `Log Out / Lock Wallet`],
+        [`Riwayat Transaksi Blockchain Asli`, `Real Blockchain Transaction History`],
+        [`Belum ada riwayat transaksi.`, `No transaction history yet.`],
+        [`Input Data Ranting & Monografi`, `Ranting & Monograph Data Input`],
+        [`1 - 3. Identitas Ranting`, `1 - 3. Ranting Identity`],
+        [`1. NAMA RANTING`, `1. RANTING NAME`],
+        [`Wilayah Ranting`, `Ranting Area`],
+        [`6 - 11. Monografi Kelurahan / Desa`, `6 - 11. Village (Kelurahan / Desa) Monograph`],
+        [`Sumber data: monografi kelurahan/desa.`, `Data source: village (kelurahan/desa) monograph.`],
+        [`6. JUMLAH PENDUDUK KELURAHAN/DESA`, `6. TOTAL POPULATION OF THE VILLAGE (KELURAHAN/DESA)`],
+        [`7. JUMLAH PENDUDUK KELURAHAN/DESA LAKI-LAKI`, `7. MALE POPULATION OF THE VILLAGE`],
+        [`8. JUMLAH PENDUDUK KELURAHAN/DESA PEREMPUAN`, `8. FEMALE POPULATION OF THE VILLAGE`],
+        [`9. JUMLAH KK`, `9. NUMBER OF HOUSEHOLDS (KK)`],
+        [`10. JUMLAH PENDUDUK MUSLIM`, `10. MUSLIM POPULATION`],
+        [`11. JUMLAH PENDUDUK NON MUSLIM`, `11. NON-MUSLIM POPULATION`],
+        [`12. Laporan Keuangan`, `12. Financial Report`],
+        [`12. LAPORAN KEUANGAN TAHUNAN`, `12. ANNUAL FINANCIAL REPORT`],
+        [`Inject Data Ranting ke Blockchain Nusachain`, `Inject Ranting Data to the Nusachain Blockchain`],
+        [`Input Data SK Kepengurusan`, `Board Decree (SK) Data Input`],
+        [`PERIODE KEPENGURUSAN`, `BOARD PERIOD`],
+        [`NO SK`, `DECREE NO. (SK)`],
+        [`TGL SK`, `DECREE DATE (SK)`],
+        [`TGL BERLAKU`, `EFFECTIVE DATE`],
+        [`Wilayah Kepengurusan`, `Board Area`],
+        [`Inject Data SK ke Blockchain Nusachain`, `Inject Decree (SK) Data to the Nusachain Blockchain`],
+        [`Input Buku Induk Anggota NU`, `NU Member Master Book Input`],
+        [`Identitas`, `Identity`],
+        [`NAMA`, `NAME`],
+        [`NO NIK`, `NATIONAL ID NO. (NIK)`],
+        [`JENIS KELAMIN`, `GENDER`],
+        [`TEMPAT LAHIR`, `PLACE OF BIRTH`],
+        [`TGL LAHIR`, `DATE OF BIRTH`],
+        [`Alamat`, `Address`],
+        [`ALAMAT`, `ADDRESS`],
+        [`Pendidikan, Keahlian & Pekerjaan`, `Education, Expertise & Occupation`],
+        [`PENDIDIKAN TERAKHIR`, `LAST EDUCATION`],
+        [`BIDANG KEAHLIAN`, `FIELD OF EXPERTISE`],
+        [`PEKERJAAN`, `OCCUPATION`],
+        [`PENDIDIKAN TERAKHIR DI PESANTREN`, `LAST EDUCATION IN ISLAMIC BOARDING SCHOOL (PESANTREN)`],
+        [`KADERISASI YANG PERNAH DIIKUTI`, `TRAINING (KADERISASI) ATTENDED`],
+        [`Inject Data Anggota ke Blockchain Nusachain`, `Inject Member Data to the Nusachain Blockchain`],
+        [`Input Inventaris Aset Tanah`, `Land Asset Inventory Input`],
+        [`Identitas Aset`, `Asset Identity`],
+        [`Pemilik`, `Owner`],
+        [`Nama Aset`, `Asset Name`],
+        [`Alas Hak & Perolehan`, `Title Basis & Acquisition`],
+        [`Jenis Alas Hak`, `Title Type`],
+        [`No Alas Hak (Sertifikat)`, `Title No. (Certificate)`],
+        [`Tgl Alas Hak (Sertifikat)`, `Title Date (Certificate)`],
+        [`Luas Tanah (m²)`, `Land Area (m²)`],
+        [`Asal Perolehan`, `Acquisition Source`],
+        [`NJOP (Rp)`, `NJOP - Tax Object Sale Value (Rp)`],
+        [`Peruntukan`, `Designated Use`],
+        [`Lokasi`, `Location`],
+        [`Alamat Detail`, `Detailed Address`],
+        [`Inject Data Aset Tanah ke Blockchain Nusachain`, `Inject Land Asset Data to the Nusachain Blockchain`],
+        [`Input Inventaris Aset Bangunan`, `Building Asset Inventory Input`],
+        [`Nama Aset Bangunan`, `Building Asset Name`],
+        [`Perizinan & Spesifikasi`, `Permits & Specifications`],
+        [`No IMB`, `Building Permit (IMB) No.`],
+        [`Tgl IMB`, `Building Permit (IMB) Date`],
+        [`Luas Bangunan (m²)`, `Building Area (m²)`],
+        [`Jumlah Tingkat`, `Number of Floors`],
+        [`Jenis Konstruksi`, `Construction Type`],
+        [`Status Bangunan`, `Building Status`],
+        [`Perolehan & Peruntukan`, `Acquisition & Designated Use`],
+        [`Nilai Bangunan (Rp)`, `Building Value (Rp)`],
+        [`Berdiri di Atas Tanah No Tanah`, `Stands on Land No. (Land No.)`],
+        [`Inject Data Aset Bangunan ke Blockchain Nusachain`, `Inject Building Asset Data to the Nusachain Blockchain`],
+        [`Input Inventaris Aset Kendaraan`, `Vehicle Asset Inventory Input`],
+        [`Identitas Kendaraan`, `Vehicle Identity`],
+        [`Nama Barang`, `Item Name`],
+        [`Tgl Pembukuan`, `Bookkeeping Date`],
+        [`Merk`, `Brand`],
+        [`Kapasitas/Ukuran`, `Capacity/Size`],
+        [`Nomor Dokumen`, `Document Numbers`],
+        [`No Rangka`, `Chassis No.`],
+        [`No Mesin`, `Engine No.`],
+        [`No BPKB`, `BPKB (Vehicle Ownership Book) No.`],
+        [`Bahan Bakar`, `Fuel`],
+        [`Tgl Berlaku STNK`, `STNK (Registration) Expiry Date`],
+        [`Nilai Perolehan (Rp)`, `Acquisition Value (Rp)`],
+        [`Keterangan`, `Notes`],
+        [`Wilayah / Lokasi Kendaraan`, `Vehicle Area / Location`],
+        [`Inject Data Aset Kendaraan ke Blockchain Nusachain`, `Inject Vehicle Asset Data to the Nusachain Blockchain`],
+        [`Input Inventaris Aset Peralatan`, `Equipment Asset Inventory Input`],
+        [`Identitas Peralatan`, `Equipment Identity`],
+        [`Nama Aset Peralatan`, `Equipment Asset Name`],
+        [`Kapasitas`, `Capacity`],
+        [`Wilayah / Lokasi Peralatan`, `Equipment Area / Location`],
+        [`Inject Data Aset Peralatan ke Blockchain Nusachain`, `Inject Equipment Asset Data to the Nusachain Blockchain`],
+        [`© 2026 Pengurus Besar Nahdlatul Ulama (PBNU) • Didukung oleh Nusachain Ledger Infrastructure.`, `© 2026 Central Board of Nahdlatul Ulama (PBNU) • Powered by Nusachain Ledger Infrastructure.`],
+        [`Scan QR / Barcode Private Key`, `Scan Private Key QR / Barcode`],
+        [`Arahkan kamera ke QR/barcode WIF atau alamat.`, `Point the camera at the WIF or address QR/barcode.`],
+        [`Pilih gambar dari galeri`, `Choose image from gallery`],
+        // atribut (placeholder / title)
+        [`Ubah Tema`, `Change Theme`],
+        [`Masukkan WIF, ENC, atau Alamat...`, `Enter WIF, ENC, or Address...`],
+        [`PIN opsional...`, `Optional PIN...`],
+        [`kosong = otomatis via API explorer (getaddresstxs + getrawtransaction)`, `empty = automatic via explorer API (getaddresstxs + getrawtransaction)`],
+        [`nama field JSON, mis. hexstring`, `JSON field name, e.g. hexstring`],
+        [`Body request persis dari dokumentasi API (opsional), tulis {hex} sebagai tempat hex. Contoh: {"method":"sendrawtransaction","params":["{hex}"]}`, `Request body exactly as in the API documentation (optional), write {hex} where the hex goes. Example: {"method":"sendrawtransaction","params":["{hex}"]}`],
+        [`txid,vout,nilai_satoshi (satu baris per UTXO)`, `txid,vout,value_satoshi (one line per UTXO)`],
+        [`txid TX yang belum terkonfirmasi, pisahkan dengan spasi atau koma`, `txid of unconfirmed TXs, separated by spaces or commas`],
+        [`Contoh: 2023 - 2028`, `Example: 2023 - 2028`],
+        [`No. SK Kepengurusan`, `Board Decree No.`],
+        [`Isi No dari form Aset Tanah`, `Fill in the No. from the Land Assets form`],
+        [`Contoh: Motor Operasional`, `Example: Operational Motorbike`],
+        [`Honda, Yamaha, dll`, `Honda, Yamaha, etc.`],
+        [`Contoh: 150 cc`, `Example: 150 cc`],
+        [`Bensin / Solar / Listrik`, `Petrol / Diesel / Electric`],
+        [`Contoh: Laptop / Sound System`, `Example: Laptop / Sound System`],
+        // wilayah (dropdown dinamis)
+        [`Provinsi`, `Province`], [`Kab/Kota`, `Regency/City`], [`Kecamatan`, `District`], [`Kel/Desa`, `Village`],
+        [`PROVINSI`, `PROVINCE`], [`KABUPATEN/KOTA`, `REGENCY/CITY`], [`KECAMATAN`, `DISTRICT`], [`KELURAHAN/DESA`, `VILLAGE (KELURAHAN/DESA)`],
+        [`-- Pilih --`, `-- Select --`], [`-- Pilih Provinsi --`, `-- Select Province --`], [`-- Pilih Kab/Kota --`, `-- Select Regency/City --`],
+        [`-- Pilih Kecamatan --`, `-- Select District --`], [`-- Pilih Kel/Desa --`, `-- Select Village --`], [`Memuat...`, `Loading...`],
+        [`Muat ulang dropdown`, `Reload dropdown`], [`Coba lagi`, `Try again`], [`Ketik manual`, `Type manually`],
+        // opsi dropdown (hanya teks tampilan; value tetap bahasa Indonesia)
+        [`Laki-laki`, `Male`], [`Perempuan`, `Female`],
+        [`S3`, `S3 (Doctorate)`], [`S2`, `S2 (Master's)`], [`S1/D4`, `S1/D4 (Bachelor's)`], [`D3`, `D3 (Diploma)`],
+        [`SMU`, `SMU (Senior High School)`], [`MA`, `MA (Islamic Senior High School)`], [`SMK`, `SMK (Vocational High School)`],
+        [`SMP`, `SMP (Junior High School)`], [`MTs`, `MTs (Islamic Junior High School)`], [`MI`, `MI (Islamic Elementary School)`], [`SD`, `SD (Elementary School)`],
+        [`Arsitektur`, `Architecture`], [`Dokter`, `Medicine (Doctor)`], [`Akuntan`, `Accounting`], [`Ekonomi`, `Economics`], [`Hukum`, `Law`],
+        [`Ma'had Ali`, `Ma'had Ali (Islamic Higher Education)`], [`Marhalah Ulya`, `Marhalah Ulya (Advanced Level)`],
+        [`Marhalah Wustho`, `Marhalah Wustho (Intermediate Level)`], [`Marhalah Ula`, `Marhalah Ula (Basic Level)`],
+        [`Kaderisasi Banom`, `Autonomous Body (Banom) Cadre Training`],
+        [`KAP`, `KAP (Public Accounting Firm)`], [`Auditor Internal`, `Internal Auditor`], [`Tidak di Audit`, `Not Audited`],
+        [`SHM`, `SHM (Freehold Title)`], [`HGB (Hak Guna Bangunan)`, `HGB (Right to Build)`], [`HGU (Hak Guna Usaha)`, `HGU (Right to Cultivate)`],
+        [`HP (Hak Pakai)`, `HP (Right of Use)`], [`HPL (Hak Pengelolaan)`, `HPL (Right of Management)`], [`Hak Tanggungan`, `Mortgage Right (Hak Tanggungan)`],
+        [`Pinjaman`, `Borrowed (Loan)`], [`Tidak Ada`, `None`],
+        [`Swadaya`, `Self-funded (Swadaya)`], [`Hibah Pemerintah`, `Government Grant`], [`Hibah Swasta`, `Private Grant`], [`Hibah Perorangan/Wakaf`, `Individual Grant / Waqf`],
+        [`Beton`, `Concrete`], [`Kayu`, `Wood`], [`Bambu`, `Bamboo`],
+        [`Belum/Tidak Bekerja`, `Unemployed / Not Yet Working`], [`ASN`, `ASN (Civil Servant)`], [`TNI`, `TNI (Armed Forces)`], [`POLRI`, `POLRI (National Police)`],
+        [`Pejabat Negara`, `State Official`], [`Pejabat Politik`, `Political Official`], [`Tenaga Pengajar`, `Teaching Staff`], [`Wiraswasta`, `Self-employed`],
+        [`Petani`, `Farmer`], [`Buruh Tani`, `Farm Laborer`], [`Peternakan`, `Livestock Farming`], [`Nelayan`, `Fisherman`],
+        [`Agama dan Kepercayaan`, `Religion and Belief`], [`Pelajar/Mahasiswa`, `Student (School/University)`], [`Tenaga Kesehatan`, `Health Worker`],
+        [`Pensiunan`, `Retiree`], [`Lainnya`, `Other`]
+    ]);
+
+    // Pesan dinamis (status, error, alert): penggantian frasa, yang terpanjang lebih dulu
+    const PH = [
+        [`GAGAL - hash BELUM tercatat di blockchain.`, `FAILED - the hash has NOT been recorded on the blockchain.`],
+        [`Hash data:`, `Data hash:`],
+        [`Isian form dipertahankan; perbaiki lalu klik Inject lagi.`, `Form entries are kept; fix the problem, then click Inject again.`],
+        [`Wallet belum dibuka. Buka wallet di menu 'Koneksi Wallet & Saldo' sebagai signer, lalu kembali dan klik Inject lagi. Data form ini tidak hilang.`, `Wallet is not open. Open the wallet in the 'Wallet Connection & Balance' menu as the signer, then come back and click Inject again. This form data is not lost.`],
+        [`Menyusun transaksi OP_RETURN untuk menu`, `Building OP_RETURN transaction for menu`],
+        [`Terjadi kesalahan tak terduga.`, `An unexpected error occurred.`],
+        [`Konflik mempool, mencoba UTXO lain (percobaan`, `Mempool conflict, trying other UTXOs (attempt`],
+        [`Berhasil disiarkan ke node.`, `Successfully broadcast to the node.`],
+        [`Hash data menu`, `Data hash of menu`],
+        [`dikirim ke OP_RETURN.`, `sent to OP_RETURN.`],
+        [`Catatan: Tx ID dari node berbeda dengan hitungan lokal; cek di explorer.`, `Note: the Tx ID from the node differs from the local calculation; check in the explorer.`],
+        [`Unduh data asli (.json)`, `Download original data (.json)`],
+        [`Unduh raw TX (.txt)`, `Download raw TX (.txt)`],
+        [`Salin hex`, `Copy hex`],
+        [`Cek status di explorer`, `Check status in explorer`],
+        [`Cek di explorer`, `Check in explorer`],
+        [`Unduh semua raw TX (`, `Download all raw TX (`],
+        [`, urut)`, `, in order)`],
+        [`Simpan file data: SHA-256 isi file harus sama dengan hash di blockchain.`, `Keep the data file: the SHA-256 of its contents must equal the hash on the blockchain.`],
+        [`siap disiarkan di tempat lain.`, `is ready to be broadcast elsewhere.`],
+        [`Hash BELUM tercatat di blockchain sebelum raw TX ini disiarkan.`, `The hash is NOT recorded on the blockchain until this raw TX is broadcast.`],
+        [`Mode raw saja aktif - transaksi tidak disiarkan oleh aplikasi.`, `Raw-only mode is active - the transaction was not broadcast by the app.`],
+        [`Broadcast ke node gagal:`, `Broadcast to the node failed:`],
+        [`Tx ID (hitungan lokal):`, `Tx ID (local calculation):`],
+        [`Cara menyiarkan:`, `How to broadcast:`],
+        [`(a) console/RPC node Nusacoin:`, `(a) Nusacoin node console/RPC:`],
+        [`(b) wallet desktop Nusacoin: Tools > Debug console >`, `(b) Nusacoin desktop wallet: Tools > Debug console >`],
+        [`(c) POST hex ke gateway/node milik Anda sendiri (isi "URL Broadcast"). Setelah disiarkan, klik "Cek status di explorer".`, `(c) POST the hex to your own gateway/node (fill in "Broadcast URL"). After broadcasting, click "Check status in explorer".`],
+        [`File raw TX sudah ditandatangani dan`, `The raw TX file is already signed and`],
+        [`tidak berisi private key`, `contains no private key`],
+        [`, jadi aman dibawa ke perangkat lain.`, `, so it is safe to carry to another device.`],
+        [`Jika membuat lebih dari satu raw TX,`, `If you create more than one raw TX,`],
+        [`siarkan berurutan (#1, #2, ...)`, `broadcast them in order (#1, #2, ...)`],
+        [`: TX berikutnya memakai sisa saldo TX sebelumnya. Muat ulang halaman akan mereset antrean ini.`, `: the next TX uses the remaining balance of the previous TX. Reloading the page resets this queue.`],
+        [`Simpan file data asli (.json): SHA-256 isinya harus sama dengan hash di OP_RETURN.`, `Keep the original data file (.json): its SHA-256 must equal the hash in OP_RETURN.`],
+        // UTXO & mempool (baru)
+        [`Kunci UTXO lokal dibuka. (Antrean raw TX yang belum disiarkan tetap dikunci.)`, `Local UTXO locks released. (The queue of raw TXs not yet broadcast stays locked.)`],
+        [`Buka wallet dulu.`, `Open the wallet first.`],
+        [`Memeriksa UTXO dan mempool...`, `Checking UTXOs and mempool...`],
+        [`Gagal memeriksa UTXO:`, `Failed to check UTXOs:`],
+        [`Pilih file JSON atau tempel hash SHA-256 dulu.`, `Select a JSON file or paste a SHA-256 hash first.`],
+        [`Isi alamat signer, buka wallet, atau isi TXID transaksi Inject.`, `Enter the signer address, open the wallet, or enter the Inject transaction TXID.`],
+        [`Menghitung hash dan mencari di blockchain...`, `Computing hashes and searching the blockchain...`],
+        [`Memeriksa transaksi:`, `Checking transactions:`],
+        [`Gagal membaca riwayat alamat dari explorer:`, `Failed to read the address history from the explorer:`],
+        [`Verifikasi gagal:`, `Verification failed:`],
+        [`File ini bukan JSON hasil Inject (hash tetap dihitung dari isi file apa adanya).`, `This file is not an Inject JSON (the hash is still computed from the file contents as-is).`],
+        [`Jumlah field:`, `Number of fields:`],
+        [`SHA-256 (hash manual):`, `SHA-256 (manual hash):`],
+        [`SHA-256 (dihitung dari file):`, `SHA-256 (computed from the file):`],
+        [`✅ COCOK - hash data ini tercatat di blockchain.`, `✅ MATCH - this data hash is recorded on the blockchain.`],
+        [`⏳ COCOK - hash tercatat, tetapi transaksi belum terkonfirmasi (masih di mempool).`, `⏳ MATCH - the hash is recorded, but the transaction is not confirmed yet (still in the mempool).`],
+        [`❌ TIDAK DITEMUKAN - hash ini belum ditemukan di blockchain.`, `❌ NOT FOUND - this hash was not found on the blockchain.`],
+        [`Dicocokkan setelah normalisasi (`, `Matched after normalization (`],
+        [`; SHA-256 yang cocok:`, `; matching SHA-256:`],
+        [`BOM dihapus`, `BOM removed`],
+        [`spasi/baris akhir dibuang`, `trailing whitespace trimmed`],
+        [`CRLF diubah ke LF`, `CRLF converted to LF`],
+        [`JSON diserialisasi ulang (compact)`, `JSON re-serialized (compact)`],
+        [`Hash blok:`, `Block hash:`],
+        [`Blok:`, `Block:`],
+        [`belum ada di blok`, `not in a block yet`],
+        [`Konfirmasi:`, `Confirmations:`],
+        [`Waktu blok:`, `Block time:`],
+        [`Output OP_RETURN:`, `OP_RETURN output:`],
+        [`Telah memeriksa `, `Checked `],
+        [` transaksi. Kemungkinan: (1) alamat signer salah, (2) raw TX belum disiarkan, (3) explorer belum mengindeks (tunggu 1-2 menit), atau (4) file sudah diubah sedikit pun (satu karakter berbeda = hash berbeda). Coba isi TXID transaksi Inject pada kolom TXID.`, ` transactions. Possible reasons: (1) wrong signer address, (2) the raw TX has not been broadcast, (3) the explorer has not indexed it yet (wait 1-2 minutes), or (4) the file was changed in any way (one different character = a different hash). Try entering the Inject transaction TXID in the TXID field.`],
+        [`Lihat isi data (`, `View data contents (`],
+        [` field)`, ` fields)`],
+        [`Ringkasan:`, `Summary:`],
+        [` file cocok dengan blockchain.`, ` files match the blockchain.`],
+        [`Hash manual`, `Manual hash`],
+        [`✅ Terkonfirmasi:`, `✅ Confirmed:`],
+        [`⏳ Belum terkonfirmasi (0 konf., mempool):`, `⏳ Unconfirmed (0 conf., mempool):`],
+        [`— rantai`, `— chain of`],
+        [`, RBF (rapuh)`, `, RBF (fragile)`],
+        [`⏳ Belum terkonfirmasi: tidak dihitung (opsi pakai dana mempool nonaktif)`, `⏳ Unconfirmed: not counted (the mempool funds option is off)`],
+        [`🔒 Terkunci (dipakai TX pending / bentrok):`, `🔒 Locked (used by a pending TX / conflicting):`],
+        [`⚠️ Cek mempool API gagal, status unconfirmed tidak terverifikasi.`, `⚠️ Mempool API check failed; unconfirmed status is not verified.`],
+        [`TX pending tidak bisa dibaca detailnya, jadi kembaliannya tidak terdeteksi.)`, `pending TXs could not be read in detail, so their change was not detected.)`],
+        [`TX pending tidak bisa dibaca detailnya.`, `pending TXs could not be read in detail.`],
+        [`TX di mempool saling bentrok (double-spend).`, `TXs in the mempool conflict with each other (double-spend).`],
+        [`Semua UTXO sedang terkunci (`, `All UTXOs are currently locked (`],
+        [`Tunggu konfirmasi sekitar 1 blok lalu coba lagi.`, `Wait for about 1 block of confirmation, then try again.`],
+        [`Sisa dana dari TX pending belum terdeteksi: isi TXID transaksi pending itu di Pengaturan UTXO & Mempool (kolom TXID transaksi pending), lalu klik Inject lagi.`, `The remaining funds from the pending TX were not detected: enter that pending transaction's TXID in UTXO & Mempool Settings (the pending transaction TXID field), then click Inject again.`],
+        [`Sebagian dana berasal dari TX pending yang bentrok (double-spend) di mempool, jadi tidak dipakai sampai jelas mana yang menang.`, `Some funds come from pending TXs that conflict (double-spend) in the mempool, so they are not used until it is clear which one wins.`],
+        [`Kunci ini hanya lokal (mempool tidak menampilkannya). Jika TX sebelumnya sudah dicek tidak ada/gagal, klik "Buka kunci UTXO lokal".`, `This lock is local only (the mempool does not show it). If the previous TX has been checked and is missing/failed, click "Release local UTXO locks".`],
+        [`(Peringatan: cek mempool API gagal, status mempool tidak terverifikasi.)`, `(Warning: mempool API check failed; mempool status is not verified.)`],
+        [`Tidak ada UTXO yang bisa dibelanjakan`, `No spendable UTXO`],
+        [` (aktifkan 'Pakai sisa dana dari transaksi mempool' untuk memakai dana belum terkonfirmasi).`, ` (enable 'Use remaining funds from mempool transactions' to use unconfirmed funds).`],
+        [`(dipakai TX pending di mempool)`, `(used by a pending TX in the mempool)`],
+        [`(dikunci lokal: baru dikirim / ditolak konflik)`, `(locked locally: just sent / rejected for conflict)`],
+        [`(TX induk bentrok/double-spend di mempool)`, `(parent TX conflicts/double-spends in the mempool)`],
+        [`Rantai transaksi belum terkonfirmasi terlalu panjang (`, `The unconfirmed transaction chain is too long (`],
+        [` TX / ~101 kB). Tunggu konfirmasi dulu supaya TX tidak ditolak atau terpental dari mempool.`, ` TXs / ~101 kB). Wait for confirmation first so the TX is not rejected or evicted from the mempool.`],
+        [` kB; batas default `, ` kB; default limit `],
+        [`Sebagian dana berasal dari TX yang BELUM terkonfirmasi (rantai `, `Some funds come from TXs that are NOT yet confirmed (chain of `],
+        [` TX). Jika TX induk dibuang/diganti dari mempool, TX ini ikut gagal.`, ` TXs). If the parent TX is dropped/replaced from the mempool, this TX fails too.`],
+        [`TX induk memberi sinyal RBF (replaceable): bisa diganti kapan saja, sehingga TX ini rapuh.`, `The parent TX signals RBF (replaceable): it can be replaced at any time, so this TX is fragile.`],
+        [`Rantai unconfirmed sudah panjang (`, `The unconfirmed chain is already long (`],
+        [` dari maks `, ` of max `],
+        [`Alamat bech32 tidak valid.`, `Invalid bech32 address.`],
+        [`Format alamat tidak dikenali.`, `Address format not recognized.`],
+        [`Format respons /utxos tidak dikenali`, `Unrecognized /utxos response format`],
+        [`URL API kosong`, `API URL is empty`],
+        // pesan error (dibuat dari kode)
+        [`Wallet dibuka dengan alamat saja (tanpa Private Key WIF), sehingga tidak bisa menandatangani transaksi.`, `The wallet was opened with an address only (no WIF private key), so it cannot sign transactions.`],
+        [`Format P2SH belum didukung untuk penandatanganan. Pilih Bech32 atau Legacy P2PKH.`, `P2SH format is not yet supported for signing. Choose Bech32 or Legacy P2PKH.`],
+        [`WIF tidak valid: harus WIF terkompresi Nusacoin (prefix 0x57).`, `Invalid WIF: must be a compressed Nusacoin WIF (prefix 0x57).`],
+        [`Karakter Base58 tidak valid`, `Invalid Base58 character`],
+        [`Respons bukan JSON dari`, `Response is not JSON from`],
+        [`API getrawtransaction explorer tidak mengembalikan data transaksi (null). Isi "UTXO manual" (txid,vout,satoshi) dari halaman explorer.`, `The explorer getrawtransaction API returned no transaction data (null). Fill in "Manual UTXO" (txid,vout,satoshi) from the explorer page.`],
+        [`Semua saldo masih berupa reward mining/staking yang belum matang (butuh `, `All balance is still immature mining/staking rewards (needs `],
+        [` konfirmasi). Tunggu atau gunakan alamat lain.`, ` confirmations). Wait or use another address.`],
+        [`Gagal mengambil UTXO (HTTP`, `Failed to fetch UTXO (HTTP`],
+        [`Saldo UTXO tidak cukup untuk fee. Tersedia`, `UTXO balance is not enough for the fee. Available`],
+        [`URL Broadcast kosong.`, `Broadcast URL is empty.`],
+        [`Isi nama field JSON untuk format kustom.`, `Enter the JSON field name for the custom format.`],
+        [`Tidak bisa menghubungi endpoint broadcast (kemungkinan diblokir CORS atau jaringan):`, `Cannot reach the broadcast endpoint (possibly blocked by CORS or the network):`],
+        [`Respons tanpa Tx ID:`, `Response without Tx ID:`],
+        [`Broadcast ditolak. Semua`, `Broadcast rejected. All`],
+        [`format body menghasilkan jawaban yang sama ->`, `body formats gave the same answer ->`],
+        [`. Nama parameter yang diharapkan API belum cocok; butuh format request dari pembuat API.`, `. The parameter name expected by the API does not match yet; the request format from the API author is needed.`],
+        [`Broadcast ditolak.`, `Broadcast rejected.`],
+        [`Baris UTXO manual ke-`, `Manual UTXO line #`],
+        [` tidak valid. Format: txid,vout,nilai_satoshi`, ` is invalid. Format: txid,vout,value_satoshi`],
+        [` - Node tidak terjangkau dari browser (mis. CORS). Isi kolom "UTXO manual" di menu Koneksi Wallet lalu klik Inject lagi untuk membuat raw TX secara offline.`, ` - Node is unreachable from the browser (e.g. CORS). Fill in the "Manual UTXO" field in the Wallet Connection menu, then click Inject again to create the raw TX offline.`],
+        [`Tidak ada UTXO (saldo) pada alamat signer.`, `No UTXO (balance) on the signer address.`],
+        // cek status & riwayat
+        [`Memeriksa explorer...`, `Checking explorer...`],
+        [`Tx terdeteksi di blockchain`, `Tx detected on the blockchain`],
+        [` konfirmasi, blok `, ` confirmations, block `],
+        [`). Hash sudah tercatat.`, `). The hash has been recorded.`],
+        [`Belum terdeteksi di explorer. Pastikan raw TX sudah disiarkan, tunggu 1-2 menit, lalu cek lagi.`, `Not detected in the explorer yet. Make sure the raw TX has been broadcast, wait 1-2 minutes, then check again.`],
+        [`Belum terdeteksi di explorer (`, `Not detected in the explorer yet (`],
+        [`). Pastikan sudah disiarkan, lalu cek lagi.`, `). Make sure it has been broadcast, then check again.`],
+        [`Memuat riwayat transaksi...`, `Loading transaction history...`],
+        [`Belum disiarkan #`, `Not broadcast yet #`],
+        [` konfirmasi)`, ` confirmations)`],
+        [`Riwayat tidak bisa dimuat dari node:`, `History could not be loaded from the node:`],
+        [`Kemungkinan diblokir CORS atau endpoint explorer berbeda; atur "URL Riwayat Transaksi" di pengaturan wallet, atau buka`, `Possibly blocked by CORS or the explorer endpoint differs; set "Transaction History URL" in the wallet settings, or open the`],
+        [`halaman alamat di explorer`, `address page in the explorer`],
+        [`Belum ada riwayat transaksi untuk alamat ini.`, `No transaction history for this address yet.`],
+        [`Tidak ada respons dari node.`, `No response from the node.`],
+        [`Alamat: `, `Address: `],
+        // alert / prompt
+        [`Masukkan Private Key WIF atau Alamat Nusacoin!`, `Enter a WIF Private Key or a Nusacoin Address!`],
+        [`Live Wallet berhasil dibuka!`, `Live Wallet opened successfully!`],
+        [`Raw TX hex disalin.`, `Raw TX hex copied.`],
+        [`Salin raw TX hex berikut:`, `Copy the following raw TX hex:`],
+        // wilayah
+        [`Mode ketik manual aktif (kode wilayah tidak tercatat).`, `Manual entry mode is active (area code is not recorded).`],
+        [`Gagal memuat data wilayah (`, `Failed to load area data (`],
+        [`Gagal memuat data wilayah`, `Failed to load area data`],
+        [`Format data tidak dikenal`, `Unknown data format`],
+        [`). Periksa koneksi internet.`, `). Check your internet connection.`],
+        // scanner
+        [`Library scanner gagal dimuat (cek koneksi internet).`, `Scanner library failed to load (check your internet connection).`],
+        [`Kamera hanya bisa dipakai lewat HTTPS atau localhost. Gunakan "Pilih gambar dari galeri".`, `The camera only works over HTTPS or localhost. Use "Choose image from gallery".`],
+        [`Kamera tidak bisa dibuka (`, `Camera cannot be opened (`],
+        [`). Izinkan akses kamera atau pilih gambar dari galeri.`, `). Allow camera access or choose an image from the gallery.`],
+        [`Kode tidak terbaca dari gambar. Coba foto yang lebih jelas/terang.`, `Code could not be read from the image. Try a clearer/brighter photo.`],
+        [` dari `, ` from `]
+    ].sort((a, b) => b[0].length - a[0].length);
+
+    const DYN = '[id^="status-"], [id^="chk-"], #txHistoryContainer, #utxoSummary, #qrMsg, [id$="WilStatus"], #liveWalletAddress, #verifyResult, #verifyProgress';
+    window.LANG = { cur: 'id' };
+    window.L = (id, en) => (window.LANG.cur === 'en' ? en : id);
+    window.tx = function (s) {
+        if (window.LANG.cur !== 'en') return s;
+        let out = String(s);
+        for (const [a, b] of PH) if (out.includes(a)) out = out.split(a).join(b);
+        return out;
+    };
+
+    const textRec = new WeakMap(), attrRec = new WeakMap();
+    const norm = x => x.replace(/\s+/g, ' ').trim();
+    function inDyn(node) { const el = node.nodeType === 1 ? node : node.parentElement; return !!(el && el.closest && el.closest(DYN)); }
+    function trString(str, dyn) {
+        const m = str.match(/^(\s*)([\s\S]*?)(\s*)$/);
+        const core = m[2];
+        if (!core) return str;
+        const key = norm(core);
+        if (UI.has(key)) return m[1] + UI.get(key) + m[3];
+        if (dyn) { const p = window.tx(str); if (p !== str) return p; }
+        return str;
+    }
+    function applyText(n) {
+        const rec = textRec.get(n);
+        const base = (rec && n.nodeValue === rec.t) ? rec.o : n.nodeValue;
+        const t = window.LANG.cur === 'en' ? trString(base, inDyn(n)) : base;
+        textRec.set(n, { o: base, t });
+        if (n.nodeValue !== t) n.nodeValue = t;
+    }
+    function applyAttrs(el) {
+        ['placeholder', 'title'].forEach(a => {
+            if (!el.hasAttribute || !el.hasAttribute(a)) return;
+            const rec = attrRec.get(el) || {}, cur = el.getAttribute(a), r = rec[a];
+            const base = (r && cur === r.t) ? r.o : cur;
+            const t = window.LANG.cur === 'en' ? trString(base, false) : base;
+            rec[a] = { o: base, t }; attrRec.set(el, rec);
+            if (cur !== t) el.setAttribute(a, t);
+        });
+    }
+    function walk(root) {
+        if (root.nodeType === 3) { const pn = root.parentNode; if (pn && !/^(SCRIPT|STYLE|TEXTAREA)$/.test(pn.nodeName)) applyText(root); return; }
+        if (root.nodeType !== 1 || /^(SCRIPT|STYLE)$/.test(root.nodeName)) return;
+        applyAttrs(root);
+        root.querySelectorAll('[placeholder],[title]').forEach(applyAttrs);
+        const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+            acceptNode: n => (!n.parentNode || /^(SCRIPT|STYLE|TEXTAREA)$/.test(n.parentNode.nodeName)) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT
+        });
+        const nodes = [];
+        while (w.nextNode()) nodes.push(w.currentNode);
+        nodes.forEach(applyText);
+    }
+
+    function setLang(lang) {
+        window.LANG.cur = lang === 'en' ? 'en' : 'id';
+        try { localStorage.setItem('pbnu_lang', window.LANG.cur); } catch (e) { }
+        document.documentElement.lang = window.LANG.cur;
+        const on = 'px-2.5 py-1 text-xs font-bold rounded-lg transition bg-[var(--primary-dark)] text-white';
+        const off = 'px-2.5 py-1 text-xs font-bold rounded-lg transition text-emerald-200';
+        const bi = document.getElementById('btnIN'), be = document.getElementById('btnEN');
+        if (bi) bi.className = window.LANG.cur === 'id' ? on : off;
+        if (be) be.className = window.LANG.cur === 'en' ? on : off;
+        document.title = window.LANG.cur === 'en' ? 'PBNU - Ranting Data Registry & Nusachain Ledger' : 'PBNU - Pendataan Ranting & Nusachain Ledger';
+        walk(document.body);
+        try {   // render ulang bagian dinamis (tanggal & label riwayat)
+            const act = document.getElementById('walletActiveSection');
+            if (typeof liveWalletData !== 'undefined' && liveWalletData.address && act && act.style.display !== 'none' && typeof renderHistory === 'function') renderHistory();
+        } catch (e) { }
+    }
+    window.__setLang = setLang;
+
+    new MutationObserver(muts => {
+        if (window.LANG.cur !== 'en') return;
+        muts.forEach(m => m.addedNodes.forEach(n => walk(n)));
+    }).observe(document.body, { childList: true, subtree: true });
+
+    const _alert = window.alert.bind(window), _prompt = window.prompt.bind(window);
+    window.alert = m => _alert(window.tx(m));
+    window.prompt = (m, d) => _prompt(window.tx(m), d);
+
+    let saved = null;
+    try { saved = localStorage.getItem('pbnu_lang'); } catch (e) { }
+    if (saved === 'en') setLang('en');
+})();
+</script>
+
+</body>
+</html>
