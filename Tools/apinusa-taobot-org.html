@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nusachain (NUX) API Documentation</title>
+    <meta name="description" content="Dokumentasi API Resmi Nusachain & Nusacoin (NUX)">
+    
+    <!-- FontAwesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Bootstrap 4.6 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        /* 1. Pemetaan Variabel Warna CSS (Spesifikasi Nusachain Theme) */
+        :root {
+            --primary: #27ae60;
+            --primary-dark: #1e8449;
+            --bg-body: #ffffff;
+            --bg-card: #ffffff;
+            --bg-card-sub: #f8fafc;
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --bg-light: #f8fafc;
+            --border: #e2e8f0;
+            --title-green: #1e8449;
+            --link-green: #27ae60;
+            --transition: all 0.3s ease;
+        }
+
+        body.dark-mode {
+            --primary: #27ae60;
+            --primary-dark: #1e8449;
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --bg-card-sub: #0f172a;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --bg-light: #1e293b;
+            --border: #334155;
+            --title-green: #4ade80;
+            --link-green: #4ade80;
+        }
+
+        /* Styling Dasar & Transisi */
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            padding-top: 80px;
+            padding-bottom: 40px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Bar Navbar Header */
+        .navbar-nusachain {
+            background-color: var(--primary-dark) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 0.75rem 1rem;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: #ffffff !important;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .navbar-brand i {
+            color: #4ade80;
+        }
+
+        /* Switcher Control Buttons */
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .lang-switcher {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 20px;
+            padding: 2px;
+            display: flex;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .lang-btn {
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            padding: 4px 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .lang-btn.active {
+            background: #ffffff;
+            color: var(--primary-dark);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .btn-theme-toggle {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        /* Hero / Title Section */
+        .hero-section {
+            padding: 2rem 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 2rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .page-title {
+            color: var(--title-green);
+            font-weight: 700;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .page-subtitle {
+            color: var(--text-sub);
+            font-size: 1.05rem;
+            transition: color 0.3s ease;
+        }
+
+        /* Feature / Endpoint Card */
+        .endpoint-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 1.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .endpoint-card:hover {
+            border-color: var(--primary);
+        }
+
+        .card-top-action {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 0.75rem;
+        }
+
+        .endpoint-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .method {
+            background-color: var(--primary);
+            color: white;
+            padding: 0.3rem 0.75rem;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .method.post {
+            background-color: #d97706;
+        }
+
+        .endpoint-path {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--text-main);
+            transition: color 0.3s ease;
+        }
+
+        .endpoint-desc {
+            color: var(--text-sub);
+            font-size: 0.95rem;
+            margin-bottom: 1.25rem;
+            transition: color 0.3s ease;
+        }
+
+        .section-title {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-sub);
+            font-weight: 600;
+            margin-top: 1rem;
+            margin-bottom: 0.4rem;
+            transition: color 0.3s ease;
+        }
+
+        /* Box & Code Style */
+        .box-container {
+            background-color: var(--bg-card-sub);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+            word-break: break-all;
+            white-space: pre-wrap;
+            color: var(--text-main);
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+        }
+
+        .btn-copy {
+            background: var(--bg-card-sub);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 0.4rem 0.85rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .btn-copy:hover {
+            background: var(--primary);
+            color: #ffffff;
+            border-color: var(--primary);
+        }
+
+        /* Syntax Highlighting Skema Blackboard / Dark Theme */
+        .json-editor-blackbord {
+            background: #0f172a !important;
+            color: #f8fafc !important;
+            font-size: 13px;
+            font-family: 'JetBrains Mono', monospace;
+            padding: 1.2rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            max-height: 380px;
+            overflow-y: auto;
+        }
+
+        ul.json-dict, ol.json-array {
+            list-style-type: none;
+            margin: 0 0 0 1px;
+            border-left: 1px dotted #334155;
+            padding-left: 1.5em;
+        }
+
+        .json-string { color: #4ade80; }
+        .json-literal { color: #fbbf24; }
+        .json-url { color: #38bdf8; }
+        .json-property { color: #38bdf8; line-height: 160%; font-weight: 500; }
+
+        a.json-toggle { position: relative; color: inherit; text-decoration: none; cursor: pointer; }
+        a.json-toggle:before { color: #64748b; content: "\25BC"; position: absolute; display: inline-block; width: 1em; left: -1em; }
+        a.json-toggle.collapsed:before { transform: rotate(-90deg); }
+        a.json-placeholder { color: #64748b; padding: 0 1em; text-decoration: none; cursor: pointer; }
+
+        /* Toast Notification */
+        #toast {
+            visibility: hidden;
+            min-width: 280px;
+            background-color: #1e293b;
+            color: #ffffff;
+            text-align: center;
+            border-radius: 8px;
+            padding: 12px 20px;
+            position: fixed;
+            z-index: 1060;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            font-size: 0.9rem;
+            font-weight: 500;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            border: 1px solid #334155;
+        }
+
+        #toast.show {
+            visibility: visible;
+            animation: fadein 0.3s, fadeout 0.3s 1.7s;
+        }
+
+        @keyframes fadein {
+            from { bottom: 0; opacity: 0; }
+            to { bottom: 30px; opacity: 1; }
+        }
+
+        @keyframes fadeout {
+            from { bottom: 30px; opacity: 1; }
+            to { bottom: 0; opacity: 0; }
+        }
+
+        /* Footer */
+        footer.footer-nusachain {
+            background-color: var(--bg-light);
+            color: var(--text-sub);
+            border-top: 1px solid var(--border);
+            padding: 2.5rem 0 1.5rem 0;
+            margin-top: auto;
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+        }
+
+        footer a {
+            color: var(--link-green);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+            color: var(--primary-dark);
+        }
+
+        .footer-heading {
+            color: var(--text-main);
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            transition: color 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar Top Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top navbar-nusachain">
+        <div class="container">
+            <a href="#" class="navbar-brand">
+                <i class="fa-solid fa-link"></i>
+                <span>Nusachain API</span>
+            </a>
+            <div class="control-group ml-auto">
+                <!-- Saklar Bahasa Dinamis (IN / EN Toggle) -->
+                <div class="lang-switcher">
+                    <button id="btnIN" class="lang-btn active" onclick="switchLanguage('id')">IN</button>
+                    <button id="btnEN" class="lang-btn" onclick="switchLanguage('en')">EN</button>
+                </div>
+                <!-- Saklar Mode Gelap / Terang -->
+                <button class="btn-theme-toggle" onclick="toggleTheme()" title="Ubah Mode Tema">
+                    <i id="themeIcon" class="fa-solid fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Container -->
+    <div class="container main-content">
+        <!-- Hero Title Section -->
+        <div class="hero-section text-center text-md-left">
+            <h1 class="page-title" id="fDocTitle"><i class="fa-solid fa-code-branch mr-2"></i>Dokumentasi API Nusachain</h1>
+            <p class="page-subtitle" id="docSub">Akses langsung data blockchain Nusacoin (NUX) melalui RESTful API endpoint yang efisien.</p>
+        </div>
+
+        <!-- Dynamic API Container -->
+        <div id="docs"></div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer-nusachain">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <h5 class="footer-heading" id="fFooterTitle"><i class="fa-solid fa-cubes mr-2"></i>Nusachain Blockchain</h5>
+                    <p id="footerDesc" class="small">Infrastruktur blockchain terdesentralisasi terpercaya untuk aset digital Nusacoin (NUX).</p>
+                </div>
+                <div class="col-md-6 mb-3 text-md-right">
+                    <h5 class="footer-heading" id="fLinkTitle"><i class="fa-solid fa-link mr-2"></i>Tautan Resmi</h5>
+                    <div class="d-flex justify-content-md-end gap-3 align-items-center">
+                        <a href="https://github.com/TaobotX11/apinusacoin" target="_blank" class="mr-3"><i class="fa-brands fa-github mr-1"></i> GitHub Repository</a>
+                        <a href="https://apinusa.taobot.org" target="_blank"><i class="fa-solid fa-globe mr-1"></i> Official Portal</a>
+                    </div>
+                </div>
+            </div>
+            <hr style="border-color: var(--border);">
+            <div class="text-center small" id="copyrightText">
+                © 2026 Nusachain (NUX). Seluruh hak cipta dilindungi undang-undang.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Notification -->
+    <div id="toast">Berhasil menyalin satu paket API!</div>
+
+    <!-- jQuery & Bootstrap Scripts -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Native JSON Viewer Script -->
+    <script>
+        !function () { var e = 'ul.json-dict, ol.json-array { list-style-type: none; margin: 0 0 0 1px; border-left: 1px dotted #334155; padding-left: 1.5em; } .json-string { color: #4ade80; } .json-literal { color: #fbbf24; } .json-url { color: #38bdf8; } .json-property { color: #38bdf8; line-height: 160%; font-weight: 500; } a.json-toggle { position: relative; color: inherit; text-decoration: none; cursor: pointer; } a.json-toggle:focus { outline: none; } a.json-toggle:before { color: #64748b; content: "\\25BC"; position: absolute; display: inline-block; width: 1em; left: -1em; } a.json-toggle.collapsed:before { transform: rotate(-90deg); } a.json-placeholder { color: #64748b; padding: 0 1em; text-decoration: none; cursor: pointer; } a.json-placeholder:hover { text-decoration: underline; }', o = function (e) { var o = document.getElementsByTagName("head")[0], t = document.createElement("style"); if (o.appendChild(t), t.styleSheet) t.styleSheet.disabled || (t.styleSheet.cssText = e); else try { t.innerHTML = e } catch (n) { t.innerText = e } }; o(e) }(), function (e) { function o(e) { return e instanceof Object && Object.keys(e).length > 0 } function t(e) { var o = /^(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/; return o.test(e) } function n(e, r) { var s = ""; if ("string" == typeof e) e = e.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"), s += t(e) ? '<a href="' + e + '" class="json-string json-url" target="_blank">"' + e + '"</a>' : '<span class="json-string">"' + e + '"</span>'; else if ("number" == typeof e) s += '<span class="json-literal json-literal-number">' + e + "</span>"; else if ("boolean" == typeof e) s += '<span class="json-literal json-literal-boolean">' + e + "</span>"; else if (null === e) s += '<span class="json-literal json-literal-null">null</span>'; else if (e instanceof Array) if (e.length > 0) { s += '[<ol class="json-array">'; for (var l = 0; l < e.length; ++l)s += "<li>", o(e[l]) && (s += '<a href class="json-toggle"></a>'), s += n(e[l], r), l < e.length - 1 && (s += ","), s += "</li>"; s += "</ol>]" } else s += "[]"; else if ("object" == typeof e) { var a = Object.keys(e).length; if (a > 0) { s += '{<ul class="json-dict">'; for (var i in e) if (e.hasOwnProperty(i)) { s += "<li>"; var c = r.withQuotes ? '<span class="json-string json-property">"' + i + '"</span>' : '<span class="json-property">' + i + "</span>"; s += o(e[i]) ? '<a href class="json-toggle"></a>' + c : c, s += ": " + n(e[i], r), --a > 0 && (s += ","), s += "</li>" } s += "</ul>}" } else s += "{}" } return s } e.fn.jsonViewer = function (t, r) { return r = r || {}, this.each(function () { var s = n(t, r); o(t) && (s = '<a href class="json-toggle"></a>' + s), e(this).html(s), e(this).off("click"), e(this).on("click", "a.json-toggle", function () { var o = e(this).toggleClass("collapsed").siblings("ul.json-dict, ol.json-array"); if (o.toggle(), o.is(":visible")) o.siblings(".json-placeholder").remove(); else { var t = o.children("li").length, n = t + (t > 1 ? " items" : " item"); o.after('<a href class="json-placeholder">' + n + "</a>") } return !1 }), e(this).on("click", "a.json-placeholder", function () { return e(this).siblings("a.json-toggle").click(), !1 }), 1 == r.collapsed && e(this).find("a.json-toggle").click() }) } }(jQuery), function (e) { function o(e) { var o = { '"': '\\"', "\\": "\\\\", "\b": "\\b", "\f": "\\f", "\n": "\\n", "\r": "\\r", "	": "\\t" }; return e.replace(/["\\\b\f\n\r\t]/g, function (e) { return o[e] }) } function t(e) { if ("string" == typeof e) return o(e); if ("object" == typeof e) for (var n in e) e[n] = t(e[n]); else if (Array.isArray(e)) for (var r = 0; r < e.length; r++)e[r] = t(e[r]); return e } function n(o, t, n) { n = n || {}, n.editable !== !1 && (n.editable = !0), this.$container = e(o), this.options = n, this.load(t) } n.prototype = { constructor: n, load: function (e) { this.$container.jsonViewer(t(e), { collapsed: this.options.defaultCollapsed, withQuotes: !0 }).addClass("json-editor-blackbord").attr("contenteditable", false) }, get: function () { try { return this.$container.find(".collapsed").click(), JSON.parse(this.$container.text()) } catch (e) { throw new Error(e) } } }, window.JsonEditor = n }(jQuery);
+    </script>
+
+    <!-- Data API & Logika Aplikasi -->
+    <script>
+        var baseUrl = 'https://apinusa.taobot.org';
+
+        // Data API Nusachain dengan Deskripsi Multabahasa
+        var apiData = [
+            {
+                'name': '/info',
+                'example': '/info',
+                'desc_id': 'Metode ini mengembalikan informasi terbaru tentang jaringan Nusacoin (NUX).',
+                'desc_en': 'This method returns current info about Nusacoin network.',
+                'method': 'GET',
+                'id': 'info',
+                'response': {
+                    "error": null,
+                    "id": "api-server",
+                    "result": {
+                        "bestblockhash": "00000000000003837103db3ff1c43f930da998d9453f3d1064336bf71069f33f",
+                        "blocks": 73637,
+                        "chain": "main",
+                        "chainwork": "000000000000000000000000000000000000000000000001210e880de0ea9d64",
+                        "difficulty": 502306.5781957264,
+                        "headers": 73637,
+                        "mediantime": 1791667554,
+                        "nethash": 54771265127,
+                        "reward": "30.00",
+                        "supply": 220911000000000
+                    }
+                }
+            },
+            {
+                'name': '/height/int:height',
+                'example': '/height/1',
+                'desc_id': 'Metode ini mengembalikan informasi blok berdasarkan ketinggian (height) tertentu.',
+                'desc_en': 'This method returns block info by given height.',
+                'method': 'GET',
+                'id': 'height',
+                'response': {
+                    "error": null,
+                    "id": "api-server",
+                    "result": {
+                        "bits": "1e0ffff0",
+                        "chainwork": "0000000000000000000000000000000000000000000000000000000000200020",
+                        "confirmations": 73637,
+                        "difficulty": 0.000244140625,
+                        "hash": "000007c732d45a968b00b2aa31612aa09cb9dd9785cf18144e1dde8599beb81c",
+                        "height": 1,
+                        "mediantime": 1765190477,
+                        "merkleroot": "04235cca545dcbe492615e04093a7b586912282e21424b0f234c525a4d7b3261",
+                        "nextblockhash": "00000385918ae5b0600e5fe97f7432a2fb1a1b945a7341a637aa9fb4874d894f",
+                        "nonce": 452629,
+                        "previousblockhash": "0000017123d6f996589bc2e58bb5502218012ac7f527ab599a3be84c1951c669",
+                        "size": 252,
+                        "strippedsize": 216,
+                        "time": 1765190477,
+                        "tx": ["04235cca545dcbe492615e04093a7b586912282e21424b0f234c525a4d7b3261"],
+                        "txcount": 1,
+                        "version": 536870912,
+                        "versionHex": "20000000",
+                        "weight": 900
+                    }
+                }
+            },
+            {
+                'name': '/block/string:hash',
+                'example': '/block/000000048f0f3bcf820f406089aedc84d5d30175b0a24e89cd5f719071f921bc',
+                'desc_id': 'Metode ini mengembalikan informasi rinci tentang blok berdasarkan hash yang diberikan.',
+                'desc_en': 'This method returns block info by given hash.',
+                'method': 'GET',
+                'id': 'block',
+                'response': {
+                    "error": null,
+                    "id": "api-server",
+                    "result": {
+                        "bits": "1d08da50",
+                        "confirmations": 55685,
+                        "difficulty": 0.1129571026722925,
+                        "hash": "000000048f0f3bcf820f406089aedc84d5d30175b0a24e89cd5f719071f921bc",
+                        "height": 17953,
+                        "time": 1765469199,
+                        "txcount": 1
+                    }
+                }
+            },
+            {
+                'name': '/header/string:hash',
+                'example': '/header/000000048f0f3bcf820f406089aedc84d5d30175b0a24e89cd5f719071f921bc',
+                'desc_id': 'Metode ini mengembalikan header blok berdasarkan hash yang diberikan.',
+                'desc_en': 'This method returns block header by given hash.',
+                'method': 'GET',
+                'id': 'header',
+                'response': {
+                    "error": null,
+                    "id": "api-server",
+                    "result": {
+                        "bits": "1d08da50",
+                        "confirmations": 55685,
+                        "hash": "000000048f0f3bcf820f406089aedc84d5d30175b0a24e89cd5f719071f921bc",
+                        "height": 17953
+                    }
+                }
+            },
+            {
+                'name': '/range/int:height',
+                'example': '/range/20?offset=3',
+                'desc_id': 'Metode ini mengembalikan daftar jangkauan blok dimulai dari ketinggian tertentu.',
+                'desc_en': 'This method returns range of blocks starting from certain height.',
+                'method': 'GET',
+                'id': 'range',
+                'response': {
+                    "error": null,
+                    "id": "api-server",
+                    "result": [{
+                        "bits": "1e0ffff0",
+                        "confirmations": 73618,
+                        "hash": "00000dfd87755b39bffa3218402afcb6f5aafd0909cfc689a54741ecee8b7f20",
+                        "height": 20
+                    }]
+                }
+            },
+            {
+                'name': '/balance/string:address',
+                'example': '/balance/XFd7D77fFhp6iY9hPwLC43dMuwijS59KCr',
+                'desc_id': 'Metode ini mengembalikan total saldo dompet (address) Nusacoin.',
+                'desc_en': 'This method returns address balance.',
+                'method': 'GET',
+                'id': 'balance',
+                'response': {
+                    "error": null,
+                    "id": "api-server",
+                    "result": { "balance": "7223" }
+                }
+            },
+            {
+                'name': '/mempool/string:address',
+                'example': '/mempool/XFd7D77fFhp6iY9hPwLC43dMuwijS59KCr',
+                'desc_id': 'Metode ini mengembalikan transaksi mempool yang tertunda untuk alamat tertentu.',
+                'desc_en': 'This method returns address mempool transactions.',
+                'method': 'GET',
+                'id': 'mempool-address',
+                'response': {
+                    "error": null,
+                    "id": "api-server",
+                    "result": { "tx": [], "txcount": 0 }
+                }
+            },
+            {
+                'name': '/utxos/string:address',
+                'example': '/utxos/XFd7D77fFhp6iY9hPwLC43dMuwijS59KCr',
+                'desc_id': 'Metode ini mengembalikan daftar unspent outputs (UTXO) global untuk alamat tertentu.',
+                'desc_en': 'This method returns address unspent outputs globally.',
+                'method': 'GET',
+                'id': 'utxos',
+                'response': {
+                    "error": null,
+                    "id": "api-server",
+                    "result": {
+                        "height": 73637,
+                        "success": true,
+                        "total_amount": 0.00007223,
+                        "txouts": 75094,
+                        "unspents": []
+                    }
+                }
+            },
+            {
+                'name': '/unspent/string:address',
+                'example': '/unspent/XFd7D77fFhp6iY9hPwLC43dMuwijS59KCr?amount=1',
+                'desc_id': 'Metode ini mengembalikan luaran transaksi unspent berdasarkan jumlah tertentu.',
+                'desc_en': 'This method returns address unspent outputs.',
+                'method': 'GET',
+                'id': 'unspent',
+                'response': {
+                    "error": null,
+                    "id": "api-server",
+                    "result": []
+                }
+            },
+            {
+                'name': '/history/string:address',
+                'example': '/history/XFd7D77fFhp6iY9hPwLC43dMuwijS59KCr',
+                'desc_id': 'Metode ini mengembalikan riwayat hash transaksi untuk alamat yang diberikan.',
+                'desc_en': 'This method returns list of address transaction hashes.',
+                'method': 'GET',
+                'id': 'history',
+                'response': {
+                    "error": null,
+                    "id": "api-server",
+                    "result": { "tx": [], "txcount": 0 }
+                }
+            },
+            {
+                'name': '/transaction/string:hash',
+                'example': '/transaction/aba25e0d650fb77ca2d0885ce04466c9e769fa99e02071e20bc754ac4112eb1d',
+                'desc_id': 'Metode ini mengembalikan rincian informasi transaksi berdasarkan hash.',
+                'desc_en': 'This method returns info about transaction.',
+                'method': 'GET',
+                'id': 'transaction',
+                'response': {
+                    "error": null,
+                    "id": "api-server",
+                    "result": {
+                        "amount": 115505563,
+                        "blockhash": "0000000087b25eb7e4feb69af6aa6085d414d55e3ea909863fa627b7af602ba5",
+                        "confirmations": 55723,
+                        "height": 17915
+                    }
+                }
+            },
+            {
+                'name': '/mempool',
+                'example': '/mempool',
+                'desc_id': 'Metode ini mengembalikan informasi status global mempool jaringan.',
+                'desc_en': 'This method returns info about mempool.',
+                'method': 'GET',
+                'id': 'mempool',
+                'response': {
+                    "error": null,
+                    "id": "api-server",
+                    "result": {
+                        "bytes": 26411,
+                        "loaded": true,
+                        "maxmempool": 300000000,
+                        "size": 66
+                    }
+                }
+            },
+            {
+                'name': '/supply',
+                'example': '/supply',
+                'desc_id': 'Metode ini mengembalikan statistik suplai koin Nusacoin saat ini.',
+                'desc_en': 'This method returns info about current coins supply.',
+                'method': 'GET',
+                'id': 'supply',
+                'response': {
+                    "error": null,
+                    "id": "api-server",
+                    "result": {
+                        "halvings": 0,
+                        "max supply": "18000000",
+                        "supply": 220911000000000
+                    }
+                }
+            },
+            {
+                'name': '/fee',
+                'example': '/fee',
+                'desc_id': 'Metode ini mengembalikan estimasi biaya (fee) transaksi yang direkomendasikan.',
+                'desc_en': 'This method returns recommended transaction fee.',
+                'method': 'GET',
+                'id': 'fee',
+                'response': {
+                    "error": null,
+                    "id": "api-server",
+                    "result": { "blocks": 6, "feerate": 1000000 }
+                }
+            },
+            {
+                'name': '/decode/string:raw',
+                'example': '/decode/0200000001f4cc9c5af659df76ba22a7bf83cd3065f49767063144db46123370a671165815010000006a47304402207952b09006be4b13b69e91da9379cd88e4f901beeafd1a18c25d4639fec582b002202e860ecaa8ac4db2a5c45e41f43ef4b3b1a7c12570369e519fed7c33a310afc2012103d44d02cd1f3d853715f162f7bc3b56c224f3e2827726e11438c16d2cdc8cde09ffffffff0140420f00000000001976a914274bc7181d172b42c0757368b19d2a22fa10cac788ac00000000',
+                'desc_id': 'Metode ini mengembalikan hasil dekode dari data mentah (raw hex) transaksi.',
+                'desc_en': 'This method returns decoded info about transaction.',
+                'method': 'GET',
+                'id': 'decode',
+                'response': {
+                    "error": null,
+                    "id": "api-server",
+                    "result": {
+                        "hash": "85c81b67c768f4e68717c3e155df3c3f9d36d5331b031fd5dea56821cc1e9594",
+                        "size": 191,
+                        "version": 2
+                    }
+                }
+            },
+            {
+                'name': '/broadcast',
+                'example': '/broadcast',
+                'desc_id': 'Metode ini menyiarkan (broadcast) transaksi mentah yang telah ditandatangani ke jaringan Nusachain (NUX).',
+                'desc_en': 'This method broadcasts raw signed transaction to NUX network.',
+                'method': 'POST',
+                'id': 'broadcast',
+                'response': {
+                    "result": "85c81b67c768f4e68717c3e155df3c3f9d36d5331b031fd5dea56821cc1e9594",
+                    "error": null,
+                    "id": "api-server"
+                }
+            }
+        ];
+
+        // 3. Kamus Terjemahan Internasionalisasi (IN / EN Dictionary Pattern)
+        var currentLang = 'id';
+        var translations = {
+            'id': {
+                'fDocTitle': '<i class="fa-solid fa-code-branch mr-2"></i>Dokumentasi API Nusachain',
+                'docSub': 'Akses langsung data blockchain Nusacoin (NUX) melalui RESTful API endpoint yang efisien.',
+                'fFooterTitle': '<i class="fa-solid fa-cubes mr-2"></i>Nusachain Blockchain',
+                'footerDesc': 'Infrastruktur blockchain terdesentralisasi terpercaya untuk aset digital Nusacoin (NUX).',
+                'fLinkTitle': '<i class="fa-solid fa-link mr-2"></i>Tautan Resmi',
+                'copyrightText': '© 2026 Nusachain (NUX). Seluruh hak cipta dilindungi undang-undang.',
+                'copyBtn': '<i class="fa-solid fa-copy"></i> Salin Paket',
+                'copiedBtn': '<i class="fa-solid fa-check"></i> Paket Tersalin!',
+                'urlTitle': 'URL Endpoint:',
+                'jsonTitle': 'Contoh Respon JSON:',
+                'toastText': 'Berhasil menyalin satu paket API!'
+            },
+            'en': {
+                'fDocTitle': '<i class="fa-solid fa-code-branch mr-2"></i>Nusachain API Documentation',
+                'docSub': 'Directly access Nusacoin (NUX) blockchain data via efficient RESTful API endpoints.',
+                'fFooterTitle': '<i class="fa-solid fa-cubes mr-2"></i>Nusachain Blockchain',
+                'footerDesc': 'Trusted decentralized blockchain infrastructure for Nusacoin (NUX) digital asset.',
+                'fLinkTitle': '<i class="fa-solid fa-link mr-2"></i>Official Links',
+                'copyrightText': '© 2026 Nusachain (NUX). All rights reserved.',
+                'copyBtn': '<i class="fa-solid fa-copy"></i> Copy Package',
+                'copiedBtn': '<i class="fa-solid fa-check"></i> Package Copied!',
+                'urlTitle': 'Endpoint URL:',
+                'jsonTitle': 'Sample JSON Response:',
+                'toastText': 'Successfully copied API package!'
+            }
+        };
+
+        // Render Endpoint API
+        function renderEndpoints() {
+            var $docs = $('#docs');
+            $docs.empty();
+
+            var t = translations[currentLang];
+
+            apiData.forEach(function(item, index) {
+                var fullUrl = baseUrl + item.example;
+                var methodClass = item.method === 'POST' ? 'method post' : 'method';
+                var desc = currentLang === 'id' ? item.desc_id : item.desc_en;
+
+                var cardHtml = `
+                    <div class="endpoint-card" id="card-${index}">
+                        <div class="card-top-action">
+                            <button class="btn-copy" onclick="copyPackage(${index})">
+                                ${t.copyBtn}
+                            </button>
+                        </div>
+                        <div class="endpoint-header">
+                            <span class="${methodClass}">${item.method}</span>
+                            <span class="endpoint-path">${item.name}</span>
+                        </div>
+                        <div class="endpoint-desc" id="desc-${index}">${desc}</div>
+                        
+                        <div class="section-title url-label-title">${t.urlTitle}</div>
+                        <div class="box-container"><span>${fullUrl}</span></div>
+
+                        <div class="section-title json-label-title">${t.jsonTitle}</div>
+                        <div class="json-viewer-container" id="json-viewer-${index}"></div>
+                    </div>
+                `;
+                $docs.append(cardHtml);
+
+                if (item.response) {
+                    new JsonEditor('#json-viewer-' + index, item.response);
+                }
+            });
+        }
+
+        // 2. Mekanisme Toggle Mode Gelap / Terang (Dark / Light Mode)
+        function toggleTheme() {
+            const body = document.body;
+            const icon = document.getElementById('themeIcon');
+            
+            body.classList.toggle('dark-mode');
+            
+            if (body.classList.contains('dark-mode')) {
+                icon.className = 'fa-solid fa-sun';
+            } else {
+                icon.className = 'fa-solid fa-moon';
+            }
+        }
+
+        // 3. Arsitektur Saklar Bahasa Dinamis (IN / EN Switcher)
+        function switchLanguage(lang) {
+            currentLang = lang;
+            document.getElementById('btnIN').classList.toggle('active', lang === 'id');
+            document.getElementById('btnEN').classList.toggle('active', lang === 'en');
+
+            const t = translations[lang];
+            for (let id in t) {
+                const el = document.getElementById(id);
+                if (el) {
+                    // Preservasi ikon FontAwesome jika merupakan judul fitur (berawalan f* dan berakhiran Title)
+                    if (id.startsWith('f') && id.endsWith('Title')) {
+                        el.innerHTML = t[id];
+                    } else {
+                        el.textContent = t[id];
+                    }
+                }
+            }
+
+            // Update deskripsi & label pada kartu endpoint tanpa merusak JSON Editor
+            apiData.forEach(function(item, index) {
+                var desc = lang === 'id' ? item.desc_id : item.desc_en;
+                $('#desc-' + index).text(desc);
+                $('#card-' + index).find('.btn-copy').html(t.copyBtn);
+                $('#card-' + index).find('.url-label-title').text(t.urlTitle);
+                $('#card-' + index).find('.json-label-title').text(t.jsonTitle);
+            });
+        }
+
+        // Fungsi Salin Satu Paket API (Method, Path, Deskripsi, URL, dan JSON)
+        function copyPackage(index) {
+            var item = apiData[index];
+            var fullUrl = baseUrl + item.example;
+            var jsonString = JSON.stringify(item.response, null, 4);
+            var desc = currentLang === 'id' ? item.desc_id : item.desc_en;
+            var t = translations[currentLang];
+
+            var packageText = item.method + ' ' + item.name + '\n' +
+                              desc + '\n' +
+                              fullUrl + '\n\n' +
+                              jsonString;
+
+            // Memakai fallback standar execCommand / clipboard API
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(packageText).then(() => {
+                    handleCopySuccess(index, t);
+                }).catch(() => {
+                    fallbackCopyText(packageText, index, t);
+                });
+            } else {
+                fallbackCopyText(packageText, index, t);
+            }
+        }
+
+        function fallbackCopyText(text, index, t) {
+            var textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                handleCopySuccess(index, t);
+            } catch (err) {
+                console.error('Gagal menyalin:', err);
+            }
+            document.body.removeChild(textArea);
+        }
+
+        function handleCopySuccess(index, t) {
+            showToast(t.toastText);
+            var btn = $('#card-' + index).find('.btn-copy');
+            var originalHTML = t.copyBtn;
+            btn.html(t.copiedBtn).css({'background-color': 'var(--primary)', 'color': 'white', 'border-color': 'var(--primary)'});
+            setTimeout(function() {
+                btn.html(originalHTML).css({'background-color': '', 'color': '', 'border-color': ''});
+            }, 1500);
+        }
+
+        function showToast(msg) {
+            var toast = document.getElementById("toast");
+            toast.textContent = msg || translations[currentLang].toastText;
+            toast.className = "show";
+            setTimeout(function() { 
+                toast.className = toast.className.replace("show", ""); 
+            }, 2000);
+        }
+
+        // Inisialisasi awal saat dokumen dimuat
+        $(document).ready(function() {
+            renderEndpoints();
+        });
+    </script>
+</body>
+</html>
