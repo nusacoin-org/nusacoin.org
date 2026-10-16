@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nusacoin Testnet API</title>
+    <meta name="description" content="Nusacoin Testnet API Documentation">
+    <!-- FontAwesome untuk Ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        :root {
+            --bg-body: #121212;
+            --bg-card: #1e1e1e;
+            --bg-card-sub: #252526;
+            --text-main: #e0e0e0;
+            --text-sub: #9da3a6;
+            --border: #333333;
+            --primary: #0ad161;
+            --primary-dark: #089c48;
+        }
+
+        body.light-mode {
+            --bg-body: #f4f6f8;
+            --bg-card: #ffffff;
+            --bg-card-sub: #f1f5f9;
+            --text-main: #212529;
+            --text-sub: #6c757d;
+            --border: #dee2e6;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            padding-top: 80px;
+            padding-bottom: 70px;
+        }
+
+        .navbar-custom {
+            background-color: #181818 !important;
+            border-bottom: 1px solid var(--border);
+        }
+
+        body.light-mode .navbar-custom {
+            background-color: #1a252f !important;
+        }
+
+        .endpoint-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .card-top-action {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 0.5rem;
+        }
+
+        .endpoint-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .method {
+            background-color: var(--primary);
+            color: #121212;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+
+        .method.post {
+            background-color: #ff8c00;
+            color: #121212;
+        }
+
+        .endpoint-path {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #4fdee5;
+        }
+
+        .endpoint-desc {
+            color: var(--text-sub);
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .section-title {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-sub);
+            font-weight: 600;
+            margin-top: 0.75rem;
+            margin-bottom: 0.35rem;
+        }
+
+        .box-container {
+            position: relative;
+            background-color: var(--bg-card-sub);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            word-break: break-all;
+            overflow-wrap: break-word;
+            white-space: pre-wrap;
+            color: #1e90ff;
+        }
+
+        body.light-mode .box-container {
+            color: #0056b3;
+        }
+
+        .btn-copy {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 0.3rem 0.7rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.2s, color 0.2s;
+            font-weight: 600;
+        }
+
+        .btn-copy:hover {
+            background: var(--primary);
+            color: #121212;
+            border-color: var(--primary);
+        }
+
+        .btn-toggle {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid var(--border);
+            color: white;
+            padding: 0.35rem 0.65rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-left: 15px;
+        }
+
+        .btn-toggle:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        /* Notifikasi Toast */
+        #toast {
+            visibility: hidden;
+            min-width: 240px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 10px;
+            position: fixed;
+            z-index: 1050;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            font-size: 0.9rem;
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.5);
+        }
+
+        #toast.show {
+            visibility: visible;
+            animation: fadein 0.3s, fadeout 0.3s 1.7s;
+        }
+
+        @keyframes fadein {
+            from { bottom: 0; opacity: 0; }
+            to { bottom: 30px; opacity: 1; }
+        }
+
+        @keyframes fadeout {
+            from { bottom: 30px; opacity: 1; }
+            to { bottom: 0; opacity: 0; }
+        }
+
+        /* Syntax highlighting tema blackboard */
+        .json-editor-blackbord {
+            background: #181818;
+            color: #fff;
+            font-size: 13px;
+            font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+            padding: 1rem;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+        }
+        body.light-mode .json-editor-blackbord {
+            background: #202020;
+            color: #fff;
+        }
+        ul.json-dict, ol.json-array {
+            list-style-type: none;
+            margin: 0 0 0 1px;
+            border-left: 1px dotted #525252;
+            padding-left: 2em;
+        }
+        .json-string { color: #0ad161; }
+        .json-literal { color: #ff8c00; }
+        .json-url { color: #1e90ff; }
+        .json-property { color: #4fdee5; line-height: 160%; font-weight: 500; }
+        a.json-toggle { position: relative; color: inherit; text-decoration: none; cursor: pointer; }
+        a.json-toggle:before { color: #aaa; content: "\25BC"; position: absolute; display: inline-block; width: 1em; left: -1em; }
+        a.json-toggle.collapsed:before { transform: rotate(-90deg); -ms-transform: rotate(-90deg); -webkit-transform: rotate(-90deg); }
+        a.json-placeholder { color: #aaa; padding: 0 1em; text-decoration: none; cursor: pointer; }
+        a.json-placeholder:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar fixed-top navbar-expand-lg navbar-dark navbar-custom">
+        <div class="container">
+            <a href="https://apitest.taobot.org" class="navbar-brand">
+                <b>Nusacoin Testnet API</b>
+            </a>
+            <div class="ml-auto d-flex align-items-center">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a href="https://github.com/TaobotX11/apinusacoin" class="nav-link" target="_blank">GitHub</a>
+                    </li>
+                </ul>
+                <button class="btn-toggle" onclick="toggleTheme()" title="Ubah Tema">
+                    <i id="themeIcon" class="fa-solid fa-sun"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-4">
+        <div id="docs"></div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer py-3 bg-dark text-white fixed-bottom" style="background-color: #181818 !important; border-top: 1px solid var(--border);">
+        <div class="container text-center" style="font-size: 0.85rem;">
+            &copy; Nusacoin Testnet API Server
+        </div>
+    </footer>
+
+    <div id="toast">Berhasil menyalin satu paket API!</div>
+
+    <!-- jQuery & Dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Plugin JsonEditor -->
+    <script>
+        !function () { var e = 'ul.json-dict, ol.json-array { list-style-type: none; margin: 0 0 0 1px; border-left: 1px dotted #525252; padding-left: 2em; } .json-string { color: #0ad161; } .json-literal { color: #ff8c00; } .json-url { color: #1e90ff; } .json-property { color: #4fdee5; line-height: 160%; font-weight: 500; } a.json-toggle { position: relative; color: inherit; text-decoration: none; cursor: pointer; } a.json-toggle:focus { outline: none; } a.json-toggle:before { color: #aaa; content: "\\25BC"; position: absolute; display: inline-block; width: 1em; left: -1em; } a.json-toggle.collapsed:before { transform: rotate(-90deg); -ms-transform: rotate(-90deg); -webkit-transform: rotate(-90deg); } a.json-placeholder { color: #aaa; padding: 0 1em; text-decoration: none; cursor: pointer; } a.json-placeholder:hover { text-decoration: underline; }', o = function (e) { var o = document.getElementsByTagName("head")[0], t = document.createElement("style"); if (o.appendChild(t), t.styleSheet) t.styleSheet.disabled || (t.styleSheet.cssText = e); else try { t.innerHTML = e } catch (n) { t.innerText = e } }; o(e) }(), function (e) { function o(e) { return e instanceof Object && Object.keys(e).length > 0 } function t(e) { var o = /^(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/; return o.test(e) } function n(e, r) { var s = ""; if ("string" == typeof e) e = e.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"), s += t(e) ? '<a href="' + e + '" class="json-string json-url">"' + e + '"</a>' : '<span class="json-string">"' + e + '"</span>'; else if ("number" == typeof e) s += '<span class="json-literal json-literal-number">' + e + "</span>"; else if ("boolean" == typeof e) s += '<span class="json-literal json-literal-boolean">' + e + "</span>"; else if (null === e) s += '<span class="json-literal json-literal-null">null</span>'; else if (e instanceof Array) if (e.length > 0) { s += '[<ol class="json-array">'; for (var l = 0; l < e.length; ++l)s += "<li>", o(e[l]) && (s += '<a href class="json-toggle"></a>'), s += n(e[l], r), l < e.length - 1 && (s += ","), s += "</li>"; s += "</ol>]" } else s += "[]"; else if ("object" == typeof e) { var a = Object.keys(e).length; if (a > 0) { s += '{<ul class="json-dict">'; for (var i in e) if (e.hasOwnProperty(i)) { s += "<li>"; var c = r.withQuotes ? '<span class="json-string json-property">"' + i + '"</span>' : '<span class="json-property">' + i + "</span>"; s += o(e[i]) ? '<a href class="json-toggle"></a>' + c : c, s += ": " + n(e[i], r), --a > 0 && (s += ","), s += "</li>" } s += "</ul>}" } else s += "{}" } return s } e.fn.jsonViewer = function (t, r) { return r = r || {}, this.each(function () { var s = n(t, r); o(t) && (s = '<a href class="json-toggle"></a>' + s), e(this).html(s), e(this).off("click"), e(this).on("click", "a.json-toggle", function () { var o = e(this).toggleClass("collapsed").siblings("ul.json-dict, ol.json-array"); if (o.toggle(), o.is(":visible")) o.siblings(".json-placeholder").remove(); else { var t = o.children("li").length, n = t + (t > 1 ? " items" : " item"); o.after('<a href class="json-placeholder">' + n + "</a>") } return !1 }), e(this).on("click", "a.json-placeholder", function () { return e(this).siblings("a.json-toggle").click(), !1 }), 1 == r.collapsed && e(this).find("a.json-toggle").click() }) } }(jQuery), function (e) { function o(e) { var o = { '"': '\\"', "\\": "\\\\", "\b": "\\b", "\f": "\\f", "\n": "\\n", "\r": "\\r", "	": "\\t" }; return e.replace(/["\\\b\f\n\r\t]/g, function (e) { return o[e] }) } function t(e) { if ("string" == typeof e) return o(e); if ("object" == typeof e) for (var n in e) e[n] = t(e[n]); else if (Array.isArray(e)) for (var r = 0; r < e.length; r++)e[r] = t(e[r]); return e } function n(o, t, n) { n = n || {}, n.editable !== !1 && (n.editable = !0), this.$container = e(o), this.options = n, this.load(t) } n.prototype = { constructor: n, load: function (e) { this.$container.jsonViewer(t(e), { collapsed: this.options.defaultCollapsed, withQuotes: !0 }).addClass("json-editor-blackbord").attr("contenteditable", !!this.options.editable) }, get: function () { try { return this.$container.find(".collapsed").click(), JSON.parse(this.$container.text()) } catch (e) { throw new Error(e) } } }, window.JsonEditor = n }(jQuery);
+    </script>
+
+    <!-- Skrip Data API Testnet -->
+    <script>
+        var uri = 'https://apitest.taobot.org';
+        var api = [
+            {
+                'name': '/info',
+                'example': '/info',
+                'description': 'This method return current info about Nusacoin network.',
+                'method': 'GET',
+                'id': 'info',
+                'response': {
+                    "error": null,
+                    "id": "api-server",
+                    "result": {
+                        "bestblockhash": "000005c97aa402f4d3062c1de6d30f95acec0f364524a215b7a68c74623c243c",
+                        "blocks": 1299,
+                        "chain": "test",
+                        "chainwork": "0000000000000000000000000000000000000000000000000000000037f1ccf0",
+                        "difficulty": 0.000244140625,
+                        "headers": 1299,
+                        "mediantime": 1791893688,
+                        "nethash": 8,
+                        "reward": "30.00",
+                        "supply": 3896900000000
+                    }
+                }
+            }, {
+                'name': '/height/int:height',
+                'example': '/height/1',
+                'description': 'This method return block info by given height.',
+                'method': 'GET',
+                'id': 'height',
+                'response': {
+                    "error": null,
+                    "id": "api-server",
+                    "result": {
+                        "bits": "2000ffff",
+                        "chainwork": "0000000000000000000000000000000000000000000000000000000000100110",
+                        "confirmations": 1299,
+                        "difficulty": 5.960464477539062e-8,
+                        "hash": "0017466a6acb87b58447a960c7bba382c153af5fdd2d87ff559e3172f547f7e1",
+                        "height": 1,
+                        "mediantime": 1770730075,
+                        "merkleroot": "cde055a79367032442662b8cc7337bc22038e7a49dff2f118d231a0a85c10294",
+                        "nextblockhash": "000008131df98d00d1c234aa358c21855680a385a7a0e6233d59da401aec2dc0",
+                        "nonce": 281,
+                        "previousblockhash": "0000017123d6f996589bc2e58bb5502218012ac7f527ab599a3be84c1951c669",
+                        "size": 249,
+                        "strippedsize": 213,
+                        "time": 1770730075,
+                        "tx": ["cde055a79367032442662b8cc7337bc22038e7a49dff2f118d231a0a85c10294"],
+                        "txcount": 1,
+                        "version": 536870912,
+                        "versionHex": "20000000",
+                        "weight": 888
+                    }
+                }
+            }, {
+                'name': '/block/string:hash',
+                'example': '/block/000000048f0f3bcf820f406089aedc84d5d30175b0a24e89cd5f719071f921bc',
+                'description': 'This method return block info by given hash.',
+                'method': 'GET',
+                'id': 'block',
+                'response': {
+                    "error": { "code": -5, "message": "Block not found" },
+                    "id": "api-server",
+                    "result": null
+                }
+            }, {
+                'name': '/header/string:hash',
+                'example': '/header/000000048f0f3bcf820f406089aedc84d5d30175b0a24e89cd5f719071f921bc',
+                'description': 'This method return block header by given hash.',
+                'method': 'GET',
+                'id': 'header',
+                'response': {
+                    "error": { "code": -5, "message": "Block not found" },
+                    "id": "api-server",
+                    "result": null
+                }
+            }, {
+                'name': '/range/int:height',
+                'example': '/range/20?offset=3',
+                'description': 'This method return range of blocks staring from certain height.',
+                'method': 'GET',
+                'id': 'range',
+                'response': {
+                    "error": null,
+                    "id": "api-server",
+                    "result": [
+                        {
+                            "bits": "2000ffff",
+                            "chainwork": "0000000000000000000000000000000000000000000000000000000001000600",
+                            "confirmations": 1280,
+                            "difficulty": 5.960464477539062e-8,
+                            "hash": "00b7bd62295fbe832726df8edde560633dc041d60f1ba662454bf39d40bfe60d",
+                            "height": 20,
+                            "mediantime": 1771323590,
+                            "merkleroot": "150459c6724451100af7ce0da2d866ed2097c97c2edec3d4416a0d6591c96ac7",
+                            "nethash": 2,
+                            "nextblockhash": "00000493174ed56ee1d5bc6afc732232d2ef843757017628c583991e3d085022",
+                            "nonce": 7,
+                            "previousblockhash": "0000020bf8f3b03d2faa1ac96beeb318efda3229a17d391b97c24195bbc0f6ca",
+                            "size": 253,
+                            "strippedsize": 217,
+                            "time": 1771402480,
+                            "tx": ["150459c6724451100af7ce0da2d866ed2097c97c2edec3d4416a0d6591c96ac7"],
+                            "txcount": 1,
+                            "version": 536870912,
+                            "versionHex": "20000000",
+                            "weight": 904
+                        }
+                    ]
+                }
+            }, {
+                'name': '/balance/string:address',
+                'example': '/balance/XFd7D77fFhp6iY9hPwLC43dMuwijS59KCr',
+                'description': 'This method return address balance.',
+                'method': 'GET',
+                'id': 'balance',
+                'response': {
+                    "error": { "code": -5, "message": "Invalid Nusacoin address: XFd7D77fFhp6iY9hPwLC43dMuwijS59KCr" },
+                    "id": "api-server",
+                    "result": null
+                }
+            }, {
+                'name': '/mempool/string:address',
+                'example': '/mempool/XFd7D77fFhp6iY9hPwLC43dMuwijS59KCr',
+                'description': 'This method return address mempool transactions.',
+                'method': 'GET',
+                'id': 'mempool',
+                'response': {
+                    "error": null,
+                    "id": "api-server",
+                    "result": { "tx": [], "txcount": 0 }
+                }
+            }, {
+                'name': '/utxos/string:address',
+                'example': '/utxos/XFd7D77fFhp6iY9hPwLC43dMuwijS59KCr',
+                'description': 'This method return address unspent outputs globally.',
+                'method': 'GET',
+                'id': 'utxos',
+                'response': {
+                    "error": { "code": -5, "message": "Address is not valid" },
+                    "id": "api-server",
+                    "result": { "address": "", "txcount": 0 }
+                }
+            }, {
+                'name': '/unspent/string:address',
+                'example': '/unspent/XFd7D77fFhp6iY9hPwLC43dMuwijS59KCr?amount=1',
+                'description': 'This method return address unspent outputs.',
+                'method': 'GET',
+                'id': 'unspent',
+                'response': {
+                    "error": { "code": -5, "message": "Invalid Nusacoin address: XFd7D77fFhp6iY9hPwLC43dMuwijS59KCr" },
+                    "id": "api-server",
+                    "result": null
+                }
+            }, {
+                'name': '/history/string:address',
+                'example': '/history/XFd7D77fFhp6iY9hPwLC43dMuwijS59KCr',
+                'description': 'This method return list of address transaction hashes.',
+                'method': 'GET',
+                'id': 'history',
+                'response': {
+                    "error": null,
+                    "id": "api-server",
+                    "result": { "tx": [], "txcount": 0 }
+                }
+            }, {
+                'name': '/transaction/string:hash',
+                'example': '/transaction/aba25e0d650fb77ca2d0885ce04466c9e769fa99e02071e20bc754ac4112eb1d',
+                'description': 'This method return info about transaction.',
+                'method': 'GET',
+                'id': 'transaction',
+                'response': {
+                    "error": { "code": -5, "message": "Transaction not found" },
+                    "result": null
+                }
+            }, {
+                'name': '/mempool',
+                'example': '/mempool',
+                'description': 'This method return info about mempool.',
+                'method': 'GET',
+                'id': 'mempool-info',
+                'response': {
+                    "error": null,
+                    "id": "api-server",
+                    "result": {
+                        "bytes": 0,
+                        "loaded": true,
+                        "maxmempool": 300000000,
+                        "mempoolminfee": 0.00001,
+                        "minrelaytxfee": 0.00001,
+                        "size": 0,
+                        "tx": [],
+                        "unbroadcastcount": 0,
+                        "usage": 64
+                    }
+                }
+            }, {
+                'name': '/supply',
+                'example': '/supply',
+                'description': 'This method return info about current coins supply.',
+                'method': 'GET',
+                'id': 'supply',
+                'response': {
+                    "error": null,
+                    "id": "api-server",
+                    "result": {
+                        "halvings": 0,
+                        "max supply": "18000000",
+                        "supply": 3896900000000
+                    }
+                }
+            }, {
+                'name': '/fee',
+                'example': '/fee',
+                'description': 'This method return recomended transaction fee.',
+                'method': 'GET',
+                'id': 'fee',
+                'response': {
+                    "error": null,
+                    "id": "api-server",
+                    "result": { "blocks": 6, "feerate": 1000000 }
+                }
+            }, {
+                'name': '/decode/string:raw',
+                'example': '/decode/0200000001f4cc9c5af659df76ba22a7bf83cd3065f49767063144db46123370a671165815010000006a47304402207952b09006be4b13b69e91da9379cd88e4f901beeafd1a18c25d4639fec582b002202e860ecaa8ac4db2a5c45e41f43ef4b3b1a7c12570369e519fed7c33a310afc2012103d44d02cd1f3d853715f162f7bc3b56c224f3e2827726e11438c16d2cdc8cde09ffffffff0140420f00000000001976a914274bc7181d172b42c0757368b19d2a22fa10cac788ac00000000',
+                'description': 'This method return decoded info about transaction.',
+                'method': 'GET',
+                'id': 'decode',
+                'response': {
+                    "error": null,
+                    "id": "api-server",
+                    "result": {
+                        "hash": "85c81b67c768f4e68717c3e155df3c3f9d36d5331b031fd5dea56821cc1e9594",
+                        "locktime": 0,
+                        "size": 191,
+                        "version": 2
+                    }
+                }
+            }, {
+                'name': '/broadcast',
+                'example': '/broadcast',
+                'description': 'This method broadcast raw signed transaction to NUX network.',
+                'method': 'POST',
+                'id': 'broadcast',
+                'response': {
+                    "result": "85c81b67c768f4e68717c3e155df3c3f9d36d5331b031fd5dea56821cc1e9594",
+                    "error": null,
+                    "id": "api-server"
+                }
+            }
+        ];
+
+        var $docs =$('#docs');
+        api.forEach(function(item, index) {
+            var fullUrl = uri + item.example;
+            var methodClass = item.method === 'POST' ? 'method post' : 'method';
+            
+            var cardHtml = `
+                <div class="endpoint-card" id="card-${index}">
+                    <div class="card-top-action">
+                        <button class="btn-copy" onclick="copyPackage(${index})">
+                            <i class="fa-solid fa-copy"></i> Salin Satu Paket
+                        </button>
+                    </div>
+                    <div class="endpoint-header">
+                        <span class="${methodClass}" id="method-${index}">${item.method}</span>
+                        <span class="endpoint-path" id="path-${index}">${item.name}</span>
+                    </div>
+                    <div class="endpoint-desc" id="desc-${index}">${item.description}</div>
+                    
+                    <div class="section-title">URL Endpoint:</div>
+                    <div class="box-container" id="url-${index}"><span>${fullUrl}</span></div>
+
+                    <div class="section-title">Contoh Respon JSON:</div>
+                    <div class="json-viewer-container" id="json-viewer-${index}"></div>
+                </div>
+            `;
+            $docs.append(cardHtml);
+
+            if (item.response) {
+                new JsonEditor('#json-viewer-' + index, item.response);
+            }
+        });
+
+        function copyPackage(index) {
+            var item = api[index];
+            var fullUrl = uri + item.example;
+            var jsonString = JSON.stringify(item.response, null, 4);
+            
+            var packageText = item.method + ' ' + item.name + '\n' +
+                              item.description + '\n' +
+                              fullUrl + '\n\n' +
+                              jsonString;
+
+            navigator.clipboard.writeText(packageText).then(() => {
+                showToast();
+                var btn = $('#card-' + index).find('.btn-copy');
+                var originalHTML = btn.html();
+                btn.html('<i class="fa-solid fa-check"></i> Paket Tersalin!').css({'background-color': 'var(--primary)', 'color': '#121212', 'border-color': 'var(--primary)'});
+                setTimeout(() => {
+                    btn.html(originalHTML).css({'background-color': '', 'color': '', 'border-color': ''});
+                }, 1500);
+            }).catch(err => {
+                console.error('Gagal menyalin: ', err);
+            });
+        }
+
+        function showToast() {
+            var toast = document.getElementById("toast");
+            toast.className = "show";
+            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 2000);
+        }
+
+        function toggleTheme() {
+            var body = document.body;
+            var icon = document.getElementById('themeIcon');
+            body.classList.toggle('light-mode');
+            if (body.classList.contains('light-mode')) {
+                icon.className = 'fa-solid fa-moon';
+            } else {
+                icon.className = 'fa-solid fa-sun';
+            }
+        }
+    </script>
+</body>
+</html>
