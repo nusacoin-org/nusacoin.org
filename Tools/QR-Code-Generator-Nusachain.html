@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>QR Code Generator Nusachain</title>
+<style>
+:root{--bg:#07130f;--bg2:#0b1c15;--panel:#0d211a;--panel2:#12291f;--line:#1f4032;--tx:#e6f4ee;--mu:#8fb3a3;--ac:#1fbf75;--ac2:#d4a53a;--on:#04170e;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#f1f8f4;--bg2:#e6f2ec;--panel:#fff;--panel2:#f3f9f6;--line:#cfe3d8;--tx:#0c2a1f;--mu:#52705f;--ac:#0a8a52;--ac2:#a97b12;--on:#fff;color-scheme:light}}
+:root[data-theme="light"]{--bg:#f1f8f4;--bg2:#e6f2ec;--panel:#fff;--panel2:#f3f9f6;--line:#cfe3d8;--tx:#0c2a1f;--mu:#52705f;--ac:#0a8a52;--ac2:#a97b12;--on:#fff;color-scheme:light}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:radial-gradient(900px 420px at 85% -10%,color-mix(in srgb,var(--ac) 16%,transparent),transparent),var(--bg);color:var(--tx);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh}
+.wrap{max-width:1080px;margin:0 auto;padding:18px 16px 40px}
+header{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.mark{width:44px;height:44px;flex:none}
+h1{font-size:clamp(18px,4.4vw,26px);margin:0;line-height:1.2;letter-spacing:.2px}
+h1 span{color:var(--ac)}
+.sub{color:var(--mu);font-size:13px;margin:2px 0 0}
+.grid{display:grid;grid-template-columns:1fr 360px;gap:16px;align-items:start}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.tabs{display:flex;overflow-x:auto;background:var(--bg2);border-bottom:1px solid var(--line);scrollbar-width:thin}
+.tabs button{flex:none;background:none;border:0;color:var(--mu);padding:14px 16px;font:600 13px/1 inherit;font-family:inherit;letter-spacing:.6px;text-transform:uppercase;cursor:pointer;border-bottom:3px solid transparent}
+.tabs button[aria-selected=true]{color:var(--ac);border-color:var(--ac)}
+.pad{padding:16px}
+.hd{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;font-size:13px;margin-bottom:12px}
+.hd i{width:26px;height:26px;border-radius:7px;background:var(--ac);display:grid;place-items:center;color:var(--on);font-style:normal;font-size:14px}
+label{display:block;font-size:12px;color:var(--mu);font-weight:600;margin:10px 0 4px}
+input[type=text],input[type=url],input[type=email],input[type=tel],input[type=password],textarea,select{width:100%;background:var(--panel2);color:var(--tx);border:1px solid var(--line);border-radius:9px;padding:10px 12px;font:inherit}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--ac);outline-offset:-1px}
+textarea{resize:vertical}
+details{border-top:1px solid var(--line)}
+summary{cursor:pointer;list-style:none;padding:14px 16px;font-weight:700;font-size:13px;letter-spacing:.5px;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";color:var(--mu);font-size:18px}
+details[open] summary::after{content:"−"}
+.body{padding:0 16px 16px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.col{display:flex;align-items:center;gap:8px}
+input[type=color]{width:44px;height:36px;border:1px solid var(--line);border-radius:8px;background:var(--panel2);padding:2px;cursor:pointer}
+input[type=range]{width:100%;accent-color:var(--ac)}
+.chk{display:flex;align-items:center;gap:8px;font-size:13px;margin:10px 0 0;color:var(--tx);font-weight:500}
+.chk input{accent-color:var(--ac);width:16px;height:16px}
+.pre{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.pre button{display:flex;align-items:center;gap:6px;background:var(--panel2);border:1px solid var(--line);color:var(--tx);border-radius:20px;padding:6px 12px;font:600 12px inherit;font-family:inherit;cursor:pointer}
+.pre b{width:14px;height:14px;border-radius:50%;display:inline-block;border:1px solid var(--line)}
+.btn{background:var(--ac);color:var(--on);border:0;border-radius:10px;padding:12px 14px;font:700 14px inherit;font-family:inherit;cursor:pointer;width:100%}
+.btn.alt{background:transparent;color:var(--ac);border:1.5px solid var(--ac)}
+.btn.sm{width:auto;padding:8px 12px;font-size:12px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+aside{position:sticky;top:12px}
+@media(max-width:860px){aside{position:static}}
+.pv{display:grid;place-items:center;padding:16px;background:#fff;min-height:200px}
+.pv.tr{background-color:#fff;background-image:conic-gradient(#e4e4e4 25%,#fff 0 50%,#e4e4e4 0 75%,#fff 0);background-size:16px 16px}
+canvas{width:100%;max-width:330px;height:auto;display:block}
+.empty{color:#667;font-size:13px;text-align:center;padding:30px 10px}
+.info{font-size:12px;color:var(--mu);margin:10px 0 12px;text-align:center;min-height:18px}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.msg{font-size:12px;text-align:center;margin-top:10px;min-height:16px;color:var(--ac2)}
+footer{text-align:center;color:var(--mu);font-size:12px;margin-top:22px}
+.logo-r{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+input[type=file]{font-size:12px;color:var(--mu);max-width:100%}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <svg class="mark" viewBox="0 0 48 48" aria-hidden="true"><polygon points="24,3 43,14 43,34 24,45 5,34 5,14" fill="none" stroke="var(--ac)" stroke-width="2.5"/><rect x="15" y="15" width="7" height="7" rx="1.5" fill="var(--ac)"/><rect x="26" y="15" width="7" height="7" rx="1.5" fill="var(--ac2)"/><rect x="15" y="26" width="7" height="7" rx="1.5" fill="var(--ac2)"/><rect x="26" y="26" width="7" height="7" rx="1.5" fill="var(--ac)"/></svg>
+  <div><h1>QR Code Generator <span>Nusachain</span></h1><p class="sub">Buat QR Code untuk URL, teks, kontak, Wi-Fi hingga alamat wallet NUX.</p></div>
+</header>
+
+<div class="grid">
+<section class="card">
+  <nav class="tabs" id="tabs" role="tablist"></nav>
+  <div class="pad">
+    <div class="hd"><i>◎</i><span>Isi Konten</span></div>
+    <div id="form"></div>
+  </div>
+
+  <details open><summary>Atur Warna</summary><div class="body">
+    <div class="row">
+      <div><label>Warna QR</label><div class="col"><input type="color" id="k_fg" data-k="fg" value="#0a7a4b"></div></div>
+      <div><label>Warna latar</label><div class="col"><input type="color" id="k_bg" data-k="bg" value="#ffffff"></div></div>
+    </div>
+    <label class="chk"><input type="checkbox" id="k_transp" data-k="transp"> Latar transparan</label>
+    <label class="chk"><input type="checkbox" id="k_grad" data-k="grad"> Gradien warna QR</label>
+    <div class="row"><div><label>Warna gradien akhir</label><input type="color" id="k_fg2" data-k="fg2" value="#d4a53a"></div><div><label>Warna mata (pojok)</label><input type="color" id="k_eye" data-k="eye" value="#0a7a4b"></div></div>
+    <label>Preset</label>
+    <div class="pre" id="pre"></div>
+  </div></details>
+
+  <details><summary>Tambah Logo</summary><div class="body">
+    <label>Unggah gambar logo (PNG, JPG, SVG)</label>
+    <div class="logo-r"><input type="file" id="logoF" accept="image/*"><button class="btn alt sm" id="logoX" type="button">Hapus logo</button></div>
+    <label>Ukuran logo: <output id="o_logoPct">22</output>%</label>
+    <input type="range" min="10" max="30" value="22" data-k="logoPct" data-n="1" id="k_logoPct">
+    <p class="sub">Dengan logo, tingkat koreksi otomatis diset ke H agar QR tetap terbaca.</p>
+  </div></details>
+
+  <details><summary>Kustomisasi Desain</summary><div class="body">
+    <div class="row">
+      <div><label>Bentuk titik</label><select data-k="dot"><option value="square">Kotak</option><option value="rounded">Membulat</option><option value="dots">Bulat</option></select></div>
+      <div><label>Bentuk mata</label><select data-k="eyeS"><option value="square">Kotak</option><option value="rounded">Membulat</option><option value="circle">Lingkaran</option></select></div>
+    </div>
+    <div class="row">
+      <div><label>Koreksi kesalahan</label><select data-k="ec"><option value="L">L (7%)</option><option value="M" selected>M (15%)</option><option value="Q">Q (25%)</option><option value="H">H (30%)</option></select></div>
+      <div><label>Ukuran unduhan</label><select data-k="size" data-n="1"><option value="512">512 px</option><option value="1024" selected>1024 px</option><option value="2048">2048 px</option><option value="4096">4096 px</option></select></div>
+    </div>
+    <label>Margin: <output id="o_margin">2</output> modul</label>
+    <input type="range" min="0" max="8" value="2" data-k="margin" data-n="1" id="k_margin">
+  </div></details>
+</section>
+
+<aside class="card pad">
+  <div class="pv" id="pv"><canvas id="cv" width="660" height="660" hidden></canvas><div class="empty" id="empty">Isi konten di sebelah untuk membuat QR Code.</div></div>
+  <div class="info" id="info"></div>
+  <div class="acts"><button class="btn" id="dPng" disabled>Unduh PNG</button><button class="btn alt" id="dSvg" disabled>Unduh SVG</button></div>
+  <div class="msg" id="msg"></div>
+</aside>
+</div>
+<footer>QR Code Generator Nusachain · QR dibuat langsung di perangkat Anda, konten tidak dikirim ke server.</footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script>
+const $=s=>document.querySelector(s);
+try{qrcode.stringToBytes=qrcode.stringToBytesFuncs['UTF-8']}catch(e){}
+const esc=s=>s.replace(/([\\;,:"])/g,'\\$1');
+const TABS={
+ url:{n:'URL',k:'u',f:[['u','URL / Tautan','url','https://nusachain.org']],b:v=>v.u},
+ text:{n:'Teks',k:'t',f:[['t','Teks','area','']],b:v=>v.t},
+ email:{n:'Email',k:'to',f:[['to','Alamat email','email',''],['sub','Subjek','text',''],['body','Isi pesan','area','']],b:v=>'mailto:'+v.to+'?subject='+encodeURIComponent(v.sub)+'&body='+encodeURIComponent(v.body)},
+ phone:{n:'Telepon',k:'p',f:[['p','Nomor telepon','tel','']],b:v=>'tel:'+v.p},
+ sms:{n:'SMS',k:'p',f:[['p','Nomor tujuan','tel',''],['m','Pesan','area','']],b:v=>'SMSTO:'+v.p+':'+v.m},
+ vcard:{n:'vCard',k:'fn',f:[['fn','Nama lengkap','text',''],['org','Organisasi','text',''],['ti','Jabatan','text',''],['tel','Telepon','tel',''],['em','Email','email',''],['web','Situs web','url',''],['adr','Alamat','text','']],
+  b:v=>['BEGIN:VCARD','VERSION:3.0','FN:'+v.fn,'ORG:'+v.org,'TITLE:'+v.ti,'TEL:'+v.tel,'EMAIL:'+v.em,'URL:'+v.web,'ADR:;;'+v.adr+';;;;','END:VCARD'].filter(l=>!/:$|:;;;;;$/.test(l)).join('\n')},
+ wifi:{n:'Wi-Fi',k:'ssid',f:[['ssid','Nama jaringan (SSID)','text',''],['pw','Kata sandi','text',''],['enc','Keamanan','select:WPA|WEP|nopass',''],['hid','Jaringan tersembunyi','select:Tidak|Ya','']],
+  b:v=>'WIFI:T:'+v.enc+';S:'+esc(v.ssid)+';P:'+esc(v.pw)+';H:'+(v.hid==='Ya'?'true':'')+';;'},
+ wallet:{n:'Wallet NUX',k:'addr',f:[['addr','Alamat wallet Nusacoin','text',''],['amt','Jumlah (opsional)','text',''],['lbl','Label (opsional)','text','']],
+  b:v=>'nusacoin:'+v.addr+(v.amt||v.lbl?'?':'')+[v.amt&&'amount='+encodeURIComponent(v.amt),v.lbl&&'label='+encodeURIComponent(v.lbl)].filter(Boolean).join('&')}
+};
+const S={fg:'#0a7a4b',fg2:'#d4a53a',bg:'#ffffff',eye:'#0a7a4b',grad:false,transp:false,dot:'square',eyeS:'square',ec:'M',size:1024,margin:2,logoPct:22};
+let cur='url',eyeT=false,logoURL=null,logoImg=null,raf=0,Q=null;
+
+/* ---------- tabs & form ---------- */
+const tabs=$('#tabs');
+Object.keys(TABS).forEach(k=>{const b=document.createElement('button');b.textContent=TABS[k].n;b.role='tab';b.dataset.t=k;b.onclick=()=>{cur=k;renderForm()};tabs.appendChild(b)});
+function renderForm(){
+  tabs.querySelectorAll('button').forEach(b=>b.setAttribute('aria-selected',b.dataset.t===cur));
+  $('#form').innerHTML=TABS[cur].f.map(([id,l,ty,df])=>{
+    let el;
+    if(ty==='area')el=`<textarea id="f_${id}" rows="4">${df}</textarea>`;
+    else if(ty.startsWith('select'))el=`<select id="f_${id}">${ty.slice(7).split('|').map(o=>`<option>${o}</option>`).join('')}</select>`;
+    else el=`<input type="${ty==='url'?'text':ty}" id="f_${id}" value="${df}" autocomplete="off">`;
+    return `<label for="f_${id}">${l}</label>${el}`}).join('');
+  $('#form').oninput=sched;
+  sched();
+}
+const vals=()=>{const v={};TABS[cur].f.forEach(([id])=>v[id]=$('#f_'+id).value.trim());return v};
+
+/* ---------- geometry ---------- */
+const f2=n=>+n.toFixed(3);
+const circ=(cx,cy,r)=>`M${f2(cx-r)},${f2(cy)}a${r},${r} 0 1 0 ${f2(2*r)},0a${r},${r} 0 1 0 ${f2(-2*r)},0z`;
+const rr=(x,y,w,h,r)=>r?`M${f2(x+r)},${f2(y)}h${f2(w-2*r)}a${r},${r} 0 0 1 ${r},${r}v${f2(h-2*r)}a${r},${r} 0 0 1 ${-r},${r}h${f2(-(w-2*r))}a${r},${r} 0 0 1 ${-r},${-r}v${f2(-(h-2*r))}a${r},${r} 0 0 1 ${r},${-r}z`:`M${f2(x)},${f2(y)}h${f2(w)}v${f2(h)}h${f2(-w)}z`;
+const eyeShape=(x,y,s)=>S.eyeS==='circle'?circ(x+s/2,y+s/2,s/2):rr(x,y,s,s,S.eyeS==='rounded'?s*.3:0);
+function build(q){
+  const n=q.getModuleCount(),m=+S.margin,T=n+2*m;
+  const inEye=(r,c)=>(r<7&&c<7)||(r<7&&c>=n-7)||(r>=n-7&&c<7);
+  let L=null;
+  if(logoImg){const w=n*S.logoPct/100,p=.7;L={x:T/2-w/2-p,y:T/2-w/2-p,w:w+2*p,p,iw:w}}
+  let d='';
+  for(let r=0;r<n;r++)for(let c=0;c<n;c++){
+    if(!q.isDark(r,c)||inEye(r,c))continue;
+    const x=c+m,y=r+m;
+    if(L&&x+.5>L.x&&x+.5<L.x+L.w&&y+.5>L.y&&y+.5<L.y+L.w)continue;
+    d+=S.dot==='dots'?circ(x+.5,y+.5,.47):S.dot==='rounded'?rr(x,y,1,1,.35):rr(x-.01,y-.01,1.02,1.02,0);
+  }
+  let e='';
+  [[0,0],[0,n-7],[n-7,0]].forEach(([r,c])=>{const x=c+m,y=r+m;e+=eyeShape(x,y,7)+eyeShape(x+1,y+1,5)+eyeShape(x+2,y+2,3)});
+  return{d,e,T,L,n};
+}
+function fit(L){const a=logoImg.naturalWidth/logoImg.naturalHeight||1;let w=L.iw,h=L.iw;a>1?h=w/a:w=h*a;return{x:L.x+L.p+(L.iw-w)/2,y:L.y+L.p+(L.iw-h)/2,w,h}}
+function draw(cv,px,q){
+  const {d,e,T,L}=build(q);cv.width=cv.height=px;
+  const g=cv.getContext('2d');g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,px,px);g.setTransform(px/T,0,0,px/T,0,0);
+  if(!S.transp){g.fillStyle=S.bg;g.fillRect(0,0,T,T)}
+  let f=S.fg;if(S.grad){f=g.createLinearGradient(0,0,T,T);f.addColorStop(0,S.fg);f.addColorStop(1,S.fg2)}
+  g.fillStyle=f;g.fill(new Path2D(d));
+  g.fillStyle=S.eye;g.fill(new Path2D(e),'evenodd');
+  if(L){g.fillStyle=S.transp?'#fff':S.bg;g.fill(new Path2D(rr(L.x,L.y,L.w,L.w,.8)));const o=fit(L);g.drawImage(logoImg,o.x,o.y,o.w,o.h)}
+}
+function svgStr(q){
+  const {d,e,T,L}=build(q);
+  let s=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${T} ${T}" width="${S.size}" height="${S.size}">`;
+  if(S.grad)s+=`<defs><linearGradient id="g" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="${T}" y2="${T}"><stop offset="0" stop-color="${S.fg}"/><stop offset="1" stop-color="${S.fg2}"/></linearGradient></defs>`;
+  if(!S.transp)s+=`<rect width="${T}" height="${T}" fill="${S.bg}"/>`;
+  s+=`<path d="${d}" fill="${S.grad?'url(#g)':S.fg}"/><path d="${e}" fill="${S.eye}" fill-rule="evenodd"/>`;
+  if(L){const o=fit(L);s+=`<path d="${rr(L.x,L.y,L.w,L.w,.8)}" fill="${S.transp?'#fff':S.bg}"/><image href="${logoURL}" x="${f2(o.x)}" y="${f2(o.y)}" width="${f2(o.w)}" height="${f2(o.h)}"/>`}
+  return s+'</svg>';
+}
+
+/* ---------- update ---------- */
+function sched(){cancelAnimationFrame(raf);raf=requestAnimationFrame(update)}
+function update(){
+  const t=TABS[cur],v=vals(),cv=$('#cv'),em=$('#empty'),info=$('#info');
+  Q=null;$('#dPng').disabled=$('#dSvg').disabled=true;
+  $('#pv').classList.toggle('tr',S.transp);
+  if(!v[t.k]){cv.hidden=true;em.hidden=false;em.textContent='Isi konten di sebelah untuk membuat QR Code.';info.textContent='';return}
+  try{
+    const val=t.b(v),q=qrcode(0,logoImg?'H':S.ec);q.addData(val,'Byte');q.make();Q=q;
+    cv.hidden=false;em.hidden=true;draw(cv,660,q);
+    info.textContent=`${q.getModuleCount()}×${q.getModuleCount()} modul · ${new TextEncoder().encode(val).length} byte`;
+    $('#dPng').disabled=$('#dSvg').disabled=false;
+  }catch(err){cv.hidden=true;em.hidden=false;em.textContent='Konten terlalu panjang untuk dijadikan QR Code. Persingkat isinya.';info.textContent=''}
+}
+
+/* ---------- controls ---------- */
+document.querySelectorAll('[data-k]').forEach(el=>{
+  const h=()=>{const k=el.dataset.k;
+    S[k]=el.type==='checkbox'?el.checked:(el.type==='range'||el.dataset.n)?+el.value:el.value;
+    if(k==='fg'&&!eyeT){S.eye=S.fg;$('#k_eye').value=S.fg}
+    if(k==='eye')eyeT=true;
+    const o=$('#o_'+k);if(o)o.textContent=el.value;
+    sched()};
+  el.addEventListener('input',h);el.addEventListener('change',h);
+});
+[['Hijau Nusa','#0a7a4b','#064e32','#ffffff'],['Emas','#8a6414','#5c410a','#fffaf0'],['Hitam','#0b0f0d','#0b0f0d','#ffffff'],['Biru','#0b4f8a','#082f54','#ffffff']].forEach(([n,fg,ey,bg])=>{
+  const b=document.createElement('button');b.type='button';b.innerHTML=`<b style="background:${fg}"></b>${n}`;
+  b.onclick=()=>{Object.assign(S,{fg,eye:ey,bg,grad:false,transp:false});eyeT=true;
+    $('#k_fg').value=fg;$('#k_eye').value=ey;$('#k_bg').value=bg;$('#k_grad').checked=false;$('#k_transp').checked=false;sched()};
+  $('#pre').appendChild(b)});
+$('#logoF').onchange=e=>{
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{logoImg=im;logoURL=r.result;sched()};im.src=r.result};r.readAsDataURL(f)};
+$('#logoX').onclick=()=>{logoImg=logoURL=null;$('#logoF').value='';sched()};
+
+/* ---------- download ---------- */
+const msg=t=>{$('#msg').textContent=t;setTimeout(()=>{if($('#msg').textContent===t)$('#msg').textContent=''},4000)};
+async function save(name,data){
+  let dl=null;
+  try{dl=window.claude&&await claude.use('downloads')}catch(e){}
+  if(dl){
+    try{await dl.save({filename:name,data});msg('File siap disimpan.')}
+    catch(e){msg(e&&e.code==='declined'?'Unduhan dibatalkan.':'Unduhan tidak tersedia di tampilan ini.')}
+    return;
+  }
+  const u=URL.createObjectURL(data instanceof Blob?data:new Blob([data]));
+  const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(u),2000);msg('Mengunduh '+name);
+}
+const fname=()=>'qr-nusachain-'+cur;
+$('#dPng').onclick=()=>{if(!Q)return;const c=document.createElement('canvas');draw(c,S.size,Q);c.toBlob(b=>b?save(fname()+'.png',b):msg('Gagal membuat PNG.'),'image/png')};
+$('#dSvg').onclick=()=>{if(!Q)return;save(fname()+'.svg',new Blob([svgStr(Q)],{type:'image/svg+xml'}))};
+
+renderForm();
+</script>
+</body>
+</html>
