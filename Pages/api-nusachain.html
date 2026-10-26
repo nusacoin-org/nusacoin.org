@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nusachain API</title>
+<link rel="icon" href="https://iili.io/CNJKhKu.th.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+
+    :root {
+      --nux-green: #27ae60;
+      --nux-green-dark: #1e8449;
+      --nux-green-deep: #0f3d26;
+      --gold: #d4a017;
+      --red: #e74c3c;
+      --white: #ffffff;
+      --green-pale: #eafff2;
+      --green-ring: rgba(39, 174, 96, 0.18);
+      --shadow: rgba(15, 61, 38, 0.18);
+      --bg: #f7f5ef;
+      --surface: #ffffff;
+      --surface-2: #f0efe6;
+      --ink: #16231c;
+      --ink-soft: #56645c;
+      --border: #e3ded0;
+    }
+
+    html[data-theme="dark"] {
+      --bg: #0d1712;
+      --surface: #142219;
+      --surface-2: #182a1e;
+      --ink: #eef3ec;
+      --ink-soft: #9db3a4;
+      --border: #24382c;
+      --shadow: rgba(0, 0, 0, 0.55);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--ink);
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px 10px;
+    }
+
+    .controls-container {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .lang-switcher {
+      display: flex;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 2px;
+    }
+
+    .lang-btn {
+      background: transparent;
+      border: none;
+      color: var(--ink-soft);
+      padding: 4px 8px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+
+    .lang-btn.active {
+      background: var(--nux-green);
+      color: var(--white);
+    }
+
+    .theme-toggle-btn {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--gold);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .app-wrapper {
+      margin: 0 auto !important;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center !important;
+      justify-content: center;
+      width: 100%;
+      max-width: 800px;
+      text-align: center;
+    }
+
+    .app-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 20px;
+      width: 100%;
+    }
+    
+    .app-logo {
+      width: 64px;
+      height: 64px;
+      object-fit: contain;
+      margin: 0 auto 12px auto;
+    }
+
+    .app-header h1 {
+      margin: 0 0 6px 0;
+      font-size: 26px;
+      color: var(--nux-green);
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 24px;
+      background: var(--surface-2);
+      padding: 6px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .tab-btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--ink-soft);
+      font-weight: bold;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background: var(--nux-green);
+      color: var(--white);
+    }
+
+    .tab-content {
+      display: none;
+      width: 100%;
+    }
+
+    .tab-content.active {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .form-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 24px;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 520px;
+      margin: 0 auto 32px auto;
+      box-shadow: 0 10px 25px -5px var(--shadow);
+      text-align: left;
+    }
+
+    .form-group { margin-bottom: 16px; }
+
+    .form-card label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+      text-transform: uppercase;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .form-card input, .form-card select, .form-card textarea {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--ink);
+      font-size: 14px;
+      outline: none;
+      font-family: monospace;
+    }
+
+    .form-card textarea {
+      resize: vertical;
+      height: 70px;
+    }
+
+    .form-card input:focus, .form-card select:focus, .form-card textarea:focus {
+      border-color: var(--nux-green);
+      box-shadow: 0 0 0 3px var(--green-ring);
+    }
+
+    .toggle-btn {
+      position: absolute;
+      right: 10px;
+      background: none;
+      border: none;
+      color: var(--ink-soft);
+      cursor: pointer;
+      font-size: 12px;
+      padding: 4px 8px;
+    }
+
+    .security-banner {
+      background: var(--green-pale);
+      border: 1px solid var(--nux-green);
+      color: var(--nux-green-dark);
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      margin-bottom: 20px;
+    }
+
+    .enc-box {
+      background: rgba(212, 160, 23, 0.1);
+      border: 1px solid var(--gold);
+      padding: 14px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .enc-box small {
+      display: block;
+      margin-top: 6px;
+      color: var(--ink-soft);
+      font-size: 11px;
+    }
+
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-auto {
+      background: var(--surface-2);
+      color: var(--ink);
+      border: 1px solid var(--border);
+    }
+
+    .btn-download, .btn-decrypt, .btn-action {
+      background: var(--nux-green);
+      color: var(--white);
+    }
+
+    .btn-download:hover, .btn-decrypt:hover, .btn-action:hover {
+      background: var(--nux-green-dark);
+    }
+
+    .preview-title {
+      font-size: 14px;
+      color: var(--ink-soft);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+
+    .print-sheet {
+      display: flex;
+      flex-direction: column;
+      width: 323.5px;
+      box-shadow: 0 15px 30px var(--shadow);
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 0 auto !important;
+      position: relative;
+    }
+
+    .card-half {
+      position: relative;
+      width: 323.5px;
+      height: 204px;
+      overflow: hidden;
+    }
+
+    .card-bg-img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 1;
+    }
+
+    .divider {
+      position: relative;
+      width: 100%;
+      height: 1px;
+      border-top: 1px dashed rgba(255,255,255,0.4);
+      z-index: 3;
+    }
+
+    .text-content-left {
+      position: absolute;
+      left: 22px;
+      top: 50%;
+      transform: translateY(-50%);
+      max-width: 180px;
+      text-align: left;
+      z-index: 2;
+    }
+
+    .overlay-public-qr, .overlay-private-qr {
+      position: absolute;
+      right: 22px;
+      top: 90px;
+      width: 82px;
+      height: 82px;
+      background: #ffffff;
+      padding: 4px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+    }
+
+    .overlay-public-name {
+      font-size: 13px;
+      font-weight: bold;
+      color: #ffffff;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .overlay-public-address, .overlay-private-key {
+      font-family: monospace;
+      font-size: 8px;
+      color: #e2e8f0;
+      word-break: break-all;
+      line-height: 1.2;
+    }
+
+    .qr-box canvas, .qr-box img {
+      width: 74px !important;
+      height: 74px !important;
+      display: block;
+    }
+
+    .balance-card {
+      background: linear-gradient(135deg, var(--nux-green-dark), var(--nux-green-deep));
+      color: white;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .balance-val {
+      font-size: 26px;
+      font-weight: bold;
+      margin: 8px 0;
+    }
+
+    .wallet-subtext {
+      font-size: 12px;
+      opacity: 0.8;
+      word-break: break-all;
+    }
+
+    .wallet-actions {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .tx-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+    }
+
+    .tx-type-in { color: var(--nux-green); font-weight: bold; }
+    .tx-type-out { color: var(--red); font-weight: bold; }
+
+    .qr-actions {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .btn-secondary {
+      flex: 1;
+      padding: 10px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--ink);
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary:hover {
+      background: var(--border);
+    }
+
+    #reader {
+      width: 100%;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 15px;
+      display: none;
+    }
+
+    .result-box {
+      margin-top: 24px;
+      padding: 16px;
+      border-radius: 8px;
+      display: none;
+      word-break: break-all;
+    }
+
+    .result-box.success {
+      display: block;
+      background: #eafff2;
+      border: 1px solid var(--nux-green);
+      color: var(--nux-green-dark);
+    }
+
+    .result-box.error {
+      display: block;
+      background: #fdf2f2;
+      border: 1px solid var(--red);
+      color: var(--red);
+    }
+
+    .result-title {
+      font-size: 11px;
+      font-weight: bold;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .result-value {
+      font-family: monospace;
+      font-size: 14px;
+      font-weight: bold;
+    }
+  
+.app-wrapper{max-width:900px}
+.sub-btn{padding:10px 20px;border:none;border-radius:6px;background:transparent;color:var(--ink-soft);font-weight:bold;font-size:14px;cursor:pointer;transition:all .2s}
+.sub-btn.active{background:var(--nux-green);color:#fff}
+.sub-pane{display:none;width:100%}
+.sub-pane.active{display:flex;flex-direction:column;align-items:center}
+.app-header h1{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;margin:0 0 6px}
+.app-header h1 img{width:48px;height:48px;object-fit:contain}
+.app-header p{margin:0;color:var(--ink-soft);font-size:14px}
+.tab-btn i{margin-right:4px}
+.api-top{width:100%;display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.api-top .base{flex:1;min-width:220px;display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-family:monospace;font-size:13px;text-align:left;word-break:break-all}
+.chip{font-size:11px;font-weight:700;text-transform:uppercase;padding:3px 8px;border-radius:20px;background:var(--green-pale);color:var(--nux-green-dark);border:1px solid var(--nux-green);white-space:nowrap}
+.chip.test{background:rgba(212,160,23,.12);color:var(--gold);border-color:var(--gold)}
+.api-top input{flex:1;min-width:160px;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--ink);font-size:14px;outline:none}
+.api-top input:focus{border-color:var(--nux-green);box-shadow:0 0 0 3px var(--green-ring)}
+.ep{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:16px;box-shadow:0 10px 25px -5px var(--shadow);text-align:left}
+.ep-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.method{background:var(--nux-green);color:#fff;padding:3px 9px;border-radius:5px;font-weight:700;font-size:12px}
+.method.post{background:var(--gold)}
+.ep-path{font-family:monospace;font-weight:700;font-size:15px;word-break:break-all;flex:1}
+.ep-desc{color:var(--ink-soft);font-size:14px;margin-bottom:10px}
+.ep-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--ink-soft);margin:10px 0 4px}
+.urlbox{background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:8px 12px;font-family:monospace;font-size:13px;word-break:break-all}
+.ep-actions{display:flex;gap:8px}
+.mini{background:var(--surface-2);border:1px solid var(--border);color:var(--ink);border-radius:6px;padding:5px 10px;font-size:12px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.mini:hover,.mini.ok{background:var(--nux-green);color:#fff;border-color:var(--nux-green)}
+.code{background:#0b1a12;color:#e2e8f0;border-radius:6px;padding:12px 14px;font-family:monospace;font-size:12.5px;line-height:1.6;max-height:320px;overflow:auto}
+.code details>summary{list-style:none;cursor:pointer;display:inline}
+.code details>summary::-webkit-details-marker{display:none}
+.code details:not([open])>summary::after{content:" … " attr(data-c);color:#64748b}
+.jb{margin-left:1.3em;border-left:1px dotted #3d5a47;padding-left:.8em}
+.jk{color:#38bdf8}.js{color:#4ade80}.jl{color:#fbbf24}.jn{color:#f87171}
+#toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:var(--nux-green-deep);color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:99}
+#toast.show{opacity:1}
+.foot{margin-top:24px;font-size:12px;color:var(--ink-soft);text-align:center}
+.foot a{color:var(--nux-green);text-decoration:none;margin:0 6px}
+
+/* ===== Responsive layout ===== */
+html{-webkit-text-size-adjust:100%}
+img{max-width:100%}
+body{padding:0 0 calc(40px + env(safe-area-inset-bottom));overflow-x:hidden}
+.topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 20px;padding-top:calc(10px + env(safe-area-inset-top));padding-left:max(20px,env(safe-area-inset-left));padding-right:max(20px,env(safe-area-inset-right));background:var(--surface);border-bottom:1px solid var(--border);box-shadow:0 4px 16px -8px var(--shadow)}
+.topbar h1{margin:0;display:flex;align-items:center;gap:10px;font-size:clamp(18px,4.6vw,26px);color:var(--nux-green);min-width:0}
+.topbar h1 img{width:clamp(32px,8vw,44px);height:clamp(32px,8vw,44px);flex:none}
+.topbar h1 span{white-space:nowrap}
+.controls-container{position:static;flex:none}
+.app-wrapper{max-width:1120px;padding:20px max(16px,env(safe-area-inset-left)) 10px max(16px,env(safe-area-inset-right))}
+.hero{margin:4px 0 18px;font-size:clamp(13px,3.4vw,15px);color:var(--ink-soft);max-width:560px}
+.nav-tabs{width:100%;max-width:640px;flex-wrap:nowrap;gap:6px;margin-bottom:20px}
+.tab-btn{flex:1;white-space:nowrap;padding:10px 8px}
+.list{display:grid;grid-template-columns:1fr;gap:16px;width:100%}
+.ep{margin:0;min-width:0}
+.ep-actions{margin-left:auto}
+@media(min-width:1000px){.list{grid-template-columns:1fr 1fr;align-items:start}.code{max-height:380px}}
+@media(max-width:600px){
+  .topbar{padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right))}
+  .app-wrapper{padding-top:14px}
+  .nav-tabs{padding:4px;gap:4px;border-radius:12px}
+  .tab-btn{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 2px;font-size:12px}
+  .tab-btn i{margin:0;font-size:17px}
+  .api-top{gap:8px}
+  .api-top .base,.api-top input{flex:1 1 100%;min-width:0}
+  .api-top input{font-size:16px}
+  .ep{padding:14px;border-radius:10px}
+  .ep-head{gap:8px}
+  .ep-path{flex:1 1 100%;order:3;font-size:14px}
+  .ep-actions{order:2;margin-left:auto}
+  .mini{padding:8px 12px;font-size:12px}
+  .code{font-size:12px;padding:10px 12px;max-height:280px}
+  .jb{margin-left:.9em;padding-left:.6em}
+  .lang-btn{padding:6px 10px}
+  .theme-toggle-btn{padding:7px 10px}
+  #theme-text{display:none}
+  #toast{bottom:calc(20px + env(safe-area-inset-bottom));width:max-content;max-width:90vw;text-align:center}
+}
+@media(max-width:360px){.topbar h1 span{font-size:16px}.tab-btn{font-size:11px}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <h1><img src="https://iili.io/CNJKhKu.th.png" alt="Nusacoin Logo"><span>Nusachain API</span></h1>
+  <div class="controls-container">
+  <div class="lang-switcher">
+    <button id="btnIN" class="lang-btn active" onclick="setLanguage('id')">IN</button>
+    <button id="btnEN" class="lang-btn" onclick="setLanguage('en')">EN</button>
+  </div>
+  <button onclick="toggleTheme()" class="theme-toggle-btn"><i id="theme-icon" class="fa-solid fa-sun"></i><span id="theme-text">Light</span></button>
+</div>
+</header>
+
+<div class="app-wrapper">
+  <p id="appDesc" class="hero"></p>
+
+  <div class="nav-tabs" id="navTabs">
+    <button class="tab-btn active" data-tab="nusaTab"><i class="fa-solid fa-cube"></i>API Nusa</button>
+    <button class="tab-btn" data-tab="taobotTab"><i class="fa-solid fa-server"></i>API Taobot</button>
+    <button class="tab-btn" data-tab="testnetTab"><i class="fa-solid fa-flask"></i>API Testnet</button>
+  </div>
+
+  <div id="nusaTab" class="tab-content active"></div>
+  <div id="taobotTab" class="tab-content"></div>
+  <div id="testnetTab" class="tab-content"></div>
+
+  <div class="foot">
+    <a href="https://github.com/TaobotX11/apinusacoin" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i> GitHub</a>
+    <a href="https://explorer.nusacoin.org" target="_blank" rel="noopener"><i class="fa-solid fa-globe"></i> Explorer</a>
+    <div id="copyright" style="margin-top:8px"></div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+const APP={"nusa":{"base":"https://api.nusacoin.org","items":[{"method":"GET","name":"/info","example":"/info","desc_en":"This method return current info about Nusacoin network.","desc_id":"Metode ini mengembalikan informasi terbaru tentang jaringan Nusacoin (NUX).","response":{"error":null,"id":"api-server","result":{"bestblockhash":"00000000000003837103db3ff1c43f930da998d9453f3d1064336bf71069f33f","blocks":73637,"chain":"main","chainwork":"000000000000000000000000000000000000000000000001210e880de0ea9d64","difficulty":502306.5781957264,"headers":73637,"mediantime":1791667554,"nethash":54771265127,"reward":"30.00","supply":220911000000000}}},{"method":"GET","name":"/height/int:height","example":"/height/1","desc_en":"This method return block info by given height.","desc_id":"Metode ini mengembalikan informasi blok berdasarkan ketinggian (height) tertentu.","response":{"error":null,"id":"api-server","result":{"bits":"1e0ffff0","chainwork":"0000000000000000000000000000000000000000000000000000000000200020","confirmations":73637,"difficulty":0.000244140625,"hash":"000007c732d45a968b00b2aa31612aa09cb9dd9785cf18144e1dde8599beb81c","height":1,"mediantime":1765190477,"merkleroot":"04235cca545dcbe492615e04093a7b586912282e21424b0f234c525a4d7b3261","nextblockhash":"00000385918ae5b0600e5fe97f7432a2fb1a1b945a7341a637aa9fb4874d894f","nonce":452629,"previousblockhash":"0000017123d6f996589bc2e58bb5502218012ac7f527ab599a3be84c1951c669","size":252,"strippedsize":216,"time":1765190477,"tx":["04235cca545dcbe492615e04093a7b586912282e21424b0f234c525a4d7b3261"],"txcount":1,"version":536870912,"versionHex":"20000000","weight":900}}},{"method":"GET","name":"/block/string:hash","example":"/block/000000048f0f3bcf820f406089aedc84d5d30175b0a24e89cd5f719071f921bc","desc_en":"This method return block info by given hash.","desc_id":"Metode ini mengembalikan informasi rinci tentang blok berdasarkan hash yang diberikan.","response":{"error":null,"id":"api-server","result":{"bits":"1d08da50","chainwork":"0000000000000000000000000000000000000000000000000000010131c02ec0","confirmations":55685,"difficulty":0.1129571026722925,"hash":"000000048f0f3bcf820f406089aedc84d5d30175b0a24e89cd5f719071f921bc","height":17953,"mediantime":1765468530,"merkleroot":"fb766b77a4a3d0960535b7425fa14de084983b36378262c92fcbf55049473eca","nextblockhash":"00000002e26655b3383df97b6cae6fcd9a0b830024f7bd4161f906db709242c0","nonce":1861705365,"previousblockhash":"000000031ae5eef71deb73a38f953b3cd0fc08d1dbacdbc2516dc92de3efd4a2","size":311,"strippedsize":275,"time":1765469199,"tx":["fb766b77a4a3d0960535b7425fa14de084983b36378262c92fcbf55049473eca"],"txcount":1,"version":536870912,"versionHex":"20000000","weight":1136}}},{"method":"GET","name":"/header/string:hash","example":"/header/000000048f0f3bcf820f406089aedc84d5d30175b0a24e89cd5f719071f921bc","desc_en":"This method return block header by given hash.","desc_id":"Metode ini mengembalikan header blok berdasarkan hash yang diberikan.","response":{"error":null,"id":"api-server","result":{"bits":"1d08da50","chainwork":"0000000000000000000000000000000000000000000000000000010131c02ec0","confirmations":55685,"difficulty":0.1129571026722925,"hash":"000000048f0f3bcf820f406089aedc84d5d30175b0a24e89cd5f719071f921bc","height":17953,"mediantime":1765468530,"merkleroot":"fb766b77a4a3d0960535b7425fa14de084983b36378262c92fcbf55049473eca","nextblockhash":"00000002e26655b3383df97b6cae6fcd9a0b830024f7bd4161f906db709242c0","nonce":1861705365,"previousblockhash":"000000031ae5eef71deb73a38f953b3cd0fc08d1dbacdbc2516dc92de3efd4a2","time":1765469199,"txcount":1,"version":536870912,"versionHex":"20000000"}}},{"method":"GET","name":"/range/int:height","example":"/range/20?offset=3","desc_en":"This method return range of blocks staring from certain height.","desc_id":"Metode ini mengembalikan daftar jangkauan blok dimulai dari ketinggian tertentu.","response":{"error":null,"id":"api-server","result":[{"bits":"1e0ffff0","chainwork":"0000000000000000000000000000000000000000000000000000000001500150","confirmations":73618,"difficulty":0.000244140625,"hash":"00000dfd87755b39bffa3218402afcb6f5aafd0909cfc689a54741ecee8b7f20","height":20,"mediantime":1765194257,"merkleroot":"de07dee9f1ad336ce301289e114b4d8ba2b46ebb0b48feabea023759618e73f9","nethash":32,"nextblockhash":"000003247eea4b6542267250edccea3737637f099c41253c75362eb59603002d","nonce":2185887744,"previousblockhash":"00000c93a7d5b26c3ef428d6f43c2f841604af24c84ca47975eaaebded3d8954","size":312,"strippedsize":276,"time":1765194285,"tx":["de07dee9f1ad336ce301289e114b4d8ba2b46ebb0b48feabea023759618e73f9"],"txcount":1,"version":536870912,"versionHex":"20000000","weight":1140}]}},{"method":"GET","name":"/balance/string:address","example":"/balance/XFd7D77fFhp6iY9hPwLC43dMuwijS59KCr","desc_en":"This method return address balance.","desc_id":"Metode ini mengembalikan total saldo dompet (address) Nusacoin.","response":{"error":null,"id":"api-server","result":{"balance":"7223"}}},{"method":"GET","name":"/mempool/string:address","example":"/mempool/XFd7D77fFhp6iY9hPwLC43dMuwijS59KCr","desc_en":"This method return address mempool transactions.","desc_id":"Metode ini mengembalikan transaksi mempool yang tertunda untuk alamat tertentu.","response":{"error":null,"id":"api-server","result":{"tx":[],"txcount":0}}},{"method":"GET","name":"/utxos/string:address","example":"/utxos/XFd7D77fFhp6iY9hPwLC43dMuwijS59KCr","desc_en":"This method return address unspent outputs globally.","desc_id":"Metode ini mengembalikan daftar unspent outputs (UTXO) global untuk alamat tertentu.","response":{"error":null,"id":"api-server","result":{"bestblock":"00000000000003837103db3ff1c43f930da998d9453f3d1064336bf71069f33f","height":73637,"success":true,"total_amount":0.00007223,"txouts":75094,"unspents":[]}}},{"method":"GET","name":"/unspent/string:address","example":"/unspent/XFd7D77fFhp6iY9hPwLC43dMuwijS59KCr?amount=1","desc_en":"This method return address unspent outputs.","desc_id":"Metode ini mengembalikan luaran transaksi unspent berdasarkan jumlah tertentu.","response":{"error":null,"id":"api-server","result":[]}},{"method":"GET","name":"/history/string:address","example":"/history/XFd7D77fFhp6iY9hPwLC43dMuwijS59KCr","desc_en":"This method return list of address transaction hashes.","desc_id":"Metode ini mengembalikan riwayat hash transaksi untuk alamat yang diberikan.","response":{"error":null,"id":"api-server","result":{"tx":[],"txcount":0}}},{"method":"GET","name":"/transaction/string:hash","example":"/transaction/aba25e0d650fb77ca2d0885ce04466c9e769fa99e02071e20bc754ac4112eb1d","desc_en":"This method return info about transaction.","desc_id":"Metode ini mengembalikan rincian informasi transaksi berdasarkan hash.","response":{"error":null,"id":"api-server","result":{"amount":115505563,"blockhash":"0000000087b25eb7e4feb69af6aa6085d414d55e3ea909863fa627b7af602ba5","blocktime":1765465757,"confirmations":55723,"hash":"efe73e00fc984dbf98e55e20721c0a270fe668d3d703a5d85001735d02ad52ca","height":17915,"version":2}}},{"method":"GET","name":"/mempool","example":"/mempool","desc_en":"This method return info about mempool.","desc_id":"Metode ini mengembalikan informasi status global mempool jaringan.","response":{"error":null,"id":"api-server","result":{"bytes":26411,"loaded":true,"maxmempool":300000000,"mempoolminfee":0.00001,"minrelaytxfee":0.00001,"size":66}}},{"method":"GET","name":"/supply","example":"/supply","desc_en":"This method return info about current coins supply.","desc_id":"Metode ini mengembalikan statistik suplai koin Nusacoin saat ini.","response":{"error":null,"id":"api-server","result":{"halvings":0,"max supply":"18000000","supply":220911000000000}}},{"method":"GET","name":"/fee","example":"/fee","desc_en":"This method return recomended transaction fee.","desc_id":"Metode ini mengembalikan estimasi biaya (fee) transaksi yang direkomendasikan.","response":{"error":null,"id":"api-server","result":{"blocks":6,"feerate":1000000}}},{"method":"GET","name":"/decode/string:raw","example":"/decode/0200000001f4cc9c5af659df76ba22a7bf83cd3065f49767063144db46123370a671165815010000006a47304402207952b09006be4b13b69e91da9379cd88e4f901beeafd1a18c25d4639fec582b002202e860ecaa8ac4db2a5c45e41f43ef4b3b1a7c12570369e519fed7c33a310afc2012103d44d02cd1f3d853715f162f7bc3b56c224f3e2827726e11438c16d2cdc8cde09ffffffff0140420f00000000001976a914274bc7181d172b42c0757368b19d2a22fa10cac788ac00000000","desc_en":"This method return decoded info about transaction.","desc_id":"Metode ini mengembalikan hasil dekode dari data mentah (raw hex) transaksi.","response":{"error":null,"id":"api-server","result":{"hash":"85c81b67c768f4e68717c3e155df3c3f9d36d5331b031fd5dea56821cc1e9594","locktime":0,"size":191,"version":2}}},{"method":"POST","name":"/broadcast","example":"/broadcast","desc_en":"This method broadcast raw signed transaction to NUX network.","desc_id":"Metode ini menyiarkan (broadcast) transaksi mentah yang telah ditandatangani ke jaringan Nusachain (NUX).","response":{"result":"85c81b67c768f4e68717c3e155df3c3f9d36d5331b031fd5dea56821cc1e9594","error":null,"id":"api-server"}}]},"taobot":{"base":"https://apinusa.taobot.org","items":[{"method":"GET","name":"/info","example":"/info","desc_en":"This method returns current info about Nusacoin network.","desc_id":"Metode ini mengembalikan informasi terbaru tentang jaringan Nusacoin (NUX).","response":{"error":null,"id":"api-server","result":{"bestblockhash":"00000000000003837103db3ff1c43f930da998d9453f3d1064336bf71069f33f","blocks":73637,"chain":"main","chainwork":"000000000000000000000000000000000000000000000001210e880de0ea9d64","difficulty":502306.5781957264,"headers":73637,"mediantime":1791667554,"nethash":54771265127,"reward":"30.00","supply":220911000000000}}},{"method":"GET","name":"/height/int:height","example":"/height/1","desc_en":"This method returns block info by given height.","desc_id":"Metode ini mengembalikan informasi blok berdasarkan ketinggian (height) tertentu.","response":{"error":null,"id":"api-server","result":{"bits":"1e0ffff0","chainwork":"0000000000000000000000000000000000000000000000000000000000200020","confirmations":73637,"difficulty":0.000244140625,"hash":"000007c732d45a968b00b2aa31612aa09cb9dd9785cf18144e1dde8599beb81c","height":1,"mediantime":1765190477,"merkleroot":"04235cca545dcbe492615e04093a7b586912282e21424b0f234c525a4d7b3261","nextblockhash":"00000385918ae5b0600e5fe97f7432a2fb1a1b945a7341a637aa9fb4874d894f","nonce":452629,"previousblockhash":"0000017123d6f996589bc2e58bb5502218012ac7f527ab599a3be84c1951c669","size":252,"strippedsize":216,"time":1765190477,"tx":["04235cca545dcbe492615e04093a7b586912282e21424b0f234c525a4d7b3261"],"txcount":1,"version":536870912,"versionHex":"20000000","weight":900}}},{"method":"GET","name":"/block/string:hash","example":"/block/000000048f0f3bcf820f406089aedc84d5d30175b0a24e89cd5f719071f921bc","desc_en":"This method returns block info by given hash.","desc_id":"Metode ini mengembalikan informasi rinci tentang blok berdasarkan hash yang diberikan.","response":{"error":null,"id":"api-server","result":{"bits":"1d08da50","confirmations":55685,"difficulty":0.1129571026722925,"hash":"000000048f0f3bcf820f406089aedc84d5d30175b0a24e89cd5f719071f921bc","height":17953,"time":1765469199,"txcount":1}}},{"method":"GET","name":"/header/string:hash","example":"/header/000000048f0f3bcf820f406089aedc84d5d30175b0a24e89cd5f719071f921bc","desc_en":"This method returns block header by given hash.","desc_id":"Metode ini mengembalikan header blok berdasarkan hash yang diberikan.","response":{"error":null,"id":"api-server","result":{"bits":"1d08da50","confirmations":55685,"hash":"000000048f0f3bcf820f406089aedc84d5d30175b0a24e89cd5f719071f921bc","height":17953}}},{"method":"GET","name":"/range/int:height","example":"/range/20?offset=3","desc_en":"This method returns range of blocks starting from certain height.","desc_id":"Metode ini mengembalikan daftar jangkauan blok dimulai dari ketinggian tertentu.","response":{"error":null,"id":"api-server","result":[{"bits":"1e0ffff0","confirmations":73618,"hash":"00000dfd87755b39bffa3218402afcb6f5aafd0909cfc689a54741ecee8b7f20","height":20}]}},{"method":"GET","name":"/balance/string:address","example":"/balance/XFd7D77fFhp6iY9hPwLC43dMuwijS59KCr","desc_en":"This method returns address balance.","desc_id":"Metode ini mengembalikan total saldo dompet (address) Nusacoin.","response":{"error":null,"id":"api-server","result":{"balance":"7223"}}},{"method":"GET","name":"/mempool/string:address","example":"/mempool/XFd7D77fFhp6iY9hPwLC43dMuwijS59KCr","desc_en":"This method returns address mempool transactions.","desc_id":"Metode ini mengembalikan transaksi mempool yang tertunda untuk alamat tertentu.","response":{"error":null,"id":"api-server","result":{"tx":[],"txcount":0}}},{"method":"GET","name":"/utxos/string:address","example":"/utxos/XFd7D77fFhp6iY9hPwLC43dMuwijS59KCr","desc_en":"This method returns address unspent outputs globally.","desc_id":"Metode ini mengembalikan daftar unspent outputs (UTXO) global untuk alamat tertentu.","response":{"error":null,"id":"api-server","result":{"height":73637,"success":true,"total_amount":0.00007223,"txouts":75094,"unspents":[]}}},{"method":"GET","name":"/unspent/string:address","example":"/unspent/XFd7D77fFhp6iY9hPwLC43dMuwijS59KCr?amount=1","desc_en":"This method returns address unspent outputs.","desc_id":"Metode ini mengembalikan luaran transaksi unspent berdasarkan jumlah tertentu.","response":{"error":null,"id":"api-server","result":[]}},{"method":"GET","name":"/history/string:address","example":"/history/XFd7D77fFhp6iY9hPwLC43dMuwijS59KCr","desc_en":"This method returns list of address transaction hashes.","desc_id":"Metode ini mengembalikan riwayat hash transaksi untuk alamat yang diberikan.","response":{"error":null,"id":"api-server","result":{"tx":[],"txcount":0}}},{"method":"GET","name":"/transaction/string:hash","example":"/transaction/aba25e0d650fb77ca2d0885ce04466c9e769fa99e02071e20bc754ac4112eb1d","desc_en":"This method returns info about transaction.","desc_id":"Metode ini mengembalikan rincian informasi transaksi berdasarkan hash.","response":{"error":null,"id":"api-server","result":{"amount":115505563,"blockhash":"0000000087b25eb7e4feb69af6aa6085d414d55e3ea909863fa627b7af602ba5","confirmations":55723,"height":17915}}},{"method":"GET","name":"/mempool","example":"/mempool","desc_en":"This method returns info about mempool.","desc_id":"Metode ini mengembalikan informasi status global mempool jaringan.","response":{"error":null,"id":"api-server","result":{"bytes":26411,"loaded":true,"maxmempool":300000000,"size":66}}},{"method":"GET","name":"/supply","example":"/supply","desc_en":"This method returns info about current coins supply.","desc_id":"Metode ini mengembalikan statistik suplai koin Nusacoin saat ini.","response":{"error":null,"id":"api-server","result":{"halvings":0,"max supply":"18000000","supply":220911000000000}}},{"method":"GET","name":"/fee","example":"/fee","desc_en":"This method returns recommended transaction fee.","desc_id":"Metode ini mengembalikan estimasi biaya (fee) transaksi yang direkomendasikan.","response":{"error":null,"id":"api-server","result":{"blocks":6,"feerate":1000000}}},{"method":"GET","name":"/decode/string:raw","example":"/decode/0200000001f4cc9c5af659df76ba22a7bf83cd3065f49767063144db46123370a671165815010000006a47304402207952b09006be4b13b69e91da9379cd88e4f901beeafd1a18c25d4639fec582b002202e860ecaa8ac4db2a5c45e41f43ef4b3b1a7c12570369e519fed7c33a310afc2012103d44d02cd1f3d853715f162f7bc3b56c224f3e2827726e11438c16d2cdc8cde09ffffffff0140420f00000000001976a914274bc7181d172b42c0757368b19d2a22fa10cac788ac00000000","desc_en":"This method returns decoded info about transaction.","desc_id":"Metode ini mengembalikan hasil dekode dari data mentah (raw hex) transaksi.","response":{"error":null,"id":"api-server","result":{"hash":"85c81b67c768f4e68717c3e155df3c3f9d36d5331b031fd5dea56821cc1e9594","size":191,"version":2}}},{"method":"POST","name":"/broadcast","example":"/broadcast","desc_en":"This method broadcasts raw signed transaction to NUX network.","desc_id":"Metode ini menyiarkan (broadcast) transaksi mentah yang telah ditandatangani ke jaringan Nusachain (NUX).","response":{"result":"85c81b67c768f4e68717c3e155df3c3f9d36d5331b031fd5dea56821cc1e9594","error":null,"id":"api-server"}}]},"testnet":{"base":"https://apitest.taobot.org","items":[{"method":"GET","name":"/info","example":"/info","desc_en":"This method return current info about Nusacoin network.","desc_id":"Metode ini mengembalikan informasi terbaru tentang jaringan Nusacoin (NUX).","response":{"error":null,"id":"api-server","result":{"bestblockhash":"000005c97aa402f4d3062c1de6d30f95acec0f364524a215b7a68c74623c243c","blocks":1299,"chain":"test","chainwork":"0000000000000000000000000000000000000000000000000000000037f1ccf0","difficulty":0.000244140625,"headers":1299,"mediantime":1791893688,"nethash":8,"reward":"30.00","supply":3896900000000}}},{"method":"GET","name":"/height/int:height","example":"/height/1","desc_en":"This method return block info by given height.","desc_id":"Metode ini mengembalikan informasi blok berdasarkan ketinggian (height) tertentu.","response":{"error":null,"id":"api-server","result":{"bits":"2000ffff","chainwork":"0000000000000000000000000000000000000000000000000000000000100110","confirmations":1299,"difficulty":5.960464477539062e-8,"hash":"0017466a6acb87b58447a960c7bba382c153af5fdd2d87ff559e3172f547f7e1","height":1,"mediantime":1770730075,"merkleroot":"cde055a79367032442662b8cc7337bc22038e7a49dff2f118d231a0a85c10294","nextblockhash":"000008131df98d00d1c234aa358c21855680a385a7a0e6233d59da401aec2dc0","nonce":281,"previousblockhash":"0000017123d6f996589bc2e58bb5502218012ac7f527ab599a3be84c1951c669","size":249,"strippedsize":213,"time":1770730075,"tx":["cde055a79367032442662b8cc7337bc22038e7a49dff2f118d231a0a85c10294"],"txcount":1,"version":536870912,"versionHex":"20000000","weight":888}}},{"method":"GET","name":"/block/string:hash","example":"/block/000000048f0f3bcf820f406089aedc84d5d30175b0a24e89cd5f719071f921bc","desc_en":"This method return block info by given hash.","desc_id":"Metode ini mengembalikan informasi rinci tentang blok berdasarkan hash yang diberikan.","response":{"error":{"code":-5,"message":"Block not found"},"id":"api-server","result":null}},{"method":"GET","name":"/header/string:hash","example":"/header/000000048f0f3bcf820f406089aedc84d5d30175b0a24e89cd5f719071f921bc","desc_en":"This method return block header by given hash.","desc_id":"Metode ini mengembalikan header blok berdasarkan hash yang diberikan.","response":{"error":{"code":-5,"message":"Block not found"},"id":"api-server","result":null}},{"method":"GET","name":"/range/int:height","example":"/range/20?offset=3","desc_en":"This method return range of blocks staring from certain height.","desc_id":"Metode ini mengembalikan daftar jangkauan blok dimulai dari ketinggian tertentu.","response":{"error":null,"id":"api-server","result":[{"bits":"2000ffff","chainwork":"0000000000000000000000000000000000000000000000000000000001000600","confirmations":1280,"difficulty":5.960464477539062e-8,"hash":"00b7bd62295fbe832726df8edde560633dc041d60f1ba662454bf39d40bfe60d","height":20,"mediantime":1771323590,"merkleroot":"150459c6724451100af7ce0da2d866ed2097c97c2edec3d4416a0d6591c96ac7","nethash":2,"nextblockhash":"00000493174ed56ee1d5bc6afc732232d2ef843757017628c583991e3d085022","nonce":7,"previousblockhash":"0000020bf8f3b03d2faa1ac96beeb318efda3229a17d391b97c24195bbc0f6ca","size":253,"strippedsize":217,"time":1771402480,"tx":["150459c6724451100af7ce0da2d866ed2097c97c2edec3d4416a0d6591c96ac7"],"txcount":1,"version":536870912,"versionHex":"20000000","weight":904}]}},{"method":"GET","name":"/balance/string:address","example":"/balance/XFd7D77fFhp6iY9hPwLC43dMuwijS59KCr","desc_en":"This method return address balance.","desc_id":"Metode ini mengembalikan total saldo dompet (address) Nusacoin.","response":{"error":{"code":-5,"message":"Invalid Nusacoin address: XFd7D77fFhp6iY9hPwLC43dMuwijS59KCr"},"id":"api-server","result":null}},{"method":"GET","name":"/mempool/string:address","example":"/mempool/XFd7D77fFhp6iY9hPwLC43dMuwijS59KCr","desc_en":"This method return address mempool transactions.","desc_id":"Metode ini mengembalikan transaksi mempool yang tertunda untuk alamat tertentu.","response":{"error":null,"id":"api-server","result":{"tx":[],"txcount":0}}},{"method":"GET","name":"/utxos/string:address","example":"/utxos/XFd7D77fFhp6iY9hPwLC43dMuwijS59KCr","desc_en":"This method return address unspent outputs globally.","desc_id":"Metode ini mengembalikan daftar unspent outputs (UTXO) global untuk alamat tertentu.","response":{"error":{"code":-5,"message":"Address is not valid"},"id":"api-server","result":{"address":"","txcount":0}}},{"method":"GET","name":"/unspent/string:address","example":"/unspent/XFd7D77fFhp6iY9hPwLC43dMuwijS59KCr?amount=1","desc_en":"This method return address unspent outputs.","desc_id":"Metode ini mengembalikan luaran transaksi unspent berdasarkan jumlah tertentu.","response":{"error":{"code":-5,"message":"Invalid Nusacoin address: XFd7D77fFhp6iY9hPwLC43dMuwijS59KCr"},"id":"api-server","result":null}},{"method":"GET","name":"/history/string:address","example":"/history/XFd7D77fFhp6iY9hPwLC43dMuwijS59KCr","desc_en":"This method return list of address transaction hashes.","desc_id":"Metode ini mengembalikan riwayat hash transaksi untuk alamat yang diberikan.","response":{"error":null,"id":"api-server","result":{"tx":[],"txcount":0}}},{"method":"GET","name":"/transaction/string:hash","example":"/transaction/aba25e0d650fb77ca2d0885ce04466c9e769fa99e02071e20bc754ac4112eb1d","desc_en":"This method return info about transaction.","desc_id":"Metode ini mengembalikan rincian informasi transaksi berdasarkan hash.","response":{"error":{"code":-5,"message":"Transaction not found"},"result":null}},{"method":"GET","name":"/mempool","example":"/mempool","desc_en":"This method return info about mempool.","desc_id":"Metode ini mengembalikan informasi status global mempool jaringan.","response":{"error":null,"id":"api-server","result":{"bytes":0,"loaded":true,"maxmempool":300000000,"mempoolminfee":0.00001,"minrelaytxfee":0.00001,"size":0,"tx":[],"unbroadcastcount":0,"usage":64}}},{"method":"GET","name":"/supply","example":"/supply","desc_en":"This method return info about current coins supply.","desc_id":"Metode ini mengembalikan statistik suplai koin Nusacoin saat ini.","response":{"error":null,"id":"api-server","result":{"halvings":0,"max supply":"18000000","supply":3896900000000}}},{"method":"GET","name":"/fee","example":"/fee","desc_en":"This method return recomended transaction fee.","desc_id":"Metode ini mengembalikan estimasi biaya (fee) transaksi yang direkomendasikan.","response":{"error":null,"id":"api-server","result":{"blocks":6,"feerate":1000000}}},{"method":"GET","name":"/decode/string:raw","example":"/decode/0200000001f4cc9c5af659df76ba22a7bf83cd3065f49767063144db46123370a671165815010000006a47304402207952b09006be4b13b69e91da9379cd88e4f901beeafd1a18c25d4639fec582b002202e860ecaa8ac4db2a5c45e41f43ef4b3b1a7c12570369e519fed7c33a310afc2012103d44d02cd1f3d853715f162f7bc3b56c224f3e2827726e11438c16d2cdc8cde09ffffffff0140420f00000000001976a914274bc7181d172b42c0757368b19d2a22fa10cac788ac00000000","desc_en":"This method return decoded info about transaction.","desc_id":"Metode ini mengembalikan hasil dekode dari data mentah (raw hex) transaksi.","response":{"error":null,"id":"api-server","result":{"hash":"85c81b67c768f4e68717c3e155df3c3f9d36d5331b031fd5dea56821cc1e9594","locktime":0,"size":191,"version":2}}},{"method":"POST","name":"/broadcast","example":"/broadcast","desc_en":"This method broadcast raw signed transaction to NUX network.","desc_id":"Metode ini menyiarkan (broadcast) transaksi mentah yang telah ditandatangani ke jaringan Nusachain (NUX).","response":{"result":"85c81b67c768f4e68717c3e155df3c3f9d36d5331b031fd5dea56821cc1e9594","error":null,"id":"api-server"}}]}};
+const T={
+ id:{desc:'Dokumentasi API Nusacoin: mainnet resmi, Taobot, dan testnet',copy:'Salin Paket',copied:'Paket Tersalin!',open:'Buka',url:'URL Endpoint',json:'Contoh Respon JSON',search:'Cari endpoint...',base:'Base URL',toast:'Berhasil menyalin satu paket API!',main:'Mainnet',test:'Testnet',copy1:'Salin',copyr:'© 2026 Nusachain (NUX). Seluruh hak cipta dilindungi undang-undang.',empty:'Tidak ada endpoint yang cocok.'},
+ en:{desc:'Nusacoin API documentation: official mainnet, Taobot, and testnet',copy:'Copy Package',copied:'Package Copied!',open:'Open',url:'Endpoint URL',json:'Sample JSON Response',search:'Search endpoints...',base:'Base URL',toast:'API package copied!',main:'Mainnet',test:'Testnet',copy1:'Copy',copyr:'© 2026 Nusachain (NUX). All rights reserved.',empty:'No matching endpoints.'}
+};
+let currentLang='id';
+const TABS={nusaTab:['nusa',false],taobotTab:['taobot',false],testnetTab:['testnet',true]};
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function jv(v){
+  if(v===null)return '<span class="jn">null</span>';
+  const t=typeof v;
+  if(t==='string')return '<span class="js">"'+esc(v)+'"</span>';
+  if(t!=='object')return '<span class="jl">'+v+'</span>';
+  const a=Array.isArray(v),k=Object.keys(v),o=a?'[':'{',c=a?']':'}';
+  if(!k.length)return o+c;
+  return '<details open><summary data-c="'+c+'">'+o+'</summary><div class="jb">'+k.map((x,i)=>'<div>'+(a?'':'<span class="jk">"'+esc(x)+'"</span>: ')+jv(v[x])+(i<k.length-1?',':'')+'</div>').join('')+'</div>'+c+'</details>';
+}
+function toast(m){const e=document.getElementById('toast');e.textContent=m;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),1800)}
+function copyText(s,cb){
+  const done=()=>cb&&cb();
+  if(navigator.clipboard)navigator.clipboard.writeText(s).then(done).catch(()=>fb());else fb();
+  function fb(){const x=document.createElement('textarea');x.value=s;document.body.appendChild(x);x.select();try{document.execCommand('copy');done()}catch(e){}x.remove()}
+}
+function renderApi(tabId){
+  const [key,isTest]=TABS[tabId],d=APP[key],t=T[currentLang],box=document.getElementById(tabId);
+  const q=(box.querySelector('input')||{}).value||'';
+  box.innerHTML='<div class="api-top"><div class="base"><span class="chip'+(isTest?' test':'')+'">'+(isTest?t.test:t.main)+'</span><span>'+d.base+'</span><button class="mini" data-copy="'+d.base+'"><i class="fa-solid fa-copy"></i> '+t.copy1+'</button></div><input type="search" placeholder="'+t.search+'" value="'+esc(q)+'"></div><div class="list"></div>';
+  const list=box.querySelector('.list');
+  const items=d.items.filter(i=>(i.name+i.example).toLowerCase().includes(q.toLowerCase()));
+  if(!items.length)list.innerHTML='<div class="ep-desc" style="text-align:center">'+t.empty+'</div>';
+  items.forEach(it=>{
+    const full=d.base+it.example,desc=currentLang==='id'?it.desc_id:it.desc_en,post=it.method==='POST';
+    const el=document.createElement('div');el.className='ep';
+    el.innerHTML='<div class="ep-head"><span class="method'+(post?' post':'')+'">'+it.method+'</span><span class="ep-path">'+esc(it.name)+'</span><div class="ep-actions">'+(post?'':'<a class="mini" target="_blank" rel="noopener" href="'+esc(full)+'"><i class="fa-solid fa-arrow-up-right-from-square"></i> '+t.open+'</a>')+'<button class="mini pk"><i class="fa-solid fa-copy"></i> <span>'+t.copy+'</span></button></div></div><div class="ep-desc">'+esc(desc)+'</div><div class="ep-label">'+t.url+'</div><div class="urlbox">'+esc(full)+'</div><div class="ep-label">'+t.json+'</div><div class="code">'+jv(it.response)+'</div>';
+    el.querySelector('.pk').onclick=function(){
+      const b=this;copyText(it.method+' '+it.name+'\n'+desc+'\n'+full+'\n\n'+JSON.stringify(it.response,null,4),()=>{
+        toast(t.toast);b.classList.add('ok');b.querySelector('span').textContent=t.copied;
+        setTimeout(()=>{b.classList.remove('ok');b.querySelector('span').textContent=T[currentLang].copy},1500)});
+    };
+    list.appendChild(el);
+  });
+  box.querySelectorAll('[data-copy]').forEach(b=>b.onclick=()=>copyText(b.dataset.copy,()=>toast(t.toast)));
+  box.querySelector('input').oninput=()=>{const p=box.querySelector('input'),pos=p.selectionStart;renderApi(tabId);const n=box.querySelector('input');n.focus();n.setSelectionRange(pos,pos)};
+}
+function switchTab(id){
+  document.querySelectorAll('.tab-content').forEach(e=>e.classList.toggle('active',e.id===id));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===id));
+  try{history.replaceState(null,'','#'+id.replace('Tab',''))}catch(e){}
+}
+function setLanguage(l){
+  currentLang=l;document.documentElement.lang=l;
+  document.getElementById('btnIN').classList.toggle('active',l==='id');
+  document.getElementById('btnEN').classList.toggle('active',l==='en');
+  document.getElementById('appDesc').textContent=T[l].desc;
+  document.getElementById('copyright').textContent=T[l].copyr;
+  Object.keys(TABS).forEach(renderApi);
+}
+function toggleTheme(){
+  const h=document.documentElement,n=h.getAttribute('data-theme')==='dark'?'light':'dark';
+  h.setAttribute('data-theme',n);
+  document.getElementById('theme-icon').className='fa-solid '+(n==='dark'?'fa-moon':'fa-sun');
+  document.getElementById('theme-text').textContent=n==='dark'?'Dark':'Light';
+}
+document.querySelectorAll('.tab-btn').forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
+setLanguage('id');
+const h=location.hash.slice(1);if(['nusa','taobot','testnet'].includes(h))switchTab(h+'Tab');
+</script>
+</body>
+</html>
