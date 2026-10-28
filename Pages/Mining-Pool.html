@@ -310,7 +310,7 @@ async function fx(u){
   if(viaOK[host]!=null){order.splice(order.indexOf(viaOK[host]),1);order.unshift(viaOK[host])}
   let err;
   for(const i of order){
-    const c=new AbortController(),t=setTimeout(()=>c.abort(),10000);
+    const c=new AbortController(),t=setTimeout(()=>c.abort(),30000);
     try{
       const r=await fetch(VIA[i](u),{cache:'no-store',signal:c.signal});
       if(!r.ok)throw new Error('HTTP '+r.status);
