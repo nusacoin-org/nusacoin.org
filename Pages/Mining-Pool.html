@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NusaScan Pool — Statistik Mining Pool Nusacoin (NUX)</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>tailwind.config={darkMode:'class',theme:{extend:{colors:{cardBg:'var(--card-bg)'}}}}</script>
+<style>
+:root{--bg:#f8fafc;--card-bg:#fff;--tx:#64748b}
+.dark{--bg:#030712;--card-bg:#0b0f19;--tx:#9ca3af}
+html,body{margin:0;background:var(--bg);color:var(--tx);font-family:Inter,system-ui,sans-serif;min-height:100%}
+table{border-collapse:collapse}td,th{border:none!important}
+.glow-box{box-shadow:0 0 15px rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.15)}
+.tile{background:#f1f5f9;border:1px solid #e2e8f0;border-radius:.75rem;padding:1rem}
+.dark .tile{background:#030712;border-color:rgba(30,41,59,.8)}
+.tile p{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#64748b}
+.tile span{display:block;font:700 1.05rem ui-monospace,monospace;margin-top:2px}
+.tab{color:var(--tx);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tab:hover{color:#f59e0b}.tab.on{color:#f59e0b;border-bottom-color:#f59e0b}
+.hid{display:none!important}
+.step{flex:none;width:2rem;height:2rem;border-radius:9999px;background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.3);color:#34d399;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:.875rem}
+.rng{padding:2px 10px;border-radius:9999px;font:600 11px ui-monospace,monospace;border:1px solid #334155}
+.rng.on{background:#f59e0b;color:#111;border-color:#f59e0b}
+.ch{position:relative;height:260px}.ch.s{height:200px}.ch.d{height:220px}
+.dot{animation:pd 1.8s infinite}@keyframes pd{0%{box-shadow:0 0 0 0 rgba(16,185,129,.6)}70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
+@media(prefers-reduced-motion:reduce){.dot{animation:none}}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #f59e0b;outline-offset:2px}
+</style>
+</head>
+<body class="p-4 md:p-6">
+<header class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3 mb-6">
+  <div class="flex items-center gap-3">
+    <img src="https://iili.io/CNVfDOb.md.png" alt="Nusachain" class="h-10 w-auto">
+    <span class="text-slate-900 dark:text-white text-2xl font-black tracking-wider uppercase">Nusa<span class="text-emerald-400">Scan</span> <span class="text-amber-400">Pool</span></span>
+  </div>
+  <div class="flex items-center gap-2 text-xs">
+    <span id="src" class="px-3 py-1.5 rounded-full border border-slate-700 font-mono flex items-center gap-2"><span id="srcdot" class="w-2 h-2 rounded-full bg-slate-500"></span><span id="srctx">Memuat…</span></span>
+    <a href="https://explorer.nusacoin.org" target="_blank" rel="noopener" class="px-3 py-1.5 rounded-xl border border-slate-700 hover:text-emerald-400"><i class="fa-solid fa-cube"></i> Explorer</a>
+    <button id="theme" class="px-3 py-1.5 rounded-xl border border-slate-700 hover:text-amber-400" aria-label="Ganti tema"><i class="fa-solid fa-circle-half-stroke"></i></button>
+  </div>
+</header>
+
+<main class="max-w-7xl mx-auto space-y-6">
+  <section class="bg-cardBg rounded-2xl p-6 glow-box space-y-4">
+    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
+      <h1 class="text-sm font-bold uppercase tracking-wider text-amber-400"><i class="fa-solid fa-server"></i> Java Pool — Live Statistics</h1>
+      <span id="upd" class="text-[10px] font-mono text-slate-400">Memuat…</span>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+      <div class="tile"><p>Pool Hashrate</p><span id="c-hash" class="text-slate-900 dark:text-white">-</span></div>
+      <div class="tile"><p>Active Workers</p><span id="c-work" class="text-slate-900 dark:text-white">-</span></div>
+      <div class="tile"><p>Valid Blocks</p><span id="c-vb" class="text-emerald-400">-</span></div>
+      <div class="tile"><p>Total Paid</p><span id="c-paid" class="text-amber-400 truncate">-</span></div>
+      <div class="tile"><p>Valid Shares</p><span id="c-vs" class="text-cyan-400">-</span></div>
+      <div class="tile"><p>Invalid Shares</p><span id="c-is" class="text-rose-400">-</span></div>
+      <div class="tile"><p>Blok Confirmed</p><span id="c-conf" class="text-slate-900 dark:text-white">-</span></div>
+      <div class="tile"><p>Orphaned / Pending</p><span id="c-orph" class="text-slate-900 dark:text-white">-</span></div>
+      <div class="tile"><p>Supply Coin</p><span id="c-supply" class="text-amber-400 truncate">-</span></div>
+      <div class="tile"><p>Jumlah Block</p><span id="c-height" class="text-emerald-400">-</span></div>
+    </div>
+    <p class="text-[10px] font-mono text-slate-500">Algoritma X11 • Symbol NUX • Sumber: pooljava.nusacoin.org/api (stats, pool_stats) • explorer.nusacoin.org (getmoneysupply, getblockcount)</p>
+  </section>
+
+  <section class="bg-cardBg rounded-2xl p-6 glow-box space-y-5">
+    <div class="flex gap-2 border-b border-slate-800 overflow-x-auto">
+      <button class="tab on px-4 py-2.5 text-xs font-bold uppercase" data-t="graph"><i class="fa-solid fa-chart-area"></i> Graph Stats</button>
+      <button class="tab px-4 py-2.5 text-xs font-bold uppercase" data-t="tab"><i class="fa-solid fa-table"></i> Tab Stats</button>
+      <button class="tab px-4 py-2.5 text-xs font-bold uppercase" data-t="workers"><i class="fa-solid fa-users-gear"></i> Workers Stats</button>
+      <button class="tab px-4 py-2.5 text-xs font-bold uppercase" data-t="guide"><i class="fa-solid fa-book"></i> Panduan Mining</button>
+    </div>
+
+    <div id="p-graph" class="space-y-6">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div class="tile"><p>Hashrate Puncak</p><span id="k-peak" class="text-amber-400">-</span></div>
+        <div class="tile"><p>Rata-rata (aktif)</p><span id="k-avg" class="text-slate-900 dark:text-white">-</span></div>
+        <div class="tile"><p>Waktu Aktif</p><span id="k-up" class="text-emerald-400">-</span></div>
+        <div class="tile"><p>Share Ratio / Orphan</p><span id="k-ratio" class="text-cyan-400">-</span></div>
+      </div>
+
+      <div>
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+          <h2 class="text-xs font-bold text-slate-500">Hashrate Pool</h2>
+          <div class="flex gap-1.5" id="ranges">
+            <button class="rng" data-r="60">1J</button><button class="rng" data-r="180">3J</button><button class="rng" data-r="360">6J</button><button class="rng on" data-r="720">12J</button>
+          </div>
+        </div>
+        <div class="ch"><canvas id="ch-hash"></canvas></div>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <div><h2 class="text-xs font-bold text-slate-500 mb-2">Jumlah Worker</h2><div class="ch s"><canvas id="ch-work"></canvas></div></div>
+        <div><h2 class="text-xs font-bold text-slate-500 mb-2">Blok Pending</h2><div class="ch s"><canvas id="ch-pend"></canvas></div></div>
+      </div>
+
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="text-xs font-bold text-slate-500">Hashrate Real-time</h2>
+          <span id="live-lbl" class="text-[10px] font-mono text-slate-500">menunggu data…</span>
+        </div>
+        <div class="ch s"><canvas id="ch-live"></canvas></div>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-6">
+        <div><h2 class="text-xs font-bold text-slate-500 mb-2">Valid vs Invalid Shares</h2><div class="ch d"><canvas id="ch-shares"></canvas></div></div>
+        <div><h2 class="text-xs font-bold text-slate-500 mb-2">Distribusi Blok</h2><div class="ch d"><canvas id="ch-blocks"></canvas></div></div>
+        <div><h2 class="text-xs font-bold text-slate-500 mb-2">Share per Worker</h2><div class="ch d"><canvas id="ch-wshare"></canvas></div></div>
+      </div>
+    </div>
+
+    <div id="p-tab" class="hid overflow-x-auto">
+      <table class="w-full text-left text-xs font-mono"><thead><tr class="text-[10px] text-slate-500 uppercase bg-slate-900/40"><th class="p-3">Field</th><th class="p-3">Nilai</th></tr></thead><tbody id="tb-tab"></tbody></table>
+    </div>
+
+    <div id="p-workers" class="hid space-y-4">
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <div class="tile"><p>Worker Aktif</p><span id="w-count" class="text-slate-900 dark:text-white">-</span></div>
+        <div class="tile"><p>Total Hashrate</p><span id="w-hash" class="text-slate-900 dark:text-white">-</span></div>
+        <div class="tile col-span-2 md:col-span-1"><p>Symbol / Algoritma</p><span class="text-slate-900 dark:text-white">NUX / X11</span></div>
+      </div>
+      <input id="wq" type="search" placeholder="Cari alamat wallet / worker…" class="w-full md:w-96 bg-slate-100 dark:bg-[#030712] border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-xs font-mono text-slate-800 dark:text-slate-200">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs font-mono"><thead><tr class="text-[10px] text-slate-500 uppercase bg-slate-900/40"><th class="p-3">Worker</th><th class="p-3 text-right">Hashrate</th><th class="p-3 text-right">Shares</th><th class="p-3 text-right">Invalid</th><th class="p-3 text-right">Porsi</th></tr></thead><tbody id="tb-work"></tbody></table>
+      </div>
+      <p class="text-[11px] text-slate-500">Tambahkan nama worker pada wallet (<span class="font-mono text-amber-400">ALAMAT_WALLET.namaworker</span>); worker muncul otomatis setelah mengirim share.</p>
+    </div>
+
+    <div id="p-guide" class="hid space-y-6">
+      <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Nusacoin ($NUX) menggunakan algoritma <span class="text-emerald-400 font-semibold">X11</span>. Untuk mulai menambang, Anda perlu menyiapkan dompet (wallet), software miner, dan terhubung ke salah satu mining pool resmi di bawah ini. Berikut panduan langkah demi langkah untuk menambang menggunakan PC/Laptop (CPU atau GPU).</p>
+      <div class="space-y-5 text-xs text-slate-500 dark:text-slate-400">
+        <div class="flex gap-4"><div class="step">1</div><div class="space-y-2 flex-1">
+          <h3 class="text-sm font-bold text-slate-800 dark:text-slate-200">Buat Alamat Wallet Nusacoin</h3>
+          <p>Sebelum mulai menambang, Anda memerlukan dompet digital untuk menampung hasil koin $NUX.</p>
+          <ul class="space-y-1.5 list-disc list-inside">
+            <li>Buka situs resmi <a href="https://www.nusacoin.org/" target="_blank" rel="noopener" class="text-emerald-400 hover:underline">Nusacoin.org</a> dan masuk ke bagian Sumber Daya.</li>
+            <li>Unduh aplikasi dompet sesuai perangkat Anda (Nusacoin Core Win, Nusacoin Dompet Web, atau Taobot Wallet Apk untuk Android).</li>
+            <li>Buat akun baru dan simpan Private Key / Seed Phrase di tempat yang aman.</li>
+            <li>Salin alamat penerima (Receiving Address) Nusacoin Anda (contoh format diawali <span class="font-mono text-slate-300">nu1q...</span>).</li>
+          </ul></div></div>
+
+        <div class="flex gap-4"><div class="step">2</div><div class="space-y-2 flex-1">
+          <h3 class="text-sm font-bold text-slate-800 dark:text-slate-200">Pilih Mining Pool Resmi</h3>
+          <p>Pool mining lebih direkomendasikan dibanding solo mining agar hasil lebih stabil. Gunakan salah satu pool komunitas resmi berikut:</p>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+            <div class="tile"><p>Java Pool</p><span class="text-emerald-400 text-xs">pooljava.nusacoin.org</span></div>
+            <div class="tile"><p>Nusa Pool</p><span class="text-emerald-400 text-xs">pool.nusacoin.org</span></div>
+            <div class="tile"><p>Taobot Pool</p><span class="text-emerald-400 text-xs">pooltaobot.nusacoin.org</span></div>
+          </div>
+          <p>Catat alamat stratum URL dan isi port: <span class="font-mono text-amber-400 font-bold">3257</span></p></div></div>
+
+        <div class="flex gap-4"><div class="step">3</div><div class="space-y-2 flex-1">
+          <h3 class="text-sm font-bold text-slate-800 dark:text-slate-200">Unduh Software Miner (Penambang)</h3>
+          <p>Sesuaikan dengan hardware yang Anda miliki, unduh software penambang yang kompatibel dengan algoritma X11.</p>
+          <ul class="space-y-1.5 list-disc list-inside">
+            <li>Jika menggunakan CPU: gunakan CPU Miner (seperti cpuminer-multi atau JayDDee cpuminer).</li>
+            <li>Jika menggunakan GPU: gunakan GPU Miner (seperti ccminer untuk Nvidia atau sgminer untuk AMD).</li>
+            <li>Sangat disarankan untuk menggunakan asic miner algoritma x11.</li>
+          </ul>
+          <div class="bg-amber-500/10 border border-amber-500/25 rounded-xl px-3 py-2.5 flex items-start gap-2"><i class="fa-solid fa-shield-halved text-amber-400 mt-0.5"></i>
+            <p class="text-[11px] text-amber-500 dark:text-amber-400">Tips Keamanan: Windows terkadang mendeteksi software mining sebagai 'False Positive'. Anda mungkin perlu menambahkan folder miner ke daftar pengecualian Windows Defender.</p></div></div></div>
+
+        <div class="flex gap-4"><div class="step">4</div><div class="space-y-2 flex-1">
+          <h3 class="text-sm font-bold text-slate-800 dark:text-slate-200">Konfigurasi Script Bat (Mulai Mining)</h3>
+          <ol class="space-y-1 list-decimal list-inside">
+            <li>Buka folder software miner Anda.</li>
+            <li>Buat file teks baru (klik kanan → New → Text Document).</li>
+            <li>Tuliskan kode konfigurasi di bawah ini (sesuaikan dengan data milik Anda):</li>
+          </ol>
+          <div class="relative bg-[#030712] rounded-xl px-4 py-3 border border-slate-800">
+            <code id="cmd" class="font-mono text-[11px] text-emerald-300 break-all pr-14">cpuminer -a x11 -o stratum+tcp://pooljava.nusacoin.org:3257 -u ALAMAT_WALLET_ANDA -p x</code>
+            <button id="cp" class="absolute top-2 right-2 text-[10px] px-2 py-1 rounded-lg border border-slate-700 text-slate-300 hover:text-amber-400">Salin</button>
+          </div>
+          <ul class="space-y-1.5 list-disc list-inside">
+            <li>Ubah <span class="font-mono text-amber-400">PORT: 3257</span> sesuai angka port pool pilihan Anda.</li>
+            <li>Ganti <span class="font-mono text-amber-400">ALAMAT_WALLET_ANDA</span> dengan alamat dompet Nusacoin dari Langkah 1.</li>
+            <li>Klik File → Save As, ubah Save as type menjadi All Files, lalu beri nama <span class="font-mono text-slate-300">mulai_mining.bat</span>.</li>
+          </ul></div></div>
+
+        <div class="flex gap-4"><div class="step">5</div><div class="space-y-2 flex-1">
+          <h3 class="text-sm font-bold text-slate-800 dark:text-slate-200">Jalankan Penambangan</h3>
+          <ul class="space-y-1.5 list-disc list-inside">
+            <li>Klik dua kali pada file <span class="font-mono text-slate-300">mulai_mining.bat</span> yang baru saja Anda buat.</li>
+            <li>Jendela Command Prompt (layar hitam) akan terbuka dan mulai berjalan.</li>
+            <li>Jika muncul tulisan <span class="text-emerald-400 font-semibold">"Accepted"</span> atau <span class="text-emerald-400 font-semibold">"Yay!"</span>, perangkat Anda telah berhasil memecahkan algoritma dan kontribusi dihitung oleh pool.</li>
+          </ul></div></div>
+      </div>
+
+      <div class="tile space-y-3 text-xs text-slate-500 dark:text-slate-400">
+        <h3 class="text-sm font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2"><i class="fa-solid fa-magnifying-glass-dollar text-amber-400"></i> Cara Cek Hasil Cuan</h3>
+        <p>Untuk memantau seberapa banyak koin $NUX yang sudah Anda kumpulkan:</p>
+        <ol class="space-y-1.5 list-decimal list-inside">
+          <li>Buka situs mining pool yang Anda gunakan (misalnya pooljava.nusacoin.org).</li>
+          <li>Cari kolom Worker Stats atau kolom pencarian alamat dompet — atau langsung buka tab <button id="go-workers" class="text-emerald-400 hover:underline font-semibold">Workers Stats</button> di atas.</li>
+          <li>Tempelkan (paste) alamat wallet Nusacoin Anda.</li>
+          <li>Anda akan melihat Hashrate serta estimasi saldo koin yang otomatis dikirim ke wallet Anda jika sudah mencapai batas minimum transfer pool.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="max-w-7xl mx-auto mt-10 pt-6 border-t border-slate-800/80 text-[11px] text-slate-500 text-center">Nusacoin Network — The people's blockchain.</footer>
+
+<script>
+const API='https://pooljava.nusacoin.org/api';
+const $=id=>document.getElementById(id);
+const fmt=n=>new Intl.NumberFormat('id-ID').format(Math.round((+n||0)*1e4)/1e4);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function hr(h){h=+h||0;const u=['H/s','KH/s','MH/s','GH/s','TH/s','PH/s'];let i=0;while(h>=1000&&i<5){h/=1000;i++}return h.toFixed(2)+' '+u[i]}
+const tm=t=>new Date(t*1000).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+const tfull=t=>new Date(t*1000).toLocaleString('id-ID');
+
+const EXP='https://explorer.nusacoin.org';
+let stats=null,hist=[],range=720,live=[],charts={},wFilter='',chain={supply:null,height:null};
+
+/* ---------- status ---------- */
+function setSrc(mode){
+  const m={live:['bg-emerald-400 dot','Realtime • 10 dtk'],err:['bg-rose-500','Gagal terhubung API']}[mode]||['bg-slate-500','Memuat…'];
+  $('src').title=mode==='err'?lastErr:(Object.entries(viaOK).map(([h,i])=>h+': '+VIA_NAME[i]).join(' | '));
+  $('srcdot').className='w-2 h-2 rounded-full '+m[0];$('srctx').textContent=m[1];
+}
+
+/* ---------- charts ---------- */
+const grid='rgba(148,163,184,.15)',tick='#94a3b8';
+const baseOpt=(yfmt)=>({responsive:true,maintainAspectRatio:false,animation:false,interaction:{mode:'index',intersect:false},
+  plugins:{legend:{display:false}},
+  scales:{x:{ticks:{color:tick,maxTicksLimit:8,maxRotation:0},grid:{color:grid}},y:{beginAtZero:true,ticks:{color:tick,callback:yfmt||(v=>v)},grid:{color:grid}}}});
+function mk(id,cfg){charts[id]=new Chart($(id),cfg);return charts[id]}
+function line(id,color,yfmt,stepped,fill=true){
+  return mk(id,{type:'line',data:{labels:[],datasets:[{data:[],borderColor:color,backgroundColor:color+'22',fill,tension:stepped?0:.3,stepped:stepped?'before':false,borderWidth:2,pointRadius:0,pointHitRadius:8}]},options:baseOpt(yfmt)});
+}
+function initCharts(){
+  Chart.defaults.font.family='Inter,system-ui,sans-serif';
+  const o=line('ch-hash','#10b981',hr,false);
+  o.options.plugins.tooltip={callbacks:{title:i=>tfull(hist.slice(-range)[i[0].dataIndex]?.[0]),label:c=>' '+hr(c.parsed.y)}};
+  const w=line('ch-work','#06b6d4',v=>Number.isInteger(v)?v:'',true);w.options.scales.y.ticks.precision=0;
+  const p=line('ch-pend','#f59e0b',v=>Number.isInteger(v)?v:'',true);
+  const l=line('ch-live','#f43f5e',hr,false);
+  l.options.plugins.tooltip={callbacks:{label:c=>' '+hr(c.parsed.y)}};
+  const dn=(id,labels,colors)=>mk(id,{type:'doughnut',data:{labels,datasets:[{data:[0,0],backgroundColor:colors,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,animation:false,cutout:'65%',plugins:{legend:{position:'bottom',labels:{color:tick,boxWidth:10,font:{size:11}}},tooltip:{callbacks:{label:c=>` ${c.label}: ${fmt(c.parsed)}`}}}}});
+  dn('ch-shares',['Valid','Invalid'],['#34d399','#fb7185']);
+  dn('ch-blocks',['Confirmed','Orphaned','Pending'],['#22d3ee','#fbbf24','#94a3b8']);
+  const b=mk('ch-wshare',{type:'bar',data:{labels:[],datasets:[{label:'Valid',data:[],backgroundColor:'#34d399'},{label:'Invalid',data:[],backgroundColor:'#fb7185'}]},options:{...baseOpt(v=>fmt(v)),indexAxis:'y',plugins:{legend:{display:true,labels:{color:tick,boxWidth:10}}}}});
+  b.options.scales.x.stacked=true;b.options.scales.y.stacked=true;b.options.scales.x.beginAtZero=true;
+  b.options.scales.y.ticks.callback=function(v){const s=this.getLabelForValue(v);return s.length>14?s.slice(0,6)+'…'+s.slice(-5):s};
+}
+
+function drawHistory(){
+  const d=hist.slice(-range);
+  const set=(id,vals)=>{const c=charts[id];c.data.labels=d.map(x=>tm(x[0]));c.data.datasets[0].data=vals;c.update()};
+  set('ch-hash',d.map(x=>x[1]));set('ch-work',d.map(x=>x[2]));set('ch-pend',d.map(x=>x[3]));
+  const act=d.filter(x=>x[1]>0).map(x=>x[1]);
+  $('k-peak').textContent=act.length?hr(Math.max(...act)):'-';
+  $('k-avg').textContent=act.length?hr(act.reduce((a,b)=>a+b,0)/act.length):'-';
+  $('k-up').textContent=d.length?(act.length/d.length*100).toFixed(1)+'%':'-';
+}
+
+function drawLive(){
+  const c=charts['ch-live'];c.data.labels=live.map(x=>new Date(x[0]*1000).toLocaleTimeString('id-ID'));c.data.datasets[0].data=live.map(x=>x[1]);c.update();
+  $('live-lbl').textContent=live.length?`${live.length} titik • terakhir ${hr(live[live.length-1][1])}`:'menunggu data live…';
+}
+
+/* ---------- render stats ---------- */
+function render(){
+  if(!stats)return;
+  const p=stats.pools?.nusacoin||{},s=p.poolStats||{},b=p.blocks||{},g=stats.global||{},a=stats.algos?.x11||{};
+  const hash=p.hashrate??g.hashrate??0,wc=p.workerCount??g.workers??0;
+  $('c-hash').textContent=hr(hash);$('c-work').textContent=fmt(wc);
+  $('c-vb').textContent=fmt(s.validBlocks);$('c-paid').textContent=fmt(parseFloat(s.totalPaid))+' NUX';
+  $('c-vs').textContent=fmt(s.validShares);$('c-is').textContent=fmt(s.invalidShares);
+  $('c-supply').textContent=chain.supply==null?'-':fmt(chain.supply)+' NUX';$('c-height').textContent=chain.height==null?'-':fmt(chain.height);
+  $('c-conf').textContent=fmt(b.confirmed);$('c-orph').textContent=fmt(b.orphaned)+' / '+fmt(b.pending);
+  $('upd').textContent=stats.time?'Update: '+tfull(stats.time):'';
+
+  const vs=+s.validShares||0,is=+s.invalidShares||0,ts=vs+is,bl=(b.confirmed||0)+(b.orphaned||0);
+  $('k-ratio').textContent=(ts?(vs/ts*100).toFixed(2)+'%':'-')+' / '+(bl?((b.orphaned||0)/bl*100).toFixed(2)+'%':'-');
+  const set=(id,d)=>{charts[id].data.datasets[0].data=d;charts[id].update()};
+  set('ch-shares',[vs,is]);set('ch-blocks',[b.confirmed||0,b.orphaned||0,b.pending||0]);
+
+  const ws=Object.entries(p.workers||{});
+  const bc=charts['ch-wshare'];bc.data.labels=ws.map(x=>x[0]);bc.data.datasets[0].data=ws.map(x=>(x[1].shares||0));bc.data.datasets[1].data=ws.map(x=>x[1].invalidshares||0);bc.update();
+
+  const rows={'Waktu (Unix)':stats.time?`${stats.time} — ${tfull(stats.time)}`:'-','Global Workers':g.workers??0,'Global Hashrate':`${g.hashrate??0} (${hr(g.hashrate)})`,
+    'Algo X11 — Workers':a.workers??0,'Algo X11 — Hashrate':hr(a.hashrate),'Nama Pool':p.name||'-','Symbol':p.symbol||'-','Algoritma':p.algorithm||'-',
+    'Valid Shares':fmt(s.validShares),'Invalid Shares':fmt(s.invalidShares),'Valid Blocks':fmt(s.validBlocks),'Total Paid':fmt(parseFloat(s.totalPaid))+' NUX',
+    'Block Pending':fmt(b.pending),'Block Confirmed':fmt(b.confirmed),'Block Orphaned':fmt(b.orphaned),'Worker Count':fmt(wc),'Pool Hashrate':hr(hash),'Supply Coin':chain.supply==null?'-':fmt(chain.supply)+' NUX','Jumlah Block (Explorer)':chain.height==null?'-':fmt(chain.height)};
+  $('tb-tab').innerHTML=Object.entries(rows).map(([k,v])=>`<tr class="hover:bg-slate-100 dark:hover:bg-slate-900/40"><td class="p-3 font-semibold text-slate-500 w-1/2 uppercase text-[11px]">${esc(k)}</td><td class="p-3 text-slate-900 dark:text-slate-200 break-all">${esc(v)}</td></tr>`).join('');
+
+  $('w-count').textContent=fmt(wc);$('w-hash').textContent=hr(hash);
+  const tot=ws.reduce((x,w)=>x+(w[1].shares||0),0);
+  const q=wFilter.toLowerCase(),list=ws.filter(w=>w[0].toLowerCase().includes(q));
+  $('tb-work').innerHTML=list.length?list.map(([n,w])=>`<tr class="hover:bg-slate-100 dark:hover:bg-slate-900/40"><td class="p-3 text-emerald-400 font-semibold break-all max-w-[320px]">${esc(n)}</td><td class="p-3 text-right text-slate-800 dark:text-slate-200">${esc(w.hashrateString?w.hashrateString+'/s':hr(w.hashrate))}</td><td class="p-3 text-right text-cyan-400">${fmt(w.shares)}</td><td class="p-3 text-right text-rose-400">${fmt(w.invalidshares)}</td><td class="p-3 text-right">${tot?((w.shares||0)/tot*100).toFixed(1)+'%':'-'}</td></tr>`).join(''):`<tr><td colspan="5" class="text-center py-6 text-slate-500">${ws.length?'Tidak ada worker yang cocok.':'Belum ada worker aktif pada respons API saat ini.'}</td></tr>`;
+}
+
+/* ---------- data ---------- */
+function onStats(d){
+  if(!d||!d.pools)return;
+  stats=d;render();setSrc('live');
+  const h=d.pools.nusacoin?.hashrate??d.global?.hashrate??0,t=d.time||Math.floor(Date.now()/1000);
+  if(!live.length||live[live.length-1][0]!==t){live.push([t,h]);if(live.length>120)live.shift();drawLive()}
+}
+/* fetch dengan cadangan: langsung -> proxy CORS (jika server API tidak mengizinkan CORS) */
+const VIA=[u=>u,u=>'https://corsproxy.io/?'+encodeURIComponent(u),u=>'https://api.allorigins.win/raw?url='+encodeURIComponent(u)];
+const VIA_NAME=['langsung','corsproxy','allorigins'];
+let viaOK={},lastErr='';
+async function fx(u){
+  const host=new URL(u).host,order=[...VIA.keys()];
+  if(viaOK[host]!=null){order.splice(order.indexOf(viaOK[host]),1);order.unshift(viaOK[host])}
+  let err;
+  for(const i of order){
+    const c=new AbortController(),t=setTimeout(()=>c.abort(),10000);
+    try{
+      const r=await fetch(VIA[i](u),{cache:'no-store',signal:c.signal});
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      const txt=await r.text();clearTimeout(t);
+      viaOK[host]=i;return txt;
+    }catch(e){clearTimeout(t);err=e;lastErr=host+' ('+VIA_NAME[i]+'): '+(e.name==='AbortError'?'timeout':e.message)}
+  }
+  throw err;
+}
+async function getJSON(u){return JSON.parse(await fx(u))}
+async function getNum(u){
+  let t=(await fx(u)).trim();try{const j=JSON.parse(t);t=typeof j==='object'&&j?Object.values(j)[0]:j}catch(e){}
+  const n=parseFloat(String(t).replace(/[^0-9.\-]/g,''));if(!isFinite(n))throw new Error('NaN');return n;
+}
+async function loadStats(){try{onStats(await getJSON(API+'/stats'))}catch(e){if(!stats){setSrc('err');$('upd').textContent='Error: '+lastErr}}}
+async function loadHist(){
+  try{
+    const j=await getJSON(API+'/pool_stats');
+    if(Array.isArray(j)&&j.length){hist=j.map(x=>{const p=x.pools?.nusacoin||{},b=p.blocks||{};return[x.time,p.hashrate||0,p.workerCount||0,b.pending||0,b.confirmed||0,b.orphaned||0]});drawHistory()}
+  }catch(e){}
+}
+async function loadChain(){
+  const [a,b]=await Promise.allSettled([getNum(EXP+'/ext/getmoneysupply'),getNum(EXP+'/api/getblockcount')]);
+  if(a.status==='fulfilled')chain.supply=a.value;
+  if(b.status==='fulfilled')chain.height=b.value;
+  render();
+}
+
+/* ---------- UI ---------- */
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===b));
+  ['graph','tab','workers','guide'].forEach(t=>$('p-'+t).classList.toggle('hid',t!==b.dataset.t));
+  if(b.dataset.t==='graph')Object.values(charts).forEach(c=>c.resize());
+});
+document.querySelectorAll('.rng').forEach(b=>b.onclick=()=>{range=+b.dataset.r;document.querySelectorAll('.rng').forEach(x=>x.classList.toggle('on',x===b));drawHistory()});
+$('go-workers').onclick=()=>document.querySelector('.tab[data-t=workers]').click();
+$('wq').oninput=e=>{wFilter=e.target.value.trim();render()};
+$('cp').onclick=()=>{navigator.clipboard?.writeText($('cmd').textContent).then(()=>{$('cp').textContent='Tersalin';setTimeout(()=>$('cp').textContent='Salin',1500)})};
+$('theme').onclick=()=>{const d=document.documentElement.classList.toggle('dark');try{localStorage.setItem('pool-theme',d?'dark':'light')}catch(e){}};
+try{if(localStorage.getItem('pool-theme')==='light')document.documentElement.classList.remove('dark')}catch(e){}
+
+initCharts();drawHistory();render();setSrc('');
+loadHist();loadStats();loadChain();
+setInterval(loadStats,10000);setInterval(loadChain,30000);setInterval(loadHist,60000);
+</script>
+</body>
+</html>
