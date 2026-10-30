@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lightning Nusacoin Masuk Fase Uji - Nusachain Update</title>
+    
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Titillium+Web:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+#navbar-iframe,
+.navbar,
+.navbar-ghost { 
+            display: none !important; 
+            height: 0 !important; 
+            visibility: hidden !important; 
+        }
+#nx-root, #nx-root * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+#nx-root {
+            --primary: #27ae60;
+            --primary-dark: #1e8449;
+            --bg-body: #ffffff;
+            --bg-card: #ffffff;
+            --bg-card-sub: #f8fafc;
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --bg-light: #f8fafc;
+            --border: #e2e8f0;
+            --title-green: #1e8449;
+            --link-green: #27ae60;
+            --btn-accent: #2ecc71;
+            --btn-accent-hover: #27ae60;
+            --link-blue: #3b82f6;
+        }
+#nx-root.dark-mode {
+            --primary: #27ae60;
+            --primary-dark: #1e8449;
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --bg-card-sub: #0f172a;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --bg-light: #1e293b;
+            --border: #334155;
+            --title-green: #4ade80;
+            --link-green: #4ade80;
+            --btn-accent: #27ae60;
+            --btn-accent-hover: #1e8449;
+            --link-blue: #60a5fa;
+        }
+#nx-root,
+#nx-root .article-card,
+#nx-root footer,
+#nx-root .feature-card {
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+#nx-root { 
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            color: var(--text-main); 
+            line-height: 1.6; 
+            background-color: var(--bg-body);
+        }
+#nx-root .top-bar {
+            width: 100%;
+            background-color: var(--primary-dark);
+            color: white;
+            padding: 10px 15px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+#nx-root .top-bar-container {
+            width: 100%;
+            max-width: 1250px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            text-align: left;
+        }
+#nx-root .top-bar-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+#nx-root .lang-switch {
+            display: flex;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+            padding: 2px;
+        }
+#nx-root .lang-btn {
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.8);
+            padding: 2px 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: all 0.2s;
+        }
+#nx-root .lang-btn.active,
+#nx-root .lang-btn:hover {
+            background: #ffffff;
+            color: var(--primary-dark);
+        }
+#nx-root .theme-toggle-btn {
+            background: rgba(0, 0, 0, 0.2);
+            border: none;
+            color: #ffffff;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s, transform 0.2s;
+        }
+#nx-root .theme-toggle-btn:hover {
+            background: rgba(0, 0, 0, 0.4);
+            transform: scale(1.08);
+        }
+#nx-root .container {
+            width: 100%;
+            max-width: none;
+            margin: 20px 0;
+            padding: 0;
+        }
+#nx-root .article-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+#nx-root .banner-img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin-bottom: 25px;
+        }
+#nx-root .page-title {
+            color: var(--title-green);
+            font-size: 1.8rem;
+            font-weight: 700;
+            font-family: 'Titillium Web', sans-serif;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+#nx-root a {
+            color: var(--link-green);
+            text-decoration: none;
+        }
+#nx-root a:hover {
+            text-decoration: underline;
+        }
+#nx-root .feature-card {
+            background-color: var(--bg-card-sub);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+        }
+#nx-root .feature-card h3 {
+            margin-top: 0;
+            color: var(--title-green);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1rem;
+            font-family: 'Titillium Web', sans-serif;
+        }
+#nx-root .feature-card p {
+            margin: 0;
+            color: var(--text-main);
+        }
+#nx-root footer {
+            width: 100%;
+            background-color: var(--bg-light);
+            border-top: 1px solid var(--border);
+            padding: 50px 20px 20px;
+            margin-top: 50px;
+        }
+#nx-root .footer-grid {
+            max-width: 1250px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+        }
+#nx-root .footer-brand h2 {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-family: 'Titillium Web', sans-serif;
+        }
+#nx-root .footer-brand p {
+            color: var(--text-sub);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+#nx-root .footer-col h3 {
+            font-size: 1.1rem;
+            color: var(--text-main);
+            margin-bottom: 15px;
+            font-family: 'Titillium Web', sans-serif;
+        }
+#nx-root .footer-col ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+#nx-root .footer-col ul li {
+            margin-bottom: 10px;
+        }
+#nx-root .footer-col ul li a {
+            color: var(--text-sub);
+            text-decoration: none;
+            transition: color 0.2s;
+            font-size: 0.95rem;
+        }
+#nx-root .footer-col ul li a:hover {
+            color: var(--primary);
+        }
+#nx-root .social-icons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+#nx-root .social-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-main);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+#nx-root .social-box:hover {
+            background-color: var(--primary) !important;
+            color: white !important;
+            border-color: var(--primary);
+        }
+#nx-root .footer-bottom {
+            max-width: 1250px;
+            margin: 30px auto 0;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            color: var(--text-sub);
+            font-size: 0.85rem;
+            gap: 10px;
+        }
+#nx-root .mono {
+            font-family: monospace;
+            white-space: nowrap;
+        }
+@media (max-width: 600px) {
+#nx-root .article-card {
+                padding: 15px;
+            }
+#nx-root .top-bar-container {
+                gap: 8px;
+            }
+#nx-root #topBarHelp {
+                font-size: 0.8rem;
+                word-break: break-word;
+            }
+#nx-root .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+                justify-content: center;
+                font-size: 0.75rem;
+            }
+}
+@container (max-width: 600px) {
+#nx-root .article-card {
+                padding: 15px;
+            }
+#nx-root .top-bar-container {
+                gap: 8px;
+            }
+#nx-root #topBarHelp {
+                font-size: 0.8rem;
+                word-break: break-word;
+            }
+#nx-root .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+                justify-content: center;
+                font-size: 0.75rem;
+            }
+}
+#nx-root.js .reveal { opacity: 0; transform: translateY(18px); transition: opacity .7s ease, transform .7s ease; transition-delay: var(--d, 0s); }
+#nx-root.js .reveal.in { opacity: 1; transform: none; }
+#nx-root .article-card p { margin-bottom: 14px; }
+#nx-root .article-card strong { color: var(--title-green); }
+#nx-root .section-label {
+            font-family: 'Titillium Web', sans-serif;
+            color: var(--title-green);
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 28px 0 14px;
+            display: flex; align-items: center; gap: 10px;
+        }
+#nx-root .section-label::after { content: ""; flex: 1; height: 2px; background: linear-gradient(90deg, var(--border), transparent); }
+#nx-root .mg-card { background: var(--bg-card-sub); border: 1px solid var(--border); border-radius: 12px; padding: 10px 6px 4px; margin: 22px 0 18px; overflow: hidden; }
+#nx-root .mg-card svg { display: block; width: 100%; height: auto; }
+#nx-root .mg-card text { font-family: 'Inter', 'Segoe UI', sans-serif; }
+#nx-root .t-lbl { fill: var(--text-main); font-size: 18px; font-weight: 600; text-anchor: middle; }
+#nx-root .t-sub { fill: var(--text-sub); font-size: 16px; font-weight: 600; }
+#nx-root .tank { fill: none; stroke: var(--text-sub); stroke-width: 3; }
+#nx-root .w { fill: #38bdf8; }
+#nx-root .w2 { fill: #7dd3fc; }
+#nx-root .a-wS { transform: translateY(88px); }
+#nx-root .a-wR { transform: translateY(54px); }
+#nx-root .pipe-ghost { fill: none; stroke: var(--text-sub); stroke-width: 3; stroke-dasharray: 8 8; opacity: 0; }
+#nx-root .cap0 { fill: var(--text-sub); font-size: 16px; font-weight: 600; text-anchor: middle; opacity: 0; }
+#nx-root .pipe { fill: var(--bg-card); stroke: var(--btn-accent); stroke-width: 3; }
+#nx-root .pipe-fill { fill: #38bdf8; transform-box: fill-box; transform-origin: left center; transform: scaleX(.259); }
+#nx-root .pipe-txt { fill: var(--text-main); font-size: 16px; font-weight: 700; text-anchor: middle; }
+#nx-root .fill-txt { fill: var(--text-sub); font-size: 16px; font-weight: 700; text-anchor: middle; }
+#nx-root .bal-txt { fill: var(--primary); font-size: 19px; font-weight: 800; text-anchor: middle; }
+#nx-root .ft1,
+#nx-root .ft2,
+#nx-root .bl1,
+#nx-root .bl2 { opacity: 0; }
+#nx-root .ring-rx { fill: none; stroke: var(--btn-accent); stroke-width: 3; opacity: 0; transform-box: fill-box; transform-origin: center; }
+#nx-root .pk { opacity: 0; }
+#nx-root .pk rect { fill: #f5b301; }
+#nx-root .pk text { fill: #1e293b; font-size: 15px; font-weight: 700; text-anchor: middle; }
+#nx-root .fee rect { fill: var(--bg-card); stroke: #f5b301; stroke-width: 2; }
+#nx-root .fee text { fill: var(--text-main); font-size: 15px; font-weight: 700; text-anchor: middle; }
+#nx-root .badge rect { fill: var(--primary); }
+#nx-root .badge text { fill: #fff; font-size: 18px; font-weight: 700; text-anchor: middle; }
+#nx-root .blk { fill: var(--bg-card); stroke: var(--border); stroke-width: 2; }
+#nx-root .lnk { stroke: var(--border); stroke-width: 3; }
+#nx-root .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 8px; }
+#nx-root .stat {
+            background: var(--bg-card-sub);
+            border: 1px solid var(--border);
+            border-top: 3px solid var(--btn-accent);
+            border-radius: 8px;
+            padding: 12px 8px;
+            text-align: center;
+        }
+#nx-root .stat-num { font-family: 'Titillium Web', sans-serif; font-size: 1.6rem; font-weight: 700; color: var(--title-green); line-height: 1.1; }
+#nx-root .stat-lbl { font-size: .75rem; color: var(--text-sub); margin-top: 4px; font-weight: 600; }
+#nx-root .proof-card { display: flex; gap: 14px; align-items: flex-start; }
+#nx-root .proof-card p { margin: 0 !important; }
+#nx-root .proof-ico {
+            flex: 0 0 38px; height: 38px; border-radius: 50%;
+            background: var(--primary); color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-size: .95rem; position: relative;
+        }
+#nx-root .proof-ico::after {
+            content: ""; position: absolute; inset: 0; border-radius: 50%;
+            border: 2px solid var(--btn-accent); opacity: 0;
+        }
+#nx-root .proof-card .note { color: var(--text-sub); }
+#nx-root .highlight-card {
+            border-left: 4px solid #f5b301;
+            background: var(--bg-card-sub);
+            border-top: 1px solid var(--border); border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);
+            border-radius: 8px; padding: 16px 20px; margin: 22px 0;
+        }
+#nx-root .highlight-card .hl-title {
+            font-weight: 700; color: var(--title-green);
+            font-family: 'Titillium Web', sans-serif; font-size: 1.2rem;
+            display: flex; gap: 10px; align-items: center; margin-bottom: 10px;
+        }
+#nx-root .highlight-card .hl-title i { color: #f5b301; }
+#nx-root .highlight-card p:last-child { margin-bottom: 0; }
+#nx-root .status-card {
+            border-left: 4px solid var(--link-blue);
+            background: var(--bg-card-sub);
+            border-top: 1px solid var(--border); border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);
+            border-radius: 8px; padding: 16px 20px; margin: 22px 0;
+        }
+#nx-root .status-card p { margin-bottom: 16px; }
+#nx-root .steps { display: flex; align-items: center; gap: 0; }
+#nx-root .step { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: .78rem; font-weight: 700; color: var(--text-sub); flex: 0 0 auto; }
+#nx-root .step .dot { width: 18px; height: 18px; border-radius: 50%; background: var(--border); border: 3px solid var(--bg-card-sub); box-shadow: 0 0 0 2px var(--border); }
+#nx-root .step.done .dot { background: var(--btn-accent); box-shadow: 0 0 0 2px var(--btn-accent); }
+#nx-root .step.now .dot { background: #f5b301; box-shadow: 0 0 0 2px #f5b301; }
+#nx-root .step.done,
+#nx-root .step.now { color: var(--title-green); }
+#nx-root .bar { flex: 1; height: 6px; background: var(--border); border-radius: 3px; margin: 0 6px 22px; overflow: hidden; position: relative; }
+#nx-root .bar i { position: absolute; inset: 0; background: var(--btn-accent); transform-origin: left; }
+#nx-root .bar.half i { right: 50%; background: linear-gradient(90deg, var(--btn-accent), #f5b301); }
+#nx-root .signature { margin-top: 22px; font-weight: 700; color: var(--title-green); font-family: 'Titillium Web', sans-serif; font-size: 1.1rem; }
+@keyframes icoPulse { 0% { opacity: .9; transform: scale(1); } 100% { opacity: 0; transform: scale(1.7); } }
+@keyframes glow { 0%, 100% { box-shadow: 0 0 0 0 rgba(39, 174, 96, 0); } 50% { box-shadow: 0 0 22px 2px rgba(39, 174, 96, .35); } }
+@keyframes shimmer { 0% { transform: scaleX(.15); } 50% { transform: scaleX(1); } 100% { transform: scaleX(.15); } }
+@keyframes bolt { 0%, 88%, 100% { transform: scale(1) rotate(0); } 92% { transform: scale(1.35) rotate(-12deg); } 96% { transform: scale(1.1) rotate(8deg); } }
+@keyframes pk1 { 0%, 17% { opacity: 0; transform: translateX(0); } 19% { opacity: 1; transform: translateX(0); } 36% { opacity: 1; transform: translateX(390px); } 38%, 100% { opacity: 0; transform: translateX(390px); } }
+@keyframes pk2 { 0%, 53% { opacity: 0; transform: translateX(0); } 54% { opacity: 1; transform: translateX(0); } 62% { opacity: 1; transform: translateX(390px); } 63%, 100% { opacity: 0; transform: translateX(390px); } }
+@keyframes pk3 { 0%, 63% { opacity: 0; transform: translateX(0); } 64% { opacity: 1; transform: translateX(0); } 72% { opacity: 1; transform: translateX(390px); } 73%, 100% { opacity: 0; transform: translateX(390px); } }
+@keyframes pipeGrp { 0%, 17% { opacity: 0; } 22%, 94% { opacity: 1; } 99%, 100% { opacity: 0; } }
+@keyframes ghost { 0%, 16% { opacity: 1; } 20%, 96% { opacity: 0; } 100% { opacity: 1; } }
+@keyframes pipefill { 0%, 20% { transform: scaleX(0); } 37%, 56% { transform: scaleX(.199); } 62%, 64% { transform: scaleX(.219); } 72%, 98% { transform: scaleX(.259); } 100% { transform: scaleX(0); } }
+@keyframes fee { 0%, 22% { opacity: 0; transform: translateY(8px); } 27%, 52% { opacity: 1; transform: translateY(0); } 58%, 100% { opacity: 0; transform: translateY(0); } }
+@keyframes sw1 { 0%, 36% { opacity: 0; } 40%, 58% { opacity: 1; } 62%, 100% { opacity: 0; } }
+@keyframes sw2 { 0%, 60% { opacity: 0; } 64%, 70% { opacity: 1; } 73%, 100% { opacity: 0; } }
+@keyframes sw3 { 0%, 72% { opacity: 0; } 76%, 94% { opacity: 1; } 98%, 100% { opacity: 0; } }
+@keyframes badge { 0%, 19% { opacity: 0; transform: translateY(10px); } 24%, 92% { opacity: 1; transform: translateY(0); } 98%, 100% { opacity: 0; transform: translateY(0); } }
+@keyframes wS { 0%, 18% { transform: translateY(10px); } 36%, 54% { transform: translateY(70px); } 62%, 64% { transform: translateY(76px); } 72%, 92% { transform: translateY(88px); } 100% { transform: translateY(10px); } }
+@keyframes wR { 0%, 18% { transform: translateY(132px); } 36%, 54% { transform: translateY(72px); } 62%, 64% { transform: translateY(66px); } 72%, 92% { transform: translateY(54px); } 100% { transform: translateY(132px); } }
+@keyframes ringRx { 0%, 35% { opacity: 0; transform: scale(1); } 36% { opacity: .8; transform: scale(1); } 46% { opacity: 0; transform: scale(1.35); } 61% { opacity: 0; transform: scale(1); } 62% { opacity: .8; } 68% { opacity: 0; transform: scale(1.3); } 71% { opacity: 0; transform: scale(1); } 72% { opacity: .8; } 78%, 100% { opacity: 0; transform: scale(1.3); } }
+@keyframes blk { to { transform: translateX(-160px); } }
+@media (prefers-reduced-motion: no-preference) {
+#nx-root .mg-card:not(.playing) svg * { animation-play-state: paused !important; }
+#nx-root .a-pk1 { animation: pk1 14s ease-in-out infinite; }
+#nx-root .a-pk2 { animation: pk2 14s ease-in-out infinite; }
+#nx-root .a-pk3 { animation: pk3 14s ease-in-out infinite; }
+#nx-root .pipe-grp { animation: pipeGrp 14s ease-in-out infinite; }
+#nx-root .pipe-ghost,
+#nx-root .cap0 { animation: ghost 14s ease-in-out infinite; }
+#nx-root .pipe-fill { animation: pipefill 14s ease-in-out infinite; }
+#nx-root .a-fee { animation: fee 14s ease-out infinite; }
+#nx-root .ft1,
+#nx-root .bl1 { animation: sw1 14s ease-in-out infinite; }
+#nx-root .ft2,
+#nx-root .bl2 { animation: sw2 14s ease-in-out infinite; }
+#nx-root .ft3,
+#nx-root .bl3 { animation: sw3 14s ease-in-out infinite; }
+#nx-root .a-badge { animation: badge 14s ease-out infinite; }
+#nx-root .a-wS { animation: wS 14s ease-in-out infinite; }
+#nx-root .a-wR { animation: wR 14s ease-in-out infinite; }
+#nx-root .ring-rx { animation: ringRx 14s ease-out infinite; }
+#nx-root .a-blocks { animation: blk 16s linear infinite; }
+#nx-root .banner-img { animation: glow 4s ease-in-out infinite; }
+#nx-root .proof-ico::after { animation: icoPulse 2.4s ease-out infinite; }
+#nx-root .proof-card:nth-of-type(2) .proof-ico::after { animation-delay: .4s; }
+#nx-root .bar.half i { animation: shimmer 3s ease-in-out infinite; }
+#nx-root .step.now .dot { animation: glow 2s ease-in-out infinite; }
+#nx-root .sig-bolt { display: inline-block; animation: bolt 4s ease-in-out infinite; }
+}
+@media (max-width: 600px) {
+#nx-root .stat-grid { grid-template-columns: repeat(2, 1fr); }
+#nx-root .page-title { font-size: 1.5rem; }
+#nx-root .highlight-card,
+#nx-root .status-card { padding: 14px 14px; }
+}
+@container (max-width: 600px) {
+#nx-root .stat-grid { grid-template-columns: repeat(2, 1fr); }
+#nx-root .page-title { font-size: 1.5rem; }
+#nx-root .highlight-card,
+#nx-root .status-card { padding: 14px 14px; }
+}
+#nx-root { display: block; width: 100%; max-width: 100%; margin: 0; padding: 0; container-type: inline-size; overflow-x: clip; }
+#nx-root .top-bar-container { flex-wrap: wrap; }
+#nx-root #topBarHelp { flex: 1 1 220px; text-align: left; }
+#nx-root .top-bar-controls { margin-left: auto; }
+
+    </style>
+</head>
+<body>
+<div id="nx-root">
+<script>document.getElementById("nx-root").classList.add("js")</script>
+
+    <!-- Top Navigation & Controls Bar -->
+    <div class="top-bar">
+        <div class="top-bar-container">
+            <span id="topBarHelp">Nusacoin.org membutuhkan bantuan anda!</span>
+            
+            <div class="top-bar-controls">
+                <div class="lang-switch">
+                    <button class="lang-btn active" id="btnIN" onclick="switchLanguage('id')">IN</button>
+                    <button class="lang-btn" id="btnEN" onclick="switchLanguage('en')">EN</button>
+                </div>
+
+                <button class="theme-toggle-btn" id="themeToggle" onclick="toggleTheme()" aria-label="Ganti Tema" title="Ganti Tema">
+                    <i class="fa-solid fa-moon" id="themeIcon"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Article Content -->
+    <div class="container">
+        <article class="article-card">
+            <img src="https://i.ibb.co.com/jPwbB8Pt/electrum.png" alt="Lightning Nusacoin" class="banner-img">
+
+            <h1 id="artTitle" class="page-title">⚡ Kabar Perkembangan: Lightning Nusacoin Masuk Fase Uji, Selangkah Lagi Mainnet</h1>
+
+            <p id="artGreet" class="reveal">Halo keluarga Nusacoin,</p>
+
+            <p id="artIntro" class="reveal">Hari ini kami menuntaskan uji menyeluruh Lightning Network di jaringan uji (testnet) Nusacoin, memakai aplikasi dompet kami sendiri, <strong>ELNUX</strong>, di HP sungguhan, bukan simulasi.</p>
+
+            <!-- MOTION GRAPHIC: dua tandon + satu jalur -->
+            <div class="mg-card reveal" id="mg">
+                <svg viewBox="0 0 720 362" role="img" aria-labelledby="mgT" xmlns="http://www.w3.org/2000/svg">
+                    <title id="mgT" data-i18n="mgTitle">Animasi dua tandon air dihubungkan satu jalur</title>
+                    <defs>
+                        <clipPath id="clS"><rect x="43" y="53" width="84" height="134" rx="11"/></clipPath>
+                        <clipPath id="clR"><rect x="593" y="53" width="84" height="134" rx="11"/></clipPath>
+                    </defs>
+
+                    <!-- Belum ada jalur -->
+                    <rect class="pipe-ghost" x="130" y="138" width="460" height="24" rx="12"/>
+                    <text class="cap0" x="360" y="124" data-i18n="svNo">Belum ada jalur — menunggu kiriman pertama</text>
+
+                    <!-- Jalur terpasang -->
+                    <g class="pipe-grp">
+                        <rect class="pipe" x="130" y="138" width="460" height="24" rx="12"/>
+                        <rect class="pipe-fill" x="130" y="138" width="460" height="24" rx="12"/>
+                        <text class="pipe-txt" x="360" y="124" data-i18n="svPipe">Jalur terpasang · 25.000</text>
+                    </g>
+                    <text class="fill-txt ft1" x="360" y="190" data-i18n="ft1">terisi 4.975 dari 25.000</text>
+                    <text class="fill-txt ft2" x="360" y="190" data-i18n="ft2">terisi 5.475 dari 25.000</text>
+                    <text class="fill-txt ft3" x="360" y="190" data-i18n="ft3">terisi 6.475 dari 25.000</text>
+
+                    <!-- Tandon pengirim -->
+                    <g clip-path="url(#clS)"><g class="a-wS"><rect class="w" x="43" y="53" width="84" height="134"/><rect class="w2" x="43" y="53" width="84" height="5"/></g></g>
+                    <rect class="tank" x="40" y="50" width="90" height="140" rx="14" fill="none"/>
+                    <text class="t-lbl" x="85" y="218" data-i18n="svSender">Pengirim</text>
+
+                    <!-- Tandon HP ELNUX -->
+                    <g clip-path="url(#clR)"><g class="a-wR"><rect class="w" x="593" y="53" width="84" height="134"/><rect class="w2" x="593" y="53" width="84" height="5"/></g></g>
+                    <rect class="ring-rx" x="590" y="50" width="90" height="140" rx="14"/>
+                    <rect class="tank" x="590" y="50" width="90" height="140" rx="14" fill="none"/>
+                    <text class="t-lbl" x="635" y="218" data-i18n="svPhone">HP ELNUX</text>
+                    <text class="bal-txt bl1" x="635" y="38" data-i18n="bl1">4.975</text>
+                    <text class="bal-txt bl2" x="635" y="38" data-i18n="bl2">5.475</text>
+                    <text class="bal-txt bl3" x="635" y="38" data-i18n="bl3">6.475</text>
+
+                    <!-- Biaya sekali -->
+                    <g class="fee a-fee">
+                        <rect x="200" y="14" width="320" height="30" rx="15"/>
+                        <text x="360" y="34" data-i18n="svFee">−25 nusan · biaya jalur (sekali)</text>
+                    </g>
+
+                    <!-- Kiriman -->
+                    <g transform="translate(165,150)"><g class="pk a-pk1"><rect x="-38" y="-14" width="76" height="28" rx="14"/><text y="5" data-i18n="pk1">5.000</text></g></g>
+                    <g transform="translate(165,150)"><g class="pk a-pk2"><rect x="-38" y="-14" width="76" height="28" rx="14"/><text y="5" data-i18n="pk2">500</text></g></g>
+                    <g transform="translate(165,150)"><g class="pk a-pk3"><rect x="-38" y="-14" width="76" height="28" rx="14"/><text y="5" data-i18n="pk3">1.000</text></g></g>
+
+                    <!-- Badge instan -->
+                    <g class="badge a-badge">
+                        <rect x="230" y="236" width="260" height="36" rx="18"/>
+                        <text x="360" y="260" data-i18n="svBadge">⚡ 0 konfirmasi blok</text>
+                    </g>
+
+                    <!-- Jalur blok mainnet -->
+                    <text class="t-sub" x="16" y="304" data-i18n="svLane">⛏ Blok mainnet (terjadwal)</text>
+                    <g class="a-blocks" id="blocks"></g>
+                </svg>
+            </div>
+
+            <div class="stat-grid">
+                <div class="stat reveal" style="--d:0s"><div class="stat-num"><span data-count="5000">5.000</span></div><div class="stat-lbl" data-i18n="st1">nusan dikirim</div></div>
+                <div class="stat reveal" style="--d:.1s"><div class="stat-num"><span data-count="4975">4.975</span></div><div class="stat-lbl" data-i18n="st2">nusan diterima</div></div>
+                <div class="stat reveal" style="--d:.2s"><div class="stat-num"><span data-count="25000">25.000</span></div><div class="stat-lbl" data-i18n="st3">kapasitas jalur</div></div>
+                <div class="stat reveal" style="--d:.3s"><div class="stat-num"><span data-count="0">0</span></div><div class="stat-lbl" data-i18n="st4">konfirmasi blok</div></div>
+            </div>
+
+            <div class="section-label reveal"><i class="fa-solid fa-circle-check"></i> <span id="artProofTitle">Yang terbukti hari ini:</span></div>
+
+            <div class="feature-card proof-card reveal">
+                <div class="proof-ico"><i class="fa-solid fa-mobile-screen"></i></div>
+                <p id="proof1">Kiriman 5.000 nusan ke dompet ELNUX di HP sampai dalam hitungan detik, diterima 4.975 nusan (selisih 25 nusan adalah biaya pembuatan jalur (channel), hanya dikenakan sekali saat jalur pertama dibuat).</p>
+            </div>
+
+            <div class="feature-card proof-card reveal">
+                <div class="proof-ico"><i class="fa-solid fa-route"></i></div>
+                <p id="proof2">Jalur pembayaran dibuatkan otomatis saat kiriman pertama datang, penerima tidak perlu menyiapkan apa-apa sebelumnya. <span class="note">(disiapkan di sisi Lightning Node).</span></p>
+            </div>
+
+            <div class="feature-card proof-card reveal">
+                <div class="proof-ico"><i class="fa-solid fa-arrows-left-right-to-line"></i></div>
+                <p id="proof3">Jalur itu langsung dibuat lebar sejak awal, berkapasitas 25.000 nusan, supaya kiriman berikutnya kecil maupun besar, bisa langsung menumpang tanpa perlu membuat jalur baru. <span class="note">(sesuai animasi di atas).</span></p>
+            </div>
+
+            <div class="feature-card proof-card reveal">
+                <div class="proof-ico"><i class="fa-solid fa-bolt"></i></div>
+                <p id="proof4">Semuanya berjalan tanpa menunggu konfirmasi blok sama sekali.</p>
+            </div>
+
+            <div class="highlight-card reveal">
+                <div class="hl-title"><i class="fa-solid fa-bolt"></i> <span id="hlTitle">Poin terakhir itu yang paling penting bagi kita.</span></div>
+                <p id="hl1">Penambangan Nusacoin Mainnet berjalan terjadwal, jadi pembayaran yang harus menunggu blok tidak akan pernah terasa kilat.</p>
+                <p id="hl2">Sistem ini dirancang supaya pembayaran berjalan instan di jalurnya sendiri, sementara urusan blok menyusul di belakang sesuai jadwal komunitas.</p>
+            </div>
+
+            <p id="pride1" class="reveal">Setahu kami, ini adalah adaptasi protokol Lightning <strong>pertama di dunia</strong> yang benar-benar berjalan di jaringan beralgoritma X11.</p>
+
+            <p id="pride2" class="reveal">Kami menyampaikannya apa adanya: bukan yang terbesar, bukan yang paling ramai, tetapi karya sebuah komunitas kecil yang membangunnya sendiri selangkah demi selangkah, dan hari ini langkah itu teruji nyata. Ada rasa bangga yang wajar di situ, dan kebanggaan itu milik kita bersama.</p>
+
+            <div class="status-card reveal">
+                <p><strong id="statusLbl">Status saat ini:</strong> <span id="statusTxt">fase pembuktian di testnet sedang dimatangkan. Sesudah fase ini selesai, mainnet menyusul, dompet ELNUX untuk koin sungguhan (mainnet), dengan kunci yang tetap dipegang pemiliknya sendiri di HP masing-masing.</span></p>
+                <div class="steps">
+                    <div class="step done"><span class="dot"></span><span id="stp1">Uji testnet</span></div>
+                    <div class="bar"><i></i></div>
+                    <div class="step now"><span class="dot"></span><span id="stp2">Pematangan</span></div>
+                    <div class="bar half"><i></i></div>
+                    <div class="step"><span class="dot"></span><span id="stp3">Mainnet</span></div>
+                </div>
+            </div>
+
+            <p id="thanks" class="reveal">Terima kasih untuk semua yang selama ini ikut menambang, menguji, dan bersabar mengikuti prosesnya. Jaringan ini lahir dari kebersamaan, dan dengan cara yang sama pula ia akan sampai ke tujuannya. 🙏</p>
+
+            <p class="signature reveal">— <span id="sign">Tim Lightning Nusacoin</span> <span class="sig-bolt">⚡</span></p>
+        </article>
+    </div>
+
+    <!-- Footer Lengkap -->
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <h2>Nusacoin Network</h2>
+                <p id="footerDesc">Blockchain milik rakyat dengan prinsip crypto yang adil. Terdesentralisasi, aman, dan dapat diakses semua orang.</p>
+                <div class="social-icons">
+                    <a href="https://x.com/Nusacoin_chain" target="_blank" class="social-box" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="https://discord.gg/NcKKZFBzJ" target="_blank" class="social-box" aria-label="Discord"><i class="fab fa-discord"></i></a>
+                    <a href="https://telegram.me/NusacoinX11" target="_blank" class="social-box" aria-label="Telegram"><i class="fab fa-telegram-plane"></i></a>
+                    <a href="https://www.reddit.com/r/Nusacoin" target="_blank" class="social-box" aria-label="Reddit"><i class="fab fa-reddit-alien"></i></a>
+                    <a href="https://github.com/TaobotX11/nusacoin" target="_blank" class="social-box" aria-label="GitHub"><i class="fab fa-github"></i></a>
+                </div>
+            </div>
+
+            <div class="footer-col">
+                <h3 id="footerQuickTitle">Tautan Cepat</h3>
+                <ul>
+                    <li><a href="https://explorer.nusacoin.org" target="_blank">Explorer</a></li>
+                    <li><a href="https://dompet.nusacoin.org" target="_blank">Nusacoin Web Wallet</a></li>
+                    <li><a href="https://github.com/TaobotX11/nusacoin" target="_blank">Nusacoin Core</a></li>
+                    <li><a href="https://green.nusacoin.org" target="_blank">Nusacoin Green Wallet</a></li>
+                    <li><a href="https://www.nusachain.org/p/visi-misi.html" target="_blank">Roadmap</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h3 id="footerResTitle">Sumber Daya</h3>
+                <ul>
+                    <li><a href="https://paper.nusacoin.org" target="_blank">Paper Wallet</a></li>
+                    <li><a href="https://pool.nusacoin.org" target="_blank">Mining Pool</a></li>
+                    <li><a href="https://ijol.nusacoin.org" target="_blank">Ijol Nusacoin (P2P)</a></li>
+                    <li><a href="https://t.me/rdnmesin_bot" target="_blank">Nusacard RDN Bot</a></li>
+                    <li><a href="https://www.nusachain.org/p/kosa-kata.html" target="_blank" id="menuGlossary">Kosa Kata</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h3 id="footerDocsTitle">Dokumen &amp; Keamanan</h3>
+                <ul>
+                    <li><a href="https://docs.google.com/viewer?url=https://raw.githubusercontent.com/nusacoin-org/nusacoin.org/main/Pages/Whitepaper_Nusacoin_in.pdf" target="_blank">Whitepaper IN</a></li>
+                    <li><a href="https://docs.google.com/viewer?url=https://raw.githubusercontent.com/nusacoin-org/nusacoin.org/main/Pages/Whitepaper_Nusacoin_en.pdf" target="_blank">Whitepaper EN</a></li>
+                    <li><a href="https://www.nusachain.org/p/amankan-wallet-anda.html" target="_blank" id="menuSecure">Amankan Wallet</a></li>
+                    <li><a href="https://www.nusachain.org/p/lindungi-privasi-anda.html" target="_blank" id="menuPrivacy">Lindungi Privasi</a></li>
+                    <li><a href="http://www.nusacoin.org/p/faq.html" target="_blank">FAQ</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Bagian Footer Bottom -->
+        <div class="footer-bottom">
+            <span id="footerCopyright">&copy; 2026 Nusacoin Project. Dibangun untuk desentralisasi.</span>
+            <span class="mono"> &middot; NUX / X11</span>
+        </div>
+    </footer>
+</div>
+
+    <script>
+        const translations = {
+            id: {
+                topBarHelp: "Nusacoin.org membutuhkan bantuan anda!",
+                artTitle: "⚡ Kabar Perkembangan: Lightning Nusacoin Masuk Fase Uji, Selangkah Lagi Mainnet",
+                artGreet: "Halo keluarga Nusacoin,",
+                artIntro: "Hari ini kami menuntaskan uji menyeluruh Lightning Network di jaringan uji (testnet) Nusacoin, memakai aplikasi dompet kami sendiri, <strong>ELNUX</strong>, di HP sungguhan, bukan simulasi.",
+                mgTitle: "Animasi dua tandon air dihubungkan satu jalur: kiriman pertama 5.000 membuat jalur 25.000 secara otomatis, kiriman berikutnya langsung lewat tanpa menunggu konfirmasi blok",
+                svSender: "Pengirim", svPhone: "HP ELNUX",
+                svFee: "−25 nusan · biaya jalur (sekali)", svNo: "Belum ada jalur — menunggu kiriman pertama", svPipe: "Jalur terpasang · 25.000",
+                ft1: "terisi 4.975 dari 25.000", ft2: "terisi 5.475 dari 25.000", ft3: "terisi 6.475 dari 25.000",
+                bl1: "4.975", bl2: "5.475", bl3: "6.475", pk1: "5.000", pk2: "500", pk3: "1.000",
+                svBadge: "⚡ 0 konfirmasi blok", svLane: "⛏ Blok mainnet (terjadwal)",
+                st1: "nusan dikirim", st2: "nusan diterima", st3: "kapasitas jalur", st4: "konfirmasi blok",
+                artProofTitle: "Yang terbukti hari ini:",
+                proof1: "Kiriman 5.000 nusan ke dompet ELNUX di HP sampai dalam hitungan detik, diterima 4.975 nusan (selisih 25 nusan adalah biaya pembuatan jalur (channel), hanya dikenakan sekali saat jalur pertama dibuat).",
+                proof2: 'Jalur pembayaran dibuatkan otomatis saat kiriman pertama datang, penerima tidak perlu menyiapkan apa-apa sebelumnya. <span class="note">(disiapkan di sisi Lightning Node).</span>',
+                proof3: 'Jalur itu langsung dibuat lebar sejak awal, berkapasitas 25.000 nusan, supaya kiriman berikutnya kecil maupun besar, bisa langsung menumpang tanpa perlu membuat jalur baru. <span class="note">(sesuai video di atas).</span>',
+                proof4: "Semuanya berjalan tanpa menunggu konfirmasi blok sama sekali.",
+                hlTitle: "Poin terakhir itu yang paling penting bagi kita.",
+                hl1: "Penambangan Nusacoin Mainnet berjalan terjadwal, jadi pembayaran yang harus menunggu blok tidak akan pernah terasa kilat.",
+                hl2: "Sistem ini dirancang supaya pembayaran berjalan instan di jalurnya sendiri, sementara urusan blok menyusul di belakang sesuai jadwal komunitas.",
+                pride1: "Setahu kami, ini adalah adaptasi protokol Lightning <strong>pertama di dunia</strong> yang benar-benar berjalan di jaringan beralgoritma X11.",
+                pride2: "Kami menyampaikannya apa adanya: bukan yang terbesar, bukan yang paling ramai, tetapi karya sebuah komunitas kecil yang membangunnya sendiri selangkah demi selangkah, dan hari ini langkah itu teruji nyata. Ada rasa bangga yang wajar di situ, dan kebanggaan itu milik kita bersama.",
+                statusLbl: "Status saat ini:",
+                statusTxt: "fase pembuktian di testnet sedang dimatangkan. Sesudah fase ini selesai, mainnet menyusul, dompet ELNUX untuk koin sungguhan (mainnet), dengan kunci yang tetap dipegang pemiliknya sendiri di HP masing-masing.",
+                stp1: "Uji testnet", stp2: "Pematangan", stp3: "Mainnet",
+                thanks: "Terima kasih untuk semua yang selama ini ikut menambang, menguji, dan bersabar mengikuti prosesnya. Jaringan ini lahir dari kebersamaan, dan dengan cara yang sama pula ia akan sampai ke tujuannya. 🙏",
+                sign: "Tim Lightning Nusacoin",
+                footerDesc: "Blockchain milik rakyat dengan prinsip crypto yang adil. Terdesentralisasi, aman, dan dapat diakses semua orang.",
+                footerQuickTitle: "Tautan Cepat",
+                footerResTitle: "Sumber Daya",
+                footerDocsTitle: "Dokumen & Keamanan",
+                menuGlossary: "Kosa Kata",
+                menuSecure: "Amankan Wallet",
+                menuPrivacy: "Lindungi Privasi",
+                footerCopyright: "© 2026 Nusacoin Project. Dibangun untuk desentralisasi."
+            },
+            en: {
+                topBarHelp: "Nusacoin.org needs your help!",
+                artTitle: "⚡ Progress Update: Nusacoin Lightning Enters Testing, One Step Away from Mainnet",
+                artGreet: "Hello Nusacoin family,",
+                artIntro: "Today we completed a full end-to-end test of the Lightning Network on the Nusacoin test network (testnet), using our own wallet app, <strong>ELNUX</strong>, on a real phone, not a simulation.",
+                mgTitle: "Animation of two water tanks joined by one channel: the first 5,000 payment opens a 25,000 channel automatically, and later payments pass straight through with no block confirmation",
+                svSender: "Sender", svPhone: "ELNUX phone",
+                svFee: "−25 nusan · channel fee (once)", svNo: "No channel yet — waiting for the first payment", svPipe: "Channel open · 25,000",
+                ft1: "filled 4,975 of 25,000", ft2: "filled 5,475 of 25,000", ft3: "filled 6,475 of 25,000",
+                bl1: "4,975", bl2: "5,475", bl3: "6,475", pk1: "5,000", pk2: "500", pk3: "1,000",
+                svBadge: "⚡ 0 block confirmations", svLane: "⛏ Mainnet blocks (scheduled)",
+                st1: "nusan sent", st2: "nusan received", st3: "channel capacity", st4: "block confirmations",
+                artProofTitle: "What was proven today:",
+                proof1: "A 5,000 nusan payment to the ELNUX wallet on a phone arrived within seconds, with 4,975 nusan received (the 25 nusan difference is the channel creation fee, charged only once when the first channel is opened).",
+                proof2: 'The payment channel was created automatically when the first payment arrived; the recipient does not need to prepare anything beforehand. <span class="note">(set up on the Lightning Node side).</span>',
+                proof3: 'The channel was made wide from the start, with a capacity of 25,000 nusan, so later payments, small or large, can ride on it right away without opening a new channel. <span class="note">(as shown in the video above).</span>',
+                proof4: "Everything ran without waiting for a single block confirmation.",
+                hlTitle: "That last point matters most to us.",
+                hl1: "Nusacoin Mainnet mining runs on a schedule, so a payment that has to wait for a block will never feel instant.",
+                hl2: "This system is designed so payments are instant on their own channel, while the block side catches up behind it on the community’s schedule.",
+                pride1: "As far as we know, this is the <strong>first adaptation of the Lightning protocol in the world</strong> that actually runs on an X11-algorithm network.",
+                pride2: "We say it as it is: not the biggest, not the busiest, but the work of a small community that built it on its own, step by step, and today that step was tested for real. There is a natural pride in that, and the pride belongs to all of us.",
+                statusLbl: "Current status:",
+                statusTxt: "the proof phase on testnet is being polished. Once it is complete, mainnet follows, with the ELNUX wallet for real coins (mainnet), with keys that stay in the owner’s hands on their own phone.",
+                stp1: "Testnet test", stp2: "Polishing", stp3: "Mainnet",
+                thanks: "Thank you to everyone who has mined, tested, and patiently followed the process. This network was born from togetherness, and in the same way it will reach its goal. 🙏",
+                sign: "Nusacoin Lightning Team",
+                footerDesc: "The people's blockchain built on fair crypto principles. Decentralized, secure, and accessible to everyone.",
+                footerQuickTitle: "Quick Links",
+                footerResTitle: "Resources",
+                footerDocsTitle: "Docs & Security",
+                menuGlossary: "Glossary",
+                menuSecure: "Secure Wallet",
+                menuPrivacy: "Protect Privacy",
+                footerCopyright: "© 2026 Nusacoin Project. Built for decentralization."
+            }
+        };
+
+        const LOCALE = { id: 'id-ID', en: 'en-US' };
+        let curLang = 'id';
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const fmt = n => new Intl.NumberFormat(LOCALE[curLang]).format(n);
+
+        function switchLanguage(lang) {
+            curLang = lang;
+            document.getElementById('btnIN').classList.toggle('active', lang === 'id');
+            document.getElementById('btnEN').classList.toggle('active', lang === 'en');
+
+            const t = translations[lang];
+            for (const key in t) {
+                const byId = document.getElementById(key);
+                if (byId) byId.innerHTML = t[key];
+                document.querySelectorAll('[data-i18n="' + key + '"]').forEach(el => { el.innerHTML = t[key]; });
+            }
+            document.querySelectorAll('[data-count]').forEach(el => { el.textContent = fmt(+el.dataset.count); });
+        }
+
+        /* Logika JavaScript Modulasi Tema */
+        function toggleTheme() {
+            const body = document.getElementById('nx-root');
+            const icon = document.getElementById('themeIcon');
+            body.classList.toggle('dark-mode');
+            icon.className = body.classList.contains('dark-mode') ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+        }
+
+        /* Blok mainnet (jalur lambat) */
+        (function buildBlocks() {
+            const g = document.getElementById('blocks');
+            const NS = 'http://www.w3.org/2000/svg';
+            for (let i = 0; i < 8; i++) {
+                const x = 20 + i * 160;
+                if (i < 7) {
+                    const l = document.createElementNS(NS, 'line');
+                    l.setAttribute('class', 'lnk');
+                    l.setAttribute('x1', x + 64); l.setAttribute('x2', x + 160);
+                    l.setAttribute('y1', 333); l.setAttribute('y2', 333);
+                    g.appendChild(l);
+                }
+                const r = document.createElementNS(NS, 'rect');
+                r.setAttribute('class', 'blk');
+                r.setAttribute('x', x); r.setAttribute('y', 316);
+                r.setAttribute('width', 64); r.setAttribute('height', 34); r.setAttribute('rx', 8);
+                g.appendChild(r);
+            }
+        })();
+
+        /* Animasi saat terlihat di layar */
+        function countUp(el) {
+            const to = +el.dataset.count;
+            if (reduceMotion || to === 0) { el.textContent = fmt(to); return; }
+            const t0 = performance.now(), dur = 1400;
+            (function step(now) {
+                const p = Math.min((now - t0) / dur, 1);
+                el.textContent = fmt(Math.round(to * (1 - Math.pow(1 - p, 3))));
+                if (p < 1) requestAnimationFrame(step);
+            })(t0);
+        }
+
+        if ('IntersectionObserver' in window) {
+            const io = new IntersectionObserver(entries => {
+                entries.forEach(e => {
+                    if (!e.isIntersecting) return;
+                    e.target.classList.add('in');
+                    e.target.querySelectorAll('[data-count]').forEach(countUp);
+                    if (e.target.classList.contains('stat')) {
+                        e.target.querySelectorAll('[data-count]').forEach(countUp);
+                    }
+                    io.unobserve(e.target);
+                });
+            }, { threshold: 0.15 });
+            document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+            const mg = document.getElementById('mg');
+            new IntersectionObserver(es => {
+                es.forEach(e => mg.classList.toggle('playing', e.isIntersecting));
+            }, { threshold: 0.2 }).observe(mg);
+        } else {
+            document.querySelectorAll('.reveal').forEach(el => el.classList.add('in'));
+            document.getElementById('mg').classList.add('playing');
+        }
+    </script>
+</body>
+</html>
