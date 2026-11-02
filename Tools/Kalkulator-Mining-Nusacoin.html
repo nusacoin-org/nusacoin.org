@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kalkulator Mining Nusacoin (NUX)</title>
+<link rel="icon" href="https://iili.io/CNJKhKu.th.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root{--nux-green:#27ae60;--nux-green-dark:#1e8449;--nux-green-deep:#0f3d26;--gold:#d4a017;--red:#e74c3c;--white:#fff;--green-pale:#eafff2;--green-ring:rgba(39,174,96,.18);--shadow:rgba(15,61,38,.18);--bg:#f7f5ef;--surface:#fff;--surface-2:#f0efe6;--ink:#16231c;--ink-soft:#56645c;--border:#e3ded0}
+html[data-theme="dark"]{--bg:#0d1712;--surface:#142219;--surface-2:#182a1e;--ink:#eef3ec;--ink-soft:#9db3a4;--border:#24382c;--shadow:rgba(0,0,0,.55)}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{margin:0;overflow-x:hidden;background:var(--bg);color:var(--ink);font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,sans-serif;min-height:100vh;padding-bottom:20px}
+.topbar{position:sticky;top:0;left:0;right:0;width:100%;margin:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;padding-top:calc(10px + env(safe-area-inset-top));padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right));background:var(--surface);border-bottom:1px solid var(--border);box-shadow:0 4px 16px -8px var(--shadow)}
+.topbar h1{margin:0;display:flex;align-items:center;gap:10px;font-size:16px;color:var(--nux-green);min-width:0}
+.topbar h1 img{width:clamp(32px,8vw,44px);height:clamp(32px,8vw,44px);flex:none}
+.topbar h1 span{line-height:1.2}
+.controls-container{display:flex;align-items:center;gap:8px;flex:none}
+.lang-switcher{display:flex;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:2px}
+.lang-btn{background:transparent;border:none;color:var(--ink-soft);padding:4px 8px;font-size:12px;font-weight:700;cursor:pointer;border-radius:6px;width:auto}
+.lang-btn.active{background:var(--nux-green);color:var(--white)}
+.theme-toggle-btn{background:var(--surface-2);border:1px solid var(--border);color:var(--gold);padding:6px 12px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;width:auto}
+.wrap{width:100%;max-width:1000px;margin:0 auto;padding:16px 12px}
+.grid>*{min-width:0}
+.hero{margin:4px 0 18px;font-size:clamp(13px,3.4vw,15px);color:var(--ink-soft);text-align:center}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:760px){.grid{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;box-shadow:0 10px 25px -5px var(--shadow)}
+.card h2{font-size:15px;margin:0 0 14px;color:var(--nux-green)}
+label{display:block;font-size:13px;font-weight:600;color:var(--ink);text-transform:uppercase;margin:14px 0 6px}
+.row{display:flex;gap:8px}
+input,select{min-width:0;width:100%;padding:10px 14px;border-radius:6px;border:1px solid var(--border);background:var(--surface-2);color:var(--ink);font-size:14px;font-family:monospace;outline:none}
+input:focus,select:focus{border-color:var(--nux-green);box-shadow:0 0 0 3px var(--green-ring)}
+select{width:auto;min-width:96px}
+button{cursor:pointer;border:0;border-radius:6px;padding:12px 16px;font-weight:700;font-size:14px;color:var(--white);background:var(--nux-green)}
+button:hover{background:var(--nux-green-dark)}
+button.sec{background:var(--surface-2);color:var(--ink);border:1px solid var(--border)}
+button.sec:hover{background:var(--surface-2)}
+.btns{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+.btns button{flex:1}
+.status{font-size:12px;color:var(--ink-soft);margin-top:10px;min-height:1.1em}
+.status.err{color:var(--gold)}
+.tabs{display:flex;gap:6px;margin-bottom:8px;background:var(--surface-2);padding:6px;border-radius:10px;border:1px solid var(--border)}
+.tabs button{flex:1;background:transparent;color:var(--ink-soft);padding:10px 12px}
+.tabs button:hover{background:transparent}
+.tabs button.on{background:var(--nux-green);color:var(--white)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:10px 8px;text-align:right;border-bottom:1px solid var(--border);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--ink-soft);font-weight:600;font-size:12px;text-transform:uppercase}
+.big{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+@media(max-width:520px){.big{grid-template-columns:1fr}}
+.kpi{background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:14px}
+.kpi small{color:var(--ink-soft);display:block;font-size:11px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.kpi b{font-size:18px}
+.pos{color:var(--nux-green)}.neg{color:var(--red)}
+.note{font-size:12px;color:var(--ink-soft);margin-top:12px;line-height:1.5}
+.full{grid-column:1/-1}
+@media(min-width:1200px){.wrap{max-width:1120px;padding:24px 16px}.topbar{padding-left:max(24px,env(safe-area-inset-left));padding-right:max(24px,env(safe-area-inset-right))}.topbar h1 span{font-size:20px}}
+@media(min-width:761px) and (max-width:1199px){.wrap{padding:20px 16px}.card{padding:20px}}
+@media(max-width:760px){.wrap{padding:12px 10px}.card{padding:16px}.grid{gap:12px}.hero{margin-bottom:12px}}
+@media(max-width:600px){
+  input,select{font-size:16px}
+  .btns button{flex:1 1 140px}
+  .tabs button{font-size:13px;padding:10px 6px}
+  table,thead,tbody,tr,td{display:block;width:100%}
+  thead{display:none}
+  tr{border:1px solid var(--border);border-radius:10px;padding:8px 12px;margin-bottom:10px;background:var(--surface-2)}
+  td{display:flex;justify-content:space-between;align-items:center;gap:12px;border:0;padding:6px 0;white-space:normal;text-align:right;font-size:14px}
+  td::before{content:attr(data-l);color:var(--ink-soft);font-size:11px;text-transform:uppercase;text-align:left}
+  td:first-child{font-weight:700;color:var(--nux-green);border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:4px;justify-content:flex-start}
+  td:first-child::before{content:none}
+}
+@media(max-width:420px){.topbar h1 span{font-size:13px}.theme-toggle-btn span{display:none}.theme-toggle-btn{padding:6px 10px}}
+@media(max-width:340px){.topbar h1 img{display:none}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <h1><img src="https://iili.io/CNJKhKu.th.png" alt="Nusacoin Logo"><span data-i="title"></span></h1>
+  <div class="controls-container">
+    <div class="lang-switcher">
+      <button id="btnIN" class="lang-btn active" type="button">IN</button>
+      <button id="btnEN" class="lang-btn" type="button">EN</button>
+    </div>
+    <button id="theme" class="theme-toggle-btn" type="button"><i id="theme-icon" class="fa-solid fa-sun"></i><span id="theme-text">Light</span></button>
+  </div>
+</header>
+<div class="wrap">
+  <p class="hero" data-i="sub"></p>
+
+  <div class="grid">
+    <div class="card">
+      <h2 data-i="hMiner"></h2>
+      <label data-i="lHr"></label>
+      <div class="row">
+        <input id="hr" type="number" min="0" step="any" value="1">
+        <select id="hrU">
+          <option value="1">H/s</option><option value="1e3">KH/s</option><option value="1e6">MH/s</option><option value="1e9" selected>GH/s</option><option value="1e12">TH/s</option>
+        </select>
+      </div>
+      <label data-i="lPw"></label>
+      <input id="pw" type="number" min="0" step="any" value="300">
+      <label data-i="lKwh"></label>
+      <input id="kwh" type="number" min="0" step="any" value="1444.70">
+      <label data-i="lFee"></label>
+      <input id="fee" type="number" min="0" step="any" value="1">
+      <label data-i="lPxUsd"></label>
+      <input id="px" type="number" min="0" step="any" value="0.004712">
+      <label data-i="lRate"></label>
+      <input id="rate" type="number" min="0" step="any" value="18000">
+      <label data-i="lCap"></label>
+      <input id="cap" type="number" min="0" step="any" value="0">
+      <label data-i="lCur"></label>
+      <select id="cur" style="width:100%">
+        <option value="IDR">Rupiah (Rp)</option>
+        <option value="USD">US Dollar ($)</option>
+      </select>
+    </div>
+
+    <div class="card">
+      <h2 data-i="hNet"></h2>
+      <div class="tabs">
+        <button id="tNet" type="button" data-i="tNet"></button>
+        <button id="tDif" class="on" type="button" data-i="tDif"></button>
+      </div>
+      <div id="boxNet" style="display:none">
+        <label data-i="lNh"></label>
+        <div class="row">
+          <input id="nh" type="number" min="0" step="any" value="5.99">
+          <select id="nhU">
+            <option value="1">H/s</option><option value="1e3">KH/s</option><option value="1e6">MH/s</option><option value="1e9">GH/s</option><option value="1e12" selected>TH/s</option>
+          </select>
+        </div>
+      </div>
+      <div id="boxDif">
+        <label data-i="lDf"></label>
+        <input id="df" type="number" min="0" step="any" value="502306.58">
+        <div class="note" style="margin-top:6px" data-i="nDf"></div>
+        <div class="note" id="nhInfo"></div>
+      </div>
+      <label data-i="lRw"></label>
+      <input id="rw" type="number" min="0" step="any" value="30">
+      <label data-i="lBt"></label>
+      <input id="bt" type="number" min="1" step="any" value="360">
+      <div class="btns">
+        <button id="live" type="button" data-i="bLive"></button>
+        <button id="reset" class="sec" type="button" data-i="bReset"></button>
+      </div>
+      <div id="st" class="status"></div>
+    </div>
+
+    <div class="card full">
+      <h2 data-i="hRes"></h2>
+      <div class="big">
+        <div class="kpi"><small data-i="kShare"></small><b id="kShare">-</b></div>
+        <div class="kpi"><small data-i="kTime"></small><b id="kTime">-</b></div>
+        <div class="kpi"><small data-i="kProfit"></small><b id="kProfit">-</b></div>
+      </div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr><th data-i="cPer"></th><th data-i="cNux"></th><th data-i="cInc"></th><th data-i="cCost"></th><th data-i="cNet"></th></tr></thead>
+          <tbody id="tb"></tbody>
+        </table>
+      </div>
+      <div id="roi" class="note"></div>
+      <div class="note" data-i="disc"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const T={
+ id:{title:'Kalkulator Mining Nusacoin (NUX)',sub:'Estimasi hasil, biaya listrik, dan titik impas mining NUX dengan data jaringan dan harga live.',
+  hMiner:'Parameter Miner',lHr:'Hashrate Anda',lPw:'Konsumsi daya (Watt)',lKwh:'Biaya listrik (Rp per kWh)',lFee:'Fee pool (%)',lPxUsd:'Harga 1 NUX (USD)',lRate:'Kurs 1 USD ke Rupiah',lCap:'Investasi perangkat (Rp, opsional untuk ROI)',lCur:'Tampilkan hasil dalam',
+  hNet:'Parameter Jaringan',tNet:'Via Network Hashrate',tDif:'Via Difficulty',lNh:'Network hashrate',lDf:'Difficulty jaringan',nDf:'Rumus: hashrate × 86400 ÷ (difficulty × 2³²), dibandingkan dengan blok target per hari.',nhEst:'Estimasi hashrate jaringan dari difficulty: ',lRw:'Reward per blok (NUX)',lBt:'Waktu blok target (detik)',
+  bLive:'🔄 Ambil data live',bReset:'Reset',
+  
+  hRes:'Hasil Estimasi',kShare:'Pangsa hashrate',kTime:'Estimasi waktu per blok',kProfit:'Laba bersih / hari',cPer:'Periode',cNux:'NUX (setelah fee)',cInc:'Pendapatan',cCost:'Listrik',cNet:'Laba bersih',
+  per:['Per jam','Per hari','Per minggu','Per bulan','Per tahun'],
+  sec:'detik',min:'menit',hour:'jam',day:'hari',year:'tahun',
+  roiOk:'📈 Estimasi balik modal (ROI): ',roiNo:'📉 Dengan parameter ini mining belum menghasilkan laba bersih, modal tidak akan kembali.',be:'⚖️ Harga impas: 1 NUX ≈ ',be2:' (di bawah ini mining merugi).',
+  disc:'⚠️ Ini estimasi teoretis. Hasil nyata bergantung pada keberuntungan blok, perubahan difficulty, stale/rejected share, dan harga pasar. Waktu blok target dan algoritma (X11) perlu Anda sesuaikan jika berbeda.',
+  loading:'Mengambil data live…',okp:'Diperbarui: ',fail:'Gagal mengambil data live (CORS/jaringan). Isi parameter secara manual.',
+  names:{diff:'difficulty',nh:'network hashrate',price:'harga NUX',rate:'kurs USD/IDR'}},
+ en:{title:'Nusacoin (NUX) Mining Calculator',sub:'Estimate NUX mining output, electricity cost and break-even using live network and price data.',
+  hMiner:'Miner Settings',lHr:'Your hashrate',lPw:'Power consumption (Watt)',lKwh:'Electricity cost (Rp per kWh)',lFee:'Pool fee (%)',lPxUsd:'Price of 1 NUX (USD)',lRate:'1 USD to Rupiah rate',lCap:'Hardware investment (Rp, optional for ROI)',lCur:'Show results in',
+  hNet:'Network Settings',tNet:'Via Network Hashrate',tDif:'Via Difficulty',lNh:'Network hashrate',lDf:'Network difficulty',nDf:'Formula: hashrate × 86400 ÷ (difficulty × 2³²), compared with target blocks per day.',nhEst:'Estimated network hashrate from difficulty: ',lRw:'Block reward (NUX)',lBt:'Target block time (seconds)',
+  bLive:'🔄 Fetch live data',bReset:'Reset',
+  
+  hRes:'Estimated Results',kShare:'Hashrate share',kTime:'Estimated time per block',kProfit:'Net profit / day',cPer:'Period',cNux:'NUX (after fee)',cInc:'Revenue',cCost:'Electricity',cNet:'Net profit',
+  per:['Per hour','Per day','Per week','Per month','Per year'],
+  sec:'sec',min:'min',hour:'hours',day:'days',year:'years',
+  roiOk:'📈 Estimated payback (ROI): ',roiNo:'📉 With these settings mining is not profitable, so the investment will not be recovered.',be:'⚖️ Break-even price: 1 NUX ≈ ',be2:' (below this, mining loses money).',
+  disc:'⚠️ Theoretical estimate only. Real results depend on block luck, difficulty changes, stale/rejected shares and market price. Adjust the target block time and algorithm (X11) if they differ.',
+  loading:'Fetching live data…',okp:'Updated: ',fail:'Could not fetch live data (CORS/network). Please fill in the values manually.',
+  names:{diff:'difficulty',nh:'network hashrate',price:'NUX price',rate:'USD/IDR rate'}}
+};
+const DEF={hr:1,hrU:'1e9',pw:300,kwh:1444.70,fee:1,px:0.004712,rate:18000,cap:0,cur:'IDR',nh:5.99,nhU:'1e12',df:502306.58,rw:30,bt:360};
+let mode='dif',L='id',lastSt=null;
+
+function num(id){const v=parseFloat($(id).value);return isFinite(v)&&v>=0?v:0}
+function loc(){return L==='id'?'id-ID':'en-US'}
+function fmt(n,d=2){return isFinite(n)?n.toLocaleString(loc(),{maximumFractionDigits:d}):'-'}
+function money(idr){
+  const c=$('cur').value;
+  if(c==='USD'){const r=num('rate')||1;return '$ '+fmt(idr/r,4)}
+  return 'Rp '+fmt(idr,0);
+}
+function fmtTime(s){
+  const t=T[L];
+  if(!isFinite(s)||s<=0)return '-';
+  if(s<60)return fmt(s,1)+' '+t.sec;
+  if(s<3600)return fmt(s/60,1)+' '+t.min;
+  if(s<86400)return fmt(s/3600,1)+' '+t.hour;
+  if(s<86400*365)return fmt(s/86400,1)+' '+t.day;
+  return fmt(s/86400/365,1)+' '+t.year;
+}
+function fmtHash(h){
+  if(!isFinite(h)||h<=0)return '0 H/s';
+  const u=[['TH/s',1e12],['GH/s',1e9],['MH/s',1e6],['KH/s',1e3]];
+  for(const [n,f] of u)if(h>=f)return fmt(h/f,2)+' '+n;
+  return fmt(h,2)+' H/s';
+}
+function netHash(){
+  if(mode==='dif'){const bt=num('bt')||360;return num('df')*4294967296/bt}
+  return num('nh')*parseFloat($('nhU').value);
+}
+function calc(){
+  const t=T[L];
+  const hr=num('hr')*parseFloat($('hrU').value);
+  const bt=num('bt')||360,rw=num('rw'),blocksDay=86400/bt;
+  let share=0;
+  if(mode==='net'){
+    const nh=netHash();
+    share=nh>0?hr/nh:0;
+  }else{
+    const df=num('df');
+    const solo=df>0?hr*86400/(df*4294967296):0;
+    share=blocksDay>0?solo/blocksDay:0;
+  }
+  share=Math.min(share,1);
+  let gross=share*blocksDay*rw;
+  const net=gross*(1-num('fee')/100);
+  const costDay=num('pw')/1000*24*num('kwh');
+  const pxIdr=num('px')*num('rate');
+
+  $('nhInfo').textContent=T[L].nhEst+fmtHash(num('df')*4294967296/(num('bt')||360));
+  $('kShare').textContent=share>0?(share*100).toLocaleString(loc(),{maximumSignificantDigits:4})+' %':'-';
+  $('kTime').textContent=share>0?fmtTime(bt/share):'-';
+
+  const d=[1/24,1,7,30,365];
+  let html='',pDay=net*pxIdr-costDay;
+  d.forEach((k,i)=>{
+    const n=net*k,inc=n*pxIdr,cost=costDay*k,pf=inc-cost;
+    html+=`<tr><td>${t.per[i]}</td><td data-l="${t.cNux}">${fmt(n,4)}</td><td data-l="${t.cInc}">${money(inc)}</td><td data-l="${t.cCost}">${money(cost)}</td><td data-l="${t.cNet}" class="${pf>=0?'pos':'neg'}">${money(pf)}</td></tr>`;
+  });
+  $('tb').innerHTML=html;
+  const kp=$('kProfit');
+  kp.textContent=money(pDay);
+  kp.className=pDay>=0?'pos':'neg';
+
+  const cap=num('cap');let r='';
+  if(cap>0)r=pDay>0?t.roiOk+fmtTime(cap/pDay*86400):t.roiNo;
+  if(net>0&&pxIdr>0){
+    const be=costDay/net;
+    const c=$('cur').value;
+    const beTxt=c==='USD'?'$ '+fmt(be/(num('rate')||1),6):'Rp '+fmt(be,2);
+    r+=(r?'<br>':'')+t.be+beTxt+t.be2;
+  }
+  $('roi').innerHTML=r;
+}
+
+function setMode(m){
+  mode=m;
+  $('boxNet').style.display=m==='net'?'':'none';
+  $('boxDif').style.display=m==='dif'?'':'none';
+  $('tNet').classList.toggle('on',m==='net');
+  $('tDif').classList.toggle('on',m==='dif');
+  calc();
+}
+function setStatus(txt,err){const s=$('st');s.textContent=txt;s.className='status'+(err?' err':'')}
+
+async function getData(url){
+  const c=new AbortController(),tm=setTimeout(()=>c.abort(),10000);
+  try{
+    const r=await fetch(url,{signal:c.signal});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const x=await r.text();
+    try{return JSON.parse(x)}catch(e){return parseFloat(x)}
+  }finally{clearTimeout(tm)}
+}
+function setHash(h){
+  let u='1',v=h;
+  for(const [k,f] of [['1e12',1e12],['1e9',1e9],['1e6',1e6],['1e3',1e3]])if(h>=f){u=k;v=h/f;break}
+  $('nh').value=+v.toPrecision(6);$('nhU').value=u;
+}
+
+async function live(){
+  const t=T[L];
+  setStatus(t.loading);
+  const E='https://explorer.nusacoin.org/';
+  const jobs=[
+    getData(E+'api/getdifficulty'),
+    getData(E+'ext/getcurrentprice'),
+    getData('https://open.er-api.com/v6/latest/USD')
+  ];
+  const [dif,pr,fx]=await Promise.allSettled(jobs);
+  const ok=[];
+  if(dif.status==='fulfilled'&&+dif.value>0){$('df').value=+dif.value;ok.push(t.names.diff)}
+  if(dif.status==='fulfilled'&&+dif.value>0)setHash(+dif.value*4294967296/(num('bt')||360));
+  if(pr.status==='fulfilled'&&pr.value){
+    const v=+(pr.value.last_price_usd??pr.value.last_price_usdt);
+    if(v>0){$('px').value=v;ok.push(t.names.price)}
+  }
+  if(fx.status==='fulfilled'&&fx.value&&fx.value.rates&&+fx.value.rates.IDR>0){
+    $('rate').value=Math.round(fx.value.rates.IDR);ok.push(t.names.rate);
+  }
+  if(ok.length){lastSt=null;setStatus(t.okp+ok.join(', '))}
+  else setStatus(t.fail,true);
+  calc();
+}
+
+function reset(){
+  for(const k in DEF)$(k).value=DEF[k];
+  setStatus('');setMode('dif');
+}
+
+function applyLang(){
+  const t=T[L];
+  document.documentElement.lang=L;
+  document.title=t.title;
+  document.querySelectorAll('[data-i]').forEach(e=>{const v=t[e.dataset.i];if(typeof v==='string')e.textContent=v});
+  $('btnIN').classList.toggle('active',L==='id');
+  $('btnEN').classList.toggle('active',L==='en');
+  try{localStorage.setItem('nux-calc-lang',L)}catch(e){}
+  calc();
+}
+function applyTheme(th){
+  document.documentElement.dataset.theme=th;
+  $('theme-icon').className='fa-solid '+(th==='dark'?'fa-moon':'fa-sun');
+  $('theme-text').textContent=th==='dark'?'Dark':'Light';
+  try{localStorage.setItem('nux-calc-theme',th)}catch(e){}
+}
+
+document.querySelectorAll('input,select').forEach(e=>e.addEventListener('input',calc));
+$('tNet').onclick=()=>setMode('net');
+$('tDif').onclick=()=>setMode('dif');
+$('live').onclick=live;
+$('reset').onclick=reset;
+$('btnIN').onclick=()=>{L='id';applyLang()};
+$('btnEN').onclick=()=>{L='en';applyLang()};
+$('theme').onclick=()=>applyTheme(document.documentElement.dataset.theme==='dark'?'light':'dark');
+
+(function init(){
+  let th=null,lg=null;
+  try{th=localStorage.getItem('nux-calc-theme');lg=localStorage.getItem('nux-calc-lang')}catch(e){}
+  if(th!=='dark'&&th!=='light')th='light';
+  if(lg==='en'||lg==='id')L=lg;
+  applyTheme(th);applyLang();
+  live();
+})();
+</script>
+</body>
+</html>
