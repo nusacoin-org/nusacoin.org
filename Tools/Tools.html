@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tools Nusachain</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+/* ===== Gaya toolbar & footer (dari website.html) ===== */
+/* ============================================================
+   NUSACOIN — DESIGN TOKENS
+   Signature: "chained block" motif — sections read like linked
+   ledger blocks (mono eyebrows, dotted chain connectors).
+   ============================================================ */
+:root{
+  --nux-green:#27ae60;
+  --nux-green-dark:#1e8449;
+  --nux-green-deep:#0f3d26;
+  --gold:#d4a017;
+
+  --bg:#f7f5ef;
+  --surface:#ffffff;
+  --surface-2:#f0efe6;
+  --ink:#16231c;
+  --ink-soft:#56645c;
+  --border:#e3ded0;
+  --shadow: 0 10px 30px -12px rgba(15,61,38,0.18);
+
+  --font-display:'Sora',sans-serif;
+  --font-body:'Inter',sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+
+  --radius:14px;
+  --transition: 0.35s cubic-bezier(.22,.9,.32,1.24);
+}
+
+html[data-theme="dark"]{
+  --bg:#0d1712;
+  --surface:#142219;
+  --surface-2:#182a1e;
+  --ink:#eef3ec;
+  --ink-soft:#9db3a4;
+  --border:#24382c;
+  --shadow: 0 10px 34px -10px rgba(0,0,0,0.55);
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:var(--font-body);
+  background:var(--bg);
+  color:var(--ink);
+  line-height:1.65;
+  overflow-x:hidden;
+  transition:background var(--transition), color var(--transition);
+}
+img{max-width:100%;display:block;}
+a{color:inherit;}
+h1,h2,h3,h4{font-family:var(--font-display);letter-spacing:-0.01em;}
+.mono{font-family:var(--font-mono);}
+:focus-visible{outline:2px solid var(--nux-green);outline-offset:3px;border-radius:4px;}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important; scroll-behavior:auto !important;}
+}
+
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px;}
+/* ---------- Announcement bar ---------- */
+.top-bar{
+  background:linear-gradient(90deg,var(--nux-green-deep),var(--nux-green));
+  color:#eafff2;
+  text-align:center;
+  padding:9px 16px;
+  font-size:0.82rem;
+  font-weight:600;
+}
+.top-bar a{color:#fff;text-decoration:underline;text-underline-offset:3px;}
+
+/* ---------- Header ---------- */
+header{
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:1000;
+  transition:background var(--transition), border-color var(--transition);
+}
+.nav-container{
+  max-width:1180px;margin:0 auto;padding:0 24px;
+  display:flex;align-items:center;height:72px;gap:28px;
+}
+.logo-area{display:flex;align-items:center;gap:10px;text-decoration:none;font-family:var(--font-display);font-weight:800;font-size:1.25rem;color:var(--ink);flex-shrink:0;}
+.logo-mark{
+  width:34px;height:34px;border-radius:9px;
+  background:linear-gradient(135deg,var(--nux-green),var(--nux-green-deep));
+  display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.95rem;font-weight:800;
+}
+.logo-area .accent{color:var(--nux-green);}
+.logo-area img{width:34px;height:34px;object-fit:contain;flex-shrink:0;}
+@media (max-width:480px){
+  .nav-container{padding:0 16px;gap:12px;}
+  .logo-area{font-size:1.05rem;gap:8px;}
+  .logo-area img{width:30px;height:30px;}
+  .coin-ring{width:min(280px,78vw);height:min(280px,78vw);}
+}
+
+.nav-menu{display:flex;list-style:none;height:100%;align-items:center;gap:2px;}
+.nav-item{position:relative;height:100%;display:flex;align-items:center;}
+.nav-link{
+  text-decoration:none;color:var(--ink-soft);font-size:0.87rem;font-weight:600;
+  padding:0 13px;height:100%;display:flex;align-items:center;gap:6px;
+  transition:color 0.2s;white-space:nowrap;
+}
+.nav-link:hover{color:var(--nux-green);}
+.dropdown{
+  position:absolute;top:100%;left:0;background:var(--surface);min-width:230px;
+  box-shadow:var(--shadow);border:1px solid var(--border);border-radius:0 0 12px 12px;
+  display:none;padding:8px 0;list-style:none;
+}
+.dropdown a{display:block;padding:9px 18px;text-decoration:none;color:var(--ink-soft);font-size:0.82rem;transition:0.2s;}
+.dropdown a:hover{background:var(--surface-2);color:var(--nux-green);padding-left:22px;}
+.nav-item:hover .dropdown{display:block;}
+
+.nav-tools{display:flex;align-items:center;gap:8px;margin-left:auto;}
+.tool-btn{
+  display:flex;align-items:center;gap:6px;
+  background:var(--surface-2);border:1px solid var(--border);color:var(--ink);
+  padding:8px 12px;border-radius:9px;font-size:0.78rem;font-weight:700;cursor:pointer;
+  font-family:var(--font-mono);transition:border-color 0.2s, color 0.2s, transform 0.2s;
+}
+.tool-btn:hover{border-color:var(--nux-green);color:var(--nux-green);transform:translateY(-1px);}
+.menu-toggle{display:none;font-size:1.3rem;cursor:pointer;background:none;border:none;color:var(--ink);}
+
+@media (max-width:768px){
+  .menu-toggle{display:block;order:3;}
+  .nav-tools{order:2;}
+  .nav-menu{
+    display:none;flex-direction:column;position:absolute;top:100%;left:0;width:100%;
+    background:var(--surface);height:auto;padding:16px 0;border-bottom:3px solid var(--nux-green);
+    box-shadow:var(--shadow);
+    max-height:calc(100vh - 72px);max-height:calc(100dvh - 72px);
+    overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;
+  }
+  .nav-menu.active{display:flex;}
+  .nav-item{width:100%;height:auto;flex-direction:column;align-items:flex-start;}
+  .nav-link{width:100%;padding:13px 24px;border-bottom:1px solid var(--border);}
+  .dropdown{position:static;width:100%;box-shadow:none;border:none;background:var(--surface-2);display:none;border-radius:0;}
+  .nav-item.open .dropdown{display:block;}
+}
+
+/* Menu desktop tetap horizontal di lebar 769-1240px (termasuk "situs desktop" di HP), dibuat lebih rapat agar muat */
+@media (min-width:769px) and (max-width:1240px){
+  .nav-container{padding:0 16px;gap:12px;}
+  .logo-area{font-size:1.05rem;gap:8px;}
+  .logo-area img{width:30px;height:30px;}
+  .nav-menu{flex:1;min-width:0;justify-content:center;gap:0;}
+  .nav-link{font-size:0.8rem;padding:0 9px;gap:4px;}
+  .tool-btn{padding:7px 10px;}
+}
+@media (min-width:769px) and (max-width:1020px){
+  .nav-container{padding:0 10px;gap:8px;}
+  .logo-area{font-size:0.95rem;}
+  .nav-link{font-size:0.74rem;padding:0 6px;}
+  .tool-btn{padding:6px 8px;font-size:0.72rem;}
+}
+
+/* ---------- Footer ---------- */
+footer{background:var(--surface-2);border-top:1px solid var(--border);padding:60px 0 30px;transition:background var(--transition);}
+.footer-grid{display:grid;grid-template-columns:1.5fr 1fr 1fr 1.2fr;gap:36px;margin-bottom:40px;}
+@media (max-width:900px){.footer-grid{grid-template-columns:1fr 1fr;}}
+@media (max-width:560px){.footer-grid{grid-template-columns:1fr;text-align:center;}}
+.footer-brand h2{color:var(--nux-green);font-size:1.4rem;margin-bottom:14px;font-family:var(--font-display);}
+.footer-brand p{color:var(--ink-soft);font-size:0.9rem;max-width:280px;}
+@media (max-width:560px){.footer-brand p{margin:0 auto;}}
+.footer-col h3{font-size:0.78rem;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:18px;color:var(--ink-soft);font-family:var(--font-mono);}
+.footer-col ul{list-style:none;}
+.footer-col li{margin-bottom:11px;}
+.footer-col a{color:var(--ink-soft);text-decoration:none;font-size:0.87rem;font-weight:500;transition:0.2s;}
+.footer-col a:hover{color:var(--nux-green);padding-left:5px;}
+.social-icons{display:flex;gap:12px;margin-top:16px;flex-wrap:wrap;}
+@media (max-width:560px){.social-icons{justify-content:center;}}
+.social-box{
+  width:42px;height:42px;border:1.5px solid var(--border);border-radius:10px;display:flex;align-items:center;
+  justify-content:center;color:var(--ink-soft);text-decoration:none;background:var(--surface);
+  transition:all var(--transition);
+}
+.social-box:hover{border-color:var(--nux-green);color:#fff;background:var(--nux-green);transform:translateY(-4px);box-shadow:0 10px 18px -8px rgba(39,174,96,0.4);}
+.footer-bottom{border-top:1px solid var(--border);padding-top:24px;text-align:center;color:var(--ink-soft);font-size:0.82rem;}
+.footer-bottom .mono{opacity:0.7;}
+</style>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap');
+
+/* Semua gaya dibatasi di dalam .nct supaya tidak bentrok dengan template Blogger */
+.nct{
+  --green:#1E9E5A;--dark:#127A43;--bg:#F2FBF6;--card:#fff;--ink:#0f2f20;--mute:#4f6f5f;--line:#cfeedd;--soft:#e3f6ea;--acc:#127A43;--shadow:rgba(18,122,67,.12);
+  container-type:inline-size;container-name:nct;
+  width:100%;max-width:1120px;margin:0 auto;
+  font-family:'Plus Jakarta Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  background:var(--bg);color:var(--ink);line-height:1.5;
+  border-radius:16px;overflow:hidden;
+  -webkit-text-size-adjust:100%;text-size-adjust:100%;
+}
+.nct[data-theme="dark"]{
+  --bg:#0b1a12;--card:#12261b;--ink:#e6f4ec;--mute:#9bb8a8;--line:#23402f;--soft:#1a3a29;--acc:#5fd08f;--shadow:rgba(0,0,0,.45);
+}
+.nct *,.nct *::before,.nct *::after{box-sizing:border-box;margin:0}
+.nct h1,.nct h2,.nct p,.nct span,.nct a,.nct button,.nct input{font-family:inherit;text-transform:none;float:none;text-shadow:none}
+.nct h1,.nct h2,.nct p{margin:0!important;padding:0;position:static;width:auto}
+.nct button,.nct input{box-shadow:none;height:auto;line-height:1.3}
+.nct-head{position:relative;z-index:1;background:linear-gradient(135deg,var(--dark),var(--green));color:#fff;padding:32px 28px 68px}
+.nct[data-theme="dark"] .nct-head{background:linear-gradient(135deg,#0a4a2a,#137a45)}
+.nct-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.nct-row h1{flex:1 1 auto;min-width:0;text-align:left}
+.nct-head h1{font-size:28px;font-size:clamp(22px,6cqi,42px);font-weight:800;letter-spacing:-.02em;line-height:1.15;color:#fff;border:0;background:none}
+.nct-head p{margin-top:10px!important;max-width:560px;opacity:.95;font-size:15px;color:#fff}
+.nct-main{position:relative;z-index:2;margin-top:-36px;padding:0 28px 40px}
+.nct-bar{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;box-shadow:0 6px 20px var(--shadow)}
+.nct-bar input{flex:1 1 100%;min-width:0;width:100%;border:1px solid var(--line);border-radius:10px;padding:11px 14px;min-height:44px;font:inherit;font-size:16px;color:var(--ink);background:var(--bg)}
+.nct-bar input::placeholder{color:var(--mute);opacity:.8}
+.nct-bar input:focus,.nct-chip:focus-visible,.nct-card a:focus-visible{outline:3px solid rgba(30,158,90,.55);outline-offset:2px}
+.nct-chips{display:flex;flex-wrap:wrap;gap:8px;flex:1 1 100%}
+.nct-chip{border:1px solid var(--line);background:var(--card);color:var(--acc);border-radius:999px;padding:8px 14px;min-height:40px;font:inherit;font-size:14px;font-weight:500;cursor:pointer;line-height:1.2}
+.nct-chip[aria-pressed=true]{background:var(--green);border-color:var(--green);color:#fff}
+.nct-count{margin:20px 2px 12px;color:var(--mute);font-size:14px}
+.nct-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,240px),1fr));gap:16px}
+.nct-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.nct-card:hover{border-color:var(--green)}
+.nct-ic{width:44px;height:44px;border-radius:12px;background:var(--soft);display:grid;place-items:center;font-size:22px}
+.nct-card h2{font-size:17px;font-weight:700;line-height:1.3;color:var(--ink);border:0;background:none;overflow-wrap:anywhere}
+.nct-cat{font-size:13px;color:var(--mute)}
+.nct-card p{font-size:14px;color:var(--mute);flex:1;overflow-wrap:anywhere}
+.nct-card a{align-self:flex-start;margin-top:6px;background:var(--green);color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:11px 16px;min-height:44px;display:inline-flex;align-items:center;border-radius:10px}
+.nct-card a:hover{background:var(--dark)}
+.nct-empty{display:none;text-align:center;padding:48px 0;color:var(--mute)}
+.nct-foot{text-align:center;color:var(--mute);font-size:13px;padding:0 20px 28px}
+
+/* Mengikuti lebar kontainer (kolom Blogger), bukan lebar layar */
+@container nct (max-width:640px){
+  .nct-head{padding:18px 18px 60px}
+  .nct-main{padding:0 14px 28px}
+  .nct-head p{font-size:14px}
+  .nct-bar{padding:12px}
+  .nct-chips{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+  .nct-chip{flex:0 0 auto;white-space:nowrap}
+}
+@container nct (max-width:420px){
+  .nct-grid{grid-template-columns:1fr;gap:12px}
+  .nct-card{padding:16px}
+  .nct-card a{align-self:stretch;justify-content:center}
+}
+@container nct (min-width:900px){
+  .nct-head{padding:28px 40px 80px}
+  .nct-main{padding:0 40px 56px}
+  .nct-head p{font-size:16px}
+}
+/* Cadangan untuk browser lama tanpa container query */
+@supports not (container-type:inline-size){
+  @media (max-width:640px){
+    .nct-head{padding:18px 18px 60px}
+    .nct-main{padding:0 14px 28px}
+    .nct-chips{flex-wrap:nowrap;overflow-x:auto}
+    .nct-chip{flex:0 0 auto;white-space:nowrap}
+  }
+  @media (max-width:420px){.nct-grid{grid-template-columns:1fr}}
+}
+
+/* Penempatan widget di dalam halaman bertoolbar */
+.nct-page{padding:32px 16px 48px}
+.nct{box-shadow:0 10px 30px -12px rgba(15,61,38,.18)}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <span data-i18n="topbar"> </span> <a href="/#faucet" data-i18n="topbarLink"> </a>
+</div>
+
+<header>
+  <div class="nav-container">
+    <a href="/" class="logo-area">
+      <img src="https://iili.io/Cr21Nx2.th.png" alt="Nusacoin Logo">
+      NUSA<span class="accent">COIN</span>
+    </a>
+
+    <button class="menu-toggle" id="mobile-btn" aria-label="Buka menu"><i class="fas fa-bars"></i></button>
+
+    <ul class="nav-menu" id="nav-list">
+      <li class="nav-item">
+  		<a href="#" class="nav-link" data-i18n="nav.Introduction">Perkenalan <i class="fa fa-caret-down"></i></a>
+ 		<ul class="dropdown">
+		  <li><a class="dropdown-item" href="/Pages/Individu.html" data-i18n="nav.individu">Individu</a></li>
+		  <li><a class="dropdown-item" href="/Pages/Bisnis.html" data-i18n="nav.businesses">Bisnis</a></li>
+ 	      <li><a class="dropdown-item" href="/Pages/Developer.html">Developer</a></li>
+   	      <li><a class="dropdown-item" href="/Pages/Memulai.html" data-i18n="nav.started">Memulai</a></li>
+    	  <li><a class="dropdown-item" href="/Pages/Visi-Misi.html">Roadmap</a></li>
+    	  <li><a class="dropdown-item" href="/Pages/Cara-Kerja.html" data-i18n="nav.how">Cara Kerja</a></li>
+    	  <li><a class="dropdown-item" href="/Pages/Whitepaper_Nusacoin_in.pdf">Whitepaper IN</a></li>
+    	  <li><a class="dropdown-item" href="/Pages/Whitepaper_Nusacoin_en.pdf">Whitepaper EN</a></li>
+        </ul>
+      </li>
+
+	 <li class="nav-item"><a href="/Pages/Inovasi.html" class="nav-link" data-i18n="nav.inovasi">Inovasi</a></li>
+
+	 <li class="nav-item"><a href="/Pages/Partisipasi.html" class="nav-link" data-i18n="nav.partisipasi">Partisipasi</a></li>
+
+     <li class="nav-item">
+  	   <a href="#" class="nav-link" data-i18n="nav.resources">Sumber Daya <i class="fa fa-caret-down"></i></a>
+       <ul class="dropdown">
+	    <li><a href="https://github.com/TaobotX11/nusacoin/releases/download/0.26.90/nusacoin-0.26.90-win64-setup.exe">Nusacoin Core Win</a></li>
+	    <li><a href="https://github.com/TaobotX11/nusacoin/releases/download/0.26.90/nusacoin-0.26.90-linux64.tar.gz">Nusacoin Core Linux</a></li>
+		<li><a href="https://github.com/TaobotX11/nusacoin/releases/download/0.26.90/Nusacoin-Qt.dmg">Nusacoin Core Mac</a></li>
+	    <li><a href="https://dompet.nusacoin.org" target="_blank" data-i18n="res.webwallet">Nusacoin Web Wallet</a></li>
+	    <li><a href="https://paper.nusacoin.org" target="_blank" data-i18n="res.paperwallet">Nusacoin Paper Wallet</a></li>
+	    <li><a href="https://green.nusacoin.org" target="_blank" data-i18n="res.greenwallet">Nusacoin Green Wallet</a></li>
+	    <li><a href="https://t.me/rdnmesin_bot">Nusacard RDN</a></li>
+	    <li><a href="/Pages/Taobot-App.html">Taobot Wallet Apk</a></li>
+	    <li><a href="https://pooljava.nusacoin.org" target="_blank" data-i18n="res.pool">Mining Pool</a></li>
+	    <li><a href="/Pages/Kosa-Kata.html" target="_blank" data-i18n="res.glossary">Kosa Kata</a></li>
+	  </ul>
+	</li>
+
+    <li class="nav-item">
+       <a href="#" class="nav-link" data-i18n="nav.explorer">Explorer </a>
+       <ul class="dropdown">
+         <li><a href="https://scan.nusachain.org">Explorer 1</a></li>
+	     <li><a href="https://block.nusachain.org">Explorer 2</a></li>
+	     <li><a href="https://chain.nusacoin.org">Explorer 3</a></li>
+	     <li><a href="https://explorer.nusacoin.org">Explorer 4</a></li>
+	     <li><a href="https://book.taobot.org">Explorer 5</a></li>
+	     <li><a href="https://scan.nusacoin.org">Explorer 6</a></li>
+	     <li><a href="https://explorer.taobot.org">Explorer 7</a></li>
+	     <li><a href="https://test.nusachain.org">Testnet Explorer</a></li>
+	   </ul>
+	 </li>
+
+	  <li class="nav-item"><a href="/Tools/Tools.html" target="_blank" class="nav-link">Tools</a></li>
+
+	  <li class="nav-item"><a href="/Pages/FAQ.html" target="_blank" class="nav-link">FAQ</a></li>
+
+	  <li class="nav-item"><a href="http://www.nusacoin.org" target="_blank" class="nav-link">Blog</a></li>
+		
+      <li class="nav-item">
+        <a href="#" class="nav-link fas fa-share-alt"></a>
+        <ul class="dropdown">
+          <li><a href="https://x.com/Nusacoin_chain" target="_blank"><i class="fab fa-twitter"></i> Twitter / X</a></li>
+		  <li><a href="https://www.threads.net/@nusa_coin" target="_blank"><i class="fab fa-threads"></i> Threads</a></li>
+          <li><a href="https://telegram.me/NusacoinX11" target="_blank"><i class="fab fa-telegram"></i> Telegram</a></li>
+          <li><a href="https://discord.gg/JMK7RgWbf" target="_blank"><i class="fab fa-discord"></i> Discord</a></li>
+          <li><a href="https://www.instagram.com/nusa_coin" target="_blank"><i class="fab fa-instagram"></i> Instagram</a></li>
+          <li><a href="https://www.youtube.com/@NusaCoin" target="_blank"><i class="fab fa-youtube"></i> YouTube</a></li>
+          <li><a href="https://www.reddit.com/r/Nusacoin" target="_blank"><i class="fab fa-reddit"></i> Reddit</a></li>
+        </ul>
+      </li>
+    </ul>
+
+    <div class="nav-tools">
+      <button class="tool-btn" id="lang-toggle" aria-label="Ganti bahasa">ID / EN</button>
+      <button class="tool-btn" id="theme-toggle" aria-label="Ganti tema"><i class="fas fa-moon"></i></button>
+    </div>
+  </div>
+</header>
+
+<main class="nct-page">
+<div class="nct" id="nct" data-theme="light">
+<div class="nct-head">
+  <div class="nct-row">
+    <h1 data-t="title"></h1>
+  </div>
+  <p data-t="intro"></p>
+</div>
+
+<div class="nct-main">
+<div class="nct-bar">
+<input id="nct-q" type="search">
+<div class="nct-chips" id="nct-chips"></div>
+</div>
+<p class="nct-count" id="nct-count" aria-live="polite"></p>
+<div class="nct-grid" id="nct-grid"></div>
+<p class="nct-empty" id="nct-empty" data-t="empty"></p>
+</div>
+
+</div>
+
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <h2>Nusacoin Network</h2>
+        <p data-i18n="footer.desc">Blockchain milik rakyat dengan prinsip crypto yang adil. Terdesentralisasi, aman, dan dapat diakses semua orang.</p>
+        <div class="social-icons">
+          <a href="https://x.com/Nusacoin_chain" target="_blank" class="social-box" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+          <a href="https://discord.gg/NcKKZFBzJ" target="_blank" class="social-box" aria-label="Discord"><i class="fab fa-discord"></i></a>
+          <a href="https://telegram.me/NusacoinX11" target="_blank" class="social-box" aria-label="Telegram"><i class="fab fa-telegram-plane"></i></a>
+          <a href="https://www.reddit.com/r/Nusacoin" target="_blank" class="social-box" aria-label="Reddit"><i class="fab fa-reddit-alien"></i></a>
+          <a href="https://github.com/TaobotX11/nusacoin" target="_blank" class="social-box" aria-label="GitHub"><i class="fab fa-github"></i></a>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <h3 data-i18n="footer.quick">Tautan Cepat</h3>
+        <ul>
+          <li><a href="https://explorer.nusacoin.org" target="_blank" data-i18n="res.explorer">Explorer</a></li>
+          <li><a href="https://dompet.nusacoin.org" target="_blank" data-i18n="res.webwallet">Nusacoin Web Wallet</a></li>
+          <li><a href="https://github.com/TaobotX11/nusacoin" target="_blank" data-i18n="res.core">Nusacoin Core</a></li>
+          <li><a href="https://green.nusacoin.org" target="_blank" data-i18n="res.greenwallet">Nusacoin Green Wallet</a></li>
+          <li><a href="/Pages/Visi-Misi.html" target="_blank" data-i18n="quick.roadmap2">Roadmap</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h3 data-i18n="footer.res">Sumber Daya</h3>
+        <ul>
+          <li><a href="https://paper.nusacoin.org" target="_blank" data-i18n="res.paperwallet">Paper Wallet</a></li>
+          <li><a href="https://pool.nusacoin.org" target="_blank" data-i18n="footer.pool">Mining Pool</a></li>
+          <li><a href="https://ijol.nusacoin.org" target="_blank" data-i18n="footer.ijol">Ijol Nusacoin (P2P)</a></li>
+          <li><a href="https://t.me/rdnmesin_bot" target="_blank" data-i18n="footer.rdn">Nusacard RDN Bot</a></li>
+          <li><a href="/Pages/Kosa-Kata.html" target="_blank" data-i18n="res.glossary">Kosa Kata</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h3 data-i18n="footer.docs">Dokumen &amp; Keamanan</h3>
+        <ul>
+          <li><a href="/Pages/Whitepaper_Nusacoin_in.pdf">Whitepaper IN</a></li>
+          <li><a href="/Pages/Whitepaper_Nusacoin_en.pdf">Whitepaper EN</a></li>
+          <li><a href="/Pages/Amankan-Wallet.html" target="_blank" data-i18n="footer.secure">Amankan Wallet</a></li>
+          <li><a href="/Pages/Lindungi-Privasi-Anda.html" target="_blank" data-i18n="footer.privacy">Lindungi Privasi</a></li>
+          <li><a href="/Pages/FAQ.html">FAQ</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span data-i18n="footer.copyright">© 2026 Nusacoin Project. Dibangun untuk desentralisasi.</span>
+      <span class="mono"> · NUX / X11</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+const B='https://www.nusachain.org/Tools/';
+const root=document.getElementById('nct');
+
+/* Teks antarmuka */
+const UI={
+  id:{title:'Tools Ekosistem Nusachain',intro:'Kumpulan alat untuk dompet, verifikasi dokumen, komunitas, dan transaksi di blockchain Nusachain. Pilih satu untuk membukanya.',
+      ph:'Cari tools, misalnya notaris atau voting',aria:'Cari tools',all:'Semua',count:(a,b)=>a+' dari '+b+' tools',open:'Buka ',
+      empty:'Tidak ada tools yang cocok. Coba kata kunci lain atau pilih kategori Semua.',toDark:'Ganti ke mode gelap',toLight:'Ganti ke mode terang',lang:'Ganti bahasa ke English'},
+  en:{title:'Nusachain Ecosystem Tools',intro:'A collection of tools for wallets, document verification, community, and transactions on the Nusachain blockchain. Pick one to open it.',
+      ph:'Search tools, e.g. notary or voting',aria:'Search tools',all:'All',count:(a,b)=>a+' of '+b+' tools',open:'Open ',
+      empty:'No matching tools. Try another keyword or choose the All category.',toDark:'Switch to dark mode',toLight:'Switch to light mode',lang:'Switch language to Bahasa Indonesia'}
+};
+
+/* Kategori */
+const CAT={
+  doc:{id:'Dokumen & Verifikasi',en:'Documents & Verification'},
+  wal:{id:'Dompet & Keamanan',en:'Wallet & Security'},
+  com:{id:'Komunitas & Data',en:'Community & Data'},
+  uti:{id:'Utilitas',en:'Utilities'},
+  fin:{id:'Keuangan & Transaksi',en:'Finance & Transactions'}
+};
+
+/* [ikon, {nama id, nama en}, kategori, {deskripsi id, deskripsi en}, url] */
+const T=[
+['🔏',['VeriSign Mainnet','VeriSign Mainnet'],'doc',['Tanda tangan dan verifikasi data di jaringan utama Nusachain.','Sign and verify data on the Nusachain main network.'],B+'VeriSign-Mainnet.html'],
+['🧪',['VeriSign Testnet','VeriSign Testnet'],'doc',['Coba VeriSign di jaringan uji tanpa memakai koin asli.','Try VeriSign on the test network without using real coins.'],B+'VeriSign-Testnet.html'],
+['💳',['Nusa-Card','Nusa-Card'],'wal',['Buat paper wallet card, dekripsi private key, dan buka live wallet.','Create a paper wallet card, decrypt a private key, and open a live wallet.'],B+'Nusa-Card.html'],
+['⛓️',['Paya-Chain','Paya-Chain'],'com',['Tool ekosistem Nusachain.','A Nusachain ecosystem tool.'],B+'Paya-Chain.html'],
+['💬',['Tanya Nusachain','Ask Nusachain'],'uti',['Tanya jawab seputar Nusachain.','Questions and answers about Nusachain.'],'https://tanya.nusachain.site'],
+['📄',['Read This File','Read This File'],'uti',['Baca dan tampilkan isi file.','Read and display the contents of a file.'],B+'Read-This-File.html'],
+['🖼️',['TA Render','TA Render'],'uti',['Halaman render untuk Read This File.','Render page for Read This File.'],'http://ta-render.nusachain.org'],
+['#️⃣',['Blog Hash Generator','Blog Hash Generator'],'doc',['Buat hash untuk tulisan blog agar keasliannya bisa dibuktikan.','Create a hash for a blog post so its authenticity can be proven.'],B+'Blog-Hash-Generator.html'],
+['🌳',['Inject Silsilah Keluarga','Inject Family Tree'],'com',['Catat silsilah keluarga ke blockchain.','Record a family tree on the blockchain.'],B+'Inject-Silsilah-Keluarga.html'],
+['🕌',['PBNU Pendataan Ranting','PBNU Branch Data Collection'],'com',['Pendataan ranting, SK, anggota, dan aset organisasi.','Data collection for branches, decrees, members, and organization assets.'],B+'PBNU-Pendataan-Ranting.html'],
+['🔳',['QR Code Generator','QR Code Generator'],'uti',['Buat QR code untuk URL, teks, email, kontak, dan lainnya.','Create QR codes for URLs, text, email, contacts, and more.'],B+'QR-Code-Generator-Nusachain.html'],
+['🎓',['Certificate','Certificate'],'doc',['Terbitkan dan verifikasi sertifikat digital.','Issue and verify digital certificates.'],B+'Certificate.html'],
+['⚖️',['Notaris','Notary'],'doc',['Cap waktu dokumen: hash file disimpan di blockchain sebagai bukti.','Document timestamping: the file hash is stored on the blockchain as proof.'],B+'Notaris.html'],
+['✂️',['Split UTXO','Split UTXO'],'fin',['Pecah UTXO menjadi banyak bagian kecil.','Split a UTXO into many smaller pieces.'],B+'Split-UTXO.html'],
+['📦',['Traceability','Traceability'],'com',['Lacak riwayat produksi produk lewat scan QR.','Trace a product\u2019s production history by scanning a QR code.'],B+'Traceability.html'],
+['📒',['Kas RT Koperasi','Neighborhood & Co-op Cash Book'],'fin',['Catat kas RT atau koperasi secara transparan.','Keep neighborhood or cooperative cash records transparently.'],B+'Kas-RT-Koperasi.html'],
+['🎫',['Tiket Event','Event Tickets'],'fin',['Tiket acara berbasis blockchain.','Blockchain-based event tickets.'],B+'Tiket-Event.html'],
+['🗳️',['Voting','Voting'],'com',['Pemungutan suara yang hasilnya bisa diperiksa publik.','Voting whose results can be checked by the public.'],B+'Voting.html'],
+['🧧',['Angpao THR','Angpao / THR Gifts'],'fin',['Kirim angpao atau THR dalam NUX.','Send angpao or holiday bonuses (THR) in NUX.'],B+'Angpao-THR.html'],
+['🗺️',['Berburu Harta Karun','Treasure Hunt'],'com',['Permainan berburu harta karun NUX.','A NUX treasure hunt game.'],B+'Berburu-Harta-Karun.html'],
+['✍️',['Tanda Tangan Wallet','Wallet Signature'],'wal',['Tanda tangani pesan memakai wallet Anda.','Sign a message using your wallet.'],B+'Tanda-Tangan-Wallet.html'],
+['📤',['Pengirim Massal','Bulk Sender'],'fin',['Kirim NUX ke banyak alamat sekaligus.','Send NUX to many addresses at once.'],B+'Pengirim-Massal.html'],
+['🏛️',['Univ-Chain','Univ-Chain'],'doc',['Verifikasi ijazah, transkrip, dan sertifikat kampus.','Verify diplomas, transcripts, and campus certificates.'],B+'Univ-Chain.html'],
+['🤲',['Donasi','Donations'],'fin',['Donasi, zakat, dan infaq dengan penyaluran yang transparan.','Donations, zakat, and infaq with transparent distribution.'],B+'Donasi.html'],
+['📐',['Jejak Revisi DED','DED Revision Trail'],'doc',['Catat dan telusuri riwayat revisi gambar DED (Detail Engineering Design) di blockchain.','Record and trace the revision history of DED (Detail Engineering Design) drawings on the blockchain.'],B+'Jejak-Revisi-DED.html'],
+['🧾',['Kwitansi Nusachain','Nusachain Receipt'],'fin',['Terbitkan kwitansi yang bisa diverifikasi lewat blockchain.','Issue receipts that can be verified through the blockchain.'],B+'Kwitansi-Nusachain.html'],
+['📜',['Pencatatan Waris','Inheritance Records'],'com',['Catat data waris secara transparan dan tahan manipulasi di blockchain.','Record inheritance data transparently and tamper-resistantly on the blockchain.'],B+'Pencatatan-Waris-Nusachain.html']
+];
+const catKeys=['all','doc','wal','com','uti','fin'];
+
+/* Penyimpanan preferensi (aman bila diblokir browser) */
+function load(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function save(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+
+let lang=load('nct-lang');
+if(lang!=='id'&&lang!=='en')lang='id';
+let theme=load('nct-theme');
+if(theme!=='dark'&&theme!=='light'){
+  theme=(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';
+}
+let cat='all';
+
+const $=id=>document.getElementById(id);
+function esc(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+const li=()=>lang==='id'?0:1;
+const catName=k=>k==='all'?UI[lang].all:CAT[k][lang];
+
+function renderStatic(){
+  const u=UI[lang];
+  root.setAttribute('lang',lang);
+  root.setAttribute('data-theme',theme);
+  root.querySelectorAll('[data-t]').forEach(el=>{el.textContent=u[el.dataset.t]});
+  $('nct-q').placeholder=u.ph;
+  $('nct-q').setAttribute('aria-label',u.aria);
+}
+function render(){
+  const u=UI[lang],i=li();
+  const q=$('nct-q').value.trim().toLowerCase();
+  const list=T.filter(t=>(cat==='all'||t[2]===cat)&&(t[1][i]+' '+catName(t[2])+' '+t[3][i]).toLowerCase().includes(q));
+  $('nct-grid').innerHTML=list.map(t=>`<article class="nct-card"><div class="nct-ic" aria-hidden="true">${t[0]}</div><h2>${esc(t[1][i])}</h2><span class="nct-cat">${esc(catName(t[2]))}</span><p>${esc(t[3][i])}</p><a href="${t[4]}" target="_blank" rel="noopener">${u.open}${esc(t[1][i])}</a></article>`).join('');
+  $('nct-count').textContent=u.count(list.length,T.length);
+  $('nct-empty').style.display=list.length?'none':'block';
+}
+function chips(){
+  $('nct-chips').innerHTML=catKeys.map(k=>`<button type="button" class="nct-chip" aria-pressed="${k===cat}" data-c="${k}">${esc(catName(k))}</button>`).join('');
+}
+function all(){renderStatic();applySite();chips();render()}
+
+$('nct-chips').addEventListener('click',e=>{const b=e.target.closest('.nct-chip');if(!b)return;cat=b.dataset.c;chips();render()});
+$('nct-q').addEventListener('input',render);
+
+/* ====== Toolbar & footer situs (dari website.html) ====== */
+const SITE={"id":{"footer.copyright":"© 2026 Nusacoin Project. Dibangun untuk desentralisasi.","footer.desc":"Blockchain milik rakyat dengan prinsip crypto yang adil. Terdesentralisasi, aman, dan dapat diakses semua orang.","footer.docs":"Dokumen & Keamanan","footer.ijol":"Ijol Nusacoin (P2P)","footer.pool":"Mining Pool","footer.privacy":"Lindungi Privasi","footer.quick":"Tautan Cepat","footer.rdn":"Nusacard RDN Bot","footer.res":"Sumber Daya","footer.secure":"Amankan Wallet","nav.Introduction":"Perkenalan","nav.businesses":"Bisnis","nav.how":"Cara Kerja","nav.individu":"Individu","nav.inovasi":"Inovasi","nav.partisipasi":"Partisipasi","nav.resources":"Sumber Daya","nav.started":"Memulai","quick.roadmap2":"Roadmap","res.core":"Nusacoin Core (GitHub)","res.explorer":"Explorer","res.glossary":"Kosa Kata","res.greenwallet":"Nusacoin Green Wallet","res.paperwallet":"Nusacoin Paper Wallet","res.pool":"Mining Pool","res.webwallet":"Nusacoin Web Wallet","topbar":"Nusacoin.org membutuhkan bantuan anda!"},"en":{"footer.copyright":"© 2026 Nusacoin Project. Built for decentralization.","footer.desc":"The people's blockchain, built on fair crypto principles. Decentralized, secure, and accessible to everyone.","footer.docs":"Docs & Security","footer.ijol":"Ijol Nusacoin (P2P)","footer.pool":"Mining Pool","footer.privacy":"Protect Your Privacy","footer.quick":"Quick Links","footer.rdn":"Nusacard RDN Bot","footer.res":"Resources","footer.secure":"Secure Your Wallet","nav.Introduction":"Introduction","nav.businesses":"Businesses","nav.how":"How It Works","nav.individu":"Individuals","nav.inovasi":"Innovation","nav.partisipasi":"Participation","nav.resources":"Resources","nav.started":"Getting Started","quick.roadmap2":"Roadmap","res.core":"Nusacoin Core (GitHub)","res.explorer":"Explorer","res.glossary":"Glossary","res.greenwallet":"Nusacoin Green Wallet","res.paperwallet":"Nusacoin Paper Wallet","res.pool":"Mining Pool","res.webwallet":"Nusacoin Web Wallet","topbar":"Nusacoin.org needs your help!"}};
+const htmlEl=document.documentElement;
+const themeBtn=$('theme-toggle'),langBtn=$('lang-toggle');
+function applySite(){
+  htmlEl.lang=lang;
+  htmlEl.setAttribute('data-theme',theme);
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const v=SITE[lang][el.getAttribute('data-i18n')];
+    if(v===undefined)return;
+    if(/<[a-z][\s\S]*>/i.test(v))el.innerHTML=v;else el.textContent=v;
+  });
+  langBtn.textContent=lang==='id'?'ID / EN':'EN / ID';
+  themeBtn.innerHTML=theme==='dark'?'<i class="fas fa-sun"></i>':'<i class="fas fa-moon"></i>';
+}
+langBtn.addEventListener('click',()=>{lang=lang==='id'?'en':'id';save('nct-lang',lang);all()});
+themeBtn.addEventListener('click',()=>{theme=theme==='dark'?'light':'dark';save('nct-theme',theme);renderStatic();applySite()});
+
+const mobileBtn=$('mobile-btn'),navList=$('nav-list');
+mobileBtn.addEventListener('click',()=>{
+  navList.classList.toggle('active');
+  const ic=mobileBtn.querySelector('i');
+  ic.classList.toggle('fa-bars');ic.classList.toggle('fa-times');
+});
+document.querySelectorAll('.nav-item').forEach(item=>{
+  item.addEventListener('click',()=>{if(window.innerWidth<=768)item.classList.toggle('open')});
+});
+
+all();
+})();
+</script>
+</body>
+</html>
