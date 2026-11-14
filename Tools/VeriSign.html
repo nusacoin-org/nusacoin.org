@@ -1,974 +1,1372 @@
 <!DOCTYPE html>
-<html lang="id" class="dark" data-net="mainnet">
+<html lang="id" class="dark">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nusachain Verisign — Mainnet &amp; Testnet</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<script>
-  tailwind.config = {
-    darkMode: 'class',
-    theme: {
-      extend: {
-        colors: {
-          nuxGreen: 'var(--nux-green)',
-          nuxGreenDark: 'var(--nux-green-dark)',
-          nuxGreenDeep: 'var(--nux-green-deep)',
-          gold: 'var(--gold)',
-          themeBg: 'var(--bg)',
-          cardBg: 'var(--surface)',
-          cardBg2: 'var(--surface-2)',
-          borderBg: 'var(--border)',
-          textPrimary: 'var(--ink)',
-          textSecondary: 'var(--ink-soft)'
-        }
-      }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nusachain Verisign & Explorer Integration</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      /* Brand Colors */
+      --nux-green: #27ae60;
+      --nux-green-dark: #1e8449;
+      --nux-green-deep: #0f3d26;
+      --gold: #d4a017;
+
+      /* Light Mode Tokens (Default) */
+      --bg: #f7f5ef;
+      --surface: #ffffff;
+      --surface-2: #f0efe6;
+      --ink: #16231c;
+      --ink-soft: #56645c;
+      --border: #e3ded0;
+      --shadow: rgba(15, 61, 38, 0.18);
+
+      --radius: 12px;
     }
-  }
-</script>
-<style>
-  :root {
-    --nux-green: #27ae60;
-    --nux-green-dark: #1e8449;
-    --nux-green-deep: #0f3d26;
-    --gold: #d4a017;
 
-    --bg: #f7f5ef;
-    --surface: #ffffff;
-    --surface-2: #f0efe6;
-    --ink: #16231c;
-    --ink-soft: #56645c;
-    --border: #e3ded0;
-    --shadow: rgba(15, 61, 38, 0.18);
+    html.dark {
+      /* Dark Mode Tokens */
+      --bg: #0d1712;
+      --surface: #142219;
+      --surface-2: #182a1e;
+      --ink: #eef3ec;
+      --ink-soft: #9db3a4;
+      --border: #24382c;
+      --shadow: rgba(0, 0, 0, 0.55);
+    }
 
-    /* Warna aksen jaringan aktif */
-    --net: #27ae60;
-  }
-  html[data-net="testnet"] { --net: #d4a017; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+    body { background-color: var(--bg); color: var(--ink-soft); min-height: 100vh; display: flex; flex-direction: column; transition: background-color .3s, color .3s; }
 
-  html.dark {
-    --bg: #0d1712;
-    --surface: #142219;
-    --surface-2: #182a1e;
-    --ink: #eef3ec;
-    --ink-soft: #9db3a4;
-    --border: #24382c;
-    --shadow: rgba(0, 0, 0, 0.55);
-  }
+    header { background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+    .nav-container { max-width: 1000px; margin: 0 auto; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; }
+    .brand { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: var(--ink); }
+    .brand img { height: 40px; width: auto; object-fit: contain; }
+    .brand-title { font-weight: 700; font-size: 1.25rem; color: var(--ink); }
+    .brand-title span { color: var(--nux-green); }
 
-  html, body {
-    margin: 0; padding: 0; width: 100%; min-height: 100%;
-    font-family: 'Inter', sans-serif;
-    background-color: var(--bg);
-    color: var(--ink-soft);
-    transition: background-color .3s, color .3s;
-  }
+    .header-controls { display: flex; align-items: center; gap: 0.75rem; }
 
-  .glow-box { box-shadow: 0 4px 20px var(--shadow); border: 1px solid var(--border); }
-  .glow-box:hover { border-color: rgba(39, 174, 96, 0.4); }
-  .hidden-page { display: none !important; }
-  .fade-in { animation: fadeIn .35s ease; }
-  @keyframes fadeIn { from { opacity:0; transform: translateY(6px);} to {opacity:1; transform: translateY(0);} }
-  #toast-wrap { position: fixed; bottom: 20px; right: 20px; z-index: 60; display:flex; flex-direction:column; gap:8px; }
-  .toast { background: var(--surface); border: 1px solid var(--border); box-shadow: 0 10px 30px var(--shadow); color: var(--ink); }
+    .lang-switcher {
+      display: flex;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 2px;
+    }
 
-  /* Tab */
-  .tab-btn { padding: .5rem 1rem; border-radius: .75rem; font-weight: 700; font-size: .75rem; transition: all .2s;
-             background: var(--surface-2); color: var(--ink-soft); border: 1px solid var(--border); }
-  .tab-btn.active { background: var(--nux-green); color: #fff; border-color: var(--nux-green); }
-  .tab-btn:not(.active):hover { color: var(--ink); }
+    .lang-btn {
+      background: transparent;
+      border: none;
+      color: var(--ink-soft);
+      padding: 4px 10px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
 
-  /* Toggle Mainnet / Testnet */
-  .net-switch { display: flex; background: var(--surface-2); border: 1px solid var(--border); padding: 4px; border-radius: .75rem; font-size: .75rem; font-weight: 800; }
-  .net-btn { padding: .3rem .8rem; border-radius: .5rem; color: var(--ink-soft); transition: all .2s; display: flex; align-items: center; gap: .4rem; }
-  .net-btn .dot { width: 7px; height: 7px; border-radius: 999px; background: currentColor; opacity: .55; }
-  .net-btn.active { background: var(--net); color: #fff; }
-  .net-btn.active .dot { opacity: 1; background: #fff; }
-  html[data-net="testnet"] .net-btn.active { color: #1b1500; }
-  html[data-net="testnet"] .net-btn.active .dot { background: #1b1500; }
-  .net-badge { border: 1px solid var(--net); color: var(--net); background: var(--surface-2); }
+    .lang-btn.active {
+      background: var(--nux-green);
+      color: #ffffff;
+    }
 
-  .lang-btn { padding: .25rem .65rem; border-radius: .5rem; color: var(--ink-soft); transition: all .2s; }
-  .lang-btn.active { background: var(--nux-green); color: #fff; }
+    .theme-toggle-btn {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--gold);
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      transition: background 0.2s;
+    }
 
-  .ext-msg { margin-top: 8px; padding: 8px 10px; border: 1px solid currentColor; border-radius: 8px; white-space: pre-wrap; word-break: break-word; font-size: .75rem; }
-  .ext-msg.bad { border-color: #c62828; color: #c62828; }
-  .ext-msg:empty { display: none; }
-</style>
+    .tabs-wrapper { background: var(--surface); border-bottom: 1px solid var(--border); }
+    .tabs-container { max-width: 1000px; margin: 0 auto; display: flex; padding: 0 1.5rem; gap: 2rem; }
+    .tab-btn { padding: 1rem 0.5rem; background: none; border: none; border-bottom: 3px solid transparent; font-size: 0.95rem; font-weight: 600; color: var(--ink-soft); cursor: pointer; display: flex; align-items: center; gap: 0.5rem; transition: all 0.2s; }
+    .tab-btn:hover, .tab-btn.active { color: var(--nux-green); border-bottom-color: var(--nux-green); }
+
+    main { flex: 1; max-width: 1000px; width: 100%; margin: 2rem auto; padding: 0 1.5rem; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .panel { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: 0 4px 20px var(--shadow); padding: 2rem; margin-bottom: 1.5rem; }
+    .panel-title { font-size: 1.35rem; font-weight: 700; color: var(--ink); margin-bottom: 0.35rem; }
+    .panel-desc { color: var(--ink-soft); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1.5rem; }
+
+    .drop-zone { border: 2px dashed rgba(39, 174, 96, 0.4); background: var(--surface-2); border-radius: var(--radius); padding: 2rem 1.5rem; text-align: center; cursor: pointer; position: relative; transition: all 0.2s; }
+    .drop-zone:hover { border-color: var(--nux-green); }
+    .drop-zone input[type="file"] { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+    
+    .form-group { margin-bottom: 1.25rem; }
+    .form-label { display: block; font-size: 0.875rem; font-weight: 600; color: var(--ink-soft); margin-bottom: 0.5rem; }
+    .form-input { width: 100%; padding: 0.85rem 1rem; background: var(--surface-2); color: var(--ink); border: 1px solid var(--border); border-radius: 8px; font-size: 0.9rem; outline: none; transition: border-color 0.2s; }
+    .form-input:focus { border-color: var(--nux-green); box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.18); }
+    .form-input.code { font-family: 'Courier New', Courier, monospace; font-size: 0.85rem; }
+
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.85rem 1.5rem; background: var(--nux-green); color: #ffffff; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer; width: 100%; transition: background 0.2s; }
+    .btn:hover { background: var(--nux-green-dark); }
+
+    .result-box { margin-top: 1.5rem; padding: 1.25rem; border-radius: 8px; background: var(--surface-2); border: 1px solid var(--border); display: none; color: var(--ink); }
+    .hash-display { background: var(--surface); padding: 0.85rem; border-radius: 6px; border: 1px solid var(--border); font-family: monospace; font-size: 0.9rem; word-break: break-all; margin-top: 0.5rem; color: var(--ink); }
+
+    .status-card { margin-top: 1.5rem; padding: 1.25rem; border-radius: 8px; display: none; background: var(--surface-2); border: 1px solid var(--border); }
+    .status-card.valid { display: block; border-color: var(--nux-green); color: var(--ink); }
+    .status-card.invalid { display: block; border-color: #e74c3c; color: var(--ink); }
+    .status-title { font-weight: 700; font-size: 1rem; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+
+    footer { background: var(--surface); border-top: 1px solid var(--border); padding: 1.5rem; text-align: center; margin-top: auto; font-size: 0.9rem; color: var(--ink-soft); }
+    footer span { color: var(--nux-green); font-weight: 700; }
+    select.form-input { appearance: auto; }
+    .row { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    .row > * { flex: 1; min-width: 140px; }
+    .btn.secondary { background: var(--surface-2); color: var(--ink); border: 1px solid var(--border); }
+    .btn.secondary:hover { border-color: var(--nux-green); }
+    .btn:disabled { opacity: .6; cursor: not-allowed; }
+    .warn { background: rgba(212,160,23,.12); border: 1px solid var(--gold); color: var(--ink); border-radius: 8px; padding: .75rem 1rem; font-size: .8rem; line-height: 1.5; margin-bottom: 1.25rem; }
+    .addr-box { font-family: monospace; word-break: break-all; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: .75rem; color: var(--ink); font-size: .85rem; }
+    .balance { font-size: 1.6rem; font-weight: 700; color: var(--nux-green); margin: .5rem 0 1rem; }
+  html[data-net="testnet"]{--nux-green:#d98a1e;--nux-green-dark:#b36f12}
+    #dbBody td,#dbHead th{padding:.4rem .5rem;border-top:1px solid var(--border);word-break:break-all;text-align:left;font-size:.78rem;color:var(--ink)}
+    #testnetDb table{width:100%;border-collapse:collapse}
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/elliptic/6.5.4/elliptic.min.js"></script>
 </head>
-<body class="p-4 md:p-6">
+<body>
 
-<div id="toast-wrap"></div>
+  <header>
+    <div class="nav-container">
+      <a href="#" class="brand">
+        <img src="https://iili.io/Cr21Nx2.th.png" alt="Nusachain Logo">
+        <span class="brand-title">Nusachain <span>Verisign & Explorer</span></span>
+      </a>
 
-<!-- HEADER -->
-<header class="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 mb-6 backdrop-blur-md pb-4 border-b border-[var(--border)]">
-  <div class="flex items-center gap-3 flex-wrap justify-center">
-    <img src="https://iili.io/Cr21Nx2.th.png" alt="Nusachain Logo" class="h-10 w-auto object-contain">
-    <span class="text-[var(--ink)] text-xl font-black tracking-wider uppercase">Nusachain <span class="text-[var(--nux-green)]">Verisign</span></span>
-    <span id="badgeConnected" class="net-badge px-3 py-0.5 rounded-full text-[10px] font-mono tracking-widest uppercase"></span>
-  </div>
-
-  <nav class="flex items-center gap-3 text-sm font-medium flex-wrap justify-center">
-    <!-- TOGGLE JARINGAN -->
-    <div class="net-switch" role="group" aria-label="Network">
-      <button id="btnMainnet" type="button" class="net-btn active" onclick="setNetwork('mainnet')"><span class="dot"></span>Mainnet</button>
-      <button id="btnTestnet" type="button" class="net-btn" onclick="setNetwork('testnet')"><span class="dot"></span>Testnet</button>
-    </div>
-
-    <button type="button" onclick="switchTab('generator')" id="tabBtnGen" class="tab-btn active" data-i18n="tabGen"></button>
-    <button type="button" onclick="switchTab('verifier')" id="tabBtnVer" class="tab-btn" data-i18n="tabVer"></button>
-
-    <!-- BAHASA -->
-    <div class="flex bg-[var(--surface-2)] border border-[var(--border)] p-1 rounded-xl text-xs font-bold">
-      <button id="btnIN" type="button" onclick="setLanguage('id')" class="lang-btn active">IN</button>
-      <button id="btnEN" type="button" onclick="setLanguage('en')" class="lang-btn">EN</button>
-    </div>
-
-    <!-- TEMA -->
-    <button id="themeToggle" type="button" class="w-9 h-9 bg-[var(--surface-2)] border border-[var(--border)] rounded-xl flex items-center justify-center text-[var(--gold)] transition shadow-sm">
-      <i id="themeIcon" class="fa-solid fa-sun"></i>
-    </button>
-  </nav>
-</header>
-
-<main class="max-w-5xl mx-auto space-y-6">
-
-  <!-- WALLET (login via extension) -->
-  <section class="bg-[var(--surface)] rounded-2xl p-5 glow-box">
-    <div id="walletLogin">
-      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-        <div>
-          <h2 class="text-sm font-bold text-[var(--ink)] flex items-center gap-2"><i class="fa-solid fa-wallet text-[var(--nux-green)]"></i> <span data-i18n="walletTitle"></span></h2>
-          <p class="text-xs text-[var(--ink-soft)] mt-1" data-i18n="walletDesc"></p>
+      <div class="header-controls">
+        <div class="lang-switcher" title="Network"><button id="btnNetMain" class="lang-btn active" onclick="setNetwork('mainnet')">Mainnet</button><button id="btnNetTest" class="lang-btn" onclick="setNetwork('testnet')">Testnet</button></div>
+        <div class="lang-switcher">
+          <button id="btnIN" class="lang-btn active" onclick="setLanguage('id')">IN</button>
+          <button id="btnEN" class="lang-btn" onclick="setLanguage('en')">EN</button>
         </div>
-        <button id="btnExt" type="button" onclick="walletConnectExt()" class="bg-gradient-to-r from-[var(--nux-green)] to-[var(--nux-green-dark)] text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-md hover:opacity-90 transition flex items-center justify-center gap-2 shrink-0">
-          <i class="fa-solid fa-plug"></i> <span data-i18n="btnConnect"></span>
-        </button>
-      </div>
-      <div id="msgExt" class="ext-msg"></div>
-    </div>
-
-    <div id="walletActive" class="hidden-page">
-      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-        <div class="min-w-0">
-          <div class="text-[10px] font-bold uppercase tracking-widest text-[var(--ink-soft)]" data-i18n="walletActive"></div>
-          <div id="wAddr" class="font-mono text-xs text-[var(--ink)] break-all mt-1"></div>
-          <div class="text-xs mt-1"><span data-i18n="lblBalance"></span>: <span id="wBal" class="font-mono text-[var(--gold)]">...</span></div>
-        </div>
-        <div class="flex gap-2 shrink-0">
-          <button type="button" onclick="refreshBalance()" class="bg-[var(--surface-2)] border border-[var(--border)] text-[var(--ink)] font-bold px-3 py-2 rounded-xl text-xs hover:border-[var(--nux-green)] transition"><i class="fa-solid fa-rotate mr-1"></i><span data-i18n="btnRefresh"></span></button>
-          <button type="button" onclick="walletLogout()" class="bg-[var(--surface-2)] border border-[var(--border)] text-[var(--ink)] font-bold px-3 py-2 rounded-xl text-xs hover:border-rose-500 transition"><i class="fa-solid fa-right-from-bracket mr-1"></i><span data-i18n="btnDisconnect"></span></button>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- TAB 1: GENERATOR HASH -->
-  <div id="section-generator" class="bg-[var(--surface)] rounded-2xl p-6 glow-box fade-in">
-    <h2 class="text-lg font-bold text-[var(--ink)] mb-1" data-i18n="genTitle"></h2>
-    <p class="text-xs text-[var(--ink-soft)] mb-5" data-i18n="genDesc"></p>
-
-    <div class="border-2 border-dashed border-[var(--nux-green)]/40 bg-[var(--surface-2)] rounded-xl p-8 text-center cursor-pointer relative hover:border-[var(--nux-green)] transition">
-      <input type="file" id="genFileInput" onchange="handleGenFileSelect(this.files)" class="absolute inset-0 opacity-0 cursor-pointer">
-      <div class="w-12 h-12 bg-[var(--nux-green)]/20 text-[var(--nux-green)] rounded-full flex items-center justify-center mx-auto mb-3">
-        <i class="fa-solid fa-file-arrow-up text-xl"></i>
-      </div>
-      <p class="text-sm font-bold text-[var(--ink)] mb-1" data-i18n="genDropTitle"></p>
-      <p class="text-xs text-[var(--ink-soft)]" data-i18n="genDropSub"></p>
-    </div>
-
-    <div id="genFileInfo" class="mt-4 p-3 rounded-xl bg-[var(--surface-2)] border border-[var(--border)] text-xs font-mono hidden-page flex items-center justify-between">
-      <span id="genFileName" class="text-[var(--nux-green)] truncate"></span>
-    </div>
-
-    <div id="genResult" class="mt-4 p-4 rounded-xl bg-[var(--surface-2)] border border-[var(--border)] hidden-page space-y-2">
-      <div class="flex items-center justify-between">
-        <span class="text-[10px] font-bold text-[var(--ink-soft)] uppercase tracking-widest" data-i18n="genOutputLabel"></span>
-        <button type="button" onclick="copyHash()" class="text-xs bg-[var(--nux-green)]/20 text-[var(--nux-green)] hover:bg-[var(--nux-green)]/30 px-3 py-1.5 rounded-lg transition font-semibold">
-          <i class="fa-regular fa-copy mr-1"></i> <span data-i18n="btnCopyHash"></span>
-        </button>
-      </div>
-      <input type="text" id="genHashOutput" readonly data-i18n-ph="phHashOutput" class="w-full bg-[var(--surface)] px-3 py-2.5 rounded-lg border border-[var(--border)] font-mono text-xs text-[var(--ink)] focus:outline-none select-all">
-    </div>
-  </div>
-
-  <!-- TAB 2: VERIFIKASI & EXPLORER -->
-  <div id="section-verifier" class="bg-[var(--surface)] rounded-2xl p-6 glow-box hidden-page fade-in space-y-6">
-    <div>
-      <h2 class="text-lg font-bold text-[var(--ink)] mb-1" data-i18n="verTitle"></h2>
-      <p class="text-xs text-[var(--ink-soft)]" data-i18n="verDesc"></p>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div class="space-y-2">
-        <label class="text-xs font-bold uppercase tracking-wider text-[var(--ink-soft)]" data-i18n="lblVerFile"></label>
-        <div class="border-2 border-dashed border-[var(--nux-green)]/40 bg-[var(--surface-2)] rounded-xl p-6 text-center cursor-pointer relative hover:border-[var(--nux-green)] transition">
-          <input type="file" id="verFileInput" onchange="handleVerFileSelect(this.files)" class="absolute inset-0 opacity-0 cursor-pointer">
-          <i class="fa-solid fa-file-shield text-[var(--nux-green)] text-2xl mb-2"></i>
-          <p id="verFileText" class="text-xs font-bold text-[var(--ink)]"></p>
-        </div>
-      </div>
-
-      <div class="space-y-4">
-        <div class="space-y-2">
-          <label for="manualTxInput" class="text-xs font-bold uppercase tracking-wider text-[var(--ink-soft)]" data-i18n="lblTxidManual"></label>
-          <input type="text" id="manualTxInput" data-i18n-ph="phTxid"
-            class="w-full bg-[var(--surface-2)] border border-[var(--border)] rounded-xl px-4 py-3 text-xs font-mono text-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-[var(--nux-green)]/50">
-          <p class="text-[11px] text-[var(--ink-soft)]" data-i18n="lblTxidNote"></p>
-        </div>
-        <div class="space-y-2">
-          <label for="refHashInput" class="text-xs font-bold uppercase tracking-wider text-[var(--ink-soft)]" data-i18n="lblHashField"></label>
-          <input type="text" id="refHashInput" data-i18n-ph="phHash"
-            class="w-full bg-[var(--surface-2)] border border-[var(--border)] rounded-xl px-4 py-3 text-xs font-mono text-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-[var(--nux-green)]/50">
-        </div>
-      </div>
-    </div>
-
-    <button type="button" onclick="executeVerification()" class="w-full bg-gradient-to-r from-[var(--nux-green)] to-[var(--nux-green-dark)] text-white font-bold py-3 rounded-xl shadow-lg hover:opacity-90 transition text-sm flex items-center justify-center gap-2">
-      <i class="fa-solid fa-magnifying-glass-chart"></i> <span data-i18n="btnRunVerify"></span>
-    </button>
-
-    <!-- Hasil Verifikasi -->
-    <div id="verResultCard" class="p-5 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] hidden-page space-y-3 font-mono text-xs">
-      <div id="verStatusHeader" class="font-bold text-sm flex items-center gap-2"></div>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 border-t border-[var(--border)]">
-        <div>
-          <span class="text-[10px] uppercase text-[var(--ink-soft)] block font-sans" data-i18n="lblCalculatedHash"></span>
-          <span id="verActualHash" class="text-[var(--ink)] break-all"></span>
-        </div>
-        <div>
-          <span class="text-[10px] uppercase text-[var(--ink-soft)] block font-sans" data-i18n="lblFoundSource"></span>
-          <span id="verFoundSource" class="text-[var(--nux-green)] break-all"></span>
-        </div>
-      </div>
-    </div>
-
-    <!-- SIMPAN KE SPREADSHEET (hanya jika jaringan punya spreadsheet) -->
-    <div id="autoSaveContainer" class="hidden-page bg-[var(--surface-2)] p-5 rounded-xl border border-[var(--nux-green)]/40 space-y-4 fade-in">
-      <div class="flex items-center gap-2">
-        <input type="checkbox" id="saveToggleCheck" onchange="toggleSaveMenu()" class="w-4 h-4 rounded border-[var(--border)] cursor-pointer">
-        <label for="saveToggleCheck" class="text-xs font-bold text-[var(--nux-green)] cursor-pointer uppercase tracking-wider" data-i18n="lblSaveSpreadsheet"></label>
-      </div>
-
-      <div id="saveMenuFields" class="hidden-page space-y-3 pt-2 border-t border-[var(--border)]">
-        <p class="text-[11px] text-[var(--ink-soft)]" data-i18n="lblSaveFieldsNote"></p>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <div>
-            <label class="block text-[10px] uppercase font-bold text-[var(--ink-soft)] mb-1" data-i18n="lblDocDesc"></label>
-            <input type="text" id="autoRegDesc" data-i18n-ph="phDocDesc" class="w-full bg-[var(--surface)] border border-[var(--border)] rounded-lg p-2.5 text-xs text-[var(--ink)] focus:outline-none focus:ring-1 focus:ring-[var(--nux-green)]">
-          </div>
-          <div>
-            <label class="block text-[10px] uppercase font-bold text-[var(--ink-soft)] mb-1" data-i18n="lblAutoTxid"></label>
-            <input type="text" id="autoRegTxid" readonly class="w-full bg-[var(--surface-2)] border border-[var(--border)] rounded-lg p-2.5 text-xs font-mono text-[var(--nux-green)] focus:outline-none cursor-not-allowed">
-          </div>
-          <div>
-            <label class="block text-[10px] uppercase font-bold text-[var(--ink-soft)] mb-1" data-i18n="lblAutoHash"></label>
-            <input type="text" id="autoRegHash" readonly class="w-full bg-[var(--surface-2)] border border-[var(--border)] rounded-lg p-2.5 text-xs font-mono text-[var(--gold)] focus:outline-none cursor-not-allowed">
-          </div>
-        </div>
-        <button type="button" onclick="submitAutoSaveData()" class="bg-[var(--nux-green)] hover:bg-[var(--nux-green-dark)] text-white font-bold px-4 py-2.5 rounded-lg text-xs transition flex items-center justify-center gap-2 w-full md:w-auto shadow-md">
-          <i class="fa-solid fa-cloud-arrow-up"></i> <span data-i18n="btnConfirmSave"></span>
+        <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()">
+          <i id="themeIcon" class="fa-solid fa-sun"></i>
         </button>
       </div>
     </div>
+  </header>
 
-    <!-- TABEL DATABASE VERISIGN -->
-    <div class="pt-4 border-t border-[var(--border)]">
-      <div class="flex items-center justify-between mb-3">
-        <h3 class="text-xs font-bold uppercase tracking-widest text-[var(--nux-green)]"><i class="fa-solid fa-database mr-1"></i> <span data-i18n="dbHeading"></span></h3>
-        <span id="lblSyncStatus" class="text-[10px] text-[var(--ink-soft)] font-mono"></span>
-      </div>
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs font-mono">
-          <thead>
-            <tr class="text-[10px] text-[var(--ink-soft)] uppercase border-b border-[var(--border)]">
-              <th class="pb-2" data-i18n="thDesc"></th>
-              <th class="pb-2" data-i18n="thTxid"></th>
-              <th class="pb-2" data-i18n="thHash"></th>
-            </tr>
-          </thead>
-          <tbody id="databaseTableBody" class="divide-y divide-[var(--border)]"></tbody>
-        </table>
-      </div>
+  <div class="tabs-wrapper">
+    <div class="tabs-container">
+      <button id="tabBtnGen" class="tab-btn active" onclick="switchTab('generator')"><i class="fa-solid fa-plus"></i> Generator Hash</button>
+      <button id="tabBtnVer" class="tab-btn" onclick="switchTab('verifier')"><i class="fa-solid fa-shield-halved"></i> Verifikasi & Explorer Match</button>
+      <button id="tabBtnInj" class="tab-btn" onclick="switchTab('inject')"><i class="fa-solid fa-link"></i> <span data-i="tabInj">Wallet & Inject</span></button>
     </div>
   </div>
 
-</main>
+  <main>
+    <!-- TAB 1: GENERATOR -->
+    <div id="tab-generator" class="tab-content active">
+      <div class="panel">
+        <h1 id="genTitle" class="panel-title">Generator Hash SHA-256</h1>
+        <p id="genDesc" class="panel-desc">Unggah file jenis apapun untuk mendapatkan nilai sidik jari digital (SHA-256).</p>
+        
+        <div class="drop-zone">
+          <input type="file" id="genFileInput" onchange="handleGenFileSelect(this.files)">
+          <div style="font-size: 2rem; color: var(--nux-green); margin-bottom: 0.5rem;"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+          <div id="genDropText" style="font-weight: 600; color: var(--ink);">Pilih atau Seret File ke Sini</div>
+        </div>
 
-<script>
-/* =====================================================================
-   KONFIGURASI JARINGAN
-   - mainnet : explorer.nusacoin.org  (/ext/gettx, /ext/getbalance)
-   - testnet : apitest.taobot.org     (/transaction/<txid>, format {result})
-   `sheet` = URL Google Apps Script untuk database + simpan otomatis.
-   Kosongkan (''), maka jaringan itu memakai database lokal & fitur simpan disembunyikan.
-   ===================================================================== */
-const MAINNET_LOCAL_DB = [
-  { hash: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    txid: "4a5e1f7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f",
-    desc: "Contoh Dokumen Kosong / Perjanjian Kerjasama V1" },
-  { hash: "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824",
-    txid: "9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1f0e9d8c7b6a5f4e3d2c1b0a9f8e",
-    desc: "Sertifikat Aset Digital Nusachain" }
-];
+        <div id="genResult" class="result-box">
+          <strong id="genResultLabel">Hasil SHA-256 Hash:</strong>
+          <div class="hash-display" id="genHashOutput">-</div>
+        </div>
+      </div>
+    </div>
 
-const NETWORKS = {
-  mainnet: {
-    key: 'mainnet',
-    label: 'Mainnet',
-    explorer: 'https://explorer.nusacoin.org',
-    sheet: '',
-    localDb: MAINNET_LOCAL_DB,
-    // -> { block } jika TX ada di chain, null jika tidak ada
-    async fetchTx(txid) {
-      const res = await fetch(`${this.explorer}/ext/gettx/${encodeURIComponent(txid)}`);
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const data = await res.json();
-      return (data && data.tx) ? { block: data.tx.blockindex } : null;
-    },
-    async fetchBalance(addr) {
-      const res = await fetch(`${this.explorer}/ext/getbalance/${encodeURIComponent(addr)}`);
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const n = parseFloat(await res.text());
-      return isNaN(n) ? null : n;
-    }
-  },
-  testnet: {
-    key: 'testnet',
-    label: 'Testnet',
-    explorer: 'https://apitest.taobot.org',
-    sheet: 'https://script.google.com/macros/s/AKfycbzNsq05CHIwKqGtkDOuyDoy0Emi9V6--mSNHshw65Fp4XwYq5KiNU4f6Q6r6pMLC60E/exec',
-    localDb: [],
-    async apiFetch(endpoint) {
-      const res = await fetch(`${this.explorer}${endpoint}`);
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const json = await res.json();
-      if (json.error) throw new Error(json.error.message || 'API Error');
-      return json.result;
-    },
-    async fetchTx(txid) {
-      const d = await this.apiFetch(`/transaction/${encodeURIComponent(txid)}`);
-      if (d && (d.hash || d.txid || d.vin || d.vout)) {
-        return { block: d.blockheight || d.blockindex || d.block_height || null };
+    <!-- TAB 2: VERIFIKASI & EXPLORER MATCHING -->
+    <div id="tab-verifier" class="tab-content">
+      <div class="panel">
+        <h1 id="verTitle" class="panel-title">Verifikasi Dokumen & Pencocokan Explorer</h1>
+        <p id="verDesc" class="panel-desc">Unggah file Anda. Sistem akan mencocokkannya dengan database lokal / OP_RETURN Explorer. Masukkan TXID jika Anda memilikinya, atau biarkan sistem mencocokkannya secara otomatis.</p>
+
+        <div class="form-group">
+          <label id="lblStep1" class="form-label">1. Unggah File</label>
+          <div class="drop-zone" style="padding: 1.5rem;">
+            <input type="file" id="verFileInput" onchange="handleVerFileSelect(this.files)">
+            <div id="verFileText" style="font-weight: 600; color: var(--ink);">Klik atau seret file ke sini</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label id="lblStep2" class="form-label" for="manualTxidInput">2. Masukkan TXID Verisign (Opsional / Jika Pemilik Memiliki)</label>
+          <input type="text" id="manualTxidInput" class="form-input code" placeholder="Contoh: 7d2876... (Kosongkan untuk pencocokan otomatis via Database/Explorer)">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" data-i="vrScan">Pencarian tanpa TXID: alamat penerbit (opsional, pisahkan koma) &amp; jumlah blok terakhir yang dipindai</label>
+          <div class="row"><input type="text" id="issuerAddrInput" class="form-input code" placeholder="nu1q..., N..."><input type="number" id="scanBlocksInput" class="form-input" value="200" min="0" style="max-width:140px"></div>
+        </div>
+
+        <div class="form-group">
+          <label id="lblStep3" class="form-label" for="refHashInput">3. Hash SHA-256 (Otomatis terisi dari file)</label>
+          <input type="text" id="refHashInput" class="form-input code" placeholder="Hash file...">
+        </div>
+
+        <button class="btn" onclick="verifyWithExplorer()">
+          <i class="fa-solid fa-magnifying-glass-chart"></i> <span id="btnVerifyText">Cocokkan dengan Explorer & Database</span>
+        </button>
+
+        <div id="verStatusCard" class="status-card">
+          <div id="verStatusTitle" class="status-title"></div>
+          <div style="font-size: 0.85rem; margin-top: 0.5rem;">
+            <strong id="lblTxDetails">Detail Transaksi / On-Chain Info:</strong>
+            <div id="verExplorerDetails" class="hash-display" style="margin-top: 0.25rem;"></div>
+          </div>
+        </div>
+      </div>
+      <div id="testnetDb" class="panel" style="display:none">
+        <div id="saveBox" style="display:none">
+          <label class="form-label"><input type="checkbox" id="saveChk" onchange="toggleSaveMenu()"> <span data-i="dbSaveQ"></span></label>
+          <div id="saveFields" style="display:none">
+            <div class="form-group"><label class="form-label" data-i="dbDesc"></label><input type="text" id="autoRegDesc" class="form-input"></div>
+            <div class="row"><div class="form-group"><label class="form-label">TXID</label><input type="text" id="autoRegTxid" class="form-input code" readonly></div>
+            <div class="form-group"><label class="form-label">Hash SHA-256</label><input type="text" id="autoRegHash" class="form-input code" readonly></div></div>
+            <button class="btn" onclick="submitAutoSaveData()"><i class="fa-solid fa-cloud-arrow-up"></i> <span data-i="dbSave"></span></button>
+          </div>
+        </div>
+        <h1 class="panel-title" data-i="dbHead"></h1>
+        <div style="overflow-x:auto"><table><thead id="dbHead"><tr><th data-i="dbDesc"></th><th>TXID</th><th>Hash SHA-256</th></tr></thead><tbody id="dbBody"></tbody></table></div>
+      </div>
+    </div>
+    <!-- TAB 3: LOGIN WALLET & INJECT -->
+    <div id="tab-inject" class="tab-content">
+      <div id="walletLogin" class="panel">
+        <h1 class="panel-title" data-i="wlTitle">Login Wallet Nusacoin</h1>
+        <p class="panel-desc" data-i="wlDesc">Masuk dengan Private Key WIF atau teks terenkripsi (ENC + PIN). Kunci hanya diproses di browser ini dan tidak dikirim ke server mana pun.</p>
+        <button class="btn" id="btnExt" type="button" onclick="walletConnectExt()"><i class="fa-solid fa-plug"></i> <span data-i="extBtn">Hubungkan Wallet Extension (Nusa Wallet / NUX Connect)</span></button>
+        <div id="msgExt"></div>
+        <p class="panel-desc" style="margin:1rem 0 .5rem" data-i="extOr">atau login manual dengan kunci:</p>
+        <div class="form-group">
+          <label class="form-label" data-i="wlKey">Private Key WIF / Teks ENC / Alamat (baca-saja)</label>
+          <input type="password" id="wKey" class="form-input code" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="row">
+          <div class="form-group"><label class="form-label" data-i="wlPin">PIN (jika terenkripsi)</label><input type="password" id="wPin" class="form-input" autocomplete="off"></div>
+          <div class="form-group"><label class="form-label" data-i="wlType">Tipe Alamat</label>
+            <select id="wType" class="form-input"><option value="bech32">Bech32 (nu1q...)</option><option value="p2pkh">P2PKH (N...)</option></select></div>
+        </div>
+        <button class="btn" onclick="walletLogin()"><i class="fa-solid fa-right-to-bracket"></i> <span data-i="wlBtn">Login Wallet</span></button>
+      </div>
+
+      <div id="walletActive" style="display:none">
+        <div class="panel">
+          <div class="row" style="align-items:center; justify-content:space-between">
+            <h1 class="panel-title" data-i="waTitle">Wallet Aktif</h1>
+            <button class="btn secondary" style="width:auto" onclick="walletLogout()"><i class="fa-solid fa-right-from-bracket"></i> <span data-i="waOut">Keluar</span></button>
+          </div>
+          <div id="wAddr" class="addr-box"></div>
+          <div class="balance" id="wBal">-</div>
+          <button class="btn secondary" style="width:auto" onclick="refreshBalance()"><i class="fa-solid fa-rotate"></i> <span data-i="waRefresh">Refresh Saldo</span></button>
+        </div>
+
+        <div class="panel">
+          <h1 class="panel-title" data-i="inTitle">Inject Hash ke Blockchain</h1>
+          <p class="panel-desc" data-i="inDesc">Hash SHA-256 dokumen ditulis ke blockchain Nusacoin lewat output OP_RETURN. Transaksi ini permanen dan memerlukan fee jaringan.</p>
+          <div class="warn" data-i="inWarn">Data di blockchain tidak bisa dihapus atau diubah. Pastikan file dan hash sudah benar sebelum inject.</div>
+          <div class="form-group">
+            <label class="form-label" data-i="inFile">1. Pilih File (hash terisi otomatis)</label>
+            <div class="drop-zone" style="padding:1.25rem">
+              <input type="file" id="injFileInput" onchange="handleInjFile(this.files)">
+              <div id="injFileText" style="font-weight:600; color: var(--ink)">Klik atau seret file ke sini</div>
+            </div>
+          </div>
+          <div class="form-group"><label class="form-label" data-i="inHash">2. Hash SHA-256</label><input type="text" id="injHash" class="form-input code" placeholder="64 hex" spellcheck="false"></div>
+          <div class="row">
+            <div class="form-group"><label class="form-label" data-i="inDescLbl">Keterangan (disimpan lokal untuk pencocokan)</label><input type="text" id="injNote" class="form-input"></div>
+            <div class="form-group"><label class="form-label" data-i="inFee">Fee (NUX)</label><input type="number" id="injFee" class="form-input" step="0.00000001" value="0.0001"></div>
+          </div>
+          <button class="btn" id="btnInject" onclick="injectData()"><i class="fa-solid fa-link"></i> <span data-i="inBtn">Inject ke Blockchain</span></button>
+          <div id="injResult" class="status-card"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <span id="footerText">Powered by <span>Nusachain Explorer Integration</span></span>
+  </footer>
+
+  <script>
+    let currentLang = 'id';
+
+    const translations = {
+      id: {
+        tabBtnGen: '<i class="fa-solid fa-plus"></i> Generator Hash',
+        tabBtnVer: '<i class="fa-solid fa-shield-halved"></i> Verifikasi & Explorer Match',
+        genTitle: "Generator Hash SHA-256",
+        genDesc: "Unggah file jenis apapun untuk mendapatkan nilai sidik jari digital (SHA-256).",
+        genDropText: "Pilih atau Seret File ke Sini",
+        genResultLabel: "Hasil SHA-256 Hash:",
+        verTitle: "Verifikasi Dokumen & Pencocokan Explorer",
+        verDesc: "Unggah file Anda. Sistem akan mencocokkannya dengan database lokal / OP_RETURN Explorer. Masukkan TXID jika Anda memilikinya, atau biarkan sistem mencocokkannya secara otomatis.",
+        lblStep1: "1. Unggah File",
+        verFileTextDefault: "Klik atau seret file ke sini",
+        lblStep2: "2. Masukkan TXID Verisign (Opsional / Jika Pemilik Memiliki)",
+        phTxid: "Contoh: 7d2876... (Kosongkan untuk pencocokan otomatis via Database/Explorer)",
+        lblStep3: "3. Hash SHA-256 (Otomatis terisi dari file)",
+        phHash: "Hash file...",
+        btnVerifyText: "Cocokkan dengan Explorer & Database",
+        lblTxDetails: "Detail Transaksi / On-Chain Info:",
+        msgComputing: "Menghitung hash...",
+        msgGenFail: "Gagal memproses file.",
+        msgFileErr: "Silakan unggah file atau masukkan hash terlebih dahulu.",
+        msgChecking: "Menghubungkan ke Explorer & Memeriksa Database...",
+        msgMatching: "Memproses pencocokan...",
+        msgVerifySuccess: "VERIFIKASI BERHASIL: Hash & TXID Cocok dengan Explorer!",
+        msgVerifyFail: "VERIFIKASI GAGAL: Tidak Ditemukan di Explorer / Database",
+        lblDesc: "Keterangan:",
+        lblBlock: "Block Index:",
+        lblConfirm: "Konfirmasi:",
+        lblOnChainValid: "On-Chain Valid",
+        lblStatus: "Status:",
+        lblMatchDb: "Cocok dengan Database Verisign",
+        lblNoOpReturn: "tidak memiliki catatan OP_RETURN atau TXID yang cocok dengan database verisign saat ini."
+      },
+      en: {
+        tabBtnGen: '<i class="fa-solid fa-plus"></i> Hash Generator',
+        tabBtnVer: '<i class="fa-solid fa-shield-halved"></i> Verification & Explorer Match',
+        genTitle: "SHA-256 Hash Generator",
+        genDesc: "Upload any file type to get its digital fingerprint value (SHA-256).",
+        genDropText: "Choose or Drag File Here",
+        genResultLabel: "SHA-256 Hash Result:",
+        verTitle: "Document Verification & Explorer Match",
+        verDesc: "Upload your file. The system will match it with the local database / OP_RETURN Explorer. Enter a TXID if you have one, or let the system match it automatically.",
+        lblStep1: "1. Upload File",
+        verFileTextDefault: "Click or drag file here",
+        lblStep2: "2. Enter Verisign TXID (Optional / If Owned)",
+        phTxid: "Example: 7d2876... (Leave empty for auto-match via Database/Explorer)",
+        lblStep3: "3. SHA-256 Hash (Auto-filled from file)",
+        phHash: "File hash...",
+        btnVerifyText: "Match with Explorer & Database",
+        lblTxDetails: "Transaction Details / On-Chain Info:",
+        msgComputing: "Calculating hash...",
+        msgGenFail: "Failed to process file.",
+        msgFileErr: "Please upload a file or enter a hash first.",
+        msgChecking: "Connecting to Explorer & Checking Database...",
+        msgMatching: "Processing match...",
+        msgVerifySuccess: "VERIFICATION SUCCESSFUL: Hash & TXID Match with Explorer!",
+        msgVerifyFail: "VERIFICATION FAILED: Not Found in Explorer / Database",
+        lblDesc: "Description:",
+        lblBlock: "Block Index:",
+        lblConfirm: "Confirmation:",
+        lblOnChainValid: "On-Chain Valid",
+        lblStatus: "Status:",
+        lblMatchDb: "Matches Verisign Database",
+        lblNoOpReturn: "has no OP_RETURN record or TXID matching the current verisign database."
       }
-      return null;
-    },
-    // Endpoint saldo testnet belum terverifikasi — best effort, jatuh ke null jika bentuknya beda.
-    async fetchBalance(addr) {
-      const d = await this.apiFetch(`/address/${encodeURIComponent(addr)}`);
-      if (typeof d === 'number') return d;
-      if (d && typeof d === 'object') {
-        const v = d.balance ?? d.final_balance ?? d.confirmed_balance;
-        const n = parseFloat(v);
-        return isNaN(n) ? null : n;
-      }
-      const n = parseFloat(d);
-      return isNaN(n) ? null : n;
-    }
-  }
-};
-
-let currentNet = 'mainnet';
-let currentLang = 'id';
-const NET = () => NETWORKS[currentNet];
-
-/* =====================================================================
-   i18n
-   ===================================================================== */
-const i18n = {
-  id: {
-    badge: "Explorer {net} Terhubung",
-    tabGen: "Generator Hash",
-    tabVer: "Verifikasi & Explorer",
-
-    walletTitle: "Login Wallet",
-    walletDesc: "Opsional. Hubungkan wallet extension untuk menampilkan alamat & saldo di jaringan {net}. Verifikasi tetap bisa dipakai tanpa login.",
-    btnConnect: "Hubungkan Wallet Extension (Nusa Wallet / NUX Connect)",
-    walletActive: "Wallet aktif",
-    lblBalance: "Saldo",
-    btnRefresh: "Refresh saldo",
-    btnDisconnect: "Keluar",
-    balFail: "gagal memuat saldo",
-    balNA: "tidak tersedia",
-    extWait: "Menunggu persetujuan di extension wallet...",
-    extNop: "Ekstensi wallet (Nusa Wallet / NUX Connect) tidak terdeteksi. Pasang/aktifkan ekstensi lalu muat ulang halaman ini.",
-    extNoAddr: "Ekstensi tidak mengembalikan alamat.",
-    extRej: "Koneksi ditolak di ekstensi.",
-    extNet: "NUX Connect sedang di jaringan {n}. Pindahkan ke {net} di popup extension lalu coba lagi.",
-    toastWalletOk: "Wallet terhubung!",
-    toastWalletReset: "Jaringan diganti ke {net}. Wallet diputus — hubungkan ulang.",
-
-    genTitle: "Generator Hash SHA-256 File",
-    genDesc: "Unggah file jenis apa pun untuk mendapatkan sidik jari digital (hash) secara aman di browser.",
-    genDropTitle: "Pilih atau seret file ke sini",
-    genDropSub: "Mendukung dokumen, gambar, video, arsip, dan format lainnya",
-    genOutputLabel: "Kolom Hasil SHA-256 Hash",
-    btnCopyHash: "Salin Hash",
-    phHashOutput: "Hash akan muncul di sini...",
-
-    verTitle: "Verifikasi File dengan Explorer {net} & Database TXID",
-    verDesc: "Cukup pilih file untuk verifikasi otomatis. Masukkan TXID secara opsional jika ingin mencocokkan transaksi spesifik dengan blockchain.",
-    lblVerFile: "1. Unggah File yang Ingin Dicheck",
-    verFileDefault: "Klik atau seret file verifikasi",
-    lblTxidManual: "2. Masukkan TXID Verisign (Opsional)",
-    phTxid: "Kosongkan jika ingin deteksi otomatis...",
-    lblTxidNote: "TXID manual wajib terdaftar dan valid di blockchain {net}.",
-    lblHashField: "3. Hash SHA-256 (Otomatis terisi dari file)",
-    phHash: "Hash file...",
-    btnRunVerify: "Jalankan Verifikasi & Pencocokan Explorer",
-    lblCalculatedHash: "Hash File Terhitung:",
-    lblFoundSource: "Sumber / TXID Ditemukan:",
-
-    lblSaveSpreadsheet: "Simpan data dokumen ini ke Spreadsheet agar tidak perlu input TXID di kemudian hari?",
-    lblSaveFieldsNote: "TXID dan Hash SHA-256 terisi otomatis sesuai data valid dari blockchain.",
-    lblDocDesc: "Keterangan Dokumen",
-    phDocDesc: "Contoh: Laporan Keuangan Q3",
-    lblAutoTxid: "TXID Verisign (Otomatis)",
-    lblAutoHash: "Hash SHA-256 (Otomatis)",
-    btnConfirmSave: "Konfirmasi & Simpan ke Spreadsheet",
-
-    dbHeading: "Database Terekam Verisign",
-    syncSheet: "Sinkronisasi Otomatis Spreadsheet",
-    syncLocal: "Database lokal (bawaan)",
-    thDesc: "Keterangan Dokumen",
-    thTxid: "TXID Verisign",
-    thHash: "Hash SHA-256",
-    dbEmpty: "Memuat data atau database kosong...",
-
-    toastHashSuccess: "Hash SHA-256 berhasil dibuat!",
-    toastHashFailed: "Gagal memproses file.",
-    toastCopySuccess: "Hash berhasil disalin ke clipboard!",
-    toastUploadFirst: "Silakan unggah file atau masukkan hash terlebih dahulu!",
-    toastDescRequired: "Keterangan Dokumen harus diisi!",
-    toastDuplicate: "Gagal: TXID dan Hash yang sama sudah tersimpan di Spreadsheet!",
-    toastSaving: "Menyimpan data otomatis ke spreadsheet...",
-    toastSaveSuccess: "BERHASIL: Data berhasil disimpan ke spreadsheet!",
-    toastSaveError: "Terjadi kesalahan koneksi saat menyimpan ke spreadsheet.",
-    toastTxidCopied: "TXID disalin!",
-    toastHashMismatch: "TXID ditemukan, tetapi Hash file berbeda dari catatan database!",
-    toastTxNotFound: "TXID tidak ditemukan di blockchain {net}!",
-    toastApiFail: "Gagal terhubung ke Explorer atau TXID tidak valid.",
-
-    verChecking: "Memeriksa TXID ke Explorer {net}...",
-    verSuccess: "VERIFIKASI BERHASIL: Sesuai dengan Blockchain {net}!",
-    verFailed: "VERIFIKASI GAGAL: TXID Tidak Valid atau Tidak Ditemukan.",
-    verErrSystem: "Terjadi kesalahan sistem saat verifikasi.",
-    srcExplorerDb: "Explorer & Database (Valid): {x}",
-    srcExplorerOnly: "Explorer {net} (Blockchain Valid): {x}",
-    srcDb: "Database (TXID: {x})",
-    srcOnChain: "On-chain valid",
-    srcBlock: "Block {b}",
-    srcRejected: "TXID ditolak oleh jaringan {net}",
-    srcNoMatch: "Tidak ada kecocokan."
-  },
-  en: {
-    badge: "{net} Explorer Connected",
-    tabGen: "Hash Generator",
-    tabVer: "Verification & Explorer",
-
-    walletTitle: "Wallet Login",
-    walletDesc: "Optional. Connect a wallet extension to show your address & balance on {net}. Verification works without logging in.",
-    btnConnect: "Connect Wallet Extension (Nusa Wallet / NUX Connect)",
-    walletActive: "Active wallet",
-    lblBalance: "Balance",
-    btnRefresh: "Refresh balance",
-    btnDisconnect: "Disconnect",
-    balFail: "failed to load balance",
-    balNA: "not available",
-    extWait: "Waiting for approval in the wallet extension...",
-    extNop: "Wallet extension (Nusa Wallet / NUX Connect) not detected. Install/enable it, then reload this page.",
-    extNoAddr: "The extension did not return an address.",
-    extRej: "Connection rejected in the extension.",
-    extNet: "NUX Connect is on {n}. Switch to {net} in the extension popup and try again.",
-    toastWalletOk: "Wallet connected!",
-    toastWalletReset: "Network switched to {net}. Wallet disconnected — please reconnect.",
-
-    genTitle: "File SHA-256 Hash Generator",
-    genDesc: "Upload any file type to get its digital fingerprint (hash) securely within your browser.",
-    genDropTitle: "Choose or drop a file here",
-    genDropSub: "Supports documents, images, videos, archives, and other formats",
-    genOutputLabel: "SHA-256 Hash Output Field",
-    btnCopyHash: "Copy Hash",
-    phHashOutput: "Hash will appear here...",
-
-    verTitle: "Verify File with {net} Explorer & TXID Database",
-    verDesc: "Simply select a file for auto-verification. Optionally enter a TXID to match a specific transaction with the blockchain.",
-    lblVerFile: "1. Upload File to Check",
-    verFileDefault: "Click or drag verification file",
-    lblTxidManual: "2. Enter Verisign TXID (Optional)",
-    phTxid: "Leave empty for auto-detection...",
-    lblTxidNote: "Manual TXID must be registered and valid on the {net} blockchain.",
-    lblHashField: "3. SHA-256 Hash (Auto-filled from file)",
-    phHash: "File hash...",
-    btnRunVerify: "Run Verification & Explorer Match",
-    lblCalculatedHash: "Calculated File Hash:",
-    lblFoundSource: "Source / TXID Found:",
-
-    lblSaveSpreadsheet: "Save this document data to Spreadsheet to avoid typing TXID in the future?",
-    lblSaveFieldsNote: "TXID and SHA-256 Hash are auto-filled according to valid blockchain data.",
-    lblDocDesc: "Document Description",
-    phDocDesc: "Example: Q3 Financial Report",
-    lblAutoTxid: "Verisign TXID (Auto)",
-    lblAutoHash: "SHA-256 Hash (Auto)",
-    btnConfirmSave: "Confirm & Save to Spreadsheet",
-
-    dbHeading: "Recorded Verisign Database",
-    syncSheet: "Spreadsheet Auto-Sync",
-    syncLocal: "Local (built-in) database",
-    thDesc: "Document Description",
-    thTxid: "Verisign TXID",
-    thHash: "SHA-256 Hash",
-    dbEmpty: "Loading data or database is empty...",
-
-    toastHashSuccess: "SHA-256 Hash successfully generated!",
-    toastHashFailed: "Failed to process file.",
-    toastCopySuccess: "Hash successfully copied to clipboard!",
-    toastUploadFirst: "Please upload a file or enter a hash first!",
-    toastDescRequired: "Document Description is required!",
-    toastDuplicate: "Failed: Identical TXID and Hash are already saved in Spreadsheet!",
-    toastSaving: "Saving data automatically to spreadsheet...",
-    toastSaveSuccess: "SUCCESS: Data successfully saved to spreadsheet!",
-    toastSaveError: "Connection error occurred while saving to spreadsheet.",
-    toastTxidCopied: "TXID copied!",
-    toastHashMismatch: "TXID found, but the file hash differs from the database record!",
-    toastTxNotFound: "TXID not found on the {net} blockchain!",
-    toastApiFail: "Failed to connect to Explorer or invalid TXID.",
-
-    verChecking: "Checking TXID on {net} Explorer...",
-    verSuccess: "VERIFICATION SUCCESSFUL: Matches {net} Blockchain!",
-    verFailed: "VERIFICATION FAILED: Invalid or Unfound TXID.",
-    verErrSystem: "System error occurred during verification.",
-    srcExplorerDb: "Explorer & Database (Valid): {x}",
-    srcExplorerOnly: "{net} Explorer (Blockchain Valid): {x}",
-    srcDb: "Database (TXID: {x})",
-    srcOnChain: "On-chain valid",
-    srcBlock: "Block {b}",
-    srcRejected: "TXID rejected by {net} network",
-    srcNoMatch: "No match found."
-  }
-};
-
-function t(key, vars = {}) {
-  let s = (i18n[currentLang][key] ?? key);
-  s = s.replace(/\{net\}/g, NET().label);
-  for (const k in vars) s = s.replace(new RegExp('\\{' + k + '\\}', 'g'), vars[k]);
-  return s;
-}
-
-function esc(s) {
-  return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-}
-
-function applyI18n() {
-  document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
-  document.querySelectorAll('[data-i18n-ph]').forEach(el => { el.placeholder = t(el.dataset.i18nPh); });
-  document.getElementById('badgeConnected').textContent = t('badge');
-  if (!selectedVerFile) document.getElementById('verFileText').textContent = t('verFileDefault');
-  document.getElementById('lblSyncStatus').textContent = NET().sheet ? t('syncSheet') : t('syncLocal');
-  document.title = `Nusachain Verisign — ${NET().label}`;
-  renderDatabaseTable();
-  if (wallet.address) renderWallet();
-}
-
-function setLanguage(lang) {
-  currentLang = lang;
-  document.documentElement.lang = lang;
-  document.getElementById('btnIN').classList.toggle('active', lang === 'id');
-  document.getElementById('btnEN').classList.toggle('active', lang === 'en');
-  applyI18n();
-}
-
-/* =====================================================================
-   TOGGLE JARINGAN
-   ===================================================================== */
-function setNetwork(key, initial = false) {
-  if (!NETWORKS[key]) key = 'mainnet';
-  const changed = key !== currentNet;
-  currentNet = key;
-  document.documentElement.dataset.net = key;
-  document.getElementById('btnMainnet').classList.toggle('active', key === 'mainnet');
-  document.getElementById('btnTestnet').classList.toggle('active', key === 'testnet');
-  try { localStorage.setItem('verisign_net', key); } catch (e) {}
-  try {
-    const u = new URL(location.href); u.searchParams.set('net', key);
-    history.replaceState(null, '', u);
-  } catch (e) {}
-
-  // Hasil verifikasi jaringan sebelumnya tidak berlaku lagi
-  document.getElementById('verResultCard').classList.add('hidden-page');
-  document.getElementById('autoSaveContainer').classList.add('hidden-page');
-
-  // Alamat & saldo berbeda per jaringan -> putuskan wallet
-  if (changed && !initial && wallet.address) {
-    walletLogout();
-    applyI18n();
-    toast(t('toastWalletReset'), 'fa-plug-circle-xmark');
-  } else {
-    applyI18n();
-  }
-  loadDatabase();
-}
-
-/* =====================================================================
-   LOGIN WALLET VIA EXTENSION (Nusa Wallet / NUX Connect)
-   ===================================================================== */
-const wallet = { address: null, kind: null };
-
-const extProvider = () => window.nusa || window.nux || null;
-// 'nusa' = punya connect() (Nusa Wallet); 'nux' = gaya EIP-1193 request() (NUX Connect)
-function extKind(p) {
-  if (!p) return null;
-  if (typeof p.connect === 'function') return 'nusa';
-  if (typeof p.request === 'function') return 'nux';
-  return null;
-}
-const extName = () => wallet.kind === 'nux' ? 'NUX Connect' : 'Nusa Wallet';
-
-function waitForExt(ms) {
-  return new Promise(res => {
-    const p = extProvider();
-    if (p) return res(p);
-    const done = () => {
-      clearTimeout(timer);
-      window.removeEventListener('nux#initialized', done);
-      window.removeEventListener('nusa#initialized', done);
-      res(extProvider());
     };
-    const timer = setTimeout(done, ms || 1500);
-    window.addEventListener('nux#initialized', done);
-    window.addEventListener('nusa#initialized', done);
-  });
-}
 
-function extMsg(text, bad) {
-  const e = document.getElementById('msgExt');
-  e.textContent = text || '';
-  e.className = 'ext-msg' + (bad ? ' bad' : '');
-}
+    function setLanguage(lang) {
+      currentLang = lang;
+      const t = translations[lang];
 
-function shortAddr(a) { return a && a.length > 20 ? a.slice(0, 10) + '…' + a.slice(-8) : a; }
+      document.getElementById('btnIN').classList.toggle('active', lang === 'id');
+      document.getElementById('btnEN').classList.toggle('active', lang === 'en');
 
-function renderWallet() {
-  document.getElementById('walletLogin').classList.toggle('hidden-page', !!wallet.address);
-  document.getElementById('walletActive').classList.toggle('hidden-page', !wallet.address);
-  if (wallet.address) {
-    document.getElementById('wAddr').textContent = `${wallet.address}  (${extName()} · ${NET().label})`;
+      document.getElementById('tabBtnGen').innerHTML = t.tabBtnGen;
+      document.getElementById('tabBtnVer').innerHTML = t.tabBtnVer;
+      document.getElementById('genTitle').textContent = t.genTitle;
+      document.getElementById('genDesc').textContent = t.genDesc;
+      document.getElementById('genDropText').textContent = t.genDropText;
+      document.getElementById('genResultLabel').textContent = t.genResultLabel;
+      
+      document.getElementById('verTitle').textContent = t.verTitle;
+      document.getElementById('verDesc').textContent = t.verDesc;
+      document.getElementById('lblStep1').textContent = t.lblStep1;
+      if (!selectedVerFile) {
+        document.getElementById('verFileText').textContent = t.verFileTextDefault;
+      }
+      document.getElementById('lblStep2').textContent = t.lblStep2;
+      document.getElementById('manualTxidInput').placeholder = t.phTxid;
+      document.getElementById('lblStep3').textContent = t.lblStep3;
+      document.getElementById('refHashInput').placeholder = t.phHash;
+      document.getElementById('btnVerifyText').textContent = t.btnVerifyText;
+      document.getElementById('lblTxDetails').textContent = t.lblTxDetails;
+      applyInjectLang();
+    }
+
+    let verisignDatabase = [
+      {
+        hash: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        txid: "4a5e1f7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f",
+        description: "Contoh Dokumen Kosong / Perjanjian Kerjasama V1"
+      },
+      {
+        hash: "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824",
+        txid: "9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1f0e9d8c7b6a5f4e3d2c1b0a9f8e",
+        description: "Sertifikat Aset Digital Nusachain"
+      }
+    ];
+
+    let API_BASE = 'https://explorer.nusacoin.org';
+
+
+    // ================== WALLET LOGIN & INJECT (OP_RETURN) ==================
+    // Fungsi kripto/alamat/transaksi di bawah diambil dari Nusa-Card.html (sign lokal + broadcast)
+    let NODE_API = 'https://api.nusacoin.org';
+    const DUST_SATS = 546;
+    const VS_PREFIX = 'VSIGN1:';
+    let liveWalletData = { pkey: null, address: null, balance: 0 };
+    let pendingUtxos = [];
+    const pendingSpent = new Set();
+  const NUSACOIN_PARAMS = {
+    bech32: 'nu',
+    pubKeyHash: 0x35, // Awalan 'N'
+    scriptHash: 0x4b, // Awalan 'X'
+    wif: 0x57         // Prefix WIF Nusacoin
+  };
+
+  const BECH32_CHARSET = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l';
+  const ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+
+  function polymod(values) {
+    let chk = 1;
+    for (let p = 0; p < values.length; ++p) {
+      let top = chk >> 25;
+      chk = ((chk & 0x1ffffff) << 5) ^ values[p];
+      if ((top >> 0) & 1) chk ^= 0x3b6a57b2;
+      if ((top >> 1) & 1) chk ^= 0x26508e6d;
+      if ((top >> 2) & 1) chk ^= 0x1ea119fa;
+      if ((top >> 3) & 1) chk ^= 0x3d4233dd;
+      if ((top >> 4) & 1) chk ^= 0x2a1462b3;
+    }
+    return chk;
   }
-}
 
-async function walletConnectExt() {
-  const btn = document.getElementById('btnExt');
-  btn.disabled = true;
-  extMsg(t('extWait'));
-  try {
-    const p = await waitForExt();
-    if (!p) throw new Error(t('extNop'));
-    const kind = extKind(p);
-    let r;
-    if (kind === 'nux') {
-      // NUX Connect: pastikan jaringan extension sama dengan toggle halaman
-      const net = await p.request({ method: 'nux_getNetwork' });
-      if (String(net).toLowerCase() !== NET().key) throw new Error(t('extNet', { n: String(net) }));
-      const acc = await p.request({ method: 'nux_requestAccounts' });
-      r = { address: Array.isArray(acc) ? acc[0] : (acc && acc.address) };
-    } else if (kind === 'nusa') {
-      r = await p.connect();            // -> { address, publicKey }
+  function hrpExpand(hrp) {
+    let ret = [];
+    for (let i = 0; i < hrp.length; ++i) ret.push(hrp.charCodeAt(i) >> 5);
+    ret.push(0);
+    for (let i = 0; i < hrp.length; ++i) ret.push(hrp.charCodeAt(i) & 31);
+    return ret;
+  }
+
+  function convertBits(data, frombits, tobits, pad = true) {
+    let acc = 0, bits = 0, ret = [], maxv = (1 << tobits) - 1;
+    for (let i = 0; i < data.length; ++i) {
+      let value = data[i];
+      if (value < 0 || value >> frombits !== 0) return null;
+      acc = (acc << frombits) | value;
+      bits += frombits;
+      while (bits >= tobits) {
+        bits -= tobits;
+        ret.push((acc >> bits) & maxv);
+      }
+    }
+    if (pad) {
+      if (bits > 0) ret.push((acc << (tobits - bits)) & maxv);
+    } else if (bits >= frombits || ((acc << (tobits - bits)) & maxv)) {
+      return null;
+    }
+    return ret;
+  }
+
+  function toBech32(hrp, version, program) {
+    let data = [version].concat(convertBits(program, 8, 5, true));
+    let checksumData = hrpExpand(hrp).concat(data).concat([0, 0, 0, 0, 0, 0]);
+    let mod = polymod(checksumData) ^ 1;
+    let ret = hrp + '1';
+    for (let p = 0; p < data.length; ++p) ret += BECH32_CHARSET.charAt(data[p]);
+    for (let p = 0; p < 6; ++p) ret += BECH32_CHARSET.charAt((mod >> (5 * (5 - p))) & 31);
+    return ret;
+  }
+
+  function toBase58(buffer) {
+    let digits = [0];
+    for (let i = 0; i < buffer.length; i++) {
+      for (let j = 0; j < digits.length; j++) digits[j] <<= 8;
+      digits[0] += buffer[i];
+      let carry = 0;
+      for (let j = 0; j < digits.length; ++j) {
+        digits[j] += carry;
+        carry = (digits[j] / 58) | 0;
+        digits[j] %= 58;
+      }
+      while (carry) {
+        digits.push(carry % 58);
+        carry = (carry / 58) | 0;
+      }
+    }
+    for (let i = 0; buffer[i] === 0 && i < buffer.length - 1; i++) digits.push(0);
+    return digits.reverse().map(d => ALPHABET[d]).join('');
+  }
+
+  function fromBase58(string) {
+    let bytes = [0];
+    for (let i = 0; i < string.length; i++) {
+      let c = string[i];
+      let value = ALPHABET.indexOf(c);
+      if (value === -1) throw new Error("Karakter Base58 tidak valid");
+      for (let j = 0; j < bytes.length; j++) bytes[j] *= 58;
+      bytes[0] += value;
+      let carry = 0;
+      for (let j = 0; j < bytes.length; ++j) {
+        bytes[j] += carry;
+        carry = bytes[j] >> 8;
+        bytes[j] &= 0xff;
+      }
+      while (carry) {
+        bytes.push(carry & 0xff);
+        carry >>= 8;
+      }
+    }
+    for (let i = 0; string[i] === '1' && i < string.length - 1; i++) bytes.push(0);
+    return new Uint8Array(bytes.reverse());
+  }
+
+  function toBase58Check(payload) {
+    const sha1 = CryptoJS.SHA256(CryptoJS.lib.WordArray.create(payload));
+    const sha2 = CryptoJS.SHA256(sha1);
+    
+    const checksum = sha2.words.slice(0, 1);
+    const checksumBytes = [
+      (checksum[0] >>> 24) & 0xff,
+      (checksum[0] >>> 16) & 0xff,
+      (checksum[0] >>> 8) & 0xff,
+      checksum[0] & 0xff
+    ];
+
+    const fullPayload = new Uint8Array(payload.length + 4);
+    fullPayload.set(payload);
+    fullPayload.set(checksumBytes, payload.length);
+
+    return toBase58(fullPayload);
+  }
+
+  function getAddressFromWif(wif, addrType = "bech32") {
+    try {
+      const decoded = fromBase58(wif);
+      const rawPrivKey = decoded.slice(1, 33);
+      
+      const ec = new elliptic.ec('secp256k1');
+      const keyPair = ec.keyFromPrivate(rawPrivKey);
+      const pubKeyHex = keyPair.getPublic(true, 'hex');
+      const pubKeyWordArray = CryptoJS.enc.Hex.parse(pubKeyHex);
+
+      const shaHash = CryptoJS.SHA256(pubKeyWordArray);
+      const ripemdHash = CryptoJS.RIPEMD160(shaHash);
+
+      const pubKeyHash = new Uint8Array(20);
+      for (let i = 0; i < 20; i++) {
+        pubKeyHash[i] = (ripemdHash.words[i >>> 2] >>> (24 - (i % 4) * 8)) & 0xff;
+      }
+
+      if (addrType === "p2pkh") {
+        const p2pkhPayload = new Uint8Array(21);
+        p2pkhPayload[0] = NUSACOIN_PARAMS.pubKeyHash;
+        p2pkhPayload.set(pubKeyHash, 1);
+        return toBase58Check(p2pkhPayload);
+      } else if (addrType === "p2sh") {
+        const p2shPayload = new Uint8Array(21);
+        p2shPayload[0] = NUSACOIN_PARAMS.scriptHash;
+        p2shPayload.set(pubKeyHash, 1);
+        return toBase58Check(p2shPayload);
+      } else {
+        return toBech32(NUSACOIN_PARAMS.bech32, 0, pubKeyHash);
+      }
+    } catch(err) {
+      console.error("Gagal mendapatkan alamat dari WIF:", err);
+      return wif;
+    }
+  }
+  function isValidWif(wif) {
+    try {
+      const d = fromBase58(wif);
+      if (d.length !== 37 && d.length !== 38) return false;
+      if (d[0] !== NUSACOIN_PARAMS.wif) return false;
+      const body = d.slice(0, d.length - 4);
+      const chk = d.slice(d.length - 4);
+      const h = CryptoJS.SHA256(CryptoJS.SHA256(CryptoJS.lib.WordArray.create(body)));
+      for (let i = 0; i < 4; i++) {
+        if (((h.words[0] >>> (24 - i * 8)) & 0xff) !== chk[i]) return false;
+      }
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function isAddressText(t) {
+    return t.startsWith(NUSACOIN_PARAMS.bech32 + "1") || (/^[1-9A-HJ-NP-Za-km-z]{26,35}$/.test(t) && !isValidWif(t));
+  }
+
+  // Teks hasil enkripsi CryptoJS (AES passphrase) selalu diawali "U2FsdGVkX1" (= "Salted__")
+  function isEncryptedText(t) {
+    return t.startsWith("ENC:") || t.startsWith("U2FsdGVkX1");
+  }
+  function numToLEHex(val, bytes) {
+    let hex = Number(val).toString(16);
+    if (hex.length % 2 !== 0) hex = '0' + hex;
+    while (hex.length < bytes * 2) hex = '0' + hex;
+    return hex.match(/../g).reverse().join('');
+  }
+
+  function numTo64BitLEHex(val) {
+    let hex = BigInt(val).toString(16);
+    while (hex.length < 16) hex = '0' + hex;
+    return hex.match(/../g).reverse().join('');
+  }
+
+  function varIntHex(n) {
+    if (n < 0xfd) return numToLEHex(n, 1);
+    if (n <= 0xffff) return 'fd' + numToLEHex(n, 2);
+    return 'fe' + numToLEHex(n, 4);
+  }
+
+  function bytesToHex(bytes) {
+    return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  function reverseHex(hex) { return hex.match(/../g).reverse().join(''); }
+
+  function sha256dHex(hex) {
+    return CryptoJS.SHA256(CryptoJS.SHA256(CryptoJS.enc.Hex.parse(hex))).toString();
+  }
+
+  function hash160Hex(hex) {
+    return CryptoJS.RIPEMD160(CryptoJS.SHA256(CryptoJS.enc.Hex.parse(hex))).toString();
+  }
+
+  // Alamat Nusacoin -> scriptPubKey (hex). Mendukung P2PKH (N...), P2SH (X...), Bech32 (nu1q...)
+  function addressToScriptHex(address) {
+    const addr = (address || '').trim();
+    if (!addr) throw new Error("Alamat kosong.");
+    const lower = addr.toLowerCase();
+
+    if (lower.startsWith(NUSACOIN_PARAMS.bech32 + '1')) {
+      if (addr !== lower && addr !== addr.toUpperCase()) throw new Error("Alamat bech32 tidak valid (huruf campuran).");
+      const pos = lower.lastIndexOf('1');
+      const hrp = lower.slice(0, pos);
+      if (hrp !== NUSACOIN_PARAMS.bech32) throw new Error("Prefix alamat bech32 bukan Nusacoin.");
+      const data = [];
+      for (const c of lower.slice(pos + 1)) {
+        const v = BECH32_CHARSET.indexOf(c);
+        if (v < 0) throw new Error("Karakter alamat bech32 tidak valid.");
+        data.push(v);
+      }
+      if (data.length < 7) throw new Error("Alamat bech32 terlalu pendek.");
+      if (polymod(hrpExpand(hrp).concat(data)) !== 1) throw new Error("Checksum alamat bech32 salah. Periksa kembali alamat tujuan.");
+      if (data[0] !== 0) throw new Error("Hanya SegWit v0 (nu1q...) yang didukung.");
+      const prog = convertBits(data.slice(1, -6), 5, 8, false);
+      if (!prog) throw new Error("Program alamat bech32 tidak valid.");
+      if (prog.length === 20) return '0014' + bytesToHex(prog);
+      if (prog.length === 32) return '0020' + bytesToHex(prog);
+      throw new Error("Panjang program alamat bech32 tidak valid.");
+    }
+
+    let raw;
+    try { raw = fromBase58(addr); } catch (e) { throw new Error("Alamat tidak valid (bukan Base58/Bech32)."); }
+    if (raw.length !== 25) throw new Error("Panjang alamat tidak valid.");
+    const payload = raw.slice(0, 21);
+    if (sha256dHex(bytesToHex(payload)).slice(0, 8) !== bytesToHex(raw.slice(21))) {
+      throw new Error("Checksum alamat salah. Periksa kembali alamat tujuan.");
+    }
+    const h = bytesToHex(raw.slice(1, 21));
+    if (payload[0] === NUSACOIN_PARAMS.pubKeyHash) return '76a914' + h + '88ac';
+    if (payload[0] === NUSACOIN_PARAMS.scriptHash) return 'a914' + h + '87';
+    throw new Error("Prefix alamat bukan alamat Nusacoin.");
+  }
+
+  // Susun + tanda tangani transaksi. Mendukung input P2PKH (legacy) & P2WPKH (SegWit, BIP143)
+  function buildSignedTransaction(utxos, outputs, privateKeyWif, ownScript) {
+    const decoded = fromBase58(privateKeyWif);
+    const ec = new elliptic.ec('secp256k1');
+    const keyPair = ec.keyFromPrivate(decoded.slice(1, 33));
+    const pubHex = keyPair.getPublic(true, 'hex');
+    const pkh = hash160Hex(pubHex);
+
+    const isSegwit = ownScript === '0014' + pkh;
+    const isLegacy = ownScript === '76a914' + pkh + '88ac';
+    if (!isSegwit && !isLegacy) {
+      throw new Error("Private key tidak cocok dengan alamat wallet, atau tipe alamat (P2SH) tidak bisa dibelanjakan dari kartu ini. Pilih format Bech32 atau P2PKH saat membuka wallet.");
+    }
+
+    const VERSION = '01000000', LOCKTIME = '00000000', SEQ = 'ffffffff', SIGHASH_ALL = '01000000';
+    const outsHex = outputs.map(o => numTo64BitLEHex(o.value) + varIntHex(o.script.length / 2) + o.script).join('');
+    const outsSer = varIntHex(outputs.length) + outsHex;
+    const ins = utxos.map(u => ({ prev: reverseHex(u.txid) + numToLEHex(u.vout, 4), value: u.value }));
+    const signDigest = (digestHex) => keyPair.sign(digestHex, { canonical: true }).toDER('hex') + '01';
+
+    let inputsSer = varIntHex(ins.length);
+    let witness = '';
+
+    if (isLegacy) {
+      ins.forEach((inp, i) => {
+        let pre = VERSION + varIntHex(ins.length);
+        ins.forEach((o, j) => {
+          pre += o.prev + (i === j ? varIntHex(ownScript.length / 2) + ownScript : '00') + SEQ;
+        });
+        pre += outsSer + LOCKTIME + SIGHASH_ALL;
+        const sig = signDigest(sha256dHex(pre));
+        const scriptSig = varIntHex(sig.length / 2) + sig + varIntHex(pubHex.length / 2) + pubHex;
+        inputsSer += inp.prev + varIntHex(scriptSig.length / 2) + scriptSig + SEQ;
+      });
     } else {
-      throw new Error(t('extNop'));
+      const hashPrevouts = sha256dHex(ins.map(x => x.prev).join(''));
+      const hashSequence = sha256dHex(ins.map(() => SEQ).join(''));
+      const hashOutputs = sha256dHex(outsHex);
+      const scriptCode = '1976a914' + pkh + '88ac';
+      ins.forEach(inp => {
+        const pre = VERSION + hashPrevouts + hashSequence + inp.prev + scriptCode +
+                    numTo64BitLEHex(inp.value) + SEQ + hashOutputs + LOCKTIME + SIGHASH_ALL;
+        const sig = signDigest(sha256dHex(pre));
+        witness += '02' + varIntHex(sig.length / 2) + sig + varIntHex(pubHex.length / 2) + pubHex;
+        inputsSer += inp.prev + '00' + SEQ;
+      });
     }
-    if (!r || !r.address) throw new Error(t('extNoAddr'));
 
-    wallet.address = r.address;
-    wallet.kind = kind;
-    extMsg('');
-    renderWallet();
-    toast(t('toastWalletOk'), 'fa-wallet');
-    refreshBalance();
-  } catch (e) {
-    extMsg(e && e.code === 4001 ? t('extRej') : ((e && e.message) || String(e)), true);
-  } finally {
-    btn.disabled = false;
+    const legacySer = VERSION + inputsSer + outsSer + LOCKTIME;
+    const raw = isSegwit ? VERSION + '0001' + inputsSer + outsSer + witness + LOCKTIME : legacySer;
+    const txid = reverseHex(sha256dHex(legacySer));
+    return { raw, txid };
   }
-}
-
-function walletLogout() {
-  try {
-    const p = extProvider();
-    if (p && wallet.address && typeof p.disconnect === 'function') p.disconnect().catch(() => {});
-  } catch (e) {}
-  wallet.address = null;
-  wallet.kind = null;
-  document.getElementById('wBal').textContent = '...';
-  renderWallet();
-}
-
-async function refreshBalance() {
-  if (!wallet.address) return;
-  const el = document.getElementById('wBal');
-  const netAtStart = currentNet, addrAtStart = wallet.address;
-  el.textContent = '...';
-  try {
-    const bal = await NETWORKS[netAtStart].fetchBalance(addrAtStart);
-    if (netAtStart !== currentNet || addrAtStart !== wallet.address) return;   // sudah berganti
-    el.textContent = bal === null ? t('balNA') : `${bal} NUX`;
-  } catch (e) {
-    if (netAtStart !== currentNet || addrAtStart !== wallet.address) return;
-    el.textContent = t('balFail');
-  }
-}
-
-/* =====================================================================
-   DATABASE (spreadsheet / lokal)
-   ===================================================================== */
-const dbByNet = { mainnet: [...MAINNET_LOCAL_DB], testnet: [] };
-const db = () => dbByNet[currentNet];
-
-async function loadDatabase() {
-  const key = currentNet, net = NETWORKS[key];
-  renderDatabaseTable();
-  if (!net.sheet) return;
-  try {
-    const res = await fetch(net.sheet);
-    const data = await res.json();
-    if (Array.isArray(data)) {
-      dbByNet[key] = data;
-      if (key === currentNet) renderDatabaseTable();
+  function normalizeUtxos(data, ownAddr) {
+    let arr = data;
+    if (data && !Array.isArray(data)) {
+      arr = data.result ?? data.utxos ?? data.unspent ?? data.unspents ?? data.data ?? data.unspent_outputs ?? null;
+      if (arr && !Array.isArray(arr)) arr = arr.utxos ?? arr.unspents ?? arr.unspent ?? null;
     }
-  } catch (err) {
-    console.warn('Failed to load database from Spreadsheet.', err);
-  }
-}
-
-function renderDatabaseTable() {
-  const tbody = document.getElementById('databaseTableBody');
-  tbody.innerHTML = '';
-  const rows = db();
-  if (!rows.length) {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td colspan="3" class="py-3 text-center text-[var(--ink-soft)]">${esc(t('dbEmpty'))}</td>`;
-    tbody.appendChild(tr);
-    return;
-  }
-  rows.forEach(item => {
-    const tr = document.createElement('tr');
-    tr.className = 'hover:bg-[var(--surface-2)] transition';
-    tr.innerHTML = `
-      <td class="py-2.5 text-[var(--ink)] font-sans font-medium">${esc(item.desc)}</td>
-      <td class="py-2.5 text-[var(--gold)] truncate max-w-[150px] cursor-pointer hover:underline" data-txid="${esc(item.txid)}">${esc(item.txid)}</td>
-      <td class="py-2.5 text-[var(--nux-green)] truncate max-w-[180px]">${esc(item.hash)}</td>`;
-    tr.querySelector('[data-txid]').addEventListener('click', e => {
-      try { navigator.clipboard.writeText(e.currentTarget.dataset.txid); } catch (err) {}
-      toast(t('toastTxidCopied'), 'fa-copy');
-    });
-    tbody.appendChild(tr);
-  });
-}
-
-function toggleSaveMenu() {
-  document.getElementById('saveMenuFields').classList.toggle('hidden-page', !document.getElementById('saveToggleCheck').checked);
-}
-
-async function submitAutoSaveData() {
-  const net = NET();
-  if (!net.sheet) return;
-  const desc = document.getElementById('autoRegDesc').value.trim();
-  const txid = document.getElementById('autoRegTxid').value.trim();
-  const hash = document.getElementById('autoRegHash').value.trim();
-
-  if (!desc) { toast(t('toastDescRequired'), 'fa-triangle-exclamation', 'rose'); return; }
-
-  const dup = db().some(i => String(i.txid).trim().toLowerCase() === txid.toLowerCase() &&
-                             String(i.hash).trim().toLowerCase() === hash.toLowerCase());
-  if (dup) { toast(t('toastDuplicate'), 'fa-circle-xmark', 'rose'); return; }
-
-  toast(t('toastSaving'), 'fa-spinner fa-spin');
-  try {
-    await fetch(net.sheet, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ desc, txid, hash })
-    });
-    toast(t('toastSaveSuccess'), 'fa-circle-check');
-    document.getElementById('autoRegDesc').value = '';
-    document.getElementById('saveToggleCheck').checked = false;
-    document.getElementById('saveMenuFields').classList.add('hidden-page');
-    document.getElementById('autoSaveContainer').classList.add('hidden-page');
-    setTimeout(loadDatabase, 2500);
-  } catch (err) {
-    toast(t('toastSaveError'), 'fa-triangle-exclamation', 'rose');
-  }
-}
-
-/* =====================================================================
-   TAB, TEMA
-   ===================================================================== */
-function switchTab(tab) {
-  const gen = tab === 'generator';
-  document.getElementById('section-generator').classList.toggle('hidden-page', !gen);
-  document.getElementById('section-verifier').classList.toggle('hidden-page', gen);
-  document.getElementById('tabBtnGen').classList.toggle('active', gen);
-  document.getElementById('tabBtnVer').classList.toggle('active', !gen);
-}
-
-document.getElementById('themeToggle').addEventListener('click', () => {
-  const html = document.documentElement, icon = document.getElementById('themeIcon');
-  const dark = html.classList.toggle('dark');
-  icon.className = dark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
-});
-
-/* =====================================================================
-   HASH & VERIFIKASI
-   ===================================================================== */
-async function calculateSHA256(file) {
-  const buffer = await file.arrayBuffer();
-  const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
-  return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
-}
-
-async function handleGenFileSelect(files) {
-  if (!files || !files.length) return;
-  const file = files[0];
-  document.getElementById('genFileInfo').classList.remove('hidden-page');
-  document.getElementById('genFileName').innerText = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
-  document.getElementById('genResult').classList.remove('hidden-page');
-  document.getElementById('genHashOutput').value = '...';
-  try {
-    document.getElementById('genHashOutput').value = await calculateSHA256(file);
-    toast(t('toastHashSuccess'), 'fa-circle-check');
-  } catch (err) {
-    document.getElementById('genHashOutput').value = t('toastHashFailed');
-  }
-}
-
-function copyHash() {
-  const input = document.getElementById('genHashOutput');
-  if (input.value && input.value !== '...' && input.value !== t('toastHashFailed')) {
-    input.select();
-    try { navigator.clipboard.writeText(input.value); } catch (e) {}
-    toast(t('toastCopySuccess'), 'fa-copy');
-  }
-}
-
-let selectedVerFile = null;
-async function handleVerFileSelect(files) {
-  if (!files || !files.length) return;
-  selectedVerFile = files[0];
-  document.getElementById('verFileText').innerText = selectedVerFile.name;
-  try {
-    document.getElementById('refHashInput').value = await calculateSHA256(selectedVerFile);
-  } catch (err) {
-    toast(t('toastHashFailed'), 'fa-triangle-exclamation', 'rose');
-  }
-}
-
-async function executeVerification() {
-  const net = NET(), netKey = net.key;
-  const manualTx = document.getElementById('manualTxInput').value.trim();
-  const typedHash = document.getElementById('refHashInput').value.trim();
-
-  if (!selectedVerFile && !typedHash) {
-    toast(t('toastUploadFirst'), 'fa-triangle-exclamation', 'rose');
-    return;
+    if (!Array.isArray(arr)) return null;
+    return arr.map(u => {
+      if (ownAddr && typeof u.address === 'string' && u.address !== ownAddr) return { txid: null };
+      const txid = u.txid || u.tx_hash || u.hash || u.txHash;
+      const vout = [u.vout, u.n, u.tx_output_n, u.tx_pos, u.index, u.outputIndex].find(v => v !== undefined);
+      let value;
+      if (u.satoshis !== undefined) value = Number(u.satoshis);
+      else if (u.amount !== undefined) value = Math.round(Number(u.amount) * 1e8);
+      else if (u.value !== undefined) value = Number.isInteger(Number(u.value)) ? Number(u.value) : Math.round(Number(u.value) * 1e8);
+      let confirmed = true;
+      if (u.confirmations !== undefined) confirmed = Number(u.confirmations) > 0;
+      else if (u.confirmed !== undefined) confirmed = !!u.confirmed;
+      else if (u.status && u.status.confirmed !== undefined) confirmed = !!u.status.confirmed;
+      return { txid, vout: Number(vout), value, confirmed };
+    }).filter(u => typeof u.txid === 'string' && /^[0-9a-fA-F]{64}$/.test(u.txid) &&
+                   Number.isInteger(u.vout) && Number.isFinite(u.value) && u.value > 0);
   }
 
-  const resultCard = document.getElementById('verResultCard');
-  const statusHeader = document.getElementById('verStatusHeader');
-  const actualHashEl = document.getElementById('verActualHash');
-  const foundSourceEl = document.getElementById('verFoundSource');
-  const autoSaveContainer = document.getElementById('autoSaveContainer');
+  // Total UTXO terkonfirmasi harus sama dengan saldo yang dibaca explorer, supaya tidak salah pakai data
+  function utxoMatchesBalance(list) {
+    const bal = liveWalletData.balance;
+    if (!(bal >= 0)) return true;
+    const total = list.filter(u => u.confirmed !== false).reduce((s, u) => s + u.value, 0) / 1e8;
+    return Math.abs(total - bal) <= Math.max(0.00001, bal * 0.001);
+  }
 
-  resultCard.classList.remove('hidden-page');
-  autoSaveContainer.classList.add('hidden-page');
-  statusHeader.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-[var(--gold)]"></i> ${esc(t('verChecking'))}`;
-  actualHashEl.innerText = '...';
-  foundSourceEl.innerText = net.explorer;
+  // Hitung UTXO dari explorer (Iquidus): ambil transaksi alamat, lalu keluaran milik alamat yang belum dibelanjakan
+  async function fetchUtxosFromExplorer(addr) {
+    let base = API_BASE;
+    if (base.endsWith('/')) base = base.slice(0, -1);
+    if (base.endsWith('/api')) base = base.replace(/\/api$/, '');
 
-  try {
-    const fileHash = (typedHash || await calculateSHA256(selectedVerFile)).toLowerCase();
-    actualHashEl.innerText = fileHash;
+    const listRes = await fetch(`${base}/ext/getaddresstxs/${addr}/0/200`);
+    if (!listRes.ok) throw new Error("explorer: daftar transaksi gagal (HTTP " + listRes.status + ")");
+    const raw = await listRes.json();
+    const arr = Array.isArray(raw) ? raw : (raw.data || raw.records || []);
+    const txids = [...new Set(arr.map(i => i.txid || (typeof i === 'string' ? i : null)).filter(Boolean))];
+    if (!txids.length) return [];
 
-    let matched = false, sourceInfo = '', validTxid = '';
+    const decoded = await Promise.all(txids.map(async txid => {
+      const r = await fetch(`${base}/api/getrawtransaction?txid=${txid}&decrypt=1`);
+      if (!r.ok) throw new Error("explorer: getrawtransaction gagal (HTTP " + r.status + ")");
+      const t = await r.text();
+      let j; try { j = JSON.parse(t); } catch (e) { throw new Error("explorer: respons getrawtransaction bukan JSON"); }
+      if (!j || !Array.isArray(j.vout)) throw new Error("explorer: detail transaksi tidak lengkap");
+      return j;
+    }));
 
-    if (manualTx) {
-      try {
-        const tx = await net.fetchTx(manualTx);
-        if (tx) {
-          const dbItem = db().find(i => String(i.txid).trim().toLowerCase() === manualTx.toLowerCase());
-          if (dbItem && String(dbItem.hash).trim().toLowerCase() !== fileHash) {
-            toast(t('toastHashMismatch'), 'fa-triangle-exclamation', 'rose');
-          } else {
-            matched = true;
-            validTxid = manualTx;
-            sourceInfo = (dbItem ? t('srcExplorerDb', { x: manualTx }) : t('srcExplorerOnly', { x: manualTx }))
-              + (tx.block ? ` — ${t('srcBlock', { b: tx.block })}` : '');
-          }
-        } else {
-          toast(t('toastTxNotFound'), 'fa-circle-xmark', 'rose');
+    const spent = new Set();
+    decoded.forEach(t => (t.vin || []).forEach(v => { if (v.txid !== undefined) spent.add(v.txid + ':' + v.vout); }));
+
+    const out = [];
+    decoded.forEach(t => (t.vout || []).forEach(o => {
+      const spk = o.scriptPubKey || {};
+      const addrs = spk.addresses || (spk.address ? [spk.address] : []);
+      if (addrs.includes(addr) && !spent.has(t.txid + ':' + o.n)) {
+        out.push({ txid: t.txid, vout: o.n, value: Math.round(Number(o.value) * 1e8), confirmed: true });
+      }
+    }));
+    return out.filter(u => u.value > 0);
+  }
+  const CONFLICT_RE = /conflict|missing-?inputs|missingorspent|already spent|double.?spend|txn-mempool/i;
+
+  // --- Broadcast via POST /broadcast (parameter: raw) ---
+  async function broadcastRawTx(apiBase, rawHex, expectedTxid) {
+    const url = `${apiBase}/broadcast`;
+    const enc = encodeURIComponent(rawHex);
+    const attempts = [
+      ['form', () => fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'raw=' + enc })],
+      ['json', () => fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ raw: rawHex }) })],
+      ['multipart', () => { const fd = new FormData(); fd.append('raw', rawHex); return fetch(url, { method: 'POST', body: fd }); }],
+      ['query-post', () => fetch(`${url}?raw=${enc}`, { method: 'POST' })],
+      ['query-get', () => fetch(`${url}?raw=${enc}`)]
+    ];
+    // Error yang menandakan server tidak membaca parameter (format request salah), bukan penolakan node
+    const formatErr = /expected type|got null|got undefined|param|argument|no raw/i;
+    const notes = [];
+    for (const [name, attempt] of attempts) {
+      let res;
+      try { res = await attempt(); } catch (e) { notes.push(name + ': ' + e.message); continue; }
+      const text = await res.text();
+      let json = null;
+      try { json = JSON.parse(text); } catch (e) {}
+      if (json && typeof json === 'object' && ('result' in json || 'error' in json)) {
+        if (json.error) {
+          const msg = typeof json.error === 'object' ? (json.error.message || JSON.stringify(json.error)) : String(json.error);
+          if (formatErr.test(msg)) { notes.push(name + ': ' + msg); continue; }
+          // TX yang sama sudah ada di mempool/blok = sukses (bukan konflik)
+          if (expectedTxid && !CONFLICT_RE.test(msg) && /already|known|duplicate/i.test(msg)) return expectedTxid;
+          const err = new Error(msg);
+          err.conflict = CONFLICT_RE.test(msg);
+          throw err;
         }
-      } catch (e) {
-        console.warn('API verification error:', e);
-        toast(t('toastApiFail'), 'fa-triangle-exclamation', 'rose');
+        if (json.result) return String(json.result);
       }
-    } else {
-      const found = db().find(i => String(i.hash).trim().toLowerCase() === fileHash);
-      if (found) {
-        matched = true;
-        validTxid = found.txid;
-        sourceInfo = t('srcDb', { x: found.txid });
-        try {
-          const tx = await net.fetchTx(found.txid);
-          if (tx) sourceInfo += ` — ${t('srcOnChain')}` + (tx.block ? ` (${t('srcBlock', { b: tx.block })})` : '');
-        } catch (e) { /* database cocok, konfirmasi on-chain gagal: tetap dianggap cocok database */ }
-      }
+      notes.push(`${name}: HTTP ${res.status} ${text.slice(0, 100)}`);
     }
-
-    if (netKey !== currentNet) return;   // jaringan diganti saat menunggu
-
-    if (matched) {
-      statusHeader.innerHTML = `<i class="fa-solid fa-circle-check text-[var(--nux-green)] text-base"></i> <span class="text-[var(--nux-green)]">${esc(t('verSuccess'))}</span>`;
-      foundSourceEl.innerText = sourceInfo;
-      toast(t('verSuccess'), 'fa-circle-check');
-
-      const alreadySaved = db().some(i => i.txid === validTxid && String(i.hash).toLowerCase() === fileHash);
-      if (net.sheet && !alreadySaved && validTxid) {
-        document.getElementById('autoRegTxid').value = validTxid;
-        document.getElementById('autoRegHash').value = fileHash;
-        autoSaveContainer.classList.remove('hidden-page');
-      }
-    } else {
-      statusHeader.innerHTML = `<i class="fa-solid fa-circle-xmark text-rose-500 text-base"></i> <span class="text-rose-500">${esc(t('verFailed'))}</span>`;
-      foundSourceEl.innerText = manualTx ? t('srcRejected') : t('srcNoMatch');
-      toast(t('verFailed'), 'fa-triangle-exclamation', 'rose');
-    }
-  } catch (err) {
-    statusHeader.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-rose-500"></i> <span class="text-rose-500">${esc(t('verErrSystem'))}</span>`;
+    const cors = notes.some(n => /failed to fetch|networkerror|load failed/i.test(n))
+      ? "\nKemungkinan diblokir CORS oleh browser: centang 'Hanya tanda tangani', lalu tempel raw TX ke halaman /broadcast di api.nusacoin.org."
+      : "";
+    const finalErr = new Error("Broadcast gagal.\n- " + notes.join("\n- ") + cors);
+    finalErr.conflict = notes.some(n => CONFLICT_RE.test(n));
+    throw finalErr;
   }
-}
 
-function toast(msg, icon = 'fa-cube', color = 'emerald') {
-  const wrap = document.getElementById('toast-wrap');
-  const el = document.createElement('div');
-  el.className = 'toast rounded-xl px-4 py-3 text-xs font-semibold flex items-center gap-2 fade-in';
-  const iconColor = color === 'rose' ? 'text-rose-500' : 'text-[var(--nux-green)]';
-  el.innerHTML = `<i class="fa-solid ${icon} ${iconColor}"></i> <span>${esc(msg)}</span>`;
-  wrap.appendChild(el);
-  setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .4s'; setTimeout(() => el.remove(), 400); }, 4500);
-}
+    const tw = {
+      id: { tabInj: 'Wallet & Inject', vrScan: 'Pencarian tanpa TXID: alamat penerbit (opsional, pisahkan koma) & jumlah blok terakhir yang dipindai', wlTitle: 'Login Wallet Nusacoin', wlDesc: 'Masuk dengan Private Key WIF atau teks terenkripsi (ENC + PIN). Kunci hanya diproses di browser ini dan tidak dikirim ke server mana pun.', wlKey: 'Private Key WIF / Teks ENC / Alamat (baca-saja)', wlPin: 'PIN (jika terenkripsi)', wlType: 'Tipe Alamat', wlBtn: 'Login Wallet', waTitle: 'Wallet Aktif', waOut: 'Keluar', waRefresh: 'Refresh Saldo', inTitle: 'Inject Hash ke Blockchain', inDesc: 'Hash SHA-256 dokumen ditulis ke blockchain Nusacoin lewat output OP_RETURN. Transaksi ini permanen dan memerlukan fee jaringan.', inWarn: 'Data di blockchain tidak bisa dihapus atau diubah. Pastikan file dan hash sudah benar sebelum inject.', inFile: '1. Pilih File (hash terisi otomatis)', inHash: '2. Hash SHA-256', inDescLbl: 'Keterangan (disimpan lokal untuk pencocokan)', inFee: 'Fee (NUX)', inBtn: 'Inject ke Blockchain' },
+      en: { tabInj: 'Wallet & Inject', vrScan: 'Search without TXID: issuer addresses (optional, comma-separated) & number of latest blocks to scan', wlTitle: 'Nusacoin Wallet Login', wlDesc: 'Sign in with a WIF private key or encrypted text (ENC + PIN). The key is processed only in this browser and is never sent to any server.', wlKey: 'WIF Private Key / ENC Text / Address (read-only)', wlPin: 'PIN (if encrypted)', wlType: 'Address Type', wlBtn: 'Login Wallet', waTitle: 'Active Wallet', waOut: 'Logout', waRefresh: 'Refresh Balance', inTitle: 'Inject Hash to Blockchain', inDesc: 'The document SHA-256 hash is written to the Nusacoin blockchain via an OP_RETURN output. This transaction is permanent and requires a network fee.', inWarn: 'Blockchain data cannot be deleted or changed. Make sure the file and hash are correct before injecting.', inFile: '1. Choose File (hash auto-filled)', inHash: '2. SHA-256 Hash', inDescLbl: 'Description (stored locally for matching)', inFee: 'Fee (NUX)', inBtn: 'Inject to Blockchain' }
+    };
+    function applyInjectLang() {
+      document.querySelectorAll('[data-i]').forEach(el => { el.textContent = tw[currentLang][el.dataset.i]; });
+    }
 
-/* =====================================================================
-   INIT
-   ===================================================================== */
-(function init() {
-  let net = 'mainnet';
+    function setInjectHash(hash, name) {
+      document.getElementById('injHash').value = hash;
+      if (name) document.getElementById('injFileText').textContent = 'File: ' + name;
+    }
+    async function handleInjFile(files) {
+      if (!files || !files.length) return;
+      try { setInjectHash(await calculateSHA256(files[0]), files[0].name); } catch (e) { alert(translations[currentLang].msgGenFail); }
+    }
+
+    function walletLogin() {
+      let key = document.getElementById('wKey').value.trim();
+      const pin = document.getElementById('wPin').value.trim();
+      const type = document.getElementById('wType').value;
+      if (!key) { alert('Masukkan Private Key WIF, teks ENC, atau alamat Nusacoin.'); return; }
+      if (isEncryptedText(key)) {
+        if (!pin) { alert('PIN dibutuhkan untuk mendekripsi kunci ini.'); return; }
+        try { key = CryptoJS.AES.decrypt(key.replace(/^ENC:/, ''), pin).toString(CryptoJS.enc.Utf8).trim(); } catch (e) { key = ''; }
+        if (!key || (!isAddressText(key) && !isValidWif(key))) { alert('Gagal mendekripsi: PIN salah atau data tidak valid.'); return; }
+      } else if (!isAddressText(key) && !isValidWif(key)) {
+        alert('Private Key WIF tidak valid (prefix 0x' + NUSACOIN_PARAMS.wif.toString(16) + ' + checksum).'); return;
+      }
+      if (isAddressText(key)) { liveWalletData.pkey = null; liveWalletData.address = key; }
+      else { liveWalletData.pkey = key; liveWalletData.address = getAddressFromWif(key, type); }
+      document.getElementById('wKey').value = ''; document.getElementById('wPin').value = '';
+      document.getElementById('walletLogin').style.display = 'none';
+      document.getElementById('walletActive').style.display = 'block';
+      document.getElementById('wAddr').textContent = liveWalletData.address + (liveWalletData.pkey ? '' : '  (baca-saja)');
+      refreshBalance();
+    }
+    function walletLogout() {
+      liveWalletData = { pkey: null, address: null, balance: 0 };
+      pendingUtxos = []; pendingSpent.clear();
+      document.getElementById('walletActive').style.display = 'none';
+      document.getElementById('walletLogin').style.display = 'block';
+      document.getElementById('injResult').style.display = 'none';
+    }
+    async function refreshBalance() {
+      const el = document.getElementById('wBal');
+      el.textContent = '...';
+      try {
+        const res = NET.electrs ? await fetch(`${NET.electrs}/address/${liveWalletData.address}`) : await fetch(`${API_BASE}/ext/getbalance/${liveWalletData.address}`);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        let n; if (NET.electrs) { const cs = (await res.json()).chain_stats; n = (cs.funded_txo_sum - cs.spent_txo_sum) / 1e8; } else n = parseFloat(await res.text());
+        liveWalletData.balance = isNaN(n) ? 0 : n;
+        el.textContent = liveWalletData.balance + ' ' + NET.unit;
+      } catch (e) { el.textContent = 'Offline / gagal memuat saldo'; }
+    }
+
+    async function fetchUtxos(address) {
+      const enc = encodeURIComponent(address), notes = [];
+      const sources = ['utxos', 'unspent', 'utxo', 'getutxo'].map(p => [p, async () => {
+        const r = await fetch(`${NODE_API}/${p}/${enc}`); if (!r.ok) throw new Error('HTTP ' + r.status);
+        return normalizeUtxos(await r.json(), address);
+      }]);
+      if (NET.electrs) sources.unshift(['electrs', async () => { const r = await fetch(`${NET.electrs}/address/${enc}/utxo`); if (!r.ok) throw new Error('HTTP ' + r.status); return normalizeUtxos(await r.json(), address); }]); else sources.push(['explorer', () => fetchUtxosFromExplorer(address)]);
+      for (const [name, fn] of sources) {
+        try {
+          const list = await fn();
+          if (!list) { notes.push(name + ': format tidak dikenali'); continue; }
+          if (!utxoMatchesBalance(list)) { notes.push(name + ': total tidak cocok dengan saldo'); continue; }
+          return list;
+        } catch (e) { notes.push(name + ': ' + e.message); }
+      }
+      throw new Error('Tidak ada sumber UTXO yang valid.\n- ' + notes.join('\n- '));
+    }
+
+    async function injectData() {
+      const btn = document.getElementById('btnInject'), box = document.getElementById('injResult');
+      const idle = btn.innerHTML;
+      const hash = document.getElementById('injHash').value.trim().toLowerCase();
+      const note = document.getElementById('injNote').value.trim();
+      const feeNUX = parseFloat(document.getElementById('injFee').value);
+      if (!liveWalletData.pkey && !liveWalletData.ext) { alert('Wallet ini mode baca-saja. Login dengan Private Key WIF untuk inject.'); return; }
+      if (!/^[0-9a-f]{64}$/.test(hash)) { alert('Hash SHA-256 harus 64 karakter hex. Pilih file atau tempel hash yang benar.'); return; }
+      if (isNaN(feeNUX) || feeNUX <= 0) { alert('Fee tidak valid.'); return; }
+      const feeSats = Math.round(feeNUX * 1e8);
+
+      btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
+      box.className = 'status-card'; box.style.display = 'none';
+      try {
+        const ownScript = addressToScriptHex(liveWalletData.address);
+        const data = Array.from(new TextEncoder().encode(VS_PREFIX + hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+        const opScript = '6a' + numToLEHex(data.length / 2, 1) + data; // OP_RETURN <71 byte>
+        let confirmed = false, raw, txid, sentTxid, selected, change;
+
+        for (let attempt = 0; attempt < 3; attempt++) {
+          let utxos = (await fetchUtxos(liveWalletData.address)).filter(u => !pendingSpent.has(u.txid + ':' + u.vout));
+          pendingUtxos.filter(p => p.address === liveWalletData.address && !pendingSpent.has(p.txid + ':' + p.vout) && !utxos.some(u => u.txid === p.txid && u.vout === p.vout)).forEach(p => utxos.push({ txid: p.txid, vout: p.vout, value: p.value, confirmed: false }));
+          utxos.sort((a, b) => ((a.confirmed === false) - (b.confirmed === false)) || (b.value - a.value));
+          selected = []; let acc = 0;
+          for (const u of utxos) { selected.push(u); acc += u.value; if (acc >= feeSats) break; }
+          if (acc < feeSats) throw new Error('Saldo tersedia tidak cukup untuk fee ' + feeNUX + ' NUX.');
+
+          const outputs = [{ value: 0, script: opScript }];
+          change = acc - feeSats;
+          let realFee = feeSats;
+          if (change >= DUST_SATS) outputs.push({ value: change, script: ownScript }); else { realFee += change; change = 0; }
+          ({ raw, txid } = await NXsign(selected, outputs, liveWalletData.pkey, ownScript));
+
+          if (!confirmed) {
+            if (!confirm(`Inject hash ke blockchain Nusacoin?\n\nHash: ${hash}\nFee: ${realFee / 1e8} NUX\n\nTransaksi tidak bisa dibatalkan.`)) { box.className = 'status-card invalid'; box.innerHTML = 'Dibatalkan. Tidak ada yang dikirim.'; return; }
+            confirmed = true;
+          }
+          try { sentTxid = await broadcastAny(raw, txid); break; }
+          catch (e) {
+            if (e.conflict && attempt < 2) { selected.forEach(u => pendingSpent.add(u.txid + ':' + u.vout)); continue; }
+            throw e;
+          }
+        }
+        selected.forEach(u => pendingSpent.add(u.txid + ':' + u.vout));
+        pendingUtxos = pendingUtxos.filter(p => !pendingSpent.has(p.txid + ':' + p.vout));
+        if (change > 0) pendingUtxos.push({ address: liveWalletData.address, txid, vout: 1, value: change });
+        verisignDatabase.push({ hash, txid: sentTxid, description: note || 'Inject via Verisign' });
+
+        box.className = 'status-card valid';
+        box.innerHTML = `<div class="status-title"><i class="fa-solid fa-circle-check" style="color: var(--nux-green)"></i> <span style="color: var(--nux-green)">Berhasil di-inject ke blockchain!</span></div>
+          <strong>TXID:</strong><div class="hash-display">${sentTxid}</div>
+          <div style="margin-top:.75rem; display:flex; gap:.5rem; flex-wrap:wrap">
+            <a class="btn secondary" style="width:auto; text-decoration:none" target="_blank" rel="noopener" href="${NET.txUrl(sentTxid)}"><i class="fa-solid fa-arrow-up-right-from-square"></i> Explorer</a>
+            <button class="btn secondary" style="width:auto" onclick="useForVerify('${sentTxid}','${hash}')"><i class="fa-solid fa-shield-halved"></i> Verifikasi sekarang</button>
+          </div>`;
+        setTimeout(refreshBalance, 3000);
+      } catch (e) {
+        box.className = 'status-card invalid';
+        box.textContent = '❌ Gagal inject: ' + e.message;
+      } finally {
+        btn.disabled = false; btn.innerHTML = idle; box.style.display = 'block';
+      }
+    }
+    function useForVerify(txid, hash) {
+      document.getElementById('manualTxidInput').value = txid;
+      document.getElementById('refHashInput').value = hash;
+      switchTab('verifier');
+    }
+
+var NX = {};
+NX.h2b = function(h){ var o = new Uint8Array(h.length / 2); for(var i = 0; i < o.length; i++) o[i] = parseInt(h.substr(i * 2, 2), 16); return o; };
+
+NX.st = function(){ return liveWalletData; };
+NX.en = function(){ return currentLang === 'en'; };
+NX.T = { wait:['Menunggu persetujuan di extension wallet...','Waiting for approval in the wallet extension...'],
+  nop:['Ekstensi wallet (Nusa Wallet / NUX Connect) tidak terdeteksi. Pasang/aktifkan ekstensi lalu muat ulang halaman ini.','Wallet extension (Nusa Wallet / NUX Connect) not detected. Install/enable it, then reload this page.'],
+  noaddr:['Ekstensi tidak mengembalikan alamat.','The extension did not return an address.'],
+  rej:['Koneksi ditolak di ekstensi.','Connection rejected in the extension.'],
+  login:['Hubungkan Nusa Wallet atau login dengan Private Key WIF dulu.','Connect Nusa Wallet or log in with a WIF private key first.'],
+  badsign:['Ekstensi tidak mengembalikan transaksi bertanda tangan.','The extension did not return a signed transaction.'],
+  net:['NUX Connect sedang di jaringan {n}. Halaman ini di {m}. Ganti jaringan di popup extension atau tombol Mainnet/Testnet halaman, lalu coba lagi.','NUX Connect is on {n}. This page is on {m}. Switch network in the extension popup or the Mainnet/Testnet button on this page, then try again.'],
+  badpsbt:['PSBT dari NUX Connect tidak valid atau berbeda dari yang diminta. Transaksi dibatalkan.','The PSBT from NUX Connect is invalid or differs from the request. Transaction cancelled.'],
+  segwit:['NUX Connect hanya memakai alamat Bech32 (nu1q...).','NUX Connect only uses Bech32 (nu1q...) addresses.'] };
+NX.t = function(k){ return NX.T[k][NX.en() ? 1 : 0]; };
+NX.p = function(){ return window.nusa || window.nux || null; };
+// Jenis provider: 'nusa' = punya connect()/signTransaction() (Nusa Wallet); 'nux' = gaya EIP-1193 request() (NUX Connect).
+NX.kind = function(p){ if(!p) return null; if(typeof p.connect === 'function') return 'nusa'; if(typeof p.request === 'function') return 'nux'; return null; };
+NX.nm = function(){ return NX.st().extKind === 'nux' ? 'NUX Connect' : 'Nusa Wallet'; };
+NX.b64 = function(bytes){ var s = ''; for(var i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]); return btoa(s); };
+NX.unb64 = function(b){ var s = atob(b), a = new Uint8Array(s.length); for(var i = 0; i < s.length; i++) a[i] = s.charCodeAt(i); return a; };
+NX.kv = function(k, v){ return varIntHex(k.length / 2) + k + varIntHex(v.length / 2) + v; };
+// PSBT v0 minimal: tx belum bertanda tangan + witness_utxo tiap input (semua input milik alamat wallet, P2WPKH).
+NX.buildPsbt = function(utxos, outputs, ownScript){
+  var SEQ = 'ffffffff';
+  var inSer = varIntHex(utxos.length) + utxos.map(function(u){ return reverseHex(u.txid) + numToLEHex(u.vout, 4) + '00' + SEQ; }).join('');
+  var outsSer = varIntHex(outputs.length) + outputs.map(function(o){ return numTo64BitLEHex(o.value) + varIntHex(o.script.length / 2) + o.script; }).join('');
+  var unsigned = '01000000' + inSer + outsSer + '00000000';
+  var hex = '70736274ff' + NX.kv('00', unsigned) + '00';
+  utxos.forEach(function(u){ hex += NX.kv('01', numTo64BitLEHex(u.value) + varIntHex(ownScript.length / 2) + ownScript) + '00'; });
+  outputs.forEach(function(){ hex += '00'; });
+  return { b64: NX.b64(NX.h2b(hex)), unsigned: unsigned, inSer: inSer, outsSer: outsSer };
+};
+NX.readMaps = function(bytes, nIn){
+  var pos = 0;
+  function rv(){ var f = bytes[pos++]; if(f < 0xfd) return f;
+    if(f === 0xfd){ var v = bytes[pos] | (bytes[pos + 1] << 8); pos += 2; return v; }
+    var w = ((bytes[pos]) | (bytes[pos + 1] << 8) | (bytes[pos + 2] << 16) | (bytes[pos + 3] << 24)) >>> 0; pos += 4; return w; }
+  if(bytesToHex(bytes.slice(0, 5)) !== '70736274ff') throw new Error(NX.t('badpsbt'));
+  pos = 5;
+  function map(){ var m = []; while(pos < bytes.length){ var kl = rv(); if(kl === 0) break;
+    var key = bytesToHex(bytes.slice(pos, pos + kl)); pos += kl; var vl = rv();
+    var val = bytesToHex(bytes.slice(pos, pos + vl)); pos += vl; m.push({ key: key, val: val }); } return m; }
+  var g = map(), ins = []; for(var i = 0; i < nIn; i++) ins.push(map());
+  return { g: g, ins: ins };
+};
+// Ambil tanda tangan dari PSBT yang dikembalikan extension, susun transaksi SegWit final -> { raw, txid }.
+NX.finalizePsbt = function(b64, built, nIn, ownScript){
+  var m = NX.readMaps(NX.unb64(b64), nIn);
+  var ut = m.g.filter(function(e){ return e.key === '00'; })[0];
+  if(!ut || ut.val !== built.unsigned) throw new Error(NX.t('badpsbt'));   // extension tidak boleh mengubah transaksi
+  var witness = '';
+  for(var i = 0; i < nIn; i++){
+    var mp = m.ins[i];
+    var fin = mp.filter(function(e){ return e.key === '08'; })[0];
+    if(fin){ witness += fin.val; continue; }
+    var ps = mp.filter(function(e){ return e.key.length === 68 && e.key.slice(0, 2) === '02'; })[0];
+    if(!ps) throw new Error(NX.t('badpsbt'));
+    var pub = ps.key.slice(2), sig = ps.val;
+    if('0014' + hash160Hex(pub) !== ownScript) throw new Error(NX.t('badpsbt'));
+    witness += '02' + varIntHex(sig.length / 2) + sig + varIntHex(pub.length / 2) + pub;
+  }
+  return { raw: '01000000' + '0001' + built.inSer + built.outsSer + witness + '00000000', txid: reverseHex(sha256dHex(built.unsigned)) };
+};
+async function NXsignNux(p, utxos, outputs, ownScript){
+  if(!/^0014[0-9a-f]{40}$/.test(ownScript)) throw new Error(NX.t('segwit'));
+  var built = NX.buildPsbt(utxos, outputs, ownScript);
+  var signed = await p.request({ method: 'nux_signPsbt', params: [built.b64] });
+  if(typeof signed !== 'string' || !signed) throw new Error(NX.t('badsign'));
+  return NX.finalizePsbt(signed, built, utxos.length, ownScript);
+}   // extension v0.1.0 memasang window.nux (alias window.nusa)
+NX.wait = function(ms){ return new Promise(function(res){
+  var p = NX.p(); if(p) return res(p);
+  var done = function(){ clearTimeout(t); window.removeEventListener('nux#initialized', done); window.removeEventListener('nusa#initialized', done); res(NX.p()); };
+  var t = setTimeout(done, ms || 1500);
+  window.addEventListener('nux#initialized', done); window.addEventListener('nusa#initialized', done); }); };
+NX.msg = function(t, bad){ var e = document.getElementById('msgExt'); if(!e) return; e.textContent = t || '';
+  e.style.cssText = t ? ('margin-top:8px;padding:8px 10px;border:1px solid ' + (bad ? '#c62828' : 'currentColor') + ';border-radius:8px;white-space:pre-wrap;word-break:break-word;font-size:.9em;' + (bad ? 'color:#c62828;' : '')) : ''; };
+async function walletConnectExt(){
+  var b = document.getElementById('btnExt'); if(b) b.disabled = true; NX.msg(NX.t('wait'));
+  try{
+    var p = await NX.wait(); if(!p) throw new Error(NX.t('nop'));
+    var kind = NX.kind(p), r;
+    if(kind === 'nux'){                                // NUX Connect (EIP-1193): window.nux.request(...)
+      var net = await p.request({ method: 'nux_getNetwork' });
+      if(net !== NET.id) throw new Error(NX.t('net').replace('{n}', String(net)).replace('{m}', NET.id));
+      var acc = await p.request({ method: 'nux_requestAccounts' });
+      r = { address: Array.isArray(acc) ? acc[0] : (acc && acc.address) };
+    } else if(kind === 'nusa'){
+      r = await p.connect();                           // window.nusa.connect() -> { address, publicKey }
+    } else throw new Error(NX.t('nop'));
+    if(!r || !r.address) throw new Error(NX.t('noaddr'));
+    try { addressToScriptHex(r.address); } catch(x){ throw new Error(NX.t('net').replace('{n}', '?').replace('{m}', NET.id)); }
+    var s = NX.st(); s.pkey = null; s.address = r.address; s.ext = true; s.extKind = kind;
+    document.getElementById('walletLogin').style.display = 'none'; document.getElementById('walletActive').style.display = 'block';
+    document.getElementById('wAddr').textContent = r.address + '  (' + NX.nm() + ')';
+    NX.msg('');
+    if(typeof refreshBalance === 'function') refreshBalance();
+    if(NX.after) NX.after();
+  }catch(e){ NX.msg(e && e.code === 4001 ? NX.t('rej') : ((e && e.message) || String(e)), true); }
+  finally{ if(b) b.disabled = false; }
+}
+// Tanda tangani transaksi lewat ekstensi (kunci privat tidak pernah keluar dari ekstensi).
+// Mode kunci WIF tetap memakai penandatanganan lokal seperti semula.
+async function NXsign(utxos, outputs, pkey, ownScript){
+  if(pkey) return buildSignedTransaction(utxos, outputs, pkey, ownScript);
+  if(!NX.st().ext) throw new Error(NX.t('login'));
+  var p = NX.p(); if(!p) throw new Error(NX.t('nop'));
+  if(NX.st().extKind === 'nux') return NXsignNux(p, utxos, outputs, ownScript);
+  var r = await p.signTransaction({
+    inputs: utxos.map(function(u){ return { txid:u.txid, vout:u.vout }; }),
+    outputs: outputs.map(function(o){ return { script:o.script, value:Number(o.value) }; }) });
+  if(!r || !r.raw || !r.txid) throw new Error(NX.t('badsign'));
+  return { raw:r.raw, txid:r.txid };
+}
+(function(){ var lo = walletLogout; walletLogout = function(){
+  try{ var p = NX.p(); if(p && NX.st().ext && typeof p.disconnect === 'function') p.disconnect().catch(function(){}); }catch(e){}
+  return lo.apply(this, arguments); }; })();
+
+// ================== JARINGAN: MAINNET / TESTNET ==================
+const NETS = {
+  mainnet: { id: 'mainnet', unit: 'NUX',  hrp: 'nu', pkh: 0x35, sh: 0x4b, wif: 0x57, explorer: 'https://explorer.nusacoin.org', node: 'https://api.nusacoin.org', electrs: null,
+             txUrl: id => 'https://explorer.nusacoin.org/tx/' + id },
+  testnet: { id: 'testnet', unit: 'tNUX', hrp: 'tn', pkh: 0x6f, sh: 0xc4, wif: 0xef, explorer: 'https://apitest.taobot.org', node: 'https://apitest.taobot.org', electrs: 'https://apinuxtest.taobot.org',
+             txUrl: id => 'https://apinuxtest.taobot.org/tx/' + id }
+};
+let NET = NETS.mainnet;
+const DBS = { mainnet: verisignDatabase, testnet: [] };
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbzNsq05CHIwKqGtkDOuyDoy0Emi9V6--mSNHshw65Fp4XwYq5KiNU4f6Q6r6pMLC60E/exec";
+Object.assign(tw.id, { extBtn: 'Hubungkan Wallet Extension (Nusa Wallet / NUX Connect)', extOr: 'atau login manual dengan kunci:', dbSaveQ: 'Simpan dokumen ini ke Spreadsheet agar tidak perlu input TXID di kemudian hari?', dbDesc: 'Keterangan Dokumen', dbSave: 'Konfirmasi & Simpan ke Spreadsheet', dbHead: 'Database Terekam Verisign (Testnet)' });
+Object.assign(tw.en, { extBtn: 'Connect Wallet Extension (Nusa Wallet / NUX Connect)', extOr: 'or log in manually with a key:', dbSaveQ: 'Save this document to the Spreadsheet so the TXID is not needed later?', dbDesc: 'Document Description', dbSave: 'Confirm & Save to Spreadsheet', dbHead: 'Recorded Verisign Database (Testnet)' });
+
+async function readTxVouts(txid) {
+  if (NET.electrs) {
+    try { const r = await fetch(`${NET.electrs}/tx/${txid}`); if (r.ok) { const j = await r.json(); if (j && Array.isArray(j.vout)) return { vout: j.vout.map(o => ({ scriptPubKey: { hex: o.scriptpubkey } })) }; } } catch (e) {}
+    try { const r = await fetch(`${NET.node}/transaction/${txid}`); if (r.ok) { const j = (await r.json()).result; if (j && Array.isArray(j.vout)) return j; } } catch (e) {}
+    return null;
+  }
+  const r = await fetch(`${API_BASE}/api/getrawtransaction?txid=${txid}&decrypt=1`); if (!r.ok) return null;
+  const j = JSON.parse(await r.text()); return j && Array.isArray(j.vout) ? j : null;
+}
+async function broadcastAny(raw, txid) {
+  if (!NET.electrs) return broadcastRawTx(NODE_API, raw, txid);
   try {
-    const q = new URLSearchParams(location.search).get('net');
-    net = (q && NETWORKS[q]) ? q : (localStorage.getItem('verisign_net') || 'mainnet');
-  } catch (e) {}
-  setNetwork(NETWORKS[net] ? net : 'mainnet', true);
-  setLanguage('id');
-})();
-</script>
+    const r = await fetch(`${NET.electrs}/tx`, { method: 'POST', body: raw }); const t = (await r.text()).trim();
+    if (r.ok && /^[0-9a-f]{64}$/i.test(t)) return t;
+    if (CONFLICT_RE.test(t)) { const err = new Error(t); err.conflict = true; throw err; }
+  } catch (e) { if (e.conflict) throw e; }
+  return broadcastRawTx(NODE_API, raw, txid);
+}
+const L2 = (a, b) => currentLang === 'id' ? a : b;
+async function loadDatabaseFromSpreadsheet() {
+  try {
+    const data = await (await fetch(SHEET_URL)).json();
+    if (Array.isArray(data)) { DBS.testnet.length = 0; data.forEach(x => DBS.testnet.push({ hash: String(x.hash || ''), txid: String(x.txid || ''), description: String(x.desc || '') })); renderDb(); }
+  } catch (e) { console.warn('Spreadsheet gagal dimuat', e); }
+}
+function renderDb() {
+  const tb = document.getElementById('dbBody'); if (!tb) return; tb.innerHTML = '';
+  if (!DBS.testnet.length) { const tr = document.createElement('tr'), td = document.createElement('td'); td.colSpan = 3; td.textContent = L2('Memuat data atau database kosong...', 'Loading data or database is empty...'); tr.appendChild(td); tb.appendChild(tr); return; }
+  DBS.testnet.forEach(x => { const tr = document.createElement('tr'); [x.description, x.txid, x.hash].forEach(v => { const td = document.createElement('td'); td.textContent = v; tr.appendChild(td); }); tb.appendChild(tr); });
+}
+function toggleSaveMenu() { document.getElementById('saveFields').style.display = document.getElementById('saveChk').checked ? 'block' : 'none'; }
+async function submitAutoSaveData() {
+  const desc = document.getElementById('autoRegDesc').value.trim(), txid = document.getElementById('autoRegTxid').value.trim(), hash = document.getElementById('autoRegHash').value.trim();
+  if (!desc) { alert(L2('Keterangan Dokumen harus diisi!', 'Document description is required!')); return; }
+  if (DBS.testnet.some(x => x.txid.toLowerCase() === txid.toLowerCase() && x.hash.toLowerCase() === hash.toLowerCase())) { alert(L2('Gagal: TXID dan Hash yang sama sudah tersimpan di Spreadsheet!', 'Failed: this TXID and Hash are already in the Spreadsheet!')); return; }
+  try {
+    await fetch(SHEET_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ desc, txid, hash }) });
+    alert(L2('Data berhasil dikirim ke spreadsheet.', 'Data sent to the spreadsheet.'));
+    document.getElementById('autoRegDesc').value = ''; document.getElementById('saveChk').checked = false; toggleSaveMenu(); document.getElementById('saveBox').style.display = 'none';
+    setTimeout(loadDatabaseFromSpreadsheet, 2500);
+  } catch (e) { alert(L2('Terjadi kesalahan koneksi saat menyimpan ke spreadsheet.', 'Connection error while saving to the spreadsheet.')); }
+}
+(function () { const v = verifyWithExplorer; verifyWithExplorer = async function () {
+  await v.apply(this, arguments);
+  document.getElementById('saveBox').style.display = 'none';
+  if (!NET.electrs) return;
+  const sp = document.querySelector('#verExplorerDetails span[style*="gold"]'), txid = sp ? sp.textContent.trim() : '';
+  const hash = document.getElementById('refHashInput').value.trim().toLowerCase();
+  if (document.getElementById('verStatusCard').classList.contains('valid') && /^[0-9a-f]{64}$/i.test(txid) && !DBS.testnet.some(x => x.txid.toLowerCase() === txid.toLowerCase() && x.hash.toLowerCase() === hash)) {
+    document.getElementById('autoRegTxid').value = txid; document.getElementById('autoRegHash').value = hash; document.getElementById('saveBox').style.display = 'block';
+  }
+}; })();
+(function () { const a = applyInjectLang; applyInjectLang = function () { a(); const f = document.querySelector('[data-i="inFee"]'); if (f) f.textContent = 'Fee (' + NET.unit + ')'; renderDb(); }; })();
+
+function setNetwork(id) {
+  if (liveWalletData.address) walletLogout();   // alamat/kunci jaringan lama tidak boleh terbawa
+  NET = NETS[id];
+  Object.assign(NUSACOIN_PARAMS, { bech32: NET.hrp, pubKeyHash: NET.pkh, scriptHash: NET.sh, wif: NET.wif });
+  API_BASE = NET.explorer; NODE_API = NET.node; verisignDatabase = DBS[id];
+  document.documentElement.dataset.net = id;
+  document.getElementById('btnNetMain').classList.toggle('active', id === 'mainnet');
+  document.getElementById('btnNetTest').classList.toggle('active', id === 'testnet');
+  document.getElementById('issuerAddrInput').placeholder = id === 'mainnet' ? 'nu1q..., N...' : 'tn1q..., m...';
+  document.getElementById('scanBlocksInput').disabled = !!NET.electrs;
+  document.querySelector('#wType option[value="bech32"]').textContent = 'Bech32 (' + NET.hrp + '1q...)';
+  document.querySelector('#wType option[value="p2pkh"]').textContent = id === 'mainnet' ? 'P2PKH (N...)' : 'P2PKH (m/n...)';
+  document.getElementById('testnetDb').style.display = NET.electrs ? 'block' : 'none';
+  ['verStatusCard', 'injResult', 'saveBox'].forEach(x => { document.getElementById(x).style.display = 'none'; });
+  if (NET.electrs) loadDatabaseFromSpreadsheet();
+  applyInjectLang();
+}
+
+    function toggleTheme() {
+      const htmlEl = document.documentElement;
+      const themeIcon = document.getElementById('themeIcon');
+      if (htmlEl.classList.contains('dark')) {
+        htmlEl.classList.remove('dark');
+        themeIcon.className = 'fa-solid fa-moon';
+      } else {
+        htmlEl.classList.add('dark');
+        themeIcon.className = 'fa-solid fa-sun';
+      }
+    }
+
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+      const ids = { generator: ['tabBtnGen', 'tab-generator'], verifier: ['tabBtnVer', 'tab-verifier'], inject: ['tabBtnInj', 'tab-inject'] }[tabName];
+      document.getElementById(ids[0]).classList.add('active');
+      document.getElementById(ids[1]).classList.add('active');
+    }
+
+    async function calculateSHA256(file) {
+      const buffer = await file.arrayBuffer();
+      const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+      return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    async function handleGenFileSelect(files) {
+      const t = translations[currentLang];
+      if (!files || files.length === 0) return;
+      const file = files[0];
+      document.getElementById('genResult').style.display = 'block';
+      document.getElementById('genHashOutput').textContent = t.msgComputing;
+      try {
+        const hash = await calculateSHA256(file);
+        document.getElementById('genHashOutput').textContent = hash;
+        setInjectHash(hash, file.name);
+      } catch (err) {
+        document.getElementById('genHashOutput').textContent = t.msgGenFail;
+      }
+    }
+
+    let selectedVerFile = null;
+    async function handleVerFileSelect(files) {
+      if (!files || files.length === 0) return;
+      selectedVerFile = files[0];
+      document.getElementById('verFileText').textContent = `File: ${selectedVerFile.name}`;
+      try {
+        const hash = await calculateSHA256(selectedVerFile);
+        document.getElementById('refHashInput').value = hash;
+      } catch (err) {
+        alert(translations[currentLang].msgGenFail);
+      }
+    }
+
+    // ===== Baca & cocokkan OP_RETURN (format apa pun) =====
+    async function getOpReturns(txid) {
+      try {
+        const j = await readTxVouts(txid); if (!j) return null;
+        const out = [];
+        for (const o of j.vout) {
+          const hex = ((o.scriptPubKey || {}).hex || '').toLowerCase();
+          if (!hex.startsWith('6a')) continue;
+          let i = 2, data = '';
+          while (i < hex.length) {
+            const op = parseInt(hex.substr(i, 2), 16); i += 2;
+            let len;
+            if (op <= 75) len = op;
+            else if (op === 0x4c) { len = parseInt(hex.substr(i, 2), 16); i += 2; }
+            else if (op === 0x4d) { len = parseInt(hex.substr(i + 2, 2) + hex.substr(i, 2), 16); i += 4; }
+            else break;
+            data += hex.substr(i, len * 2); i += len * 2;
+          }
+          out.push(data);
+        }
+        return out;
+      } catch (e) { return null; }
+    }
+    const hexToText = h => (h.match(/../g) || []).map(x => { const c = parseInt(x, 16); return c >= 32 && c < 127 ? String.fromCharCode(c) : '.'; }).join('');
+    // cocok bila data = 32 byte hash mentah, atau teks OP_RETURN memuat hash 64 hex (awalan apa pun)
+    const opMatches = (data, hash) => data === hash || hexToText(data).toLowerCase().includes(hash);
+
+    async function mapPool(items, fn, n = 5) {
+      let i = 0;
+      await Promise.all(Array.from({ length: n }, async () => { while (i < items.length) await fn(items[i++]); }));
+    }
+
+    // Cari TX yang OP_RETURN-nya memuat hash: alamat penerbit dulu, lalu pindai N blok terakhir
+    async function findTxByHash(hash, addrs, nBlocks, progress) {
+      let found = null;
+      const check = async txid => { if (found) return; const ops = await getOpReturns(txid); if (ops && ops.some(d => opMatches(d, hash))) found = txid; };
+      for (const a of addrs) {
+        if (found) break;
+        try {
+          progress('Memeriksa alamat ' + a.slice(0, 12) + '...');
+          const raw = await (await fetch(NET.electrs ? `${NET.electrs}/address/${a}/txs` : `${API_BASE}/ext/getaddresstxs/${a}/0/500`)).json();
+          const arr = Array.isArray(raw) ? raw : (raw.data || raw.records || []);
+          await mapPool([...new Set(arr.map(x => x.txid || (typeof x === 'string' ? x : null)).filter(Boolean))], check);
+        } catch (e) {}
+      }
+      if (!found && nBlocks > 0 && !NET.electrs) {
+        try {
+          const top = parseInt(await (await fetch(`${API_BASE}/api/getblockcount`)).text(), 10);
+          const heights = Array.from({ length: nBlocks }, (_, k) => top - k).filter(h => h >= 0);
+          let done = 0;
+          await mapPool(heights, async h => {
+            if (found) return;
+            try {
+              const bh = (await (await fetch(`${API_BASE}/api/getblockhash?index=${h}`)).text()).replace(/"/g, '').trim();
+              const blk = await (await fetch(`${API_BASE}/api/getblock?hash=${bh}`)).json();
+              await mapPool((blk.tx || []).slice(1).map(x => typeof x === 'string' ? x : x.txid), check, 3);
+            } catch (e) {}
+            progress(`Memindai blok... ${++done}/${heights.length}`);
+          });
+        } catch (e) {}
+      }
+      return found;
+    }
+
+    async function verifyWithExplorer() {
+      const t = translations[currentLang], L = (a, b) => currentLang === 'id' ? a : b;
+      const manualTxid = document.getElementById('manualTxidInput').value.trim().toLowerCase();
+      const hash = document.getElementById('refHashInput').value.trim().toLowerCase();
+      const card = document.getElementById('verStatusCard'), title = document.getElementById('verStatusTitle'), box = document.getElementById('verExplorerDetails');
+      if (!hash) { alert(t.msgFileErr); return; }
+      if (!/^[0-9a-f]{64}$/.test(hash)) { alert(L('Hash harus 64 karakter hex.', 'Hash must be 64 hex characters.')); return; }
+
+      card.className = 'status-card'; card.style.display = 'block';
+      title.innerHTML = `<i class="fa-solid fa-spinner fa-spin" style="color: var(--gold);"></i> ${t.msgChecking}`;
+      box.textContent = t.msgMatching;
+      const show = (ok, text, html) => {
+        card.className = 'status-card ' + (ok ? 'valid' : 'invalid');
+        const c = ok ? 'var(--nux-green)' : '#e74c3c';
+        title.innerHTML = `<i class="fa-solid ${ok ? 'fa-circle-check' : 'fa-circle-xmark'}" style="color:${c}"></i> <span style="color:${c}">${text}</span>`;
+        box.innerHTML = html;
+      };
+
+      let txid = manualTxid, desc = '', dbOnly = false, ops = null;
+      if (txid) {
+        ops = await getOpReturns(txid);
+      } else {
+        const f = verisignDatabase.find(x => x.hash.toLowerCase() === hash);
+        if (f) {
+          const o = await getOpReturns(f.txid);
+          if (!o || o.some(d => opMatches(d, hash))) { txid = f.txid; desc = f.description; ops = o; dbOnly = !o; }
+        }
+        if (!txid) {
+          const addrs = document.getElementById('issuerAddrInput').value.split(/[\s,]+/).filter(Boolean);
+          if (liveWalletData.address && !addrs.includes(liveWalletData.address)) addrs.push(liveWalletData.address);
+          const nBlocks = Math.max(0, parseInt(document.getElementById('scanBlocksInput').value, 10) || 0);
+          txid = await findTxByHash(hash, addrs, nBlocks, m => { box.textContent = m; });
+          if (txid) ops = await getOpReturns(txid);
+        }
+      }
+
+      if (!txid) {
+        show(false, t.msgVerifyFail, L('Hash', 'Hash') + ` <code>${hash}</code> ` + L('tidak ditemukan di OP_RETURN mana pun pada alamat penerbit / blok yang dipindai. Isi TXID, alamat penerbit, atau perbesar jumlah blok.', 'was not found in any OP_RETURN of the scanned issuer addresses / blocks. Enter the TXID, issuer address, or increase the block count.'));
+        return;
+      }
+      let blockInfo = '';
+      try { if (NET.electrs) { const d = await (await fetch(`${NET.electrs}/tx/${txid}`)).json(); if (d && d.status && d.status.block_height !== undefined) blockInfo = `<strong>${t.lblBlock}</strong> ${d.status.block_height}<br>`; } else { const d = await (await fetch(`${API_BASE}/ext/gettx/${txid}`)).json(); if (d && d.tx) blockInfo = `<strong>${t.lblBlock}</strong> ${d.tx.blockindex}<br>`; } } catch (e) {}
+      const head = `<strong>TXID:</strong> <span style="color: var(--gold);">${txid}</span><br>` + (desc ? `<strong>${t.lblDesc}</strong> ${desc}<br>` : '') + blockInfo;
+
+      if (dbOnly) show(true, t.msgVerifySuccess, head + `<strong>${t.lblStatus}</strong> ${t.lblMatchDb} ` + L('(isi OP_RETURN tidak bisa dibaca dari explorer)', '(OP_RETURN could not be read from explorer)'));
+      else if (ops === null) show(false, t.msgVerifyFail, head + L('TX tidak bisa dibaca dari explorer, sehingga isi OP_RETURN tidak dapat dicocokkan dengan hash.', 'The TX could not be read from the explorer, so its OP_RETURN cannot be matched with the hash.'));
+      else if (!ops.some(d => opMatches(d, hash))) show(false, t.msgVerifyFail, head + L('OP_RETURN transaksi ini TIDAK cocok dengan hash file.', 'This transaction OP_RETURN does NOT match the file hash.') + '<br>OP_RETURN: ' + (ops.length ? ops.map(d => `<code>${hexToText(d)}</code>`).join(' ') : L('(tidak ada)', '(none)')) + `<br>Hash: <code>${hash}</code>`);
+      else show(true, t.msgVerifySuccess, head + `<strong>${t.lblConfirm}</strong> ${t.lblOnChainValid} (OP_RETURN = hash)`);
+    }
+    setNetwork('mainnet');
+  </script>
 </body>
 </html>
