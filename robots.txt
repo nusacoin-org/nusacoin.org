@@ -61,3 +61,4 @@ Disallow: /admin/
 
 # Sitemap links
 Sitemap: https://www.nusachain.org/sitemap.xml
+Sitemap: https://nusachain.org/sitemap.xml
