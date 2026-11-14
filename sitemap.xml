@@ -2,37 +2,44 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <!-- Homepage Domain Utama -->
   <url>
-    <loc>https://www.nusachain.org/</loc>
+    <loc>https://nusachain.org/</loc>
     <lastmod>2026-08-13</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <!-- Halaman -->
   <url>
-    <loc>https://www.nusachain.org/Pages/Verisign-Mainnet.html</loc>
+    <loc>https://nusachain.org/Tools/Tools.html</loc>
     <lastmod>2026-08-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
 
   <url>
-    <loc>https://www.nusachain.org/Pages/Verisign-Testnet.html</loc>
+    <loc>https://nusachain.org/Pages/Taobot-App.html</loc>
     <lastmod>2026-08-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://www.nusachain.org/Pages/Memulai.html</loc>
+    <loc>https://nusachain.org/Pages/Memulai.html</loc>
     <lastmod>2026-08-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://www.nusachain.org/Pages/Taobot-App.html</loc>
+    <loc>https://nusachain.org/Pages/FAQ.html</loc>
     <lastmod>2026-08-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://nusachain.org/Pages/Visi-Misi.html</loc>
+    <lastmod>2026-11-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
   </url>
 </urlset>
