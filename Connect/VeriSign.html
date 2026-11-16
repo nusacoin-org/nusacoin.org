@@ -1071,11 +1071,14 @@ NX.T = { wait:['Menunggu persetujuan di extension wallet...','Waiting for approv
   badsign:['Ekstensi tidak mengembalikan transaksi bertanda tangan.','The extension did not return a signed transaction.'],
   net:['NUX Connect sedang di jaringan {n}. Halaman ini di {m}. Ganti jaringan di popup extension atau tombol Mainnet/Testnet halaman, lalu coba lagi.','NUX Connect is on {n}. This page is on {m}. Switch network in the extension popup or the Mainnet/Testnet button on this page, then try again.'],
   badpsbt:['PSBT dari NUX Connect tidak valid atau berbeda dari yang diminta. Transaksi dibatalkan.','The PSBT from NUX Connect is invalid or differs from the request. Transaction cancelled.'],
-  segwit:['NUX Connect hanya memakai alamat Bech32 (nu1q...).','NUX Connect only uses Bech32 (nu1q...) addresses.'] };
+  segwit:['NUX Connect hanya memakai alamat Bech32 (nu1q...).','NUX Connect only uses Bech32 (nu1q...) addresses.'],
+  nosign:['Wallet extension yang terhubung (Nusa Wallet) tidak mendukung signTransaction. Gunakan ekstensi NUX Connect (nonaktifkan ekstensi lain yang memakai window.nusa lalu muat ulang), atau login dengan Private Key WIF.','The connected wallet extension (Nusa Wallet) does not support signTransaction. Use the NUX Connect extension (disable other extensions that define window.nusa, then reload), or log in with a WIF private key.'] };
 NX.t = function(k){ return NX.T[k][NX.en() ? 1 : 0]; };
-NX.p = function(){ return window.nusa || window.nux || null; };
+// Nux Connect (window.nux, isNuxConnect) selalu didahulukan; window.nusa hanya dipakai jika Nux Connect tidak ada.
+NX.isNux = function(p){ return !!p && (p.isNuxConnect === true || (typeof p.request === 'function' && typeof p.connect !== 'function')); };
+NX.p = function(){ var n = window.nux; if(NX.isNux(n)) return n; return window.nusa || n || null; };
 // Jenis provider: 'nusa' = punya connect()/signTransaction() (Nusa Wallet); 'nux' = gaya EIP-1193 request() (NUX Connect).
-NX.kind = function(p){ if(!p) return null; if(typeof p.connect === 'function') return 'nusa'; if(typeof p.request === 'function') return 'nux'; return null; };
+NX.kind = function(p){ if(!p) return null; if(NX.isNux(p)) return 'nux'; if(typeof p.connect === 'function') return 'nusa'; if(typeof p.request === 'function') return 'nux'; return null; };
 NX.nm = function(){ return NX.st().extKind === 'nux' ? 'NUX Connect' : 'Nusa Wallet'; };
 NX.b64 = function(bytes){ var s = ''; for(var i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]); return btoa(s); };
 NX.unb64 = function(b){ var s = atob(b), a = new Uint8Array(s.length); for(var i = 0; i < s.length; i++) a[i] = s.charCodeAt(i); return a; };
@@ -1167,6 +1170,7 @@ async function NXsign(utxos, outputs, pkey, ownScript){
   if(!NX.st().ext) throw new Error(NX.t('login'));
   var p = NX.p(); if(!p) throw new Error(NX.t('nop'));
   if(NX.st().extKind === 'nux') return NXsignNux(p, utxos, outputs, ownScript);
+  if(typeof p.signTransaction !== 'function') throw new Error(NX.t('nosign'));
   var r = await p.signTransaction({
     inputs: utxos.map(function(u){ return { txid:u.txid, vout:u.vout }; }),
     outputs: outputs.map(function(o){ return { script:o.script, value:Number(o.value) }; }) });
