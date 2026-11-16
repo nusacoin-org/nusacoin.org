@@ -1008,6 +1008,9 @@
         const opScript = '6a' + numToLEHex(data.length / 2, 1) + data; // OP_RETURN <71 byte>
         let confirmed = false, raw, txid, sentTxid, selected, change;
 
+        if (liveWalletData.ext && liveWalletData.extKind === 'nusa') {
+          sentTxid = await NXsendData(data);   // Nusa Wallet: sendData (konfirmasi muncul di jendela ekstensi)
+        } else {
         for (let attempt = 0; attempt < 3; attempt++) {
           let utxos = (await fetchUtxos(liveWalletData.address)).filter(u => !pendingSpent.has(u.txid + ':' + u.vout));
           pendingUtxos.filter(p => p.address === liveWalletData.address && !pendingSpent.has(p.txid + ':' + p.vout) && !utxos.some(u => u.txid === p.txid && u.vout === p.vout)).forEach(p => utxos.push({ txid: p.txid, vout: p.vout, value: p.value, confirmed: false }));
@@ -1035,6 +1038,7 @@
         selected.forEach(u => pendingSpent.add(u.txid + ':' + u.vout));
         pendingUtxos = pendingUtxos.filter(p => !pendingSpent.has(p.txid + ':' + p.vout));
         if (change > 0) pendingUtxos.push({ address: liveWalletData.address, txid, vout: 1, value: change });
+        }
         verisignDatabase.push({ hash, txid: sentTxid, description: note || 'Inject via Verisign' });
 
         box.className = 'status-card valid';
@@ -1072,7 +1076,9 @@ NX.T = { wait:['Menunggu persetujuan di extension wallet...','Waiting for approv
   net:['NUX Connect sedang di jaringan {n}. Halaman ini di {m}. Ganti jaringan di popup extension atau tombol Mainnet/Testnet halaman, lalu coba lagi.','NUX Connect is on {n}. This page is on {m}. Switch network in the extension popup or the Mainnet/Testnet button on this page, then try again.'],
   badpsbt:['PSBT dari NUX Connect tidak valid atau berbeda dari yang diminta. Transaksi dibatalkan.','The PSBT from NUX Connect is invalid or differs from the request. Transaction cancelled.'],
   segwit:['NUX Connect hanya memakai alamat Bech32 (nu1q...).','NUX Connect only uses Bech32 (nu1q...) addresses.'],
-  nosign:['Wallet extension yang terhubung (Nusa Wallet) tidak mendukung signTransaction. Gunakan ekstensi NUX Connect (nonaktifkan ekstensi lain yang memakai window.nusa lalu muat ulang), atau login dengan Private Key WIF.','The connected wallet extension (Nusa Wallet) does not support signTransaction. Use the NUX Connect extension (disable other extensions that define window.nusa, then reload), or log in with a WIF private key.'] };
+  nosign:['Nusa Wallet tidak mendukung penandatanganan transaksi kustom (signTransaction). Untuk aksi ini gunakan ekstensi NUX Connect atau login dengan Private Key WIF.','Nusa Wallet does not support custom transaction signing (signTransaction). For this action use the NUX Connect extension or log in with a WIF private key.'],
+  nusaNet:['Nusa Wallet hanya mendukung Mainnet. Ganti halaman ke Mainnet, atau gunakan NUX Connect / Private Key WIF untuk Testnet.','Nusa Wallet only supports Mainnet. Switch this page to Mainnet, or use NUX Connect / a WIF private key for Testnet.'],
+  feeNote:['Nusa Wallet: persetujuan, fee, dan pemilihan UTXO (hanya yang sudah terkonfirmasi) diatur oleh ekstensi. Isian fee di halaman ini tidak dipakai.','Nusa Wallet: approval, fee and UTXO selection (confirmed UTXOs only) are handled by the extension. The fee field on this page is not used.'] };
 NX.t = function(k){ return NX.T[k][NX.en() ? 1 : 0]; };
 // Nux Connect (window.nux, isNuxConnect) selalu didahulukan; window.nusa hanya dipakai jika Nux Connect tidak ada.
 NX.isNux = function(p){ return !!p && (p.isNuxConnect === true || (typeof p.request === 'function' && typeof p.connect !== 'function')); };
@@ -1125,6 +1131,16 @@ NX.finalizePsbt = function(b64, built, nIn, ownScript){
   }
   return { raw: '01000000' + '0001' + built.inSer + built.outsSer + witness + '00000000', txid: reverseHex(sha256dHex(built.unsigned)) };
 };
+// Nusa Wallet 0.1.0 tidak punya signTransaction; data OP_RETURN dikirim lewat sendData (ekstensi memilih UTXO, memasang fee, menandatangani dan menyiarkan sendiri).
+async function NXsendData(dataHex){
+  var p = NX.p(); if(!p) throw new Error(NX.t('nop'));
+  if(NET.id !== 'mainnet') throw new Error(NX.t('nusaNet'));
+  if(typeof p.sendData !== 'function') throw new Error(NX.t('nosign'));
+  var r = await p.sendData({ data: dataHex, encoding: 'hex' });     // -> { txid }
+  var txid = r && (r.txid || r);
+  if(typeof txid !== 'string' || !/^[0-9a-fA-F]{64}$/.test(txid)) throw new Error(NX.t('badsign'));
+  return txid.toLowerCase();
+}
 async function NXsignNux(p, utxos, outputs, ownScript){
   if(!/^0014[0-9a-f]{40}$/.test(ownScript)) throw new Error(NX.t('segwit'));
   var built = NX.buildPsbt(utxos, outputs, ownScript);
@@ -1150,6 +1166,7 @@ async function walletConnectExt(){
       var acc = await p.request({ method: 'nux_requestAccounts' });
       r = { address: Array.isArray(acc) ? acc[0] : (acc && acc.address) };
     } else if(kind === 'nusa'){
+      if(NET.id !== 'mainnet') throw new Error(NX.t('nusaNet'));
       r = await p.connect();                           // window.nusa.connect() -> { address, publicKey }
     } else throw new Error(NX.t('nop'));
     if(!r || !r.address) throw new Error(NX.t('noaddr'));
@@ -1157,7 +1174,7 @@ async function walletConnectExt(){
     var s = NX.st(); s.pkey = null; s.address = r.address; s.ext = true; s.extKind = kind;
     document.getElementById('walletLogin').style.display = 'none'; document.getElementById('walletActive').style.display = 'block';
     document.getElementById('wAddr').textContent = r.address + '  (' + NX.nm() + ')';
-    NX.msg('');
+    NX.msg(kind === 'nusa' ? NX.t('feeNote') : '');
     if(typeof refreshBalance === 'function') refreshBalance();
     if(NX.after) NX.after();
   }catch(e){ NX.msg(e && e.code === 4001 ? NX.t('rej') : ((e && e.message) || String(e)), true); }
