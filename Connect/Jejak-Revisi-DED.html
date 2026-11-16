@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Jejak Revisi Nusachain</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/elliptic/6.5.4/elliptic.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#F4F9FF;--card:#fff;--tx:#12263f;--mut:#5b6b80;--pri:#007BFF;--pri2:#0056B3;--bd:#d5e3f3;--ok:#0a7d3b;--bad:#c62828;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1621;--card:#16212f;--tx:#e6eef8;--mut:#9fb0c4;--bd:#2a3a4f;--ok:#4cd387;--bad:#ff7b7b;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e1621;--card:#16212f;--tx:#e6eef8;--mut:#9fb0c4;--bd:#2a3a4f;--ok:#4cd387;--bad:#ff7b7b;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:720px;margin:0 auto;padding:16px}
+h1{font-size:1.4rem;margin:8px 0 2px;color:var(--pri2)}
+@media (prefers-color-scheme:dark){h1{color:var(--pri)}}
+.sub{color:var(--mut);margin:0 0 14px}
+.tabs{display:flex;gap:8px;margin-bottom:12px}.tabs button{flex:1;margin:0}
+button{background:var(--pri);color:#fff;border:0;border-radius:8px;padding:10px 14px;font:inherit;font-weight:600;cursor:pointer;margin:6px 6px 0 0}
+button.alt{background:transparent;color:var(--pri);border:1px solid var(--pri)}
+button:disabled{opacity:.6}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:16px;margin-bottom:12px}
+label{display:block;font-size:.85rem;color:var(--mut);margin:10px 0 4px}
+input,select{width:100%;padding:9px 10px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font:inherit}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:520px){.row{grid-template-columns:1fr}}
+.mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.8rem;word-break:break-all}
+.msg{padding:10px 12px;border-radius:8px;margin-top:10px;border:1px solid var(--bd);white-space:pre-wrap;word-break:break-word}
+.ok{color:var(--ok);border-color:var(--ok)}.bad{color:var(--bad);border-color:var(--bad)}
+.hide{display:none}
+.cert{text-align:center;border:2px solid var(--pri);border-radius:12px;padding:20px}
+.cert h2{margin:0 0 4px}
+#qr{display:flex;justify-content:center;margin:12px 0}
+#qr canvas,#qr img{background:#fff;padding:14px;border-radius:8px;box-sizing:content-box}
+.step{border-left:3px solid var(--pri);padding:6px 0 6px 12px;margin:10px 0}
+.step b{display:block}.tag{font-size:.8rem}
+@page{margin:12mm}
+@media print{body *{visibility:hidden}#certOut,#certOut *{visibility:visible}#certOut{position:absolute;left:0;top:0;width:100%;border:0;background:#fff;color:#000;padding:0}#certOut button{display:none}#certOut .cert{border-color:#0056B3;color:#000}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Jejak Revisi Nusachain</h1>
+<p class="sub">Catat setiap revisi gambar kerja, RAB, atau dokumen tender ke blockchain. Tiap catatan memuat sidik jari (hash) berkas dan tautan ke catatan revisi sebelumnya, sehingga urutan versi dan waktunya bisa dibuktikan. Berkas tidak pernah dikirim ke mana pun.</p>
+<div class="tabs"><button id="tabA" onclick="show('A')">Catat Revisi</button><button id="tabB" class="alt" onclick="show('B')">Telusuri</button></div>
+
+<section id="A">
+<div class="card" id="walletLogin">
+<b>Login Wallet Pencatat</b>
+<div><button id="btnExt" type="button" onclick="walletConnectExt()">Hubungkan Nusa Wallet / Nux Connect</button></div>
+<div id="msgExt"></div>
+<p style="margin:10px 0 0;font-size:.85em;opacity:.75">atau login manual dengan kunci:</p>
+<label>Private Key WIF / teks ENC</label><input id="wKey" type="password" autocomplete="off">
+<div class="row"><div><label>PIN (jika terenkripsi)</label><input id="wPin" type="password" autocomplete="off"></div>
+<div><label>Tipe alamat</label><select id="wType"><option value="bech32">Bech32 (nu1q...)</option><option value="p2pkh">P2PKH (N...)</option></select></div></div>
+<div><button onclick="walletLogin()">Login Wallet</button></div>
+<p class="sub">Kunci hanya diproses di browser ini. Hanya catatan yang dikirim dari alamat ini yang dipercaya saat penelusuran.</p>
+</div>
+<div class="card hide" id="walletActive">
+<b>Wallet aktif</b><div id="wAddr" class="mono"></div><div>Saldo: <span id="wBal">...</span></div>
+<div><button class="alt" onclick="refreshBalance()">Refresh saldo</button><button class="alt" onclick="walletLogout()">Keluar</button></div>
+</div>
+<div class="card">
+<label>Kode proyek (pakai kode yang sama untuk semua revisi proyek ini)</label><input id="kode" placeholder="mis. RUMAH-BUDI-2026">
+<label>Berkas revisi (boleh pilih banyak berkas, mis. seluruh lembar DED)</label><input id="nfile" type="file" multiple>
+<label>Keterangan revisi (opsional, hanya di berkas jejak, tidak masuk blockchain)</label><input id="nket" placeholder="mis. Revisi denah lantai 2 sesuai permintaan owner">
+<label>Fee (NUX)</label><input id="injFee" type="number" step="0.00000001" value="0.0001">
+<div><button class="alt" onclick="siapkan()">Hitung hash</button><button id="btnCatat" onclick="catat()">Catat revisi ke blockchain</button></div>
+<div id="hasilHash" class="mono"></div>
+<label>Berkas jejak sebelumnya (opsional, untuk melanjutkan catatan keterangan dan nama berkas)</label><input id="jfile" type="file" accept=".json" onchange="imporJejak()">
+<div id="msgT"></div>
+</div>
+<div id="certOut" class="hide card">
+<div class="cert" id="certBox"></div><div id="qr"></div>
+<div><button class="alt" onclick="unduhJejak()">Unduh berkas jejak (.json)</button><button class="alt" onclick="window.print()">Cetak</button></div>
+</div>
+</section>
+
+<section id="B" class="hide">
+<div class="card">
+<label>Alamat pencatat</label><input id="qa" placeholder="nu1q...">
+<label>Kode proyek</label><input id="qk">
+<label>Berkas untuk dicocokkan dengan jejak (opsional, pilih semua berkas revisi yang dimaksud)</label><input id="qfile" type="file" multiple>
+<label>Berkas jejak (opsional, menampilkan nama berkas dan keterangan)</label><input id="qjson" type="file" accept=".json" onchange="imporJejakB()">
+<div><button onclick="telusur()">Telusuri</button></div>
+<div id="msgQ"></div>
+</div>
+<div id="hasil"></div>
+</section>
+<p class="sub">Waktu yang dibuktikan adalah waktu block yang memuat transaksi, bukan jam di komputermu; waktu block bisa meleset sekitar satu sampai dua jam. Blockchain membuktikan berkas tertentu sudah ada pada waktu itu dan urutan revisinya, bukan bahwa isinya benar. Hash hanya cocok jika berkas identik per byte, jadi simpan berkas asli setiap revisi dan jangan ekspor ulang.</p>
+</div>
+
+<script>
+const API_BASE = 'https://explorer.nusacoin.org', NODE_API = 'https://api.nusacoin.org';
+const DUST_SATS = 546;
+const $ = id => document.getElementById(id);
+const NUSACOIN_PARAMS = { bech32: 'nu', pubKeyHash: 0x35, scriptHash: 0x4b, wif: 0x57 };
+const BECH32_CHARSET = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l';
+const ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+const ec = new elliptic.ec('secp256k1');
+const TAGHEX = '4e5231', ZERO = '0'.repeat(64); // "NR1"
+let liveWalletData = { pkey: null, address: null, balance: 0 };
+let pendingUtxos = [], cur = null, jejak = null;
+const pendingSpent = new Set(), sesi = {}, txc = new Map();
+
+function polymod(values) {
+  let chk = 1;
+  for (let p = 0; p < values.length; ++p) {
+    let top = chk >> 25;
+    chk = ((chk & 0x1ffffff) << 5) ^ values[p];
+    if ((top >> 0) & 1) chk ^= 0x3b6a57b2;
+    if ((top >> 1) & 1) chk ^= 0x26508e6d;
+    if ((top >> 2) & 1) chk ^= 0x1ea119fa;
+    if ((top >> 3) & 1) chk ^= 0x3d4233dd;
+    if ((top >> 4) & 1) chk ^= 0x2a1462b3;
+  }
+  return chk;
+}
+function hrpExpand(hrp) {
+  let ret = [];
+  for (let i = 0; i < hrp.length; ++i) ret.push(hrp.charCodeAt(i) >> 5);
+  ret.push(0);
+  for (let i = 0; i < hrp.length; ++i) ret.push(hrp.charCodeAt(i) & 31);
+  return ret;
+}
+function convertBits(data, frombits, tobits, pad = true) {
+  let acc = 0, bits = 0, ret = [], maxv = (1 << tobits) - 1;
+  for (let i = 0; i < data.length; ++i) {
+    let value = data[i];
+    if (value < 0 || value >> frombits !== 0) return null;
+    acc = (acc << frombits) | value; bits += frombits;
+    while (bits >= tobits) { bits -= tobits; ret.push((acc >> bits) & maxv); }
+  }
+  if (pad) { if (bits > 0) ret.push((acc << (tobits - bits)) & maxv); }
+  else if (bits >= frombits || ((acc << (tobits - bits)) & maxv)) return null;
+  return ret;
+}
+function toBech32(hrp, version, program) {
+  let data = [version].concat(convertBits(program, 8, 5, true));
+  let mod = polymod(hrpExpand(hrp).concat(data).concat([0, 0, 0, 0, 0, 0])) ^ 1;
+  let ret = hrp + '1';
+  for (let p = 0; p < data.length; ++p) ret += BECH32_CHARSET.charAt(data[p]);
+  for (let p = 0; p < 6; ++p) ret += BECH32_CHARSET.charAt((mod >> (5 * (5 - p))) & 31);
+  return ret;
+}
+function toBase58(buffer) {
+  let digits = [0];
+  for (let i = 0; i < buffer.length; i++) {
+    for (let j = 0; j < digits.length; j++) digits[j] <<= 8;
+    digits[0] += buffer[i];
+    let carry = 0;
+    for (let j = 0; j < digits.length; ++j) { digits[j] += carry; carry = (digits[j] / 58) | 0; digits[j] %= 58; }
+    while (carry) { digits.push(carry % 58); carry = (carry / 58) | 0; }
+  }
+  for (let i = 0; buffer[i] === 0 && i < buffer.length - 1; i++) digits.push(0);
+  return digits.reverse().map(d => ALPHABET[d]).join('');
+}
+function fromBase58(string) {
+  let bytes = [0];
+  for (let i = 0; i < string.length; i++) {
+    let value = ALPHABET.indexOf(string[i]);
+    if (value === -1) throw new Error("Karakter Base58 tidak valid");
+    for (let j = 0; j < bytes.length; j++) bytes[j] *= 58;
+    bytes[0] += value;
+    let carry = 0;
+    for (let j = 0; j < bytes.length; ++j) { bytes[j] += carry; carry = bytes[j] >> 8; bytes[j] &= 0xff; }
+    while (carry) { bytes.push(carry & 0xff); carry >>= 8; }
+  }
+  for (let i = 0; string[i] === '1' && i < string.length - 1; i++) bytes.push(0);
+  return new Uint8Array(bytes.reverse());
+}
+function toBase58Check(payload) {
+  const c = CryptoJS.SHA256(CryptoJS.SHA256(CryptoJS.lib.WordArray.create(payload))).words[0];
+  const full = new Uint8Array(payload.length + 4);
+  full.set(payload);
+  full.set([(c >>> 24) & 0xff, (c >>> 16) & 0xff, (c >>> 8) & 0xff, c & 0xff], payload.length);
+  return toBase58(full);
+}
+const bytesToHex = b => Array.from(b).map(x => x.toString(16).padStart(2, '0')).join('');
+const hexToBytes = h => Uint8Array.from(h.match(/../g) || [], x => parseInt(x, 16));
+const reverseHex = hex => hex.match(/../g).reverse().join('');
+const sha256dHex = hex => CryptoJS.SHA256(CryptoJS.SHA256(CryptoJS.enc.Hex.parse(hex))).toString();
+const hash160Hex = hex => CryptoJS.RIPEMD160(CryptoJS.SHA256(CryptoJS.enc.Hex.parse(hex))).toString();
+function numToLEHex(val, bytes) {
+  let hex = Number(val).toString(16);
+  if (hex.length % 2 !== 0) hex = '0' + hex;
+  while (hex.length < bytes * 2) hex = '0' + hex;
+  return hex.match(/../g).reverse().join('');
+}
+function numTo64BitLEHex(val) {
+  let hex = BigInt(val).toString(16);
+  while (hex.length < 16) hex = '0' + hex;
+  return hex.match(/../g).reverse().join('');
+}
+function varIntHex(n) {
+  if (n < 0xfd) return numToLEHex(n, 1);
+  if (n <= 0xffff) return 'fd' + numToLEHex(n, 2);
+  return 'fe' + numToLEHex(n, 4);
+}
+function addrFromPub(pubHex, type) {
+  const pkh = hexToBytes(hash160Hex(pubHex));
+  if (type === 'p2pkh') { const pl = new Uint8Array(21); pl[0] = NUSACOIN_PARAMS.pubKeyHash; pl.set(pkh, 1); return toBase58Check(pl); }
+  return toBech32(NUSACOIN_PARAMS.bech32, 0, pkh);
+}
+function isValidWif(wif) {
+  try {
+    const d = fromBase58(wif);
+    if (d.length !== 37 && d.length !== 38) return false;
+    if (d[0] !== NUSACOIN_PARAMS.wif) return false;
+    const h = CryptoJS.SHA256(CryptoJS.SHA256(CryptoJS.lib.WordArray.create(d.slice(0, d.length - 4))));
+    for (let i = 0; i < 4; i++) if (((h.words[0] >>> (24 - i * 8)) & 0xff) !== d[d.length - 4 + i]) return false;
+    return true;
+  } catch (e) { return false; }
+}
+const isEncryptedText = t => t.startsWith("ENC:") || t.startsWith("U2FsdGVkX1");
+const keyFromWif = wif => ec.keyFromPrivate(fromBase58(wif).slice(1, 33));
+
+function addressToScriptHex(address) {
+  const addr = (address || '').trim();
+  if (!addr) throw new Error("Alamat kosong.");
+  const lower = addr.toLowerCase();
+  if (lower.startsWith(NUSACOIN_PARAMS.bech32 + '1')) {
+    if (addr !== lower && addr !== addr.toUpperCase()) throw new Error("Alamat bech32 tidak valid (huruf campuran).");
+    const pos = lower.lastIndexOf('1');
+    if (lower.slice(0, pos) !== NUSACOIN_PARAMS.bech32) throw new Error("Prefix alamat bech32 bukan Nusacoin.");
+    const data = [];
+    for (const c of lower.slice(pos + 1)) {
+      const v = BECH32_CHARSET.indexOf(c);
+      if (v < 0) throw new Error("Karakter alamat bech32 tidak valid.");
+      data.push(v);
+    }
+    if (data.length < 7) throw new Error("Alamat bech32 terlalu pendek.");
+    if (polymod(hrpExpand('nu').concat(data)) !== 1) throw new Error("Checksum alamat bech32 salah.");
+    if (data[0] !== 0) throw new Error("Hanya SegWit v0 (nu1q...) yang didukung.");
+    const prog = convertBits(data.slice(1, -6), 5, 8, false);
+    if (!prog) throw new Error("Program alamat bech32 tidak valid.");
+    if (prog.length === 20) return '0014' + bytesToHex(prog);
+    if (prog.length === 32) return '0020' + bytesToHex(prog);
+    throw new Error("Panjang program alamat bech32 tidak valid.");
+  }
+  let raw;
+  try { raw = fromBase58(addr); } catch (e) { throw new Error("Alamat tidak valid (bukan Base58/Bech32)."); }
+  if (raw.length !== 25) throw new Error("Panjang alamat tidak valid.");
+  const payload = raw.slice(0, 21);
+  if (sha256dHex(bytesToHex(payload)).slice(0, 8) !== bytesToHex(raw.slice(21))) throw new Error("Checksum alamat salah.");
+  const h = bytesToHex(raw.slice(1, 21));
+  if (payload[0] === NUSACOIN_PARAMS.pubKeyHash) return '76a914' + h + '88ac';
+  if (payload[0] === NUSACOIN_PARAMS.scriptHash) return 'a914' + h + '87';
+  throw new Error("Prefix alamat bukan alamat Nusacoin.");
+}
+
+function buildSignedTransaction(utxos, outputs, privateKeyWif, ownScript) {
+  const keyPair = keyFromWif(privateKeyWif);
+  const pubHex = keyPair.getPublic(true, 'hex');
+  const pkh = hash160Hex(pubHex);
+  const isSegwit = ownScript === '0014' + pkh;
+  const isLegacy = ownScript === '76a914' + pkh + '88ac';
+  if (!isSegwit && !isLegacy) throw new Error("Private key tidak cocok dengan alamat wallet. Pilih format Bech32 atau P2PKH yang sesuai saat login.");
+  const VERSION = '01000000', LOCKTIME = '00000000', SEQ = 'ffffffff', SIGHASH_ALL = '01000000';
+  const outsHex = outputs.map(o => numTo64BitLEHex(o.value) + varIntHex(o.script.length / 2) + o.script).join('');
+  const outsSer = varIntHex(outputs.length) + outsHex;
+  const ins = utxos.map(u => ({ prev: reverseHex(u.txid) + numToLEHex(u.vout, 4), value: u.value }));
+  const signDigest = d => keyPair.sign(d, { canonical: true }).toDER('hex') + '01';
+  let inputsSer = varIntHex(ins.length), witness = '';
+  if (isLegacy) {
+    ins.forEach((inp, i) => {
+      let pre = VERSION + varIntHex(ins.length);
+      ins.forEach((o, j) => { pre += o.prev + (i === j ? varIntHex(ownScript.length / 2) + ownScript : '00') + SEQ; });
+      pre += outsSer + LOCKTIME + SIGHASH_ALL;
+      const sig = signDigest(sha256dHex(pre));
+      const scriptSig = varIntHex(sig.length / 2) + sig + varIntHex(pubHex.length / 2) + pubHex;
+      inputsSer += inp.prev + varIntHex(scriptSig.length / 2) + scriptSig + SEQ;
+    });
+  } else {
+    const hashPrevouts = sha256dHex(ins.map(x => x.prev).join(''));
+    const hashSequence = sha256dHex(ins.map(() => SEQ).join(''));
+    const hashOutputs = sha256dHex(outsHex);
+    const scriptCode = '1976a914' + pkh + '88ac';
+    ins.forEach(inp => {
+      const pre = VERSION + hashPrevouts + hashSequence + inp.prev + scriptCode + numTo64BitLEHex(inp.value) + SEQ + hashOutputs + LOCKTIME + SIGHASH_ALL;
+      const sig = signDigest(sha256dHex(pre));
+      witness += '02' + varIntHex(sig.length / 2) + sig + varIntHex(pubHex.length / 2) + pubHex;
+      inputsSer += inp.prev + '00' + SEQ;
+    });
+  }
+  const legacySer = VERSION + inputsSer + outsSer + LOCKTIME;
+  const raw = isSegwit ? VERSION + '0001' + inputsSer + outsSer + witness + LOCKTIME : legacySer;
+  return { raw, txid: reverseHex(sha256dHex(legacySer)) };
+}
+
+function normalizeUtxos(data, ownAddr) {
+  let arr = data;
+  if (data && !Array.isArray(data)) {
+    arr = data.result ?? data.utxos ?? data.unspent ?? data.unspents ?? data.data ?? data.unspent_outputs ?? null;
+    if (arr && !Array.isArray(arr)) arr = arr.utxos ?? arr.unspents ?? arr.unspent ?? null;
+  }
+  if (!Array.isArray(arr)) return null;
+  return arr.map(u => {
+    if (ownAddr && typeof u.address === 'string' && u.address !== ownAddr) return { txid: null };
+    const txid = u.txid || u.tx_hash || u.hash || u.txHash;
+    const vout = [u.vout, u.n, u.tx_output_n, u.tx_pos, u.index, u.outputIndex].find(v => v !== undefined);
+    let value;
+    if (u.satoshis !== undefined) value = Number(u.satoshis);
+    else if (u.amount !== undefined) value = Math.round(Number(u.amount) * 1e8);
+    else if (u.value !== undefined) value = Number.isInteger(Number(u.value)) ? Number(u.value) : Math.round(Number(u.value) * 1e8);
+    let confirmed = true;
+    if (u.confirmations !== undefined) confirmed = Number(u.confirmations) > 0;
+    else if (u.confirmed !== undefined) confirmed = !!u.confirmed;
+    else if (u.status && u.status.confirmed !== undefined) confirmed = !!u.status.confirmed;
+    return { txid, vout: Number(vout), value, confirmed };
+  }).filter(u => typeof u.txid === 'string' && /^[0-9a-fA-F]{64}$/.test(u.txid) && Number.isInteger(u.vout) && Number.isFinite(u.value) && u.value > 0);
+}
+function utxoMatchesBalance(list) {
+  const bal = liveWalletData.balance;
+  if (!(bal >= 0)) return true;
+  const total = list.filter(u => u.confirmed !== false).reduce((s, u) => s + u.value, 0) / 1e8;
+  return Math.abs(total - bal) <= Math.max(0.00001, bal * 0.001);
+}
+// Daftar TXID suatu alamat dari explorer, dengan paging
+async function txList(addr) {
+  const ids = new Set();
+  for (let start = 0; start < 5000; start += 500) {
+    const r = await fetch(`${API_BASE}/ext/getaddresstxs/${addr}/${start}/500`);
+    if (!r.ok) throw new Error("explorer: daftar transaksi gagal (HTTP " + r.status + ")");
+    const raw = await r.json(), arr = Array.isArray(raw) ? raw : (raw.data || raw.records || []);
+    arr.forEach(i => { const t = i.txid || (typeof i === 'string' ? i : null); if (t) ids.add(t); });
+    if (arr.length < 500) break;
+  }
+  return [...ids];
+}
+async function fetchUtxosFromExplorer(addr) {
+  const ids = await txList(addr);
+  if (!ids.length) return [];
+  const decoded = await Promise.all(ids.map(txj));
+  const spent = new Set();
+  decoded.forEach(t => (t.vin || []).forEach(v => { if (v.txid !== undefined) spent.add(v.txid + ':' + v.vout); }));
+  const out = [];
+  decoded.forEach(t => (t.vout || []).forEach(o => {
+    const spk = o.scriptPubKey || {};
+    const addrs = spk.addresses || (spk.address ? [spk.address] : []);
+    if (addrs.includes(addr) && !spent.has(t.txid + ':' + o.n)) out.push({ txid: t.txid, vout: o.n, value: Math.round(Number(o.value) * 1e8), confirmed: true });
+  }));
+  return out.filter(u => u.value > 0);
+}
+async function fetchUtxos(address) {
+  const enc = encodeURIComponent(address), notes = [];
+  const sources = ['utxos', 'unspent', 'utxo', 'getutxo'].map(p => [p, async () => {
+    const r = await fetch(`${NODE_API}/${p}/${enc}`); if (!r.ok) throw new Error('HTTP ' + r.status);
+    return normalizeUtxos(await r.json(), address);
+  }]);
+  sources.push(['explorer', () => fetchUtxosFromExplorer(address)]);
+  for (const [name, fn] of sources) {
+    try {
+      const list = await fn();
+      if (!list) { notes.push(name + ': format tidak dikenali'); continue; }
+      if (!utxoMatchesBalance(list)) { notes.push(name + ': total tidak cocok dengan saldo'); continue; }
+      return list;
+    } catch (e) { notes.push(name + ': ' + e.message); }
+  }
+  throw new Error('Tidak ada sumber UTXO yang valid.\n- ' + notes.join('\n- '));
+}
+const CONFLICT_RE = /conflict|missing-?inputs|missingorspent|already spent|double.?spend|txn-mempool/i;
+async function broadcastRawTx(apiBase, rawHex, expectedTxid) {
+  const url = `${apiBase}/broadcast`, enc = encodeURIComponent(rawHex);
+  const attempts = [
+    ['form', () => fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'raw=' + enc })],
+    ['json', () => fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ raw: rawHex }) })],
+    ['multipart', () => { const fd = new FormData(); fd.append('raw', rawHex); return fetch(url, { method: 'POST', body: fd }); }],
+    ['query-post', () => fetch(`${url}?raw=${enc}`, { method: 'POST' })],
+    ['query-get', () => fetch(`${url}?raw=${enc}`)]
+  ];
+  const formatErr = /expected type|got null|got undefined|param|argument|no raw/i;
+  const notes = [];
+  for (const [name, attempt] of attempts) {
+    let res;
+    try { res = await attempt(); } catch (e) { notes.push(name + ': ' + e.message); continue; }
+    const text = await res.text();
+    let json = null;
+    try { json = JSON.parse(text); } catch (e) {}
+    if (json && typeof json === 'object' && ('result' in json || 'error' in json)) {
+      if (json.error) {
+        const msg = typeof json.error === 'object' ? (json.error.message || JSON.stringify(json.error)) : String(json.error);
+        if (formatErr.test(msg)) { notes.push(name + ': ' + msg); continue; }
+        if (expectedTxid && !CONFLICT_RE.test(msg) && /already|known|duplicate/i.test(msg)) return expectedTxid;
+        const err = new Error(msg); err.conflict = CONFLICT_RE.test(msg); throw err;
+      }
+      if (json.result) return String(json.result);
+    }
+    notes.push(`${name}: HTTP ${res.status} ${text.slice(0, 100)}`);
+  }
+  throw new Error("Broadcast gagal.\n- " + notes.join("\n- "));
+}
+async function mapPool(items, fn, n = 5) {
+  let i = 0;
+  await Promise.all(Array.from({ length: n }, async () => { while (i < items.length) await fn(items[i++]); }));
+}
+
+// ===== Dasar antarmuka dan wallet =====
+function show(w) { ['A', 'B'].forEach(k => { $(k).classList.toggle('hide', k !== w); $('tab' + k).classList.toggle('alt', k !== w); }); }
+function note(el, cls, t) { const d = document.createElement("div"); d.className = "msg " + cls; d.textContent = t; $(el).innerHTML = ""; $(el).appendChild(d); }
+const bersih = s => String(s).replace(/[|\r\n]+/g, " ").trim();
+async function sha(buf) { return [...new Uint8Array(await crypto.subtle.digest("SHA-256", buf))].map(b => b.toString(16).padStart(2, "0")).join(""); }
+/* ===== Nusa Wallet + Nux Connect extension (login via extension) ===== */
+var NX = {};
+NX.st = function(){ return liveWalletData; };
+NX.en = function(){ return false; };
+NX.T = { wait:['Menunggu persetujuan di ekstensi wallet...','Waiting for approval in the wallet extension...'],
+  nop:['Ekstensi Nusa Wallet / Nux Connect tidak terdeteksi. Pasang/aktifkan ekstensi lalu muat ulang halaman ini. Halaman harus dibuka lewat http(s) atau localhost, bukan file://.','Nusa Wallet / Nux Connect extension not detected. Install/enable it, then reload this page. The page must be opened via http(s) or localhost, not file://.'],
+  noaddr:['Ekstensi tidak mengembalikan alamat.','The extension did not return an address.'],
+  rej:['Koneksi ditolak di ekstensi.','Connection rejected in the extension.'],
+  login:['Hubungkan Nusa Wallet / Nux Connect atau login dengan Private Key WIF dulu.','Connect Nusa Wallet / Nux Connect or log in with a WIF private key first.'],
+  badsign:['Ekstensi tidak mengembalikan transaksi bertanda tangan.','The extension did not return a signed transaction.'],
+  net:['Nux Connect sedang memakai jaringan Testnet. Buka ekstensi, pindah ke Mainnet, lalu coba lagi.','Nux Connect is on Testnet. Open the extension, switch to Mainnet, then try again.'],
+  seg:['Alamat wallet bukan SegWit (nu1q...). Nux Connect hanya menandatangani input SegWit.','The wallet address is not SegWit (nu1q...). Nux Connect only signs SegWit inputs.'],
+  chg:['Akun atau jaringan di ekstensi berubah, sesi wallet diputus. Hubungkan ulang.','The account or network changed in the extension; the wallet session was closed. Please reconnect.'] };
+NX.t = function(k){ return NX.T[k][NX.en() ? 1 : 0]; };
+// Nux Connect: window.nux dengan request({method}) dan isNuxConnect. Nusa Wallet lama: window.nusa / window.nux dengan connect().
+NX.isConnect = function(p){ return !!p && typeof p.request === 'function' && (p.isNuxConnect === true || typeof p.connect !== 'function'); };
+NX.p = function(){ var n = window.nux; if(NX.isConnect(n)) return n; return window.nusa || n || null; };
+NX.label = function(p){ return NX.isConnect(p) ? 'Nux Connect' : 'Nusa Wallet'; };
+NX.wait = function(ms){ return new Promise(function(res){
+  var p = NX.p(); if(p) return res(p);
+  var done = function(){ clearTimeout(t); window.removeEventListener('nux#initialized', done); window.removeEventListener('nusa#initialized', done); res(NX.p()); };
+  var t = setTimeout(done, ms || 1500);
+  window.addEventListener('nux#initialized', done); window.addEventListener('nusa#initialized', done); }); };
+NX.msg = function(t, bad){ var e = document.getElementById('msgExt'); if(!e) return; e.textContent = t || '';
+  e.style.cssText = t ? ('margin-top:8px;padding:8px 10px;border:1px solid ' + (bad ? '#c62828' : 'currentColor') + ';border-radius:8px;white-space:pre-wrap;word-break:break-word;font-size:.9em;' + (bad ? 'color:#c62828;' : '')) : ''; };
+NX.needMainnet = async function(p){
+  var net = await p.request({ method:'nux_getNetwork' });
+  if(net !== 'mainnet') throw new Error(NX.t('net'));
+};
+NX.listen = function(p){
+  if(NX.bound || !p || typeof p.on !== 'function') return; NX.bound = true;
+  var drop = function(){ var s = NX.st(); if(!s.ext) return; try{ walletLogout(); }catch(e){} NX.msg(NX.t('chg'), true); };
+  p.on('accountsChanged', function(a){ var s = NX.st(); if(!s.ext) return; if(!Array.isArray(a) || !a[0] || a[0] !== s.address) drop(); });
+  p.on('networkChanged', function(n){ if(n !== 'mainnet') drop(); });
+};
+async function walletConnectExt(){
+  var b = document.getElementById('btnExt'); if(b) b.disabled = true; NX.msg(NX.t('wait'));
+  try{
+    var p = await NX.wait(); if(!p) throw new Error(NX.t('nop'));
+    var addr;
+    if(NX.isConnect(p)){
+      await NX.needMainnet(p);
+      var acc = await p.request({ method:'nux_requestAccounts' });   // Nux Connect -> [address]
+      addr = Array.isArray(acc) ? acc[0] : null;
+    } else {
+      var r = await p.connect();                                      // Nusa Wallet lama -> { address, publicKey }
+      addr = r && r.address;
+    }
+    if(!addr) throw new Error(NX.t('noaddr'));
+    var s = NX.st(); s.pkey = null; s.address = addr; s.ext = true;
+    document.getElementById('walletLogin').classList.add('hide'); document.getElementById('walletActive').classList.remove('hide');
+    document.getElementById('wAddr').textContent = addr + '  (' + NX.label(p) + ')';
+    NX.msg(''); NX.listen(p);
+    if(typeof refreshBalance === 'function') refreshBalance();
+    if(NX.after) NX.after();
+  }catch(e){ NX.msg(e && e.code === 4001 ? NX.t('rej') : ((e && e.message) || String(e)), true); }
+  finally{ if(b) b.disabled = false; }
+}
+// PSBT v0 minimal (BIP174): tx belum bertanda tangan + witnessUtxo tiap input. Dipakai Nux Connect.
+NX.psbt = function(utxos, outputs, ownScript){
+  if(String(ownScript).indexOf('0014') !== 0) throw new Error(NX.t('seg'));
+  var ins = utxos.map(function(u){ return reverseHex(u.txid) + numToLEHex(u.vout, 4) + '00' + 'ffffffff'; }).join('');
+  var outs = outputs.map(function(o){ return numTo64BitLEHex(o.value) + varIntHex(o.script.length / 2) + o.script; }).join('');
+  var tx = '01000000' + varIntHex(utxos.length) + ins + varIntHex(outputs.length) + outs + '00000000';
+  var hex = '70736274ff' + '0100' + varIntHex(tx.length / 2) + tx + '00';
+  utxos.forEach(function(u){
+    var wu = numTo64BitLEHex(u.value) + varIntHex(ownScript.length / 2) + ownScript;
+    hex += '0101' + varIntHex(wu.length / 2) + wu + '00';
+  });
+  outputs.forEach(function(){ hex += '00'; });
+  var bin = ''; for(var i = 0; i < hex.length; i += 2) bin += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+  return btoa(bin);
+};
+// Tanda tangani transaksi lewat ekstensi (kunci privat tidak pernah keluar dari ekstensi).
+// Nux Connect: PSBT dikirim via nux_sendPsbt, ekstensi menandatangani dan menyiarkan sendiri (hasil: sent:true, raw:null).
+// Nusa Wallet lama: signTransaction mengembalikan raw untuk disiarkan halaman. Mode kunci WIF tetap lokal.
+async function NXsign(utxos, outputs, pkey, ownScript){
+  if(pkey) return buildSignedTransaction(utxos, outputs, pkey, ownScript);
+  if(!NX.st().ext) throw new Error(NX.t('login'));
+  var p = NX.p(); if(!p) throw new Error(NX.t('nop'));
+  if(NX.isConnect(p)){
+    await NX.needMainnet(p);
+    var txid = await p.request({ method:'nux_sendPsbt', params:{ psbt: NX.psbt(utxos, outputs, ownScript) } });
+    if(typeof txid !== 'string' || !/^[0-9a-fA-F]{64}$/.test(txid)) throw new Error(NX.t('badsign'));
+    return { raw:null, txid:txid.toLowerCase(), sent:true };
+  }
+  var r = await p.signTransaction({
+    inputs: utxos.map(function(u){ return { txid:u.txid, vout:u.vout }; }),
+    outputs: outputs.map(function(o){ return { script:o.script, value:Number(o.value) }; }) });
+  if(!r || !r.raw || !r.txid) throw new Error(NX.t('badsign'));
+  return { raw:r.raw, txid:r.txid };
+}
+(function(){ var lo = walletLogout; walletLogout = function(){
+  try{ var p = NX.p(); if(p && NX.st().ext && !NX.isConnect(p) && p.disconnect) p.disconnect().catch(function(){}); }catch(e){}
+  return lo.apply(this, arguments); }; })();
+
+
+function walletLogin() {
+  let key = $('wKey').value.trim(); const pin = $('wPin').value.trim(), type = $('wType').value;
+  if (!key) { alert('Masukkan Private Key WIF atau teks ENC.'); return; }
+  if (isEncryptedText(key)) {
+    if (!pin) { alert('PIN dibutuhkan untuk mendekripsi kunci ini.'); return; }
+    try { key = CryptoJS.AES.decrypt(key.replace(/^ENC:/, ''), pin).toString(CryptoJS.enc.Utf8).trim(); } catch (e) { key = ''; }
+    if (!key || !isValidWif(key)) { alert('Gagal mendekripsi: PIN salah atau data tidak valid.'); return; }
+  } else if (!isValidWif(key)) { alert('Private Key WIF tidak valid.'); return; }
+  liveWalletData.pkey = key; liveWalletData.address = addrFromPub(keyFromWif(key).getPublic(true, 'hex'), type);
+  $('wKey').value = ''; $('wPin').value = '';
+  $('walletLogin').classList.add('hide'); $('walletActive').classList.remove('hide');
+  $('wAddr').textContent = liveWalletData.address; refreshBalance();
+}
+function walletLogout() {
+  liveWalletData = { pkey: null, address: null, balance: 0 }; pendingUtxos = []; pendingSpent.clear();
+  $('walletActive').classList.add('hide'); $('walletLogin').classList.remove('hide');
+}
+async function refreshBalance() {
+  const el = $('wBal'); el.textContent = '...';
+  try {
+    const res = await fetch(`${API_BASE}/ext/getbalance/${liveWalletData.address}`); if (!res.ok) throw new Error('HTTP ' + res.status);
+    const n = parseFloat(await res.text()); liveWalletData.balance = isNaN(n) ? 0 : n; el.textContent = liveWalletData.balance + ' NUX';
+  } catch (e) { el.textContent = 'gagal memuat saldo'; }
+}
+async function kirimPayload(dataHex, feeSats) {
+  const ownScript = addressToScriptHex(liveWalletData.address);
+  const opScript = '6a' + numToLEHex(dataHex.length / 2, 1) + dataHex;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    let utxos = (await fetchUtxos(liveWalletData.address)).filter(u => !pendingSpent.has(u.txid + ':' + u.vout));
+    pendingUtxos.filter(p => p.address === liveWalletData.address && !pendingSpent.has(p.txid + ':' + p.vout) && !utxos.some(u => u.txid === p.txid && u.vout === p.vout)).forEach(p => utxos.push({ txid: p.txid, vout: p.vout, value: p.value, confirmed: false }));
+    utxos.sort((a, b) => ((a.confirmed === false) - (b.confirmed === false)) || (b.value - a.value));
+    const selected = []; let acc = 0;
+    for (const u of utxos) { selected.push(u); acc += u.value; if (acc >= feeSats) break; }
+    if (acc < feeSats) throw new Error('Saldo tersedia tidak cukup untuk fee.');
+    const outputs = [{ value: 0, script: opScript }]; let change = acc - feeSats;
+    if (change >= DUST_SATS) outputs.push({ value: change, script: ownScript }); else change = 0;
+    const sg = await NXsign(selected, outputs, liveWalletData.pkey, ownScript), txid = sg.txid;
+    let sent;
+    try { sent = sg.sent ? txid : await broadcastRawTx(NODE_API, sg.raw, txid); }   // Nux Connect sudah menyiarkan sendiri
+    catch (e) { if (e.conflict && attempt < 2) { selected.forEach(u => pendingSpent.add(u.txid + ':' + u.vout)); continue; } throw e; }
+    selected.forEach(u => pendingSpent.add(u.txid + ':' + u.vout));
+    pendingUtxos = pendingUtxos.filter(p => !pendingSpent.has(p.txid + ':' + p.vout));
+    if (change > 0) pendingUtxos.push({ address: liveWalletData.address, txid, vout: 1, value: change });
+    return sent;
+  }
+  throw new Error('Broadcast gagal setelah 3 percobaan.');
+}
+
+// ===== Format catatan revisi (73 byte): "NR1" + id proyek 4B + no. revisi 2B + TXID revisi sebelumnya 32B + hash berkas 32B =====
+const pidOf = k => CryptoJS.SHA256(k).toString().slice(0, 8);
+const encRec = (kode, rev, prev, hash) => TAGHEX + pidOf(kode) + rev.toString(16).padStart(4, '0') + (prev || ZERO) + hash;
+function parseRec(hex) {
+  hex = String(hex).toLowerCase();
+  if (hex.length !== 146 || hex.slice(0, 6) !== TAGHEX) return null;
+  return { pid: hex.substr(6, 8), rev: parseInt(hex.substr(14, 4), 16), prev: hex.substr(18, 64), hash: hex.substr(82, 64) };
+}
+async function txj(id) {
+  if (!txc.has(id)) {
+    const r = await fetch(`${API_BASE}/api/getrawtransaction?txid=${id}&decrypt=1`);
+    if (!r.ok) throw new Error("explorer: transaksi gagal dibaca (HTTP " + r.status + ")");
+    const j = JSON.parse(await r.text());
+    if (!j || !Array.isArray(j.vout)) throw new Error("explorer: detail transaksi tidak lengkap");
+    txc.set(id, j);
+  }
+  return txc.get(id);
+}
+function opsOf(j) {
+  const out = [];
+  for (const o of j.vout) {
+    const hex = ((o.scriptPubKey || {}).hex || '').toLowerCase();
+    if (!hex.startsWith('6a')) continue;
+    let i = 2, data = '';
+    while (i < hex.length) {
+      const op = parseInt(hex.substr(i, 2), 16); i += 2;
+      let len;
+      if (op <= 75) len = op;
+      else if (op === 0x4c) { len = parseInt(hex.substr(i, 2), 16); i += 2; }
+      else if (op === 0x4d) { len = parseInt(hex.substr(i + 2, 2) + hex.substr(i, 2), 16); i += 4; }
+      else break;
+      data += hex.substr(i, len * 2); i += len * 2;
+    }
+    out.push(data);
+  }
+  return out;
+}
+async function dikirimDari(j, addr) {
+  try {
+    for (const vi of (j.vin || [])) {
+      if (!vi.txid) continue;
+      const p = await txj(vi.txid), o = (p.vout || []).find(x => x.n === vi.vout); if (!o) return null;
+      const sp = o.scriptPubKey || {}, list = [].concat(sp.addresses || [], sp.address ? [sp.address] : []);
+      if (list.some(a => String(a).toLowerCase() === addr.toLowerCase())) return true;
+    }
+    return false;
+  } catch (e) { return null; }
+}
+// Ambil semua catatan revisi proyek dari alamat pencatat (hanya yang benar-benar dikirim dari alamat itu)
+async function muatRantai(addr, kode, prog) {
+  const pid = pidOf(kode), ids = await txList(addr), recs = []; let n = 0;
+  await mapPool(ids, async id => {
+    try {
+      const j = await txj(id);
+      for (const d of opsOf(j)) { const r = parseRec(d); if (r && r.pid === pid) { r.txid = id; r.time = j.blocktime || 0; r.conf = j.confirmations || 0; r.j = j; recs.push(r); break; } }
+    } catch (e) {}
+    if (prog && ++n % 10 === 0) prog("Memeriksa transaksi " + n + "/" + ids.length + "...");
+  }, 6);
+  for (const r of recs) { r.ok = await dikirimDari(r.j, addr); delete r.j; }
+  return { sah: recs.filter(r => r.ok !== false), palsu: recs.filter(r => r.ok === false), total: ids.length };
+}
+const fmtWaktu = t => t ? new Date(t * 1000).toLocaleString("id-ID", { timeZone: "Asia/Jakarta", dateStyle: "long", timeStyle: "short" }) + " WIB" : "menunggu konfirmasi block";
+
+// ===== Catat revisi =====
+async function hashBerkas(files) {
+  const daftar = [];
+  for (const f of files) daftar.push({ nama: f.name, size: f.size, hash: await sha(await f.arrayBuffer()) });
+  const hash = daftar.length === 1 ? daftar[0].hash : CryptoJS.SHA256(daftar.map(d => d.hash).sort().join('\n')).toString();
+  return { hash, daftar };
+}
+async function siapkan() {
+  const fs = $('nfile').files; if (!fs.length) return note('msgT', 'bad', 'Pilih berkas revisi dulu.');
+  note('msgT', '', 'Menghitung hash...');
+  const h = await hashBerkas(fs); cur = { hash: h.hash, daftar: h.daftar, ket: bersih($('nket').value) };
+  $('hasilHash').textContent = h.daftar.map(d => d.nama + " (" + d.size + " byte)\n" + d.hash).join("\n\n") + (h.daftar.length > 1 ? "\n\nHash gabungan revisi:\n" + h.hash : "");
+  $('msgT').innerHTML = '';
+}
+async function catat() {
+  if (!cur) return note('msgT', 'bad', 'Hitung hash dulu.');
+  const kode = bersih($('kode').value), feeNUX = parseFloat($('injFee').value);
+  if (!kode) return note('msgT', 'bad', 'Isi kode proyek.');
+  if (!(liveWalletData.pkey || liveWalletData.ext)) { alert("Hubungkan Nusa Wallet / Nux Connect atau login dengan Private Key WIF dulu (mode baca-saja tidak bisa mengirim)."); return; }
+  if (isNaN(feeNUX) || feeNUX <= 0) { alert("Fee tidak valid."); return; }
+  cur.ket = bersih($('nket').value);
+  const btn = $('btnCatat'); btn.disabled = true; note('msgT', '', 'Memeriksa rantai revisi proyek...');
+  try {
+    txc.clear();
+    const rantai = await muatRantai(liveWalletData.address, kode, p => note('msgT', '', p));
+    let last = null;
+    rantai.sah.forEach(r => { if (!last || r.rev > last.rev || (r.rev === last.rev && r.time && r.time < last.time)) last = r; });
+    const s = sesi[liveWalletData.address + '|' + kode];
+    if (s && (!last || s.rev > last.rev)) last = s;
+    const rev = last ? last.rev + 1 : 1, prev = last ? last.txid : null;
+    if (rev > 65535) throw new Error("Nomor revisi melebihi batas.");
+    if (last && last.hash === cur.hash && !confirm("Berkas ini identik dengan Revisi " + last.rev + " yang sudah tercatat. Tetap catat sebagai revisi baru?")) { btn.disabled = false; return note('msgT', '', 'Dibatalkan.'); }
+    if (!confirm("Catat Revisi " + rev + " proyek " + kode + " ke blockchain Nusacoin?\n\nHash: " + cur.hash + "\nTertaut ke: " + (prev ? "Revisi " + last.rev : "(revisi pertama)") + "\nFee: " + feeNUX + " NUX\n\nData ini publik dan permanen.")) { btn.disabled = false; return note('msgT', '', 'Dibatalkan.'); }
+    note('msgT', '', 'Mengirim transaksi...');
+    const txid = await kirimPayload(encRec(kode, rev, prev, cur.hash), Math.round(feeNUX * 1e8));
+    sesi[liveWalletData.address + '|' + kode] = { rev, txid, hash: cur.hash };
+    if (!jejak || jejak.kode !== kode || jejak.alamat !== liveWalletData.address) jejak = { v: 1, kode, alamat: liveWalletData.address, revisi: [] };
+    const e = { rev, file: cur.daftar.map(d => d.nama).join(" + "), berkas: cur.daftar, ket: cur.ket, hash: cur.hash, txid, prev: prev || ZERO };
+    jejak.revisi = jejak.revisi.filter(x => x.rev !== rev).concat(e);
+    note('msgT', 'ok', 'Revisi ' + rev + ' tercatat. TXID: ' + txid); tampilBukti(e); setTimeout(refreshBalance, 3000);
+  } catch (e) { note('msgT', 'bad', 'Gagal: ' + e.message); }
+  finally { btn.disabled = false; }
+}
+function tampilBukti(e) {
+  const box = $('certBox'); box.innerHTML = "";
+  const add = (tag, t, cls) => { const x = document.createElement(tag); x.textContent = t; if (cls) x.className = cls; box.appendChild(x); };
+  add("h2", "Jejak Revisi: " + jejak.kode); add("div", "Revisi " + e.rev + (e.ket ? " - " + e.ket : ""));
+  add("div", "Berkas: " + e.file); add("div", "Dicatat oleh " + jejak.alamat, "mono");
+  add("div", "Hash: " + e.hash, "mono"); add("div", "TXID: " + e.txid, "mono");
+  $("qr").innerHTML = "";
+  try { new QRCode($("qr"), { text: location.href.split("#")[0] + "#a=" + jejak.alamat + "&p=" + encodeURIComponent(jejak.kode), width: 200, height: 200, correctLevel: QRCode.CorrectLevel.L }); } catch (x) { $("qr").textContent = "QR gagal dibuat."; }
+  $("certOut").classList.remove("hide");
+}
+function unduhJejak() {
+  if (!jejak) return;
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([JSON.stringify(jejak, null, 1)], { type: "application/json" }));
+  a.download = "jejak-" + jejak.kode.replace(/[^\w-]+/g, '_') + ".json"; a.click();
+}
+function bacaJejak(file, cb) {
+  const r = new FileReader();
+  r.onload = () => { try { const j = JSON.parse(r.result); if (!j.kode || !Array.isArray(j.revisi)) throw new Error("Format berkas jejak tidak dikenali."); jejak = j; cb(null, j); } catch (e) { cb(e); } };
+  r.readAsText(file);
+}
+function imporJejak() {
+  const f = $('jfile').files[0]; if (!f) return;
+  bacaJejak(f, (e, j) => { if (e) return note('msgT', 'bad', e.message); $('kode').value = j.kode; note('msgT', 'ok', "Berkas jejak dimuat: proyek " + j.kode + ", " + j.revisi.length + " revisi. Revisi berikutnya akan ditambahkan ke jejak ini jika dikirim dari alamat " + j.alamat + "."); });
+}
+function imporJejakB() {
+  const f = $('qjson').files[0]; if (!f) return;
+  bacaJejak(f, (e, j) => { if (e) return note('msgQ', 'bad', e.message); $('qk').value = j.kode; if (j.alamat) $('qa').value = j.alamat; note('msgQ', 'ok', "Berkas jejak dimuat: proyek " + j.kode + ", " + j.revisi.length + " revisi."); });
+}
+
+// ===== Telusuri =====
+async function telusur() {
+  const addr = $('qa').value.trim(), kode = bersih($('qk').value), out = $('hasil'); out.innerHTML = "";
+  if (!addr || !kode) return note('msgQ', 'bad', 'Isi alamat pencatat dan kode proyek.');
+  txc.clear();
+  try {
+    let doc = null;
+    if ($('qfile').files.length) { note('msgQ', '', 'Menghitung hash berkas...'); doc = (await hashBerkas($('qfile').files)).hash; }
+    note('msgQ', '', 'Mengambil riwayat alamat...');
+    const r = await muatRantai(addr, kode, p => note('msgQ', '', p));
+    if (!r.sah.length) return note('msgQ', 'bad', 'Tidak ada catatan revisi untuk proyek ini dari alamat tersebut (' + r.total + ' transaksi diperiksa). Periksa alamat dan kode proyek.');
+    const sah = r.sah.sort((a, b) => a.rev - b.rev || (a.time || 9e12) - (b.time || 9e12)), byTx = new Map(sah.map(x => [x.txid, x]));
+    sah.forEach(x => { x.link = x.prev === ZERO ? (x.rev === 1 ? 'awal' : 'putus') : (byTx.has(x.prev) && byTx.get(x.prev).rev === x.rev - 1 ? 'ok' : 'putus'); });
+    const utuh = sah.filter(x => x.link !== 'putus'), terbaru = utuh.length ? utuh[utuh.length - 1].rev : null;
+    const kembar = new Set(); const seenPrev = new Map();
+    sah.forEach(x => { if (seenPrev.has(x.prev)) { kembar.add(x.prev); } else seenPrev.set(x.prev, x); });
+    const meta = h => jejak && jejak.revisi ? jejak.revisi.find(m => m.hash === h) : null;
+    const mk = (p, tag, t, cls) => { const e = document.createElement(tag); e.textContent = t; if (cls) e.className = cls; p.appendChild(e); return e; };
+    const head = document.createElement('div'); head.className = 'card';
+    mk(head, 'b', 'Jejak revisi proyek ' + kode); mk(head, 'div', 'Pencatat: ' + addr, 'mono');
+    mk(head, 'div', sah.length + ' revisi tercatat' + (terbaru ? ', revisi terbaru: Revisi ' + terbaru : ''));
+    if (kembar.size) mk(head, 'div', 'PERHATIAN: ada cabang ganda, dua catatan menunjuk revisi sebelumnya yang sama. Periksa apakah pencatat mengirim dua versi berbeda.', 'bad');
+    const cocok = doc ? sah.filter(x => x.hash === doc) : [];
+    if (doc) {
+      const c = document.createElement('div'); c.className = 'msg ' + (cocok.length ? 'ok' : 'bad');
+      if (cocok.length) { const x = cocok[0]; c.textContent = "COCOK. Berkas yang kamu pilih identik dengan Revisi " + x.rev + ", dicatat pada " + fmtWaktu(x.time) + ". " + (x.rev === terbaru ? "Ini revisi TERBARU." : "Sudah ada revisi yang lebih baru (Revisi " + terbaru + ")."); }
+      else c.textContent = "TIDAK COCOK. Hash berkas tidak sama dengan revisi mana pun pada jejak ini. Berkas berbeda satu byte pun menghasilkan hash yang berbeda.";
+      head.appendChild(c);
+    }
+    sah.forEach(x => {
+      const d = document.createElement('div'); d.className = 'step'; const m = meta(x.hash);
+      mk(d, 'b', 'Revisi ' + x.rev + (x.rev === terbaru ? ' (terbaru)' : '') + (cocok.includes(x) ? '  <- berkas kamu' : ''));
+      if (m) mk(d, 'div', (m.file || '') + (m.ket ? ' - ' + m.ket : ''));
+      mk(d, 'div', fmtWaktu(x.time) + (x.time ? ' (' + x.conf + ' konfirmasi)' : ''), 'tag');
+      mk(d, 'div', 'Hash: ' + x.hash, 'mono'); mk(d, 'div', 'TXID: ' + x.txid, 'mono');
+      mk(d, 'div', x.link === 'ok' ? 'Tertaut ke Revisi ' + (x.rev - 1) : x.link === 'awal' ? 'Revisi awal' : 'TAUTAN PUTUS: revisi sebelumnya tidak ditemukan pada alamat ini', 'tag' + (x.link === 'putus' ? ' bad' : ''));
+      if (x.ok === null) mk(d, 'div', 'Pengirim tidak bisa diverifikasi dari explorer.', 'tag bad');
+      if (cocok.includes(x)) d.style.borderColor = 'var(--ok)'; if (x.link === 'putus') d.style.borderColor = 'var(--bad)';
+      head.appendChild(d);
+    });
+    out.appendChild(head);
+    if (r.palsu.length) {
+      const w = document.createElement('div'); w.className = 'card'; mk(w, 'b', 'Diabaikan: ' + r.palsu.length + ' catatan bukan dikirim oleh alamat pencatat', 'bad');
+      r.palsu.forEach(x => mk(w, 'div', 'Revisi ' + x.rev + '  TXID ' + x.txid, 'mono')); out.appendChild(w);
+    }
+    note('msgQ', 'ok', sah.length + ' revisi ditemukan' + (r.palsu.length ? ', ' + r.palsu.length + ' diabaikan' : '') + '.');
+  } catch (e) { note('msgQ', 'bad', 'Gagal menelusuri: ' + e.message); }
+}
+(function () {
+  const a = location.hash.match(/[#&]a=([^&]+)/), p = location.hash.match(/[#&]p=([^&]+)/);
+  if (a && p) { show('B'); $('qa').value = decodeURIComponent(a[1]); $('qk').value = decodeURIComponent(p[1]); telusur(); }
+})();
+</script>
+</body>
+</html>

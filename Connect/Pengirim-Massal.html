@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pengirim Massal Nusachain</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#F4F9FF;--card:#fff;--tx:#12263f;--mut:#5b6b80;--pri:#007BFF;--pri2:#0056B3;--bd:#d5e3f3;--ok:#0a7d3b;--bad:#c62828;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1621;--card:#16212f;--tx:#e6eef8;--mut:#9fb0c4;--bd:#2a3a4f;--ok:#4cd387;--bad:#ff7b7b;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e1621;--card:#16212f;--tx:#e6eef8;--mut:#9fb0c4;--bd:#2a3a4f;--ok:#4cd387;--bad:#ff7b7b;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:720px;margin:0 auto;padding:16px}
+h1{font-size:1.4rem;margin:8px 0 2px;color:var(--pri2)}
+@media (prefers-color-scheme:dark){h1{color:var(--pri)}}
+.sub{color:var(--mut);margin:0 0 14px}
+button{background:var(--pri);color:#fff;border:0;border-radius:8px;padding:10px 14px;font:inherit;font-weight:600;cursor:pointer;margin:6px 6px 0 0}
+button.alt{background:transparent;color:var(--pri);border:1px solid var(--pri)}
+button:disabled{opacity:.6}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:16px;margin-bottom:12px}
+label{display:block;font-size:.85rem;color:var(--mut);margin:10px 0 4px}
+input,select,textarea{width:100%;padding:9px 10px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font:inherit}
+textarea{min-height:150px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.8rem}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:520px){.row{grid-template-columns:1fr}}
+.mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.8rem;word-break:break-all}
+.msg{padding:10px 12px;border-radius:8px;margin-top:10px;border:1px solid var(--bd);white-space:pre-wrap;word-break:break-word}
+.ok{color:var(--ok);border-color:var(--ok)}.bad{color:var(--bad);border-color:var(--bad)}
+.hide{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Pengirim Massal Nusachain</h1>
+<p class="sub">Kirim NUX ke banyak alamat sekaligus dari daftar CSV. Wallet dihubungkan lewat ekstensi Nusa Wallet atau Nux Connect; kunci privat tetap di ekstensi dan setiap transaksi disetujui di sana.</p>
+
+<div class="card" id="walletLogin">
+<b>Hubungkan Wallet</b>
+<p class="sub">Pasang dan buka kunci ekstensi Nusa Wallet atau Nux Connect (jaringan Mainnet), lalu klik tombol di bawah dan setujui permintaan koneksi.</p>
+<div><button id="btnConnect" onclick="walletConnect()">Hubungkan Nusa Wallet / Nux Connect</button></div>
+<div id="msgW"></div>
+</div>
+<div class="card hide" id="walletActive">
+<b>Wallet terhubung</b><div id="wAddr" class="mono"></div><div>Saldo: <span id="wBal">...</span></div>
+<div><button class="alt" onclick="refreshBalance()">Refresh saldo</button><button class="alt" onclick="walletLogout()">Putuskan</button></div>
+</div>
+
+<div class="card">
+<b>1. Daftar penerima</b>
+<label>Satu baris satu penerima: alamat, jumlah NUX (pemisah koma, titik koma, spasi, atau tab; desimal pakai titik). Baris berawalan # diabaikan.</label>
+<textarea id="list" placeholder="nu1q...,10&#10;N...,2.5&#10;nu1q...,0.75"></textarea>
+<div><button class="alt" onclick="$('csv').click()">Impor berkas CSV/TXT</button><input id="csv" type="file" accept=".csv,.txt,text/*" class="hide" onchange="impor()"></div>
+<label>Jumlah default (NUX, dipakai jika baris tanpa jumlah)</label><input id="defAmt" type="number" step="0.00000001" placeholder="opsional">
+<div id="msgL"></div>
+</div>
+
+<div class="card">
+<b>2. Kirim</b>
+<div><button class="alt" onclick="lihat()">Lihat rencana</button><button id="btnSend" onclick="kirim()">Kirim massal</button></div>
+<div id="msgP"></div>
+<div id="msgR"></div>
+<div><button id="btnCsv" class="alt hide" onclick="unduh()">Unduh laporan (.csv)</button></div>
+</div>
+<p class="sub">Ekstensi mengirim satu transaksi per penerima, jadi setiap penerima memunculkan satu jendela persetujuan dan fee dihitung per transaksi. Transaksi tidak bisa dibatalkan setelah disetujui, jadi periksa rencana lebih dulu.</p>
+</div>
+
+<script>
+const DUST_SATS = 546;
+const $ = id => document.getElementById(id);
+let liveWalletData = { address: null, balance: 0 };
+let hasil = [];
+const NUSACOIN_PARAMS = { bech32: 'nu', pubKeyHash: 0x35, scriptHash: 0x4b };
+const BECH32_CHARSET = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l';
+const ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+
+function polymod(values) {
+  let chk = 1;
+  for (let p = 0; p < values.length; ++p) {
+    let top = chk >> 25;
+    chk = ((chk & 0x1ffffff) << 5) ^ values[p];
+    if ((top >> 0) & 1) chk ^= 0x3b6a57b2;
+    if ((top >> 1) & 1) chk ^= 0x26508e6d;
+    if ((top >> 2) & 1) chk ^= 0x1ea119fa;
+    if ((top >> 3) & 1) chk ^= 0x3d4233dd;
+    if ((top >> 4) & 1) chk ^= 0x2a1462b3;
+  }
+  return chk;
+}
+function hrpExpand(hrp) {
+  let ret = [];
+  for (let i = 0; i < hrp.length; ++i) ret.push(hrp.charCodeAt(i) >> 5);
+  ret.push(0);
+  for (let i = 0; i < hrp.length; ++i) ret.push(hrp.charCodeAt(i) & 31);
+  return ret;
+}
+function convertBits(data, frombits, tobits, pad = true) {
+  let acc = 0, bits = 0, ret = [], maxv = (1 << tobits) - 1;
+  for (let i = 0; i < data.length; ++i) {
+    let value = data[i];
+    if (value < 0 || value >> frombits !== 0) return null;
+    acc = (acc << frombits) | value; bits += frombits;
+    while (bits >= tobits) { bits -= tobits; ret.push((acc >> bits) & maxv); }
+  }
+  if (pad) { if (bits > 0) ret.push((acc << (tobits - bits)) & maxv); }
+  else if (bits >= frombits || ((acc << (tobits - bits)) & maxv)) return null;
+  return ret;
+}
+function fromBase58(string) {
+  let bytes = [0];
+  for (let i = 0; i < string.length; i++) {
+    let value = ALPHABET.indexOf(string[i]);
+    if (value === -1) throw new Error("Karakter Base58 tidak valid");
+    for (let j = 0; j < bytes.length; j++) bytes[j] *= 58;
+    bytes[0] += value;
+    let carry = 0;
+    for (let j = 0; j < bytes.length; ++j) {
+      bytes[j] += carry; carry = bytes[j] >> 8; bytes[j] &= 0xff;
+    }
+    while (carry) { bytes.push(carry & 0xff); carry >>= 8; }
+  }
+  for (let i = 0; string[i] === '1' && i < string.length - 1; i++) bytes.push(0);
+  return new Uint8Array(bytes.reverse());
+}
+const bytesToHex = bytes => Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+const sha256dHex = hex => CryptoJS.SHA256(CryptoJS.SHA256(CryptoJS.enc.Hex.parse(hex))).toString();
+
+function addressToScriptHex(address) {
+  const addr = (address || '').trim();
+  if (!addr) throw new Error("Alamat kosong.");
+  const lower = addr.toLowerCase();
+  if (lower.startsWith(NUSACOIN_PARAMS.bech32 + '1')) {
+    if (addr !== lower && addr !== addr.toUpperCase()) throw new Error("Alamat bech32 tidak valid (huruf campuran).");
+    const pos = lower.lastIndexOf('1');
+    if (lower.slice(0, pos) !== NUSACOIN_PARAMS.bech32) throw new Error("Prefix alamat bech32 bukan Nusacoin.");
+    const data = [];
+    for (const c of lower.slice(pos + 1)) {
+      const v = BECH32_CHARSET.indexOf(c);
+      if (v < 0) throw new Error("Karakter alamat bech32 tidak valid.");
+      data.push(v);
+    }
+    if (data.length < 7) throw new Error("Alamat bech32 terlalu pendek.");
+    if (polymod(hrpExpand('nu').concat(data)) !== 1) throw new Error("Checksum alamat bech32 salah.");
+    if (data[0] !== 0) throw new Error("Hanya SegWit v0 (nu1q...) yang didukung.");
+    const prog = convertBits(data.slice(1, -6), 5, 8, false);
+    if (!prog) throw new Error("Program alamat bech32 tidak valid.");
+    if (prog.length === 20) return '0014' + bytesToHex(prog);
+    if (prog.length === 32) return '0020' + bytesToHex(prog);
+    throw new Error("Panjang program alamat bech32 tidak valid.");
+  }
+  let raw;
+  try { raw = fromBase58(addr); } catch (e) { throw new Error("Alamat tidak valid (bukan Base58/Bech32)."); }
+  if (raw.length !== 25) throw new Error("Panjang alamat tidak valid.");
+  const payload = raw.slice(0, 21);
+  if (sha256dHex(bytesToHex(payload)).slice(0, 8) !== bytesToHex(raw.slice(21))) throw new Error("Checksum alamat salah.");
+  const h = bytesToHex(raw.slice(1, 21));
+  if (payload[0] === NUSACOIN_PARAMS.pubKeyHash) return '76a914' + h + '88ac';
+  if (payload[0] === NUSACOIN_PARAMS.scriptHash) return 'a914' + h + '87';
+  throw new Error("Prefix alamat bukan alamat Nusacoin.");
+}
+
+
+// ===== Koneksi ekstensi Nusa Wallet + Nux Connect =====
+// Nux Connect: window.nux dengan request({method}) dan isNuxConnect, jumlah dalam nusan (1 NUX = 1e8).
+// Nusa Wallet lama: window.nusa / window.nux dengan connect(), jumlah dalam NUX.
+// Catatan: nama global "nux" dipakai ekstensi, jadi jangan dideklarasikan ulang di halaman ini.
+const isConnect = p => !!p && typeof p.request === 'function' && (p.isNuxConnect === true || typeof p.connect !== 'function');
+const getProvider = () => { const n = window.nux; if (isConnect(n)) return n; return window.nusa || n || null; };
+const extName = p => isConnect(p) ? 'Nux Connect' : 'Nusa Wallet';
+function waitProvider(ms = 1500) {
+  return new Promise(res => {
+    const p = getProvider(); if (p) return res(p);
+    const done = () => { clearTimeout(t); window.removeEventListener('nux#initialized', done); window.removeEventListener('nusa#initialized', done); res(getProvider()); };
+    const t = setTimeout(done, ms);
+    window.addEventListener('nux#initialized', done); window.addEventListener('nusa#initialized', done);
+  });
+}
+async function needMainnet(w) {
+  const net = await w.request({ method: 'nux_getNetwork' });
+  if (net !== 'mainnet') throw new Error('Nux Connect sedang memakai jaringan Testnet. Buka ekstensi, pindah ke Mainnet, lalu coba lagi.');
+}
+let extBound = false;
+function bindEvents(w) {
+  if (extBound || typeof w.on !== 'function') return; extBound = true;
+  const drop = () => { if (!liveWalletData.address) return; walletLogout(); note('msgW', 'bad', 'Akun atau jaringan di ekstensi berubah, sesi wallet diputus. Hubungkan ulang.'); };
+  w.on('accountsChanged', a => { if (liveWalletData.address && (!Array.isArray(a) || !a[0] || a[0] !== liveWalletData.address)) drop(); });
+  w.on('networkChanged', n => { if (n !== 'mainnet') drop(); });
+}
+async function walletConnect() {
+  const btn = $('btnConnect'); btn.disabled = true; note('msgW', '', 'Menunggu persetujuan di ekstensi wallet...');
+  try {
+    const w = await waitProvider();
+    if (!w) throw new Error('Ekstensi Nusa Wallet / Nux Connect tidak terdeteksi. Pasang/aktifkan ekstensi lalu muat ulang halaman ini. Halaman harus dibuka lewat http(s) atau localhost, bukan file://.');
+    let addr;
+    if (isConnect(w)) {
+      await needMainnet(w);
+      const acc = await w.request({ method: 'nux_requestAccounts' });   // -> [address]
+      addr = Array.isArray(acc) ? acc[0] : null;
+    } else {
+      const r = await w.connect();                                      // -> { address, publicKey }
+      addr = r && r.address;
+    }
+    if (!addr) throw new Error('Ekstensi tidak mengembalikan alamat.');
+    liveWalletData.address = addr;
+    $('msgW').innerHTML = '';
+    $('walletLogin').classList.add('hide'); $('walletActive').classList.remove('hide');
+    $('wAddr').textContent = addr + '  (' + extName(w) + ')';
+    bindEvents(w);
+    refreshBalance();
+  } catch (e) {
+    note('msgW', 'bad', e.code === 4001 ? 'Koneksi ditolak di ekstensi.' : (e.message || String(e)));
+  } finally { btn.disabled = false; }
+}
+async function walletLogout() {
+  try { const w = getProvider(); if (w && !isConnect(w) && w.disconnect) await w.disconnect(); } catch (e) {}
+  const was = isConnect(getProvider()) && liveWalletData.address;
+  liveWalletData = { address: null, balance: 0 };
+  $('walletActive').classList.add('hide'); $('walletLogin').classList.remove('hide');
+  if (was) note('msgW', '', 'Sesi di halaman ini ditutup. Untuk mencabut izin situs, buka ekstensi Nux Connect.');
+}
+async function refreshBalance() {
+  const el = $('wBal'); el.textContent = '...';
+  try {
+    const w = getProvider(); if (!w) throw new Error('no provider');
+    if (isConnect(w)) {
+      const b = await w.request({ method: 'nux_getBalance' });          // { confirmed, unconfirmed } dalam nusan
+      const c = Number(b && b.confirmed) / 1e8, u = Number(b && b.unconfirmed) / 1e8;
+      if (isNaN(c)) throw new Error('bad balance');
+      liveWalletData.balance = c;
+      el.textContent = fmt(Math.round(c * 1e8)) + ' NUX' + (u ? ' (belum terkonfirmasi: ' + fmt(Math.round(u * 1e8)) + ')' : '');
+    } else {
+      const n = Number(await w.getBalance());
+      liveWalletData.balance = isNaN(n) ? 0 : n; el.textContent = liveWalletData.balance + ' NUX';
+    }
+  } catch (e) { el.textContent = 'gagal memuat saldo'; }
+}
+
+// ===== Pengirim massal =====
+function note(el, cls, t) { const d = document.createElement("div"); d.className = "msg " + cls; d.textContent = t; $(el).innerHTML = ""; $(el).appendChild(d); }
+const fmt = s => (s / 1e8).toFixed(8).replace(/0+$/, "").replace(/\.$/, "");
+const cell = s => '"' + String(s).replace(/"/g, '""') + '"';
+
+function impor() {
+  const f = $('csv').files[0]; if (!f) return;
+  const r = new FileReader(); r.onload = () => { $('list').value = r.result; lihatDaftar(); }; r.readAsText(f);
+}
+function parseDaftar() {
+  const def = parseFloat($('defAmt').value), rows = [], errs = [];
+  $('list').value.split(/\r?\n/).forEach((ln, i) => {
+    ln = ln.trim(); if (!ln || ln[0] === '#') return;
+    const p = ln.split(/[\s,;]+/).filter(Boolean);
+    if (i === 0 && /^(alamat|address)$/i.test(p[0])) return;
+    try {
+      addressToScriptHex(p[0]);
+      const amt = p[1] !== undefined ? Number(p[1]) : def;
+      if (!isFinite(amt) || amt <= 0) throw new Error("jumlah tidak valid atau kosong.");
+      const sats = Math.round(amt * 1e8);
+      if (sats < DUST_SATS) throw new Error("jumlah di bawah batas dust (" + DUST_SATS + " satoshi).");
+      rows.push({ addr: p[0], sats, line: i + 1 });
+    } catch (e) { errs.push("Baris " + (i + 1) + ": " + e.message); }
+  });
+  return { rows, errs };
+}
+function lihatDaftar() {
+  const { rows, errs } = parseDaftar();
+  const tot = rows.reduce((a, r) => a + r.sats, 0);
+  note('msgL', errs.length ? 'bad' : 'ok', rows.length + " penerima valid, total " + fmt(tot) + " NUX." + (errs.length ? "\n\n" + errs.length + " baris bermasalah:\n" + errs.slice(0, 15).join("\n") + (errs.length > 15 ? "\n..." : "") : ""));
+  return { rows, errs };
+}
+async function rencana() {
+  if (!liveWalletData.address) throw new Error("Hubungkan Nusa Wallet / Nux Connect dulu.");
+  const { rows, errs } = parseDaftar();
+  if (errs.length) throw new Error("Perbaiki dulu " + errs.length + " baris bermasalah:\n" + errs.slice(0, 10).join("\n"));
+  if (!rows.length) throw new Error("Daftar penerima kosong.");
+  const w = getProvider(); if (isConnect(w)) await needMainnet(w);
+  await refreshBalance();
+  const total = rows.reduce((a, r) => a + r.sats, 0);
+  return { rows, total };
+}
+function teks(p) {
+  const bal = liveWalletData.balance;
+  return p.rows.length + " penerima, total " + fmt(p.total) + " NUX\n" + p.rows.length + " transaksi terpisah (satu per penerima), tiap transaksi disetujui di ekstensi\nFee: ditentukan ekstensi per transaksi\nSaldo wallet: " + bal + " NUX" +
+    (bal < p.total / 1e8 ? "\n\nPERHATIAN: saldo lebih kecil dari total yang akan dikirim." : "") +
+    (p.rows.length > 20 ? "\n\nCatatan: ekstensi hanya memakai UTXO yang sudah terkonfirmasi, jadi untuk daftar panjang kembalian bisa belum tersedia di antara transaksi. Jika berhenti dengan error saldo, tunggu konfirmasi lalu lanjutkan dengan daftar sisa." : "");
+}
+async function lihat() { try { note('msgP', '', 'Menghitung rencana...'); note('msgP', '', teks(await rencana())); } catch (e) { note('msgP', 'bad', e.message); } }
+async function kirim() {
+  const w = getProvider(); if (!w) { alert("Ekstensi Nusa Wallet / Nux Connect tidak terdeteksi."); return; }
+  let p; try { note('msgP', '', 'Menghitung rencana...'); p = await rencana(); } catch (e) { return note('msgP', 'bad', e.message); }
+  note('msgP', '', teks(p));
+  if (!confirm("Kirim NUX ke " + p.rows.length + " penerima?\n\n" + teks(p) + "\n\nTransaksi tidak bisa dibatalkan.")) return;
+  const btn = $('btnSend'); btn.disabled = true; hasil = []; $('btnCsv').classList.add('hide');
+  let k = 0;
+  try {
+    for (const r of p.rows) {
+      k++; note('msgP', '', "Menunggu persetujuan di ekstensi: penerima " + k + " dari " + p.rows.length + "...");
+      const res = isConnect(w)
+        ? await w.request({ method: 'nux_sendTransaction', params: { to: r.addr, amount: r.sats } })   // Nux Connect: jumlah dalam nusan
+        : await w.sendTransaction({ to: r.addr, amount: Number(fmt(r.sats)) });                         // Nusa Wallet lama: jumlah dalam NUX
+      hasil.push({ addr: r.addr, sats: r.sats, txid: (res && res.txid) || String(res) });
+    }
+    note('msgP', 'ok', "Selesai. " + hasil.length + " penerima dalam " + hasil.length + " transaksi.");
+  } catch (e) {
+    const sisa = p.rows.slice(k - 1);
+    note('msgP', 'bad', "Berhenti di penerima " + k + " dari " + p.rows.length + ": " + (e.code === 4001 ? "ditolak di ekstensi." : e.message) + "\n\nBelum terkirim: " + sisa.length + " penerima. Daftar sisa dimasukkan kembali ke kotak penerima agar bisa dicoba lagi.");
+    $('list').value = sisa.map(r => r.addr + "," + fmt(r.sats)).join("\n");
+  } finally {
+    btn.disabled = false;
+    if (hasil.length) {
+      const ids = [...new Set(hasil.map(h => h.txid))];
+      note('msgR', 'ok', "Terkirim ke " + hasil.length + " alamat.\nTXID:\n" + ids.join("\n") + "\n\nExplorer: https://explorer.nusacoin.org/tx/<TXID>");
+      $('btnCsv').classList.remove('hide');
+    }
+    setTimeout(refreshBalance, 3000);
+  }
+}
+function unduh() {
+  const csv = "alamat,jumlah_NUX,txid\n" + hasil.map(h => [cell(h.addr), fmt(h.sats), h.txid].join(",")).join("\n");
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+  a.download = "laporan-kirim-massal-" + new Date().toISOString().slice(0, 10) + ".csv"; a.click();
+}
+$('list').addEventListener('change', lihatDaftar);
+</script>
+</body>
+</html>
