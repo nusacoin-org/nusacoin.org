@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Baca Gambar dari Blockchain NUX</title>
+<style>
+:root{color-scheme:light dark;--bg:#f4f9ff;--c:#fff;--t:#10243e;--m:#5b6f8a;--l:#d5e3f5;--g:#007bff;--ok:#0f7a43;--er:#c0392b}
+@media(prefers-color-scheme:dark){:root{--bg:#0b1623;--c:#122236;--t:#e6eefa;--m:#93a6bf;--l:#25384f;--g:#3d94ff;--ok:#4cd08a;--er:#ff7b6b}}
+body{margin:0;background:var(--bg);color:var(--t);font:15px/1.5 system-ui,sans-serif}main{max-width:640px;margin:0 auto;padding:16px}
+h1{font-size:20px;margin:0 0 4px}h2{font-size:16px;margin:0 0 8px}.card{background:var(--c);border:1px solid var(--l);border-radius:12px;padding:14px;margin:12px 0}
+label{display:block;font-weight:600;font-size:13px;margin:10px 0 4px}input,select{width:100%;box-sizing:border-box;padding:9px 10px;border:1px solid var(--l);border-radius:8px;background:var(--bg);color:var(--t);font:inherit}
+button{padding:9px 14px;border:0;border-radius:8px;background:var(--g);color:#fff;font:inherit;font-weight:600;margin:8px 8px 0 0}button.g{background:#e8f1fd;color:#0056b3}@media(prefers-color-scheme:dark){button.g{background:#1b3350;color:#8ec3ff}}button:disabled{opacity:.5}
+.mut{color:var(--m);font-size:13px;white-space:pre-line;word-break:break-all}.ok{color:var(--ok)}.er{color:var(--er)}.row{display:flex;gap:10px}.row>div{flex:1}
+.bar{height:8px;background:var(--l);border-radius:4px;overflow:hidden;margin-top:10px}.bar i{display:block;height:100%;width:0;background:var(--g)}
+.s{display:flex;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--l);font-size:13px}.s .d{flex:1;min-width:0;word-break:break-all}.s b{font-family:monospace}.s button{margin:0;padding:6px 10px}
+a.dl{display:inline-block;padding:9px 14px;border-radius:8px;background:#e8f1fd;color:#0056b3;font-weight:600;text-decoration:none;margin:8px 8px 0 0}@media(prefers-color-scheme:dark){a.dl{background:#1b3350;color:#8ec3ff}}
+img{max-width:100%;border-radius:8px;margin-top:8px;background:#fff}
+</style></head><body><main>
+<h1>Baca Gambar dari Blockchain NUX</h1>
+<p class="mut">Membaca gambar hasil Inject. Semua format dikenali otomatis: base64 utuh dalam rantai transaksi, potongan NX, dan potongan GB1 (dengan kode sesi).</p>
+<section class="card"><h2>1. Cari gambar</h2>
+<label for="txid">TxID salah satu transaksi gambar (paling mudah)</label><input id="txid" placeholder="TxID transaksi pertama atau mana saja di block itu" autocomplete="off" spellcheck="false">
+<div class="row"><div><label for="h1">Tinggi blok (awal)</label><input id="h1" type="number" min="0" step="1" inputmode="numeric" placeholder="mis. 12345"></div><div><label for="h2">Sampai tinggi (opsional)</label><input id="h2" type="number" min="0" step="1" inputmode="numeric" placeholder="kosong = blok awal saja"></div></div>
+<label for="addr">Alamat pengirim (opsional)</label><input id="addr" placeholder="nu1q... atau N..." autocomplete="off" spellcheck="false">
+<label for="sid">ID sesi (opsional, untuk menyaring potongan)</label><input id="sid" autocomplete="off" spellcheck="false">
+<button id="go">Baca blockchain</button>
+<div class="bar"><i id="bar"></i></div><p class="mut" id="st"></p></section>
+<section class="card" id="rc" hidden><h2>2. Gambar ditemukan</h2><div id="list"></div></section>
+<section class="card" id="vc" hidden><h2>3. Gambar</h2><p class="mut" id="info"></p><img id="img" alt="Gambar dari blockchain" hidden><div id="act"></div></section>
+<details class="card"><summary><b>Pengaturan</b></summary>
+<label for="api">Alamat API explorer</label><input id="api" value="https://explorer.nusacoin.org" autocomplete="off" spellcheck="false">
+<p class="mut">Pengaturan di bawah hanya untuk potongan + kode sesi.</p>
+<label for="pre">Format potongan</label><select id="pre"><option value="auto">Otomatis (NX + GB1)</option><option value="NX">NX{id}{i}{n} (ID 8, lebar 3)</option><option value="GB1">GB1{id}{i}{n} (ID 7, lebar 3)</option><option value="custom">Kustom (isi kolom di bawah)</option></select>
+<label for="tpl">Templat header (Kustom)</label><input id="tpl" value="NX{id}{i}{n}">
+<div class="row"><div><label for="idl">Panjang ID sesi</label><input id="idl" type="number" value="8" min="0" max="20"></div><div><label for="nw">Lebar angka</label><input id="nw" type="number" value="3" min="1" max="8"></div></div>
+<label for="nen">Pengkodean angka (Kustom)</label><select id="nen"><option value="b62">Base62</option><option value="hex">Heksadesimal</option><option value="dec">Desimal</option></select></details>
+</main>
+<script>
+const $=id=>document.getElementById(id),API=()=>$('api').value.trim().replace(/\/+$/,'');
+const AL={b62:'0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',hex:'0123456789ABCDEF',dec:'0123456789'};
+const MAGIC=['/9j/','iVBOR','UklGR','R0lGOD'];
+const say=(m,c)=>{$('st').className='mut '+(c||'');$('st').textContent=m},bar=p=>$('bar').style.width=Math.min(100,p)+'%';
+let SES={},RAW={},ITEMS=[],URLS=[],FAIL=0,LAST='',CFG={},SCANNED=new Set();
+$('pre').onchange=()=>{const v=$('pre').value;if(v==='NX'||v==='GB1'){$('tpl').value=v+'{id}{i}{n}';$('idl').value=v==='GB1'?7:8;$('nw').value=3;$('nen').value='b62'}};
+const dn=(s,a)=>{let v=0;for(const ch of s){const k=a.indexOf(ch);if(k<0)return NaN;v=v*a.length+k}return v};
+function mkRe(tpl,idl,w){const order=[];
+ const src=tpl.split(/(\{id\}|\{i\}|\{n\})/).map(p=>{if(p==='{id}'){order.push('id');return`(.{${idl}})`}if(p==='{i}'){order.push('i');return`(.{${w}})`}if(p==='{n}'){order.push('n');return`(.{${w}})`}return p.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}).join('');
+ return{re:new RegExp('^'+src+'([A-Za-z0-9+/=]+)$'),order}}
+function mkPats(){const v=$('pre').value,b62=AL.b62,P=[];
+ if(v==='auto'){P.push({...mkRe('NX{id}{i}{n}',8,3),al:b62},{...mkRe('GB1{id}{i}{n}',7,3),al:b62})}
+ else P.push({...mkRe($('tpl').value,+$('idl').value,+$('nw').value),al:AL[$('nen').value]});
+ return P}
+const hx2s=h=>{let s='';for(let i=0;i<h.length;i+=2)s+=String.fromCharCode(parseInt(h.substr(i,2),16));return s};
+function vdata(o){const sp=o.scriptPubKey||{},h=sp.hex;if(h&&h.slice(0,2)==='6a'){const op=parseInt(h.substr(2,2),16);let l,p;
+ if(op<0x4c){l=op;p=4}else if(op===0x4c){l=parseInt(h.substr(4,2),16);p=6}else if(op===0x4d){l=parseInt(h.substr(4,2),16)+parseInt(h.substr(6,2),16)*256;p=8}else return null;return hx2s(h.substr(p,l*2))}
+ const m=/^OP_RETURN ([0-9a-f]+)/i.exec(sp.asm||'');return m?hx2s(m[1]):null}
+async function jget(u){const r=await fetch(u);if(!r.ok)throw Error('explorer HTTP '+r.status);return r.json()}
+async function blockHash(h){const r=await fetch(`${API()}/api/getblockhash?index=${h}`);if(!r.ok)throw Error(`getblockhash HTTP ${r.status} (tinggi ${h})`);const t=(await r.text()).trim();let v=t;try{const j=JSON.parse(t);v=typeof j==='string'?j:(j.result||j.hash||t)}catch(e){}v=String(v).replace(/"/g,'');if(!/^[0-9a-f]{64}$/i.test(v))throw Error(`Blok tinggi ${h} tidak ditemukan.`);return v}
+async function blockTxs(bh){const j=await jget(`${API()}/api/getblock?hash=${bh}`),B=j.result||j;return(B.tx||[]).map(x=>typeof x==='string'?x:x.txid).filter(Boolean)}
+async function getTx(id){let e;for(let t=0;t<3;t++){try{const j=await jget(`${API()}/api/getrawtransaction?txid=${id}&decrypt=1`);return j.result||j}catch(x){e=x;await new Promise(r=>setTimeout(r,600*(t+1)))}}throw e}
+function proc(t){const{pats,only}=CFG,prev=(t.vin||[]).map(v=>v.txid).filter(Boolean);
+ for(const o of t.vout||[]){const txt=vdata(o);if(!txt)continue;let hit=false;
+  for(const p of pats){const m=p.re.exec(txt);if(!m)continue;const g={};p.order.forEach((n,x)=>g[n]=m[x+1]);const i=dn(g.i||'',p.al),n=dn(g.n||'',p.al);
+   if(Number.isFinite(i)&&Number.isFinite(n)&&n>0&&i<n){hit=true;const sid=g.id||'-';if(only&&sid!==only)break;const S=SES[sid]||(SES[sid]={n,p:{},blocks:new Set()});S.p[i]=m[p.order.length+1];if(t.blockhash)S.blocks.add(t.blockhash);break}}
+  if(hit)continue;
+  if(!only&&txt.length>=4&&/^[A-Za-z0-9+/]+={0,2}$/.test(txt))RAW[t.txid]={text:txt,prev,bh:t.blockhash||null}}}
+async function scan(list,label){let k=0,done=0;
+ await Promise.all(Array.from({length:8},async()=>{while(k<list.length){const id=list[k++];try{proc(await getTx(id));SCANNED.add(id)}catch(e){FAIL++;LAST=e.message}done++;bar(done/list.length*100);say(`${label} ${done} dari ${list.length}...`)}}))}
+$('go').onclick=async()=>{const b=$('go'),addr=$('addr').value.trim(),tx0=$('txid').value.trim(),only=$('sid').value.trim(),h1=$('h1').value.trim(),h2=$('h2').value.trim();
+ if(!addr&&!tx0&&h1==='')return say('Isi TxID, tinggi blok, atau alamat dulu.','er');
+ b.disabled=true;SES={};RAW={};ITEMS=[];FAIL=0;LAST='';SCANNED=new Set();$('rc').hidden=$('vc').hidden=true;
+ try{const ids=new Set();CFG={pats:mkPats(),only};
+  if(tx0){if(!/^[0-9a-f]{64}$/i.test(tx0))throw Error('TxID harus 64 karakter heksadesimal.');say('Mencari block dari TxID...');const t=await getTx(tx0);if(!t.blockhash)throw Error('Transaksi itu belum terkonfirmasi di block. Tunggu 1 block lalu coba lagi.');
+   say('Mengambil isi block...');(await blockTxs(t.blockhash)).forEach(i=>ids.add(i))}
+  if(addr){say('Mengambil daftar transaksi alamat...');for(let s=0;s<5000;s+=500){const raw=await jget(`${API()}/ext/getaddresstxs/${addr}/${s}/500`),arr=Array.isArray(raw)?raw:(raw.data||raw.records||[]);arr.forEach(i=>{const t=i.txid||(typeof i==='string'?i:null);if(t)ids.add(t)});if(arr.length<500)break}}
+  if(h1!==''){const a=Number(h1),z=h2===''?a:Number(h2);if(!Number.isInteger(a)||!Number.isInteger(z)||a<0||z<a)throw Error('Tinggi blok tidak valid (tinggi akhir harus ≥ tinggi awal).');if(z-a>=300)throw Error('Rentang maksimal 300 blok sekali baca.');
+   for(let h=a;h<=z;h++){say(`Mengambil blok ${h} (${h-a+1} dari ${z-a+1})...`);bar((h-a+1)/(z-a+1)*100);(await blockTxs(await blockHash(h))).forEach(i=>ids.add(i))}}
+  const list=[...ids];if(!list.length)throw Error('Tidak ada transaksi untuk pencarian ini.');
+  await scan(list,'Memeriksa transaksi');
+  build();if(!ITEMS.length)throw Error(FAIL?`${FAIL} transaksi gagal dibaca (${LAST}). Periksa koneksi lalu coba lagi.`:'Tidak ada gambar yang dikenali. Periksa TxID/blok, atau pengaturan format potongan. Jika gambar tersebar di beberapa block, isi rentang tinggi blok.');
+  show();say(`Ditemukan ${ITEMS.length} gambar.`+(FAIL?` Peringatan: ${FAIL} transaksi gagal dibaca (${LAST}); tekan Baca blockchain lagi jika gambar belum utuh.`:''),FAIL?'er':'ok')}
+ catch(e){say(e.message,'er')}finally{b.disabled=false}};
+async function fill(it,btn){btn.disabled=true;FAIL=0;LAST='';
+ try{const S=SES[it.sid],ids=[];for(const bh of S.blocks){say('Mengambil isi blok '+bh.slice(0,12)+'...');(await blockTxs(bh)).forEach(t=>{if(!SCANNED.has(t))ids.push(t)})}
+  if(!ids.length)throw Error('Tidak ada transaksi baru di blok itu. Isi rentang tinggi blok untuk mencari potongan di blok lain.');
+  await scan(ids,'Memindai blok:');build();show();const n=ITEMS.find(x=>x.sid===it.sid);if(n)view(n);
+  say(FAIL?`${FAIL} transaksi gagal dibaca (${LAST}), coba lagi.`:'Pemindaian blok selesai.',FAIL?'er':'ok')}
+ catch(e){say(e.message,'er');btn.disabled=false}}
+function endOk(b64){try{const bin=atob(b64),n=bin.length,c=i=>bin.charCodeAt(n-i);if(b64.startsWith('/9j/'))return c(2)===0xff&&c(1)===0xd9;if(b64.startsWith('iVBOR'))return c(8)===0x49&&c(7)===0x45&&c(6)===0x4e&&c(5)===0x44;return true}catch(e){return false}}
+function build(){ITEMS=[];
+ for(const[sid,S]of Object.entries(SES)){const miss=[];let b64='';for(let i=0;i<S.n;i++){if(S.p[i]===undefined)miss.push(i);else b64+=S.p[i]}
+  ITEMS.push({kind:'Potongan',sid,title:sid,ok:!miss.length,b64:miss.length?'':b64,n:S.n,have:Object.keys(S.p).length,miss,blocks:S.blocks.size})}
+ const nx={},hasPrev=new Set();for(const id in RAW)for(const p of RAW[id].prev)if(RAW[p]){nx[p]=id;hasPrev.add(id)}
+ for(const h of Object.keys(RAW).filter(id=>!hasPrev.has(id))){let cur=h,grp=null;const seen=new Set();
+  while(cur&&!seen.has(cur)){seen.add(cur);const r=RAW[cur],st=MAGIC.some(m=>r.text.startsWith(m));
+   if(st){grp={ids:[],b64:''};ITEMS.push({kind:'Rantai',raw:grp})}if(grp){grp.ids.push(cur);grp.b64+=r.text}cur=nx[cur]}}
+ ITEMS.forEach(it=>{if(it.kind!=='Rantai')return;const g=it.raw;it.title=g.ids[0].slice(0,10)+'...';it.n=g.ids.length;it.b64=g.b64;it.ok=endOk(g.b64);it.miss=[]})}
+function show(){const box=$('list');box.textContent='';ITEMS.forEach(it=>{const d=document.createElement('div');d.className='s';
+ const txt=it.kind==='Rantai'?(it.ok?`rantai ${it.n} transaksi, lengkap`:`rantai ${it.n} transaksi, akhir file tidak ditemukan (mungkin terpotong)`):(it.ok?`lengkap (${it.have} potongan)`:`${it.have} dari ${it.n} potongan`);
+ d.innerHTML='<div class="d"><b></b><br><span class="'+(it.ok?'ok':'er')+'"></span></div>';d.querySelector('b').textContent=it.kind+' '+it.title;d.querySelector('span').textContent=txt;
+ const bt=document.createElement('button');bt.className='g';bt.textContent='Lihat';bt.onclick=()=>view(it);d.appendChild(bt);box.appendChild(d)});$('rc').hidden=false;
+ const f=ITEMS.find(i=>i.ok&&i.b64)||ITEMS.find(i=>i.b64);if(f)view(f);else view(ITEMS[0])}
+function view(it){$('vc').hidden=false;URLS.forEach(URL.revokeObjectURL);URLS=[];$('act').textContent='';const im=$('img');
+ if(!it.b64){im.removeAttribute('src');im.hidden=true;
+  if(it.kind==='Potongan'&&it.blocks){const f=document.createElement('button');f.type='button';f.textContent='Lengkapi dari blok';f.onclick=()=>fill(it,f);$('act').appendChild(f)}
+  $('info').className='mut er';$('info').textContent=`Gambar ${it.title} belum utuh. Potongan hilang: ${it.miss.slice(0,20).join(', ')}${it.miss.length>20?'...':''}. Mungkin tersebar di block lain atau belum terkonfirmasi; tekan Lengkapi dari blok, atau isi rentang tinggi blok lalu baca lagi.`;return}
+ try{const bin=atob(it.b64),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
+  const type=it.b64.startsWith('iVBOR')?'image/png':it.b64.startsWith('UklGR')?'image/webp':it.b64.startsWith('R0lGOD')?'image/gif':'image/jpeg',ext={'image/png':'png','image/webp':'webp','image/gif':'gif','image/jpeg':'jpg'}[type];
+  const url=URL.createObjectURL(new Blob([u],{type}));URLS.push(url);
+  im.onerror=()=>{$('info').className='mut er';$('info').textContent='Data terbaca ('+u.length+' byte) tetapi bukan gambar yang valid. Kemungkinan ada potongan yang salah urutan atau terpotong.'};
+  im.hidden=false;im.src=url;$('info').className='mut '+(it.ok?'ok':'er');
+  $('info').textContent=`${it.kind} ${it.title}: ${it.n} ${it.kind==='Rantai'?'transaksi':'potongan'}, ${u.length} byte${it.blocks>1?`, tersebar di ${it.blocks} blok`:''}. Jika tombol unduh tidak bekerja di aplikasi, tekan lama gambar lalu pilih simpan.`;
+  const a=document.createElement('a');a.href=url;a.download=`nux-${it.title.replace(/\W/g,'')}.${ext}`;a.textContent='Unduh gambar';a.className='dl';$('act').appendChild(a);
+  const o=document.createElement('a');o.href=url;o.target='_blank';o.textContent='Buka di tab baru';o.className='dl';$('act').appendChild(o)}
+ catch(e){im.hidden=true;$('info').className='mut er';$('info').textContent='Data gambar rusak: '+e.message}}
+</script></body></html>

@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Inject Gambar ke Galeri NUX</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+<style>
+:root{color-scheme:light dark;--bg:#f4f9ff;--c:#fff;--t:#10243e;--m:#5b6f8a;--l:#d5e3f5;--g:#007bff;--bd:#0056b3;--ok:#0f7a43;--er:#c0392b}
+@media(prefers-color-scheme:dark){:root{--bg:#0b1623;--c:#122236;--t:#e6eefa;--m:#93a6bf;--l:#25384f;--g:#3d94ff;--bd:#8ec3ff;--ok:#4cd08a;--er:#ff7b6b}}
+body{margin:0;background:var(--bg);color:var(--t);font:15px/1.5 system-ui,sans-serif}main{max-width:640px;margin:0 auto;padding:16px}
+h1{font-size:20px;margin:0 0 4px}h2{font-size:16px;margin:0 0 8px}.card{background:var(--c);border:1px solid var(--l);border-radius:12px;padding:14px;margin:12px 0}
+label{display:block;font-weight:600;font-size:13px;margin:10px 0 4px}input,select{width:100%;box-sizing:border-box;padding:9px 10px;border:1px solid var(--l);border-radius:8px;background:var(--bg);color:var(--t);font:inherit}
+button{padding:9px 14px;border:0;border-radius:8px;background:var(--g);color:#fff;font:inherit;font-weight:600;margin:8px 8px 0 0}button.g{background:#e8f1fd;color:#0056b3}button:hover{filter:brightness(.92)}@media(prefers-color-scheme:dark){button.g{background:#1b3350;color:#8ec3ff}}button:disabled{opacity:.5}
+.mut{color:var(--m);font-size:13px;white-space:pre-line;word-break:break-all}.ok{color:var(--ok)}.er{color:var(--er)}.row{display:flex;gap:10px}.row>div{flex:1}
+.bar{height:8px;background:var(--l);border-radius:4px;overflow:hidden;margin-top:10px}.bar i{display:block;height:100%;width:0;background:var(--g)}
+#ulist{max-height:220px;overflow:auto;border:1px solid var(--l);border-radius:8px;margin-top:8px}#ulist label{display:flex;gap:8px;align-items:center;margin:0;padding:7px 10px;border-bottom:1px solid var(--l);font-weight:400;font-size:13px}#ulist input{width:auto;margin:0}#ulist .v{margin-left:auto;font-weight:600;white-space:nowrap}
+pre{max-height:180px;overflow:auto;font-size:12px;background:var(--bg);padding:8px;border-radius:8px;white-space:pre-wrap;word-break:break-all}img{max-width:100%;border-radius:8px;margin-top:8px}
+</style></head><body><main>
+<h1>Inject Gambar ke Galeri NUX</h1>
+<p class="mut">Gambar dipecah ke OP_RETURN lalu semua potongan dikirim sekaligus dari UTXO terpilih (rantai maks 24 transaksi per UTXO), sehingga masuk dalam satu block.</p>
+<section class="card"><h2>1. Masuk dengan WIF</h2>
+<label for="wif">Private key (WIF) atau teks ENC</label><input id="wif" type="password" autocomplete="off" spellcheck="false">
+<div class="row"><div><label for="pin">PIN (jika terenkripsi)</label><input id="pin" type="password" autocomplete="off"></div>
+<div><label for="atype">Tipe alamat</label><select id="atype"><option value="bech32">Bech32 (nu1q...)</option><option value="p2pkh">P2PKH (N...)</option></select></div></div>
+<button id="login">Masuk</button><button id="rb" class="g" hidden>Refresh saldo</button><button id="logout" class="g" hidden>Keluar</button>
+<p class="mut" id="acct"></p><p class="mut">Pakai alamat khusus dengan saldo secukupnya, bukan wallet utama.</p>
+<div id="utl" hidden><label>Pilih UTXO (opsional)</label><button id="usel" class="g" type="button">Pilih semua terkonfirmasi</button><button id="uclr" class="g" type="button">Kosongkan</button><div id="ulist"></div><p class="mut" id="usum"></p></div></section>
+<section class="card"><h2>2. Pilih gambar</h2>
+<input id="file" type="file" accept="image/*">
+<div class="row"><div><label for="dim">Sisi terpanjang maks (px)</label><input id="dim" type="number" value="800" min="64" max="1024"></div>
+<div><label for="kb">Ukuran maks (KB)</label><input id="kb" type="number" value="60" min="5" max="100"></div></div>
+<img id="pv" alt="Pratinjau" hidden><p class="mut" id="est"></p></section>
+<section class="card"><h2>3. Inject</h2>
+<button id="go" disabled>Inject sekarang</button><button id="rs" class="g" hidden>Lanjutkan</button><button id="chk" class="g" hidden>Cek blok</button><button id="del" class="g" hidden>Hapus proses tersimpan</button>
+<div class="bar"><i id="bar"></i></div><p class="mut" id="st"></p><p class="mut" id="js"></p><pre id="log" hidden></pre></section>
+<details class="card"><summary><b>Pengaturan</b></summary>
+<label for="fee">Fee per potongan (nusan; minimum jaringan sekitar 1 nusan/vByte)</label><input id="fee" type="number" value="300" min="1">
+<label for="mode">Mode parser explorer</label><select id="mode"><option value="chunk">Parser 2: potongan + kode sesi (NX)</option><option value="raw">Parser 1: base64 utuh dalam satu block (tanpa header)</option><option value="gb1">Parser 3: potongan + kode sesi lama (GB1)</option></select>
+<p class="mut" id="mnote"></p>
+<label for="tpl">Templat header potongan. Token: {id} ID sesi, {i} nomor potongan, {n} total potongan. Bawaan NX{id}{i}{n}</label><input id="tpl" value="NX{id}{i}{n}">
+<div class="row"><div><label for="idl">Panjang ID sesi</label><input id="idl" type="number" value="8" min="0" max="20"></div><div><label for="nw">Lebar angka</label><input id="nw" type="number" value="3" min="1" max="8"></div></div>
+<div class="row"><div><label for="nen">Pengkodean angka</label><select id="nen"><option value="b62">Base62 (0-9A-Za-z)</option><option value="hex">Heksadesimal</option><option value="dec">Desimal</option></select></div><div><label for="mxb">Maks. byte OP_RETURN</label><input id="mxb" type="number" value="80" min="20" max="20000"></div></div>
+<p class="mut">Sisa ruang tiap OP_RETURN diisi data gambar base64 (kelipatan 4 karakter). Tanpa {i} urutan potongan tidak bisa dipulihkan.</p>
+<label for="lim">Maks. transaksi per rantai/UTXO (node ini terbukti menerima rantai sekitar 100 transaksi; bawaan Bitcoin hanya 25)</label><input id="lim" type="number" value="24" min="1" max="300"></details>
+</main>
+<script>
+let W=null,IMG=null;
+const $=id=>document.getElementById(id),fmt=n=>n.toLocaleString('id-ID'),sleep=ms=>new Promise(r=>setTimeout(r,ms));
+/*CORE*/
+const enc=new TextEncoder();
+const hex=b=>[...b].map(x=>x.toString(16).padStart(2,'0')).join('');
+const unhex=h=>Uint8Array.from(h.match(/../g)||[],x=>parseInt(x,16));
+const cat=(...a)=>{const o=new Uint8Array(a.reduce((s,x)=>s+x.length,0));let p=0;for(const x of a){o.set(x,p);p+=x.length}return o};
+const sha=async b=>new Uint8Array(await crypto.subtle.digest('SHA-256',b));
+const sha2=async b=>sha(await sha(b));
+const B58='123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+const b58d=s=>{let n=0n;for(const c of s){const i=B58.indexOf(c);if(i<0)throw Error('Karakter base58 tidak valid');n=n*58n+BigInt(i)}let h=n.toString(16);if(h.length%2)h='0'+h;const z=s.match(/^1*/)[0].length;return cat(new Uint8Array(z),n?unhex(h):new Uint8Array())};
+const b58e=b=>{let n=BigInt('0x0'+hex(b)),s='',z=0;while(n>0n){s=B58[Number(n%58n)]+s;n/=58n}while(z<b.length&&b[z]===0)z++;return '1'.repeat(z)+s};
+const b58check=async b=>b58e(cat(b,(await sha2(b)).slice(0,4)));
+async function wifDecode(w){const b=b58d(w.trim()),p=b.slice(0,-4);if(hex((await sha2(p)).slice(0,4))!==hex(b.slice(-4)))throw Error('Checksum WIF salah');if(p.length!==33&&p.length!==34)throw Error('Format WIF tidak dikenal');if(p[0]!==0x57)throw Error('WIF ini bukan mainnet Nusacoin (prefix 0x'+p[0].toString(16)+', seharusnya 0x57)');const key=BigInt('0x'+hex(p.slice(1,33)));if(key<=0n||key>=N)throw Error('Private key di luar rentang yang valid');return{key,comp:p.length===34}}
+/* secp256k1 */
+const P=0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2Fn;
+const N=0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141n;
+const G=[0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798n,0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8n,1n];
+const INF=[0n,1n,0n];
+const mod=(a,m=P)=>{const r=a%m;return r>=0n?r:r+m};
+function inv(n,m=P){let a=mod(n,m),b=m,x=0n,y=1n,u=1n,v=0n;while(a){const q=b/a,r=b%a,t=x-u*q,w=y-v*q;b=a;a=r;x=u;y=v;u=t;v=w}return mod(x,m)}
+function dbl([X,Y,Z]){if(!Z||!Y)return INF;const A=mod(X*X),B=mod(Y*Y),C=mod(B*B),D=mod(2n*((X+B)**2n-A-C)),E=3n*A,F=mod(E*E),X3=mod(F-2n*D);return[X3,mod(E*(D-X3)-8n*C),mod(2n*Y*Z)]}
+function add(p,q){if(!p[2])return q;if(!q[2])return p;const[X1,Y1,Z1]=p,[X2,Y2,Z2]=q,a=mod(Z1*Z1),b=mod(Z2*Z2),U1=mod(X1*b),U2=mod(X2*a),S1=mod(Y1*Z2*b),S2=mod(Y2*Z1*a);if(U1===U2)return S1===S2?dbl(p):INF;const H=mod(U2-U1),I=mod(4n*H*H),J=mod(H*I),r=mod(2n*(S2-S1)),V=mod(U1*I),X3=mod(r*r-J-2n*V);return[X3,mod(r*(V-X3)-2n*S1*J),mod(((Z1+Z2)**2n-a-b)*H)]}
+function mul(k,pt){let r=INF,q=pt;while(k>0n){if(k&1n)r=add(r,q);q=dbl(q);k>>=1n}return r}
+const aff=([X,Y,Z])=>{const zi=inv(Z),z2=mod(zi*zi);return[mod(X*z2),mod(Y*z2*zi)]};
+const h32=n=>unhex(n.toString(16).padStart(64,'0'));
+const pubBytes=(d,comp)=>{const[x,y]=aff(mul(d,G));return comp?cat(Uint8Array.of(y&1n?3:2),h32(x)):cat(Uint8Array.of(4),h32(x),h32(y))};
+const i2b=n=>{let h=n.toString(16);if(h.length%2)h='0'+h;let b=unhex(h);return b[0]&128?cat(Uint8Array.of(0),b):b};
+const der=(r,s)=>{const R=i2b(r),S=i2b(s);return cat(Uint8Array.of(0x30,4+R.length+S.length,2,R.length),R,Uint8Array.of(2,S.length),S)};
+async function sign(d,h){const z=BigInt('0x'+hex(h));for(;;){const k=BigInt('0x'+hex(crypto.getRandomValues(new Uint8Array(32))))%N;if(!k)continue;const r=mod(aff(mul(k,G))[0],N);if(!r)continue;let s=mod(inv(k,N)*(z+r*d),N);if(!s)continue;if(s>N>>1n)s=N-s;return der(r,s)}}
+/* ripemd160 */
+const T=s=>s.split(' ').map(Number);
+const RL=T('0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 7 4 13 1 10 6 15 3 12 0 9 5 2 14 11 8 3 10 14 4 9 15 8 1 2 7 0 6 13 11 5 12 1 9 11 10 0 8 12 4 13 3 7 15 14 5 6 2 4 0 5 9 7 12 2 10 14 1 3 8 11 6 15 13');
+const RR=T('5 14 7 0 9 2 11 4 13 6 15 8 1 10 3 12 6 11 3 7 0 13 5 10 14 15 8 12 4 9 1 2 15 5 1 3 7 14 6 9 11 8 12 2 10 0 4 13 8 6 4 1 3 11 15 0 5 12 2 13 9 7 10 14 12 15 10 4 1 5 8 7 6 2 13 14 0 3 9 11');
+const SL=T('11 14 15 12 5 8 7 9 11 13 14 15 6 7 9 8 7 6 8 13 11 9 7 15 7 12 15 9 11 7 13 12 11 13 6 7 14 9 13 15 14 8 13 6 5 12 7 5 11 12 14 15 14 15 9 8 9 14 5 6 8 6 5 12 9 15 5 11 6 8 13 12 5 12 13 14 11 8 5 6');
+const SR=T('8 9 9 11 13 15 15 5 7 7 8 11 14 14 12 6 9 13 15 7 12 8 9 11 7 7 12 7 6 15 13 11 9 7 15 11 8 6 6 14 12 13 5 14 13 13 7 5 15 5 8 11 14 14 6 14 6 9 12 9 12 5 15 8 8 5 12 9 12 5 14 6 8 13 6 5 15 13 11 11');
+const KL=[0,0x5A827999,0x6ED9EBA1,0x8F1BBCDC,0xA953FD4E],KR=[0x50A28BE6,0x5C4DD124,0x6D703EF3,0x7A6D76E9,0];
+const rol=(x,n)=>(x<<n)|(x>>>(32-n));
+const F=(j,x,y,z)=>j===0?x^y^z:j===1?(x&y)|(~x&z):j===2?(x|~y)^z:j===3?(x&z)|(y&~z):x^(y|~z);
+function rmd160(m){const l=m.length,n=((l+8)>>6)+1,b=new Uint8Array(n*64);b.set(m);b[l]=0x80;new DataView(b.buffer).setUint32(n*64-8,l*8>>>0,true);new DataView(b.buffer).setUint32(n*64-4,Math.floor(l/0x20000000),true);
+let H=[0x67452301,0xEFCDAB89,0x98BADCFE,0x10325476,0xC3D2E1F0];const dv=new DataView(b.buffer);
+for(let o=0;o<n*64;o+=64){const X=[];for(let i=0;i<16;i++)X.push(dv.getUint32(o+i*4,true));let[al,bl,cl,dl,el]=H,[ar,br,cr,dr,er]=H;
+for(let j=0;j<80;j++){const r=j>>4;let t=(rol((al+F(r,bl,cl,dl)+X[RL[j]]+KL[r])|0,SL[j])+el)|0;al=el;el=dl;dl=rol(cl,10);cl=bl;bl=t;
+t=(rol((ar+F(4-r,br,cr,dr)+X[RR[j]]+KR[r])|0,SR[j])+er)|0;ar=er;er=dr;dr=rol(cr,10);cr=br;br=t}
+const t=(H[1]+cl+dr)|0;H=[t,(H[2]+dl+er)|0,(H[3]+el+ar)|0,(H[4]+al+br)|0,(H[0]+bl+cr)|0]}
+const out=new Uint8Array(20),ov=new DataView(out.buffer);H.forEach((v,i)=>ov.setUint32(i*4,v>>>0,true));return out}
+const hash160=async b=>rmd160(await sha(b));
+/* transaksi */
+const u32=n=>Uint8Array.of(n&255,(n>>>8)&255,(n>>>16)&255,(n>>>24)&255);
+const u64=n=>{const b=new Uint8Array(8);new DataView(b.buffer).setBigUint64(0,BigInt(n),true);return b};
+const vi=n=>n<253?Uint8Array.of(n):Uint8Array.of(253,n&255,n>>8);
+const push=b=>b.length<76?cat(Uint8Array.of(b.length),b):b.length<256?cat(Uint8Array.of(0x4c,b.length),b):cat(Uint8Array.of(0x4d,b.length&255,b.length>>8),b);
+const p2pkh=h=>cat(Uint8Array.of(0x76,0xa9,20),h,Uint8Array.of(0x88,0xac));
+const opret=b=>cat(Uint8Array.of(0x6a),push(b));
+const rev=b=>Uint8Array.from(b).reverse();
+function ser(ins,outs,sigs){return cat(u32(1),vi(ins.length),...ins.map((i,k)=>{const sc=sigs?sigs[k]:i.sc;return cat(rev(unhex(i.txid)),u32(i.vout),vi(sc.length),sc,u32(0xffffffff))}),vi(outs.length),...outs.map(o=>cat(u64(o.v),vi(o.s.length),o.s)),u32(0))}
+async function buildTx(ins,outs,d,comp,spk){const pk=pubBytes(d,comp),sigs=[];for(let k=0;k<ins.length;k++){const t=ser(ins.map((x,j)=>({...x,sc:j===k?spk:new Uint8Array()})),outs),sg=cat(await sign(d,await sha2(cat(t,u32(1)))),Uint8Array.of(1));sigs.push(cat(push(sg),push(pk)))}return ser(ins,outs,sigs)}
+/* gambar <-> potongan */
+function chunkImg(bytes,id,max){const per=max-12,n=Math.ceil(bytes.length/per),out=[];for(let i=0;i<n;i++)out.push(cat(enc.encode('NIMG'),id,Uint8Array.of(i>>8,i&255,n>>8,n&255),bytes.slice(i*per,(i+1)*per)));return out}
+function opretsOf(raw){let p=4;const rd=()=>{let n=raw[p++];if(n===253){n=raw[p]|raw[p+1]<<8;p+=2}else if(n===254){n=raw[p]|raw[p+1]<<8|raw[p+2]<<16|raw[p+3]<<24;p+=4}return n};const ni=rd();for(let i=0;i<ni;i++){p+=36;const l=rd();p+=l+4}const no=rd(),res=[];for(let i=0;i<no;i++){p+=8;const l=rd(),s=raw.slice(p,p+l);p+=l;if(s[0]===0x6a){let o=1,len=s[o];if(len===0x4c)len=s[++o];o++;res.push(s.slice(o,o+len))}}return res}
+function assemble(pl){const g={};for(const p of pl){if(hex(p.slice(0,4))!=='4e494d47')continue;const id=hex(p.slice(4,8));(g[id]??={n:p[10]<<8|p[11],c:{}}).c[p[8]<<8|p[9]]=p.slice(12)}const ids=Object.keys(g);if(!ids.length)throw Error('Tidak ada data gambar (NIMG) pada TXID tersebut');const x=g[ids[0]],miss=[];for(let i=0;i<x.n;i++)if(!x.c[i])miss.push(i);if(miss.length)throw Error('Potongan hilang: '+miss.slice(0,10).join(', ')+' (total '+x.n+')');return cat(...Array.from({length:x.n},(_,i)=>x.c[i]))}
+const mime=b=>b[0]===0xff&&b[1]===0xd8?'image/jpeg':b[0]===0x89&&b[1]===0x50?'image/png':hex(b.slice(8,12))==='57454250'?'image/webp':'application/octet-stream';
+/*ENDCORE*/
+const NODE_API='https://api.nusacoin.org',EXPL='https://explorer.nusacoin.org',NET={pkh:0x35,hrp:'nu'};
+const NUX=n=>(n/1e8).toLocaleString('id-ID',{maximumFractionDigits:8});
+async function getBalance(addr){const r=await fetch(`${EXPL}/ext/getbalance/${addr}`);if(!r.ok)throw Error('HTTP '+r.status);const n=parseFloat(await r.text());if(isNaN(n))throw Error('balasan saldo tidak valid');return n}
+function normUtxos(data,own){let a=data;if(data&&!Array.isArray(data)){a=data.result??data.utxos??data.unspent??data.unspents??data.data??data.unspent_outputs??null;if(a&&!Array.isArray(a))a=a.utxos??a.unspents??a.unspent??null}
+if(!Array.isArray(a))return null;
+return a.map(u=>{if(own&&typeof u.address==='string'&&u.address!==own)return{};const txid=u.txid||u.tx_hash||u.hash||u.txHash,vout=[u.vout,u.n,u.tx_output_n,u.tx_pos,u.index,u.outputIndex].find(x=>x!==undefined);let v;if(u.satoshis!==undefined)v=Number(u.satoshis);else if(u.amount!==undefined)v=Math.round(Number(u.amount)*1e8);else if(u.value!==undefined)v=Number.isInteger(Number(u.value))?Number(u.value):Math.round(Number(u.value)*1e8);let c=true;if(u.confirmations!==undefined)c=Number(u.confirmations)>0;else if(u.confirmed!==undefined)c=!!u.confirmed;else if(u.status&&u.status.confirmed!==undefined)c=!!u.status.confirmed;return{txid,vout:Number(vout),v,c}}).filter(u=>typeof u.txid==='string'&&/^[0-9a-fA-F]{64}$/.test(u.txid)&&Number.isInteger(u.vout)&&Number.isFinite(u.v)&&u.v>0)}
+async function utxosFromExplorer(addr){const ids=new Set();for(let s=0;s<5000;s+=500){const r=await fetch(`${EXPL}/ext/getaddresstxs/${addr}/${s}/500`);if(!r.ok)throw Error('explorer HTTP '+r.status);const raw=await r.json(),arr=Array.isArray(raw)?raw:(raw.data||raw.records||[]);arr.forEach(i=>{const t=i.txid||(typeof i==='string'?i:null);if(t)ids.add(t)});if(arr.length<500)break}
+const list=[...ids];if(!list.length)return[];const dec=[];for(let i=0;i<list.length;i+=8)dec.push(...await Promise.all(list.slice(i,i+8).map(async id=>{const r=await fetch(`${EXPL}/api/getrawtransaction?txid=${id}&decrypt=1`);if(!r.ok)throw Error('explorer tx HTTP '+r.status);const j=await r.json();return j.result||j})));
+const spent=new Set();dec.forEach(t=>(t.vin||[]).forEach(v=>{if(v.txid!==undefined)spent.add(v.txid+':'+v.vout)}));const out=[];
+dec.forEach(t=>(t.vout||[]).forEach(o=>{const k=o.scriptPubKey||{},ad=k.addresses||(k.address?[k.address]:[]);if(ad.includes(addr)&&!spent.has(t.txid+':'+o.n))out.push({txid:t.txid,vout:o.n,v:Math.round(Number(o.value)*1e8),c:(t.confirmations??1)>0})}));return out.filter(u=>u.v>0)}
+let UTXO_NOTE='',SKIPPED=0;
+/* UTXO yang sudah dipakai transaksi menunggu (mempool) disembunyikan */
+const SPK='nxg_spent',spLoad=()=>{try{return JSON.parse(localStorage.getItem(SPK))||{}}catch{return{}}};
+const spMark=ks=>{const o=spLoad(),now=Date.now();for(const k in o)if(now-o[k]>2592e6)delete o[k];ks.forEach(k=>o[k]=now);try{localStorage.setItem(SPK,JSON.stringify(o))}catch{}};
+function inOf(h){let p=8;if(h.slice(8,12)==='0001')p=12;p+=2;const t=h.substr(p,64).match(/../g).reverse().join(''),v=h.substr(p+64,8).match(/../g).reverse().join('');return t+':'+parseInt(v,16)}
+async function memSpent(){const s=new Set();for(const u of[`${EXPL}/api/getrawmempool`,`${NODE_API}/getrawmempool`,`${NODE_API}/mempool`]){try{const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),6000);const r=await fetch(u,{signal:ctl.signal});clearTimeout(to);if(!r.ok)continue;const j=await r.json();let a=j.result??j.txids??j.tx??j;if(a&&!Array.isArray(a)&&typeof a==='object')a=Object.keys(a);if(!Array.isArray(a))continue;a=a.filter(x=>typeof x==='string'&&/^[0-9a-f]{64}$/i.test(x)).slice(0,600);
+for(let i=0;i<a.length;i+=8)await Promise.all(a.slice(i,i+8).map(async id=>{try{const q=await fetch(`${EXPL}/api/getrawtransaction?txid=${id}&decrypt=1`);if(!q.ok)return;const w=await q.json(),t=w.result||w;(t.vin||[]).forEach(v=>{if(v.txid)s.add(v.txid+':'+v.vout)})}catch{}}));return s}catch{}}return s}
+/* uji UTXO: transaksi uji bertanda tangan SALAH (kunci acak) tidak mungkin diterima node.
+   Node memeriksa bentrok mempool / input hilang SEBELUM memeriksa tanda tangan, jadi:
+   bentrok/missing-inputs = UTXO sudah terpakai; galat tanda tangan = UTXO masih bebas. */
+const PROBED=new Map(),FREEOK=/script|verify|signature|\bsig\b|witness|mandatory|fee|dust|min relay|standard/i;let PROBE_UNK=0;
+function rndKey(){return BigInt('0x'+hex(crypto.getRandomValues(new Uint8Array(32))))%(N-1n)+1n}
+async function probeOne(u){const seg=W.type==='bech32',t=await buildTx2([{txid:u.txid,vout:u.vout,v:u.v}],[{v:u.v-1000,s:W.spk}],rndKey(),W.spk,seg);
+ try{await bcast(hex(t.raw));return'free'}catch(e){const m=(e&&e.message)||'';if((e&&e.conflict)||/conflict|missing|spent|txn-mempool/i.test(m))return'used';return FREEOK.test(m)?'free':'unk'}}
+async function probeFilter(list,prog){const todo=list.filter(u=>u.c&&u.v>=2000&&!(PROBED.get(u.txid+':'+u.vout)>Date.now()-12e4)),bad=new Set();let k=0,done=0,unk=0;
+ await Promise.all(Array.from({length:6},async()=>{while(k<todo.length){const u=todo[k++],key=u.txid+':'+u.vout;let r='unk';try{r=await probeOne(u)}catch{}
+  if(r==='used'){bad.add(key);spMark([key])}else{PROBED.set(key,Date.now());if(r==='unk')unk++}done++;if(prog)prog(done,todo.length)}}));
+ PROBE_UNK=unk;SKIPPED+=bad.size;return list.filter(u=>!bad.has(u.txid+':'+u.vout))}
+async function getUtxos(){const l=await getUtxos0(),sp=new Set(Object.keys(spLoad()));try{(await memSpent()).forEach(k=>sp.add(k))}catch{}const out=l.filter(u=>!sp.has(u.txid+':'+u.vout));SKIPPED=l.length-out.length;return out}
+async function getUtxos0(){const enc=encodeURIComponent(W.addr),notes=[];let bal=null;try{bal=await getBalance(W.addr)}catch{}
+const match=l=>bal==null||Math.abs(l.filter(u=>u.c).reduce((s,u)=>s+u.v,0)/1e8-bal)<=Math.max(1e-5,bal*1e-3);
+const src=['utxos','unspent','utxo','getutxo'].map(p=>[p,async()=>{const r=await fetch(`${NODE_API}/${p}/${enc}`);if(!r.ok)throw Error('HTTP '+r.status);return normUtxos(await r.json(),W.addr)}]);src.push(['explorer',()=>utxosFromExplorer(W.addr)]);
+let fb=null;for(const[n,f]of src){try{const l=await f();if(!l){notes.push(n+': format tidak dikenali');continue}if(!match(l)){notes.push(n+': total tidak cocok dengan saldo');if(!fb)fb=l;continue}UTXO_NOTE='';return l}catch(e){notes.push(n+': '+e.message)}}
+if(fb){UTXO_NOTE='Total UTXO tidak sama persis dengan saldo explorer (mungkin ada transaksi belum terkonfirmasi).';return fb}
+throw Error('Tidak ada sumber UTXO yang valid.\n- '+notes.join('\n- '))}
+async function bcast(raw,txid){const url=`${NODE_API}/broadcast`,e=encodeURIComponent(raw),CONF=/conflict|missing-?inputs|missingorspent|already spent|double.?spend|txn-mempool/i,FE=/expected type|got null|got undefined|param|argument|no raw/i,
+at=[['form',()=>fetch(url,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'raw='+e})],['json',()=>fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({raw})})],['multipart',()=>{const f=new FormData();f.append('raw',raw);return fetch(url,{method:'POST',body:f})}],['query-post',()=>fetch(`${url}?raw=${e}`,{method:'POST'})],['query-get',()=>fetch(`${url}?raw=${e}`)]],notes=[];
+for(const[n,f]of at){let r;try{r=await f()}catch(x){notes.push(n+': '+x.message);continue}const t=await r.text();let j=null;try{j=JSON.parse(t)}catch{}
+if(j&&typeof j==='object'&&('result'in j||'error'in j)){if(j.error){const m=typeof j.error==='object'?(j.error.message||JSON.stringify(j.error)):String(j.error);if(FE.test(m)){notes.push(n+': '+m);continue}if(txid&&!CONF.test(m)&&/already|known|duplicate/i.test(m))return txid;const er=Error(m);er.conflict=CONF.test(m);throw er}if(j.result)return String(j.result)}
+notes.push(`${n}: HTTP ${r.status} ${t.slice(0,100)}`)}
+throw Error('Broadcast gagal.\n- '+notes.join('\n- '))}
+/* alamat Nusacoin: bech32 nu1q... (P2WPKH) atau P2PKH (N...) */
+const BC32C='qpzry9x8gf2tvdw0s3jn54khce6mua7l';
+function b32poly(v){const G=[0x3b6a57b2,0x26508e6d,0x1ea119fa,0x3d4233dd,0x2a1462b3];let c=1;for(const x of v){const t=c>>25;c=((c&0x1ffffff)<<5)^x;for(let j=0;j<5;j++)if((t>>j)&1)c^=G[j]}return c}
+function bech32enc(hrp,h20){const d=[0];let acc=0,bits=0;for(const b of h20){acc=(acc<<8)|b;bits+=8;while(bits>=5){bits-=5;d.push((acc>>bits)&31)}}if(bits)d.push((acc<<(5-bits))&31);
+const ex=[...hrp].map(c=>c.charCodeAt(0)>>5).concat([0],[...hrp].map(c=>c.charCodeAt(0)&31)),m=b32poly(ex.concat(d,[0,0,0,0,0,0]))^1;let s=hrp+'1';for(const x of d)s+=BC32C[x];for(let i=0;i<6;i++)s+=BC32C[(m>>(5*(5-i)))&31];return s}
+/* tanda tangan: P2PKH (legacy) atau P2WPKH (BIP143) */
+async function buildTx2(ins,outs,d,spk,seg){if(!seg){const raw=await buildTx(ins,outs,d,true,spk);return{raw,txid:hex(rev(await sha2(raw)))}}
+const pk=pubBytes(d,true),h=spk.slice(2),op=i=>cat(rev(unhex(i.txid)),u32(i.vout)),sq=u32(0xffffffff),oc=o=>cat(u64(o.v),vi(o.s.length),o.s),
+hp=await sha2(cat(...ins.map(op))),hs=await sha2(cat(...ins.map(()=>sq))),ho=await sha2(cat(...outs.map(oc))),code=cat(Uint8Array.of(0x19,0x76,0xa9,0x14),h,Uint8Array.of(0x88,0xac));
+let wit=new Uint8Array();for(const i of ins){const pre=cat(u32(1),hp,hs,op(i),code,u64(i.v),sq,ho,u32(0),u32(1)),sg=cat(await sign(d,await sha2(pre)),Uint8Array.of(1));wit=cat(wit,Uint8Array.of(2),push(sg),push(pk))}
+const body=cat(vi(ins.length),...ins.map(i=>cat(op(i),Uint8Array.of(0),sq)),vi(outs.length),...outs.map(oc));
+return{raw:cat(u32(1),Uint8Array.of(0,1),body,wit,u32(0)),txid:hex(rev(await sha2(cat(u32(1),body,u32(0)))))}}
+
+const say=(m,c='')=>{$('st').className='mut '+c;$('st').textContent=m},log=m=>{$('log').hidden=false;$('log').textContent+=m+'\n';$('log').scrollTop=1e9},bar=p=>{$('bar').style.width=p+'%'};
+const B62='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',b62=(v,l)=>{let t='';for(let i=0;i<l;i++){t=B62[v%62]+t;v=Math.floor(v/62)}return t};
+const ne=(v,w,a)=>{let t='';for(let i=0;i<w;i++){t=a[v%a.length]+t;v=Math.floor(v/a.length)}return t};
+function cfgFmt(){const tpl=$('mode').value==='raw'?'':$('tpl').value,idl=Math.round(+$('idl').value),w=Math.round(+$('nw').value),maxb=Math.round(+$('mxb').value),alpha={b62:B62,hex:'0123456789ABCDEF',dec:'0123456789'}[$('nen').value];
+if(!(idl>=0&&idl<=20&&w>=1&&w<=8&&maxb>=20&&maxb<=20000))throw Error('Pengaturan format tidak valid.');if(!/^[\x20-\x7E]*$/.test(tpl))throw Error('Templat hanya boleh berisi karakter ASCII biasa.');
+const cnt=r=>(tpl.match(r)||[]).length,lit=tpl.replace(/\{(id|i|n)\}/g,'').length,hdr=lit+idl*cnt(/\{id\}/g)+w*(cnt(/\{i\}/g)+cnt(/\{n\}/g)),dc=Math.floor((maxb-hdr)/4)*4;
+if(dc<4)throw Error('Header terlalu panjang untuk batas byte OP_RETURN.');return{tpl,idl,w,alpha,maxb,hdr,dc}}
+function mkChunks(bytes,sid,F){let bin='';for(let i=0;i<bytes.length;i+=0x8000)bin+=String.fromCharCode.apply(null,bytes.subarray(i,i+0x8000));const b=btoa(bin),n=Math.ceil(b.length/F.dc),o=[];
+if(/\{(i|n)\}/.test(F.tpl)&&n>=Math.pow(F.alpha.length,F.w))throw Error('Lebar angka terlalu kecil untuk jumlah potongan.');
+for(let k=0;k<n;k++)o.push(F.tpl.replace(/\{id\}/g,sid).replace(/\{i\}/g,ne(k,F.w,F.alpha)).replace(/\{n\}/g,ne(n,F.w,F.alpha))+b.slice(k*F.dc,(k+1)*F.dc));return o}
+const KEY='nxg_job',save=j=>{try{localStorage.setItem(KEY,JSON.stringify(j))}catch{}},load=()=>{try{return JSON.parse(localStorage.getItem(KEY))}catch{return null}};
+async function txInfo(id){try{const r=await fetch(`${EXPL}/api/getrawtransaction?txid=${id}&decrypt=1`);if(!r.ok)return null;const j=await r.json(),t=j.result||j;return{c:t.confirmations||0,bh:t.blockhash||null}}catch{return null}}
+function showJob(){const j=load();$('js').textContent=j?`Proses tersimpan: ${j.n} potongan, ID ${j.sid}, ${j.phase==='done'?'selesai dikirim':'pengiriman belum selesai'}.`:'';$('rs').hidden=!j||j.phase==='done';$('chk').hidden=!j;$('del').hidden=!j}
+/* login */
+async function showAcct(){const w=W,el=$('acct');el.className='mut';el.textContent='Memeriksa saldo...';let bal,us;try{bal=NUX(Math.round(await getBalance(w.addr)*1e8))+' NUX'}catch(e){bal='gagal dimuat'}try{const u=await probeFilter(await getUtxos(),(d,n)=>{if(W===w)el.textContent=`Memeriksa UTXO di mempool ${d} dari ${n}...`}),c=u.filter(x=>x.c);UT=u;SEL=new Set([...SEL].filter(k=>u.some(x=>ukey(x)===k)));us=`${u.length} UTXO, ${c.length} terkonfirmasi (${NUX(c.reduce((s,x)=>s+x.v,0))} NUX siap dipakai)`+(SKIPPED?`\n${SKIPPED} UTXO disembunyikan karena sudah dipakai transaksi yang menunggu block`:'')+(PROBE_UNK?`\n${PROBE_UNK} UTXO tidak bisa dipastikan (respon node tidak jelas)`:'')}catch(e){us='UTXO tidak terbaca: '+e.message}
+if(W!==w)return;renderUtxos();el.className='mut ok';el.textContent=`Alamat: ${w.addr}\nSaldo: ${bal}\n${us}`;$('logout').hidden=false;$('rb').hidden=false;ready()}
+$('login').onclick=async()=>{const b=$('login');b.disabled=true;try{let raw=$('wif').value.trim();if(!raw)throw Error('Masukkan private key WIF atau teks ENC.');
+if(/^(ENC:|U2FsdGVkX1)/.test(raw)){const pin=$('pin').value.trim();if(!pin)throw Error('PIN dibutuhkan untuk mendekripsi kunci ini.');if(typeof CryptoJS==='undefined')throw Error('Library dekripsi gagal dimuat. Periksa koneksi lalu muat ulang halaman.');try{raw=CryptoJS.AES.decrypt(raw.replace(/^ENC:/,''),pin).toString(CryptoJS.enc.Utf8).trim()}catch{raw=''}if(!raw)throw Error('Gagal mendekripsi: PIN salah atau data tidak valid.')}
+const{key}=await wifDecode(raw),type=$('atype').value,h=await hash160(pubBytes(key,true)),addr=type==='bech32'?bech32enc(NET.hrp,h):await b58check(cat(Uint8Array.of(NET.pkh),h)),spk=type==='bech32'?cat(Uint8Array.of(0,20),h):p2pkh(h);
+W={d:key,comp:true,h,addr,spk,type};$('wif').value='';$('pin').value='';await showAcct()}catch(e){W=null;$('acct').className='mut er';$('acct').textContent=e.message;ready()}finally{b.disabled=false}};
+$('rb').onclick=()=>{if(W)showAcct()};
+$('logout').onclick=()=>{W=null;UT=[];SEL.clear();renderUtxos();$('acct').textContent='';$('logout').hidden=true;$('rb').hidden=true;ready()};
+/* gambar */
+const ready=()=>{$('go').disabled=!(W&&IMG)};
+function est(){if(!IMG)return;let F;try{F=cfgFmt()}catch(e){$('est').textContent=e.message;return}const n=Math.ceil(Math.ceil(IMG.length/3)*4/F.dc),lim=+$('lim').value||24;if($('mode').value==='raw'){const b=Math.ceil(IMG.length/3)*4,need=Math.ceil(b/lim/4)*4,ok=n<=lim;$('est').textContent=`${IMG.length} byte (${fmt(b)} karakter base64). Dengan OP_RETURN ${F.maxb} byte jadi ${fmt(n)} transaksi dalam satu rantai (maks ${lim}), fee sekitar ${fmt(n*+$('fee').value)} nusan.`+(ok?'':` Terlalu banyak: isi Maks. byte OP_RETURN minimal ${need} agar muat ${lim} transaksi.`);return}
+$('est').textContent=`${IMG.length} byte, ${fmt(n)} potongan (${F.dc} karakter data tiap potongan), butuh minimal ${Math.ceil(n/lim)} UTXO terkonfirmasi (${lim} transaksi per UTXO), fee sekitar ${fmt(n*+$('fee').value)} nusan.`+(n>2500?' Terlalu besar (maks 2500 potongan), perkecil ukuran.':'')}
+async function prep(){const f=$('file').files[0];if(!f)return;try{const bm=await createImageBitmap(f),maxB=+$('kb').value*1024;let dim=Math.min(+$('dim').value,Math.max(bm.width,bm.height)),bl=null,w,h;
+for(let t=0;t<14;t++){const s=Math.min(1,dim/Math.max(bm.width,bm.height));w=Math.max(1,Math.round(bm.width*s));h=Math.max(1,Math.round(bm.height*s));const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,w,h);x.drawImage(bm,0,0,w,h);
+for(let q=.9;q>=.3;q-=.1){bl=await new Promise(r=>c.toBlob(r,'image/jpeg',q));if(bl.size<=maxB)break}if(bl.size<=maxB)break;dim=Math.round(dim*.85)}
+IMG=new Uint8Array(await bl.arrayBuffer());$('pv').src=URL.createObjectURL(bl);$('pv').hidden=false;est();ready()}catch(e){IMG=null;$('est').textContent='Gagal memproses gambar: '+e.message;ready()}}
+const MODES={chunk:{mxb:80,fee:300,kb:60,lim:24,tpl:'NX{id}{i}{n}',idl:8,note:'Setiap OP_RETURN berisi header (kode sesi, nomor, total) + potongan base64. Banyak UTXO boleh dipakai, potongan boleh tersebar di beberapa block.'},gb1:{mxb:80,fee:300,kb:60,lim:24,tpl:'GB1{id}{i}{n}',idl:7,note:'Format lama (inject-gambar versi awal): header GB1 + kode sesi + nomor + total, lalu potongan base64. Banyak UTXO boleh dipakai, potongan boleh tersebar di beberapa block.'},raw:{mxb:1000,fee:2640,kb:100,lim:135,note:'Setiap OP_RETURN hanya berisi potongan base64 murni, tanpa header. Memakai satu UTXO dan satu rantai transaksi berurutan agar semuanya masuk satu block. Urutan transaksi di block adalah urutan gambar.'}};
+$('mode').onchange=()=>{const m=MODES[$('mode').value];$('mxb').value=m.mxb;$('fee').value=m.fee;$('kb').value=m.kb;$('lim').value=m.lim;if(m.tpl){$('tpl').value=m.tpl;$('idl').value=m.idl}$('mnote').textContent=m.note;$('tpl').disabled=$('idl').disabled=$('nw').disabled=$('nen').disabled=$('mode').value==='raw';if(IMG&&$('file').files[0])prep();else est()};$('mxb').addEventListener('input',()=>{if($('mode').value==='raw'){$('fee').value=Math.round((+$('mxb').value+200)*2.2);est()}});$('mnote').textContent=MODES.chunk.note;
+$('file').onchange=$('dim').onchange=$('kb').onchange=prep;$('fee').oninput=$('lim').oninput=$('tpl').oninput=$('idl').oninput=$('nw').oninput=$('mxb').oninput=$('nen').onchange=est;
+/* pilihan UTXO */
+let UT=[],SEL=new Set();const ukey=u=>u.txid+':'+u.vout;
+function renderUtxos(){const box=$('ulist');box.textContent='';if(!W||!UT.length){$('utl').hidden=true;return}$('utl').hidden=false;
+[...UT].sort((a,b)=>(b.c-a.c)||(b.v-a.v)).forEach(u=>{const lb=document.createElement('label'),cb=document.createElement('input'),t=document.createElement('span'),v=document.createElement('span');cb.type='checkbox';cb.checked=SEL.has(ukey(u));cb.onchange=()=>{cb.checked?SEL.add(ukey(u)):SEL.delete(ukey(u));updSel()};t.textContent=u.txid.slice(0,8)+'...'+u.txid.slice(-6)+':'+u.vout+(u.c?'':' (belum terkonfirmasi)');v.className='v';v.textContent=NUX(u.v)+' NUX';lb.append(cb,t,v);box.append(lb)});updSel()}
+function updSel(){const s=UT.filter(u=>SEL.has(ukey(u)));$('usum').textContent=s.length?`Dipilih ${s.length} UTXO, total ${NUX(s.reduce((t,u)=>t+u.v,0))} NUX.`:'Tidak ada yang dipilih: UTXO terkonfirmasi terbesar dipakai otomatis sesuai kebutuhan.'}
+$('usel').onclick=()=>{UT.filter(u=>u.c).forEach(u=>SEL.add(ukey(u)));renderUtxos()};$('uclr').onclick=()=>{SEL.clear();renderUtxos()};
+/* proses: satu rantai per UTXO, semua rantai dikirim bersamaan */
+function plan(n,lim,fee,pool){for(let k=Math.ceil(n/lim);k<=pool.length;k++){const use=pool.slice(0,k),base=Math.floor(n/k),r=n%k,cnt=use.map((_,i)=>base+(i<r?1:0));if(use.every((u,i)=>u.v>=cnt[i]*fee+546))return use.map((u,i)=>({u,cnt:cnt[i]}))}return null}
+async function sendAll(j){const p=j.chains.map(()=>0);let err='',done=0;
+for(let pass=0;pass<3;pass++){const todo=j.chains.map((_,c)=>c).filter(c=>p[c]<j.chains[c].length);if(!todo.length)break;if(pass)await sleep(3000);let k=0;
+await Promise.all(Array.from({length:Math.min(8,todo.length)},async()=>{while(k<todo.length){const c=todo[k++];while(p[c]<j.chains[c].length){const t=j.chains[c][p[c]];try{await bcast(t.hex,t.id)}catch(e){err=(e&&e.message)||String(e);if(p[c]===0&&/conflict|missing|spent|txn-mempool/i.test(err))try{spMark([inOf(t.hex)])}catch{}break}if(p[c]===0)try{spMark([inOf(t.hex)])}catch{}p[c]++;done++;bar(50+done/j.n*50);say(`Mengirim potongan: ${done} dari ${j.n}`)}}}))}
+const left=j.chains.reduce((s,ch,c)=>s+ch.length-p[c],0);
+if(left)throw Error(`${left} potongan belum terkirim: ${err.slice(0,160)}. Tekan Lanjutkan untuk mengirim ulang, sebelum blok berikutnya terbentuk.`+(/conflict|missing|spent|txn-mempool/i.test(err)?' UTXO yang bentrok sudah ditandai terpakai: hapus proses tersimpan, tekan Refresh saldo, lalu Inject ulang.':''));
+j.phase='done';save(j);say(`Semua ${j.n} potongan terkirim. Tunggu 1 blok, lalu tekan Cek blok.`,'ok')}
+async function runJob(j){$('go').disabled=true;$('rs').hidden=true;try{await sendAll(j)}catch(e){const m=(e&&e.message)||String(e);say(m,'er');log('GAGAL: '+m)}finally{showJob();ready()}}
+$('go').onclick=async()=>{const old=load();if(old&&old.phase!=='done'&&!confirm('Ada proses tersimpan yang belum selesai. Memulai yang baru akan melupakannya. Lanjut?'))return;$('log').textContent='';$('go').disabled=true;
+try{if(!W)throw Error('Masuk dulu.');if(!IMG)throw Error('Pilih gambar dulu.');
+const F=cfgFmt(),sid=Array.from(crypto.getRandomValues(new Uint8Array(F.idl)),x=>B62[x%62]).join(''),chunks=mkChunks(IMG,sid,F),n=chunks.length;if(n>2500)throw Error(`Gambar butuh ${fmt(n)} potongan, melebihi batas 2500. Perkecil ukuran.`);
+let raw;const fee=Math.round(+$('fee').value),lim=Math.min(300,Math.max(1,Math.round(+$('lim').value)));if(!(fee>=1))throw Error('Fee minimal 1.');
+say('Mengambil UTXO...');const all=await probeFilter(await getUtxos(),(d,n)=>say(`Memeriksa UTXO di mempool ${d} dari ${n}...`)),sel=all.filter(u=>SEL.has(ukey(u))),pool=(sel.length?sel:all.filter(u=>u.c)).sort((a,b)=>b.v-a.v);raw=$('mode').value==='raw';if(raw&&n>lim)throw Error(`Mode satu block hanya muat ${lim} potongan, gambar ini ${n}. Perkecil ukuran gambar atau naikkan maks byte OP_RETURN.`);const pl=raw?(pool.length&&pool[0].v>=n*fee+546?[{u:pool[0],cnt:n}]:null):plan(n,lim,fee,pool);
+if(!pl)throw Error(`UTXO ${sel.length?'terpilih':'terkonfirmasi'} tidak cukup untuk ${fmt(n)} potongan. Butuh minimal ${Math.ceil(n/lim)} UTXO (maks ${lim} transaksi per UTXO), tersedia ${pool.length}, dan tiap UTXO harus cukup untuk fee jatahnya. Perkecil gambar atau pecah saldo ke lebih banyak UTXO.`);
+const seg=W.type==='bech32',spk=W.spk,k=pl.length,chains=pl.map(()=>[]);let idx=0;
+log(`ID ${sid}, ${n} potongan dari ${k} UTXO`);
+for(let c=0;c<k;c++){let cur={txid:pl[c].u.txid,vout:pl[c].u.vout,v:pl[c].u.v};for(let m=0;m<pl[c].cnt;m++){const i=c+m*k,t=await buildTx2([cur],[{v:0,s:opret(enc.encode(chunks[i]))},{v:cur.v-fee,s:spk}],W.d,spk,seg);chains[c].push({id:t.txid,hex:hex(t.raw),i});cur={txid:t.txid,vout:1,v:cur.v-fee};if(++idx%20===0){say(`Menandatangani ${idx} dari ${n}`);bar(idx/n*50);await sleep(0)}}}
+const j={sid,n,addr:W.addr,phase:'send',chains};save(j);await runJob(j)}catch(e){const m=(e&&e.message)||String(e);say(m,'er');log('GAGAL: '+m);ready()}};
+$('rs').onclick=()=>{const j=load();if(j)runJob(j)};
+$('chk').onclick=async()=>{const j=load();if(!j||!j.chains)return;const b=$('chk');b.disabled=true;try{const ids=j.chains.flat().map(t=>t.id),n=ids.length,g={};let k=0,unk=0,pend=0;
+await Promise.all(Array.from({length:8},async()=>{while(k<n){const i=k++,r=await txInfo(ids[i]);if(!r)unk++;else if(r.c<1||!r.bh)pend++;else g[r.bh]=(g[r.bh]||0)+1;say(`Memeriksa ${k} dari ${n}...`)}}));
+const hs=Object.entries(g).sort((a,b)=>b[1]-a[1]),conf=hs.reduce((t,[,c])=>t+c,0);
+if(conf===n&&hs.length===1)say(`Semua ${n} potongan ada di satu blok (${hs[0][0].slice(0,12)}...). Gambar siap terdeteksi di NUX Fun Facts.`,'ok');
+else if(conf===n)say(`Potongan tersebar di ${hs.length} blok (${hs.map(([h,c])=>c+' di '+h.slice(0,8)).join(', ')}). Karena tidak berada di satu blok, gambar kemungkinan tidak terdeteksi di galeri.`,'er');
+else say(`${conf} dari ${n} sudah terkonfirmasi, ${pend} belum, ${unk} belum terbaca explorer. Coba lagi nanti.`)}finally{b.disabled=false}};
+$('del').onclick=()=>{if(confirm('Hapus proses tersimpan? Potongan yang sudah terkirim tetap ada di blockchain.')){try{localStorage.removeItem(KEY)}catch{}showJob()}};
+showJob();
+</script></body></html>
