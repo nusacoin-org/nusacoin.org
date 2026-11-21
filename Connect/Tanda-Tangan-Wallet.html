@@ -61,8 +61,9 @@ textarea{min-height:110px;font-family:ui-monospace,Menlo,Consolas,monospace;font
 <div><button onclick="tandatangani()">Tanda tangani</button></div>
 <div id="msgS"></div>
 <div id="outS" class="hide">
-<label>Hasil (JSON, salin dan kirim ke aplikasi/penguji)</label><textarea id="hasil" readonly></textarea>
-<div><button class="alt" onclick="salin()">Salin hasil</button></div>
+<label>Hasil (format pesan bertanda tangan, salin dan kirim ke aplikasi/penguji)</label><textarea id="hasil" readonly></textarea>
+<div><button class="alt" onclick="salin()">Salin hasil</button> <button class="alt" onclick="salinSig()">Salin tanda tangan saja</button></div>
+<p class="sub">Untuk form Claim di explorer.nusacoin.org: isi kolom Pesan dengan Display Name yang sama persis, lalu tempel hanya tanda tangan (tombol kedua).</p>
 </div>
 </div>
 <p class="sub">Tanda tangani hanya pesan yang kamu baca dan pahami. Pastikan nama aplikasi dan waktu pada tantangan sesuai situs yang sedang kamu buka.</p>
@@ -77,7 +78,7 @@ textarea{min-height:110px;font-family:ui-monospace,Menlo,Consolas,monospace;font
 </div>
 <div class="card">
 <b>Verifikasi tanda tangan</b>
-<label>Tempel JSON hasil (opsional, mengisi kolom di bawah otomatis)</label><textarea id="vjson" oninput="muatJson()" style="min-height:70px"></textarea>
+<label>Tempel hasil tanda tangan (blok NUSACOIN SIGNED MESSAGE atau JSON lama, opsional, mengisi kolom di bawah otomatis)</label><textarea id="vjson" oninput="muatJson()" style="min-height:70px"></textarea>
 <label>Alamat</label><input id="vaddr" placeholder="nu1q... atau N...">
 <label>Pesan</label><textarea id="vmsg"></textarea>
 <label>Tanda tangan (base64)</label><input id="vsig">
@@ -93,7 +94,8 @@ const $ = id => document.getElementById(id);
 const NUSACOIN_PARAMS = { bech32: 'nu', pubKeyHash: 0x35, wif: 0x57 };
 const BECH32_CHARSET = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l';
 const ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
-const MSG_PREFIX = 'Nusachain Signed Message:\n';
+const MSG_PREFIX = 'Nusacoin Signed Message:\n';          // sama dengan MESSAGE_MAGIC di Nusacoin Core (src/util/message.cpp)
+const MSG_PREFIX_LAMA = 'Nusachain Signed Message:\n';    // prefix lama, hanya untuk memeriksa tanda tangan yang sudah terlanjur dibuat
 const ec = new elliptic.ec('secp256k1');
 let wallet = { pkey: null, address: null };
 
@@ -172,11 +174,13 @@ const hexToBytes = h => Uint8Array.from(h.match(/../g) || [], x => parseInt(x, 1
 const sha256dHex = hex => CryptoJS.SHA256(CryptoJS.SHA256(CryptoJS.enc.Hex.parse(hex))).toString();
 const hash160Hex = hex => CryptoJS.RIPEMD160(CryptoJS.SHA256(CryptoJS.enc.Hex.parse(hex))).toString();
 function varIntHex(n) {
-  if (n < 0xfd) return n.toString(16).padStart(2, '0');
-  return 'fd' + (n & 0xff).toString(16).padStart(2, '0') + (n >> 8).toString(16).padStart(2, '0');
+  const le = (v, len) => { let o = ''; for (let i = 0; i < len; i++) o += ((v >>> (8 * i)) & 0xff).toString(16).padStart(2, '0'); return o; };
+  if (n < 0xfd) return le(n, 1);
+  if (n <= 0xffff) return 'fd' + le(n, 2);
+  return 'fe' + le(n, 4);
 }
 function varStr(s) { const b = new TextEncoder().encode(s); return varIntHex(b.length) + bytesToHex(b); }
-const msgHash = m => sha256dHex(varStr(MSG_PREFIX) + varStr(m));
+const msgHash = (m, prefix) => sha256dHex(varStr(prefix || MSG_PREFIX) + varStr(m));
 
 function addrFromPubHex(pubHex, type) {
   const pkh = hexToBytes(hash160Hex(pubHex));
@@ -271,6 +275,14 @@ function walletLogout() {
   $('walletActive').classList.add('hide'); $('walletLogin').classList.remove('hide');
 }
 
+// Format keluaran seperti pesan bertanda tangan di wallet Nusacoin
+function formatBlok(addr, msg, sig) {
+  return '-----BEGIN NUSACOIN SIGNED MESSAGE-----\n' + msg + '\n-----BEGIN SIGNATURE-----\n' + addr + '\n' + sig + '\n-----END NUSACOIN SIGNED MESSAGE-----';
+}
+function parseBlok(t) {
+  const m = t.replace(/\r/g, '').match(/-----BEGIN NUSACOIN SIGNED MESSAGE-----\n([\s\S]*?)\n-----BEGIN SIGNATURE-----\n([^\n]+)\n([^\n]+)\n?-----END NUSACOIN SIGNED MESSAGE-----/);
+  return m ? { pesan: m[1], alamat: m[2].trim(), tanda_tangan: m[3].trim() } : null;
+}
 function tandatangani() {
   if (wallet.ext) return tandatanganiExt();
   if (!wallet.pkey) return note('msgS', 'bad', 'Login wallet dulu.');
@@ -278,11 +290,11 @@ function tandatangani() {
   if (!m.trim()) return note('msgS', 'bad', 'Pesan masih kosong.');
   if (!confirm("Tanda tangani pesan ini dengan alamat " + wallet.address + "?\n\n" + m.slice(0, 600))) return;
   const sig = keyFromWif(wallet.pkey).sign(msgHash(m), { canonical: true });
-  const header = (wallet.address.startsWith('nu1') ? 39 : 31) + sig.recoveryParam;
+  const header = 31 + sig.recoveryParam;
   const bytes = new Uint8Array(65); bytes[0] = header;
   bytes.set(hexToBytes(sig.r.toString(16, 64)), 1); bytes.set(hexToBytes(sig.s.toString(16, 64)), 33);
   const b64 = btoa(String.fromCharCode(...bytes));
-  $('hasil').value = JSON.stringify({ alamat: wallet.address, pesan: m, tanda_tangan: b64 }, null, 2);
+  $('hasil').value = formatBlok(wallet.address, m, b64);
   $('outS').classList.remove('hide'); note('msgS', 'ok', 'Pesan berhasil ditandatangani. Tidak ada transaksi yang dikirim.');
 }
 async function tandatanganiExt(){
@@ -292,12 +304,13 @@ async function tandatanganiExt(){
     const p = NX.p(); if (!p) throw new Error(NX.t('nop'));
     const r = await p.signMessage(m);                  // { signature, publicKey, magic }
     const b = Uint8Array.from(atob(r.signature), c => c.charCodeAt(0));
-    const rec = (b[0] - 27) & 3; b[0] = (wallet.address.startsWith('nu1') ? 39 : 31) + rec;   // samakan header dengan mode WIF
-    $('hasil').value = JSON.stringify({ alamat: wallet.address, pesan: m, tanda_tangan: btoa(String.fromCharCode(...b)) }, null, 2);
+    const rec = (b[0] - 27) & 3; b[0] = 31 + rec;   // samakan header dengan mode WIF
+    $('hasil').value = formatBlok(wallet.address, m, btoa(String.fromCharCode(...b)));
     $('outS').classList.remove('hide'); note('msgS', 'ok', 'Pesan berhasil ditandatangani oleh Nusa Wallet. Tidak ada transaksi yang dikirim.');
   } catch (e) { note('msgS', 'bad', e && e.code === 4001 ? 'Ditolak di Nusa Wallet.' : ((e && e.message) || String(e))); }
 }
 
+function salinSig() { try { const j = parseBlok($('hasil').value); navigator.clipboard.writeText(j.tanda_tangan); note('msgS', 'ok', 'Tanda tangan (base64) disalin.'); } catch (e) { note('msgS', 'bad', 'Salin gagal. Salin manual dari kolom hasil.'); } }
 function salin() { $('hasil').select(); try { navigator.clipboard.writeText($('hasil').value); } catch (e) { document.execCommand('copy'); } }
 
 function buatTantangan() {
@@ -308,7 +321,7 @@ function buatTantangan() {
 }
 function muatJson() {
   try {
-    const j = JSON.parse($('vjson').value);
+    const t = $('vjson').value, j = parseBlok(t) || JSON.parse(t);
     if (j.alamat) $('vaddr').value = j.alamat; if (j.pesan !== undefined) $('vmsg').value = j.pesan; if (j.tanda_tangan) $('vsig').value = j.tanda_tangan;
   } catch (e) {}
 }
@@ -320,14 +333,26 @@ function verifikasi() {
     if (b.length !== 65) throw new Error("Panjang tanda tangan harus 65 byte.");
     if (b[0] < 27 || b[0] > 42) throw new Error("Header tanda tangan tidak dikenali.");
     const sig = { r: bytesToHex(b.slice(1, 33)), s: bytesToHex(b.slice(33, 65)) };
-    const h = msgHash(m);
-    const pub = ec.recoverPubKey(hexToBytes(h), sig, (b[0] - 27) & 3);
-    if (!ec.keyFromPublic(pub).verify(h, sig)) throw new Error("Tanda tangan tidak cocok dengan pesan.");
+    const rec = (b[0] - 27) & 3;
+    let pub = null, lama = false;
+    for (const pf of [MSG_PREFIX, MSG_PREFIX_LAMA]) {
+      try {
+        const h = msgHash(m, pf);
+        const k = ec.recoverPubKey(hexToBytes(h), sig, rec);
+        if (!ec.keyFromPublic(k).verify(h, sig)) continue;
+        const kh = k.encode('hex', true);
+        const c = [addrFromPubHex(kh, 'bech32'), addrFromPubHex(kh, 'p2pkh')];
+        const ok = addr.toLowerCase().startsWith('nu1') ? c[0] === addr.toLowerCase() : c[1] === addr;
+        if (ok || !pub) { pub = k; lama = pf === MSG_PREFIX_LAMA; }
+        if (ok) break;
+      } catch (e) {}
+    }
+    if (!pub) throw new Error("Tanda tangan tidak cocok dengan pesan.");
     const pubHex = pub.encode('hex', true);
     const cand = [addrFromPubHex(pubHex, 'bech32'), addrFromPubHex(pubHex, 'p2pkh')];
     const cocok = addr.toLowerCase().startsWith('nu1') ? cand[0] === addr.toLowerCase() : cand[1] === addr;
     if (!cocok) return note('msgV', 'bad', "TIDAK VALID. Tanda tangan sah, tetapi dibuat oleh alamat lain:\n" + cand.join("\n"));
-    let teks = "VALID. Pesan ditandatangani oleh pemilik alamat " + addr + ".";
+    let teks = "VALID. Pesan ditandatangani oleh pemilik alamat " + addr + "." + (lama ? "\n\nCatatan: tanda tangan ini memakai prefix lama (Nusachain). Tanda tangan baru memakai prefix Nusacoin, kompatibel dengan verifymessage di Nusacoin Core." : "");
     const w = m.match(/Waktu: (\S+)/), d = m.match(/Berlaku: (\d+) menit/);
     if (w && d) {
       const t = Date.parse(w[1]), umur = (Date.now() - t) / 60000;
