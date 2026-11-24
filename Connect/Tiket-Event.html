@@ -34,6 +34,10 @@ input[type=checkbox]{width:auto;margin-right:6px}
 .msg{padding:10px 12px;border-radius:8px;margin-top:10px;border:1px solid var(--bd);white-space:pre-wrap;word-break:break-word}
 .ok{color:var(--ok);border-color:var(--ok)}.bad{color:var(--bad);border-color:var(--bad)}
 .hide{display:none}
+.ulist{max-height:260px;overflow:auto;border:1px solid var(--bd);border-radius:8px;margin-top:8px}
+.urow{display:flex;gap:8px;align-items:center;padding:8px 10px;border-bottom:1px solid var(--bd);cursor:pointer;margin:0;color:var(--tx);font-size:.85rem}
+.urow:last-child{border-bottom:0}.urow input{margin:0;flex:none}.urow b{flex:none;min-width:110px}.urow span{min-width:0}
+.usum{margin-top:8px;font-size:.9rem}
 #gRes{text-align:center;font-size:1.1rem}#gRes b{display:block;font-size:1.6rem}
 #sheet{display:grid;grid-template-columns:1fr;gap:14px;margin-top:10px}
 .tk{--stub:68px;--acc:#0056B3;position:relative;display:flex;color:#12263f;border:2px solid var(--acc);border-radius:12px;break-inside:avoid;
@@ -51,7 +55,7 @@ input[type=checkbox]{width:auto;margin-right:6px}
 .tk-lbl{font-size:.6rem;text-transform:uppercase;letter-spacing:.12em;color:#5b6b80;margin-top:6px}
 .tk-lbl:first-child{margin-top:0}
 .tk .no{font:700 1.15rem ui-monospace,Menlo,Consolas,monospace;overflow-wrap:anywhere}
-.tk-val{font-size:.85rem;font-weight:600}
+.tk-val{font-size:.85rem;font-weight:600;overflow-wrap:anywhere}
 .tk small{display:block;margin-top:8px;font-size:.62rem;line-height:1.3;color:#5b6b80}
 .tk-stub{flex:none;width:var(--stub);display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:6px;padding:10px 4px;border-left:2px dashed #8fa9c8;background:rgba(0,86,179,.07)}
 .tk-v{writing-mode:vertical-rl;transform:rotate(180deg);font:700 .85rem ui-monospace,Menlo,Consolas,monospace;letter-spacing:.08em;white-space:nowrap}
@@ -82,10 +86,20 @@ input[type=checkbox]{width:auto;margin-right:6px}
 <b>Wallet aktif</b><div id="wAddr" class="mono"></div><div>Saldo: <span id="wBal">...</span></div>
 <div><button class="alt" onclick="refreshBalance()">Refresh saldo</button><button class="alt" onclick="walletLogout()">Keluar</button></div>
 </div>
+<div class="card hide" id="utxoCard">
+<b>Pilih UTXO untuk pendanaan</b>
+<p class="sub" style="margin:4px 0 0;font-size:.85rem">Hanya UTXO yang sudah terkonfirmasi dan tidak sedang dipakai transaksi di mempool yang ditampilkan. Langkah 2 hanya memakai UTXO yang dicentang.</p>
+<div><button class="alt" type="button" onclick="muatUtxo()">Muat ulang UTXO</button><button class="alt" type="button" onclick="pilihSemuaUtxo(true)">Pilih semua</button><button class="alt" type="button" onclick="pilihSemuaUtxo(false)">Kosongkan</button></div>
+<div id="msgU"></div>
+<div id="utxoList" class="ulist hide"></div>
+<div id="utxoSum" class="usum"></div>
+</div>
 <div class="card">
 <b>Data event</b>
 <div class="row"><div><label>Nama event</label><input id="evNama" placeholder="mis. Konser Amal Nusa"></div>
 <div><label>Kode tiket (singkat)</label><input id="kode" value="NUSA26"></div></div>
+<div class="row"><div><label>Tanggal event</label><input id="evTgl" type="date"></div>
+<div><label>Tempat event</label><input id="evTempat" placeholder="mis. Gedung Serbaguna Nusa, Semarang" maxlength="80"></div></div>
 <div class="row"><div><label>Jumlah tiket (maks 300)</label><input id="nTix" type="number" min="1" max="300" value="50"></div>
 <div><label>Nilai UTXO per tiket (NUX, min 0.00015)</label><input id="nilai" type="number" step="0.00000001" value="0.0003"></div></div>
 <label>Fee per kB (NUX)</label><input id="feeRate" type="number" step="0.00000001" value="0.001">
@@ -420,7 +434,7 @@ async function mempoolTerpakai() {   // best effort: kumpulkan semua outpoint ya
       await mapPool(ids, async id => {
         try { const t = await fetchTx(id); (t.vin || []).forEach(v => { if (v.txid !== undefined) spent.add(v.txid + ':' + v.vout); }); } catch (e) {}
       }, 6);
-      return spent;
+      spent.ok = true; return spent;
     } catch (e) {}
   }
   return spent;
@@ -428,7 +442,7 @@ async function mempoolTerpakai() {   // best effort: kumpulkan semua outpoint ya
 async function fetchUtxosTersedia(address, bal) {
   const raw = await fetchUtxos(address, bal);
   const info = { total: raw.length, belum: 0, mempool: 0, gagal: 0 };
-  const mp = await mempoolTerpakai();
+  const mp = await mempoolTerpakai(); info.mpOk = mp.ok === true;
   let cand = raw.filter(u => {
     if (mp.has(kunciUtxo(u))) { info.mempool++; return false; }
     if (u.confirmed === false) { info.belum++; return false; }
@@ -442,7 +456,7 @@ async function fetchUtxosTersedia(address, bal) {
   cand = cand.filter(u => u.confirmed === true || ok.has(kunciUtxo(u))).map(u => ({ ...u, confirmed: true }));
   return { list: cand, info };
 }
-const ringkasUtxo = i => 'UTXO ditemukan: ' + i.total + ', belum terkonfirmasi: ' + i.belum + ', terpakai di mempool: ' + i.mempool + (i.gagal ? ', gagal diperiksa: ' + i.gagal : '') + '.';
+const ringkasUtxo = i => 'UTXO ditemukan: ' + i.total + ', belum terkonfirmasi: ' + i.belum + ', terpakai di mempool: ' + i.mempool + (i.gagal ? ', gagal diperiksa: ' + i.gagal : '') + '.' + (i.mpOk === false ? '\nPERINGATAN: daftar mempool tidak bisa dibaca dari API, jadi UTXO yang sudah dipakai transaksi tertunda tidak bisa disaring otomatis.' : '');
 const CONFLICT_RE = /conflict|missing-?inputs|missingorspent|already spent|double.?spend|txn-mempool/i;
 async function broadcastRawTx(apiBase, rawHex, expectedTxid) {
   const url = `${apiBase}/broadcast`, enc = encodeURIComponent(rawHex);
@@ -540,7 +554,7 @@ async function walletConnectExt(){
     document.getElementById('walletLogin').classList.add('hide'); document.getElementById('walletActive').classList.remove('hide');
     document.getElementById('wAddr').textContent = addr + '  (' + NX.label(p) + ')';
     NX.msg(''); NX.listen(p);
-    if(typeof refreshBalance === 'function') refreshBalance();
+    if(typeof muatUtxo === 'function') muatUtxo();
     if(NX.after) NX.after();
   }catch(e){ NX.msg(e && e.code === 4001 ? NX.t('rej') : ((e && e.message) || String(e)), true); }
   finally{ if(b) b.disabled = false; }
@@ -596,10 +610,11 @@ function walletLogin() {
   $('wKey').value = ''; $('wPin').value = '';
   $('walletLogin').classList.add('hide'); $('walletActive').classList.remove('hide');
   $('wAddr').textContent = liveWalletData.address;
-  refreshBalance();
+  muatUtxo();
 }
 function walletLogout() {
   liveWalletData = { pkey: null, address: null, balance: 0 };
+  utxoPool = []; utxoPilih = new Set(); utxoInfo = null; $('utxoCard').classList.add('hide'); $('utxoList').innerHTML = '';
   $('walletActive').classList.add('hide'); $('walletLogin').classList.remove('hide');
 }
 async function getBalance(addr) {
@@ -610,6 +625,50 @@ async function refreshBalance() {
   const el = $('wBal'); el.textContent = '...';
   try { liveWalletData.balance = await getBalance(liveWalletData.address); el.textContent = liveWalletData.balance + ' NUX'; }
   catch (e) { el.textContent = 'gagal memuat saldo'; }
+}
+
+// ===== Pilihan UTXO (setelah login, sebelum inject) =====
+let utxoPool = [], utxoPilih = new Set(), utxoInfo = null, utxoMuat = false;
+function renderUtxo() {
+  const box = $('utxoList'); box.innerHTML = '';
+  box.classList.toggle('hide', !utxoPool.length);
+  utxoPool.forEach(u => {
+    const k = kunciUtxo(u), row = el('label', 'urow'), cb = document.createElement('input');
+    cb.type = 'checkbox'; cb.checked = utxoPilih.has(k);
+    cb.onchange = () => { if (cb.checked) utxoPilih.add(k); else utxoPilih.delete(k); ringkasPilihan(); };
+    row.appendChild(cb); row.appendChild(el('b', '', fmtNux(u.value) + ' NUX'));
+    row.appendChild(el('span', 'mono', u.txid.slice(0, 10) + '…' + u.txid.slice(-6) + ':' + u.vout));
+    box.appendChild(row);
+  });
+  ringkasPilihan();
+}
+function ringkasPilihan() {
+  const sel = utxoPool.filter(u => utxoPilih.has(kunciUtxo(u))), tot = sel.reduce((a, u) => a + u.value, 0);
+  const todo = tix.filter(t => !t.txid), butuh = todo.reduce((a, t) => a + t.sats, 0);
+  let t = utxoPool.length + ' UTXO tersedia, dipilih ' + sel.length + ' (' + fmtNux(tot) + ' NUX).';
+  if (butuh) t += ' Tiket belum didanai: ' + fmtNux(butuh) + ' NUX + fee jaringan.';
+  const d = $('utxoSum'); d.textContent = t; d.className = 'usum ' + (butuh && tot < butuh ? 'bad' : '');
+}
+function pilihSemuaUtxo(v) {
+  utxoPilih = new Set(v ? utxoPool.map(kunciUtxo) : []); renderUtxo();
+}
+async function muatUtxo(jaga) {
+  if (!liveWalletData.address || utxoMuat) return;
+  utxoMuat = true; const lama = new Set(utxoPilih), pertama = !utxoPool.length;
+  $('utxoCard').classList.remove('hide');
+  note('msgU', '', 'Memeriksa UTXO yang tersedia (terkonfirmasi dan tidak ada di mempool)...');
+  try {
+    await refreshBalance(); txCache.clear();
+    const ut = await fetchUtxosTersedia(liveWalletData.address, liveWalletData.balance);
+    utxoInfo = ut.info; utxoPool = ut.list.slice().sort((a, b) => b.value - a.value);
+    const ada = new Set(utxoPool.map(kunciUtxo));
+    utxoPilih = new Set(pertama && !jaga ? [...ada] : [...lama].filter(k => ada.has(k)));
+    renderUtxo();
+    note('msgU', utxoPool.length && utxoInfo.mpOk ? 'ok' : 'bad', utxoPool.length ? ringkasUtxo(utxoInfo) : 'Tidak ada UTXO yang tersedia. ' + ringkasUtxo(utxoInfo) + '\nTunggu transaksi sebelumnya terkonfirmasi, lalu klik Muat ulang UTXO.');
+  } catch (e) {
+    utxoPool = []; utxoPilih = new Set(); renderUtxo();
+    note('msgU', 'bad', 'Gagal memuat UTXO: ' + e.message);
+  } finally { utxoMuat = false; }
 }
 
 // ===== Penerbitan tiket =====
@@ -633,7 +692,7 @@ function pakai(pl, b) {   // buang UTXO yang sudah dipakai; kembalian ada di mem
 }
 function buatTiket() {
   const n = parseInt($('nTix').value, 10), v = Math.round(parseFloat($('nilai').value) * 1e8);
-  const kode = bersih($('kode').value).replace(/\s+/g, ''), ev = bersih($('evNama').value);
+  const kode = bersih($('kode').value).replace(/\s+/g, ''), ev = bersih($('evNama').value), tgl = $('evTgl').value, tempat = bersih($('evTempat').value);
   if (!kode) return note('msgA', 'bad', 'Isi kode tiket.');
   if (!ev) return note('msgA', 'bad', 'Isi nama event.');
   if (!(n >= 1) || n > 300) return note('msgA', 'bad', 'Jumlah tiket harus 1 sampai 300.');
@@ -644,7 +703,7 @@ function buatTiket() {
     const kp = ec.genKeyPair({ entropy: Array.from(crypto.getRandomValues(new Uint8Array(32))) });
     const priv = kp.getPrivate('hex').padStart(64, '0');
     const wif = toBase58Check(Uint8Array.from([NUSACOIN_PARAMS.wif, ...hexToBytes(priv), 1]));
-    tix.push({ label: kode + '-' + String(i + 1).padStart(3, '0'), ev, wif, addr: addrFromPub(kp.getPublic(true, 'hex'), 'bech32'), sats: v, txid: '' });
+    tix.push({ label: kode + '-' + String(i + 1).padStart(3, '0'), ev, wif, addr: addrFromPub(kp.getPublic(true, 'hex'), 'bech32'), sats: v, txid: '', tgl, tempat });
   }
   unduhCsv(); render();
   note('msgA', 'ok', n + " tiket dibuat dan cadangan diunduh. Simpan berkas cadangannya, lalu lanjut ke langkah 2 untuk mendanai tiket.\nTotal nilai tiket: " + fmtNux(n * v) + " NUX (di luar fee jaringan).");
@@ -655,58 +714,67 @@ async function kirimTiket() {
   if (!todo.length) return note('msgA', 'bad', tix.length ? 'Semua tiket sudah didanai.' : 'Buat tiket dulu (langkah 1).');
   const rate = parseFloat($('feeRate').value); if (isNaN(rate) || rate <= 0) return note('msgA', 'bad', 'Fee per kB tidak valid.');
   const total = todo.reduce((a, t) => a + t.sats, 0);
-  if (!confirm("Danai " + todo.length + " tiket?\n\nTotal nilai tiket: " + fmtNux(total) + " NUX ditambah fee jaringan.\nHanya UTXO yang sudah terkonfirmasi dan tidak ada di mempool yang dipakai.\nPastikan berkas cadangan sudah tersimpan.\n\nTransaksi tidak bisa dibatalkan.")) return;
+  if (!utxoPool.length) return note('msgA', 'bad', 'UTXO belum dimuat. Klik "Muat ulang UTXO" di kartu pilihan UTXO dulu.');
+  if (!utxoPilih.size) return note('msgA', 'bad', 'Pilih minimal satu UTXO di kartu "Pilih UTXO untuk pendanaan".');
+  if (!confirm("Danai " + todo.length + " tiket?\n\nTotal nilai tiket: " + fmtNux(total) + " NUX ditambah fee jaringan.\nHanya UTXO yang kamu pilih (terkonfirmasi, tidak ada di mempool) yang dipakai.\nPastikan berkas cadangan sudah tersimpan.\n\nTransaksi tidak bisa dibatalkan.")) return;
   const btn = $('btnKirim'); btn.disabled = true; let k = 0;
   try {
     const own = addressToScriptHex(liveWalletData.address);
-    await refreshBalance();
-    txCache.clear();
-    note('msgA', '', 'Memeriksa UTXO yang tersedia (terkonfirmasi dan tidak ada di mempool)...');
-    const ut = await fetchUtxosTersedia(liveWalletData.address, liveWalletData.balance);
-    let pl = ut.list; const blocked = new Set();
-    if (!pl.length) throw new Error('Tidak ada UTXO yang tersedia. ' + ringkasUtxo(ut.info) + '\nTunggu transaksi wallet sebelumnya terkonfirmasi, lalu klik langkah 2 lagi.');
+    note('msgA', '', 'Memeriksa ulang UTXO pilihanmu (terkonfirmasi dan tidak ada di mempool)...');
+    const dipilih0 = utxoPilih.size;
+    await muatUtxo(true);   // segarkan status; pilihan dipertahankan
+    let pl = utxoPool.filter(u => utxoPilih.has(kunciUtxo(u))); const blocked = new Set();
+    if (pl.length < dipilih0) throw new Error((dipilih0 - pl.length) + ' UTXO pilihanmu sudah tidak tersedia (kemungkinan baru dipakai transaksi di mempool). Periksa pilihan di kartu UTXO, lalu klik langkah 2 lagi.');
+    if (!pl.length) throw new Error('Tidak ada UTXO yang dipilih.');
     const nb = Math.ceil(todo.length / PER_TX);
     for (let i = 0; i < todo.length; i += PER_TX) {
       k++; note('msgA', '', "Mengirim transaksi " + k + " dari " + nb + "...");
       const chunk = todo.slice(i, i + PER_TX), rc = chunk.map(t => ({ sats: t.sats, script: addressToScriptHex(t.addr) }));
-      let b = null, sent = null;
-      for (let tr = 0; tr < 6 && !sent; tr++) {
+      let b = null, sent = null, lastMsg = '';
+      for (let tr = 0; tr < (liveWalletData.ext ? 3 : 15) && !sent; tr++) {
         const avail = pl.filter(u => !blocked.has(kunciUtxo(u)));
         try { b = susunBatch(avail, rc, own, rate); }
         catch (e) {
           if (blocked.size) throw new Error(e.message + '\n' + blocked.size + ' UTXO dilewati karena sedang dipakai transaksi di mempool. Tunggu terkonfirmasi, lalu klik langkah 2 lagi.');
           if (k > 1) throw new Error(e.message + '\nKembalian transaksi sebelumnya masih di mempool dan tidak dipakai. Tunggu 1 blok terkonfirmasi, lalu klik langkah 2 lagi.');
-          throw new Error(e.message + '\n' + ringkasUtxo(ut.info));
+          throw new Error(e.message + '\nPilih UTXO tambahan di kartu pilihan UTXO jika ada.');
         }
         try {
           const sg = await NXsign(b.sel, b.outputs, liveWalletData.pkey, own);
           sent = sg.sent ? sg.txid : await broadcastRawTx(NODE_API, sg.raw, sg.txid);   // Nux Connect sudah menyiarkan sendiri
         } catch (e) {
           if (!CONFLICT_RE.test(e.message)) throw e;
-          b.sel.forEach(u => blocked.add(kunciUtxo(u)));   // UTXO ini sudah ada di mempool: jangan dipakai lagi, coba UTXO lain
-          note('msgA', '', "Transaksi " + k + ": " + b.sel.length + " UTXO ternyata sudah ada di mempool, mencoba UTXO lain...");
+          lastMsg = e.message;
+          b.sel.forEach(u => { blocked.add(kunciUtxo(u)); utxoPilih.delete(kunciUtxo(u)); });   // ditolak node: jangan dipakai lagi, coba UTXO lain
+          note('msgA', '', "Transaksi " + k + ": node menolak (" + lastMsg.slice(0, 160) + "). " + b.sel.length + " UTXO dilewati, mencoba UTXO lain...");
         }
       }
-      if (!sent) throw new Error('UTXO terus ditolak karena sudah ada di mempool. Tunggu sampai terkonfirmasi, lalu klik langkah 2 lagi.');
+      if (!sent) { renderUtxo(); throw new Error('Semua UTXO yang dicoba ditolak node. Pesan node terakhir: ' + lastMsg + '\\n' + blocked.size + ' UTXO ditolak dan sudah dihapus dari pilihan. Cek transaksi tertunda (pending) di alamat wallet pada explorer; kalau ada transaksi pendanaan lama yang belum terkonfirmasi, tunggu sampai terkonfirmasi, lalu klik Muat ulang UTXO dan langkah 2.'); }
       pl = pakai(pl, b); chunk.forEach(t => t.txid = sent);
     }
     note('msgA', 'ok', todo.length + " tiket didanai dalam " + nb + " transaksi. Tunggu konfirmasi, lalu buka tab Tiket untuk mencetak.");
     show('B'); render();
   } catch (e) {
     note('msgA', 'bad', "Berhenti di transaksi " + k + ": " + e.message + "\n\nTiket yang sudah didanai: " + tix.filter(t => t.txid).length + " dari " + tix.length + ". Klik langkah 2 lagi untuk melanjutkan sisanya.");
-  } finally { btn.disabled = false; setTimeout(refreshBalance, 3000); }
+  } finally { btn.disabled = false; setTimeout(muatUtxo, 3000); }
 }
 
 // ===== Daftar, cetak, cadangan =====
 function el(tag, cls, txt) { const d = document.createElement(tag); if (cls) d.className = cls; if (txt !== undefined) d.textContent = txt; return d; }
+function fmtTgl(v) {
+  const d = new Date(v + 'T00:00:00');
+  return isNaN(d) ? v : d.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+}
 function render() {
   const sh = $('sheet'); sh.innerHTML = '';
   tix.forEach(t => {
     const c = el('div', 'tk'), main = el('div', 'tk-main');
     const top = el('div', 'tk-top'); top.append(el('span', '', 'TIKET MASUK'), el('span', '', 'ADMIT ONE'));
     const body = el('div', 'tk-body'), q = el('div', 'qrb'), info = el('div', 'tk-info');
-    info.append(el('div', 'tk-lbl', 'No. Tiket'), el('div', 'no', t.label),
-      el('div', 'tk-lbl', 'Berlaku'), el('div', 'tk-val', '1 orang, 1 kali masuk'),
+    info.append(el('div', 'tk-lbl', 'No. Tiket'), el('div', 'no', t.label));
+    if (t.tgl) info.append(el('div', 'tk-lbl', 'Tanggal'), el('div', 'tk-val', fmtTgl(t.tgl)));
+    if (t.tempat) info.append(el('div', 'tk-lbl', 'Tempat'), el('div', 'tk-val', t.tempat));
+    info.append(el('div', 'tk-lbl', 'Berlaku'), el('div', 'tk-val', '1 orang, 1 kali masuk'),
       el('small', '', 'Satu kali pakai. Jangan dibagikan atau difoto.'));
     body.append(q, info);
     main.append(top, el('div', 'tk-ev', t.ev), body);
@@ -719,7 +787,7 @@ function render() {
 }
 function unduhCsv() {
   if (!tix.length) return note('msgB', 'bad', 'Belum ada tiket.');
-  const csv = "label,event,alamat,wif,txid\n" + tix.map(t => [t.label, t.ev, t.addr, t.wif, t.txid].join(",")).join("\n");
+  const csv = "label,event,alamat,wif,txid,tanggal,tempat\n" + tix.map(t => [t.label, t.ev, t.addr, t.wif, t.txid, t.tgl || "", t.tempat || ""].join(",")).join("\n");
   const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
   a.download = "cadangan-tiket-" + tix[0].label.split('-')[0] + ".csv"; a.click();
 }
@@ -731,7 +799,7 @@ function impor() {
     r.result.split(/\r?\n/).forEach((ln, i) => {
       const p = ln.trim().split(','); if (p.length < 4 || (i === 0 && p[0] === 'label')) return;
       if (!isValidWif(p[3])) { bad++; return; }
-      out.push({ label: p[0], ev: p[1], wif: p[3], addr: addrFromPub(keyFromWif(p[3]).getPublic(true, 'hex'), 'bech32'), sats: 0, txid: p[4] || '' });
+      out.push({ label: p[0], ev: p[1], wif: p[3], addr: addrFromPub(keyFromWif(p[3]).getPublic(true, 'hex'), 'bech32'), sats: 0, txid: p[4] || '', tgl: p[5] || '', tempat: p[6] || '' });
     });
     tix = out; render();
     note('msgB', bad ? 'bad' : 'ok', out.length + " tiket dimuat." + (bad ? " " + bad + " baris dengan kunci tidak valid dilewati." : ""));
