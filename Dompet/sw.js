@@ -1,5 +1,5 @@
 // Service worker Nusa Wallet. Naikkan CACHE_VERSION setiap kali file aplikasi diperbarui.
-const CACHE_VERSION = 'nusawallet-v4';
+const CACHE_VERSION = 'nusawallet-v5';
 const APP_SHELL = [
   './', './index.html', './app.css', './app.js', './nux-bridge.js', './manifest.json',
   './lib/nusa-core.js', './lib/nusa-seed.js', './lib/qrcode.js',
