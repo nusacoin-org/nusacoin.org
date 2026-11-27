@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Detektif - Penelusur OP_RETURN Nusachain</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+:root{color-scheme:light dark;--bg:#f4f9ff;--c:#fff;--t:#10243e;--m:#5b6f8a;--l:#d5e3f5;--g:#007bff;--ok:#0f7a43;--er:#c0392b;--sb:#e8f1fd;--sf:#0056b3}
+@media(prefers-color-scheme:dark){:root{--bg:#0b1623;--c:#122236;--t:#e6eefa;--m:#93a6bf;--l:#25384f;--g:#3d94ff;--ok:#4cd08a;--er:#ff7b6b;--sb:#1b3350;--sf:#8ec3ff}}
+body{margin:0;background:var(--bg);color:var(--t);font:15px/1.5 system-ui,sans-serif}main{max-width:680px;margin:0 auto;padding:16px}
+h1{font-size:22px;margin:0 0 4px}h2{font-size:16px;margin:0 0 8px}.card{background:var(--c);border:1px solid var(--l);border-radius:12px;padding:14px;margin:12px 0}
+label{display:block;font-weight:600;font-size:13px;margin:10px 0 4px}input,select{width:100%;box-sizing:border-box;padding:9px 10px;border:1px solid var(--l);border-radius:8px;background:var(--bg);color:var(--t);font:inherit}
+button{padding:9px 14px;border:0;border-radius:8px;background:var(--g);color:#fff;font:inherit;font-weight:600;margin:8px 8px 0 0;cursor:pointer}button.g{background:var(--sb);color:var(--sf)}button:disabled{opacity:.5}
+.mut{color:var(--m);font-size:13px;white-space:pre-line;word-break:break-all}.ok{color:var(--ok)}.er{color:var(--er)}.row{display:flex;gap:10px}.row>div{flex:1}
+.bar{height:8px;background:var(--l);border-radius:4px;overflow:hidden;margin-top:10px}.bar i{display:block;height:100%;width:0;background:var(--g)}
+.s{display:flex;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--l);font-size:13px}.s .d{flex:1;min-width:0;word-break:break-all}.s b{font-family:monospace}.s button{margin:0;padding:6px 10px}
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:1px 7px;border-radius:99px;background:var(--sb);color:var(--sf);margin-right:6px}
+a.dl{display:inline-block;padding:9px 14px;border-radius:8px;background:var(--sb);color:var(--sf);font-weight:600;text-decoration:none;margin:8px 8px 0 0}
+pre{background:var(--bg);border:1px solid var(--l);border-radius:8px;padding:10px;white-space:pre-wrap;word-break:break-all;max-height:320px;overflow:auto;font-size:13px}
+#pv canvas{display:block;max-width:100%;height:auto;margin:10px auto 0;border:1px solid var(--l);border-radius:6px;background:#fff}
+img{max-width:100%;border-radius:8px;margin-top:8px;background:#fff}
+</style></head><body><main>
+<h1>🕵️ Detektif</h1>
+<p class="mut">Menelusuri blok Nusacoin, membaca semua data OP_RETURN, lalu merangkainya kembali: PDF (PDF1), gambar (NX, GB1, atau rantai base64), serta teks, hex, dan hash SHA-256 dari Inject Data.</p>
+<section class="card"><h2>1. Telusuri</h2>
+<label for="txid">TxID (memindai seluruh blok tempat TxID itu berada)</label><input id="txid" placeholder="64 karakter heksadesimal" autocomplete="off" spellcheck="false">
+<div class="row"><div><label for="h1">Tinggi blok (awal)</label><input id="h1" type="number" min="0" step="1" inputmode="numeric" placeholder="mis. 12345"></div><div><label for="h2">Sampai tinggi (opsional)</label><input id="h2" type="number" min="0" step="1" inputmode="numeric" placeholder="kosong = blok awal saja"></div></div>
+<label for="addr">Alamat pengirim (opsional)</label><input id="addr" placeholder="nu1q... atau N..." autocomplete="off" spellcheck="false">
+<label for="sid">ID sesi (opsional, menyaring potongan PDF/gambar)</label><input id="sid" autocomplete="off" spellcheck="false">
+<button id="go">Telusuri blockchain</button>
+<div class="bar"><i id="bar"></i></div><p class="mut" id="st"></p></section>
+<section class="card" id="rc" hidden><h2>2. Temuan</h2>
+<select id="flt"><option value="">Semua jenis</option><option value="pdf">PDF</option><option value="img">Gambar</option><option value="txt">Teks / hex / hash</option></select><div id="list"></div></section>
+<section class="card" id="vc" hidden><h2>3. Hasil rangkaian</h2><p class="mut" id="info"></p><div id="act"></div><div id="out"></div><div id="pv"></div></section>
+<details class="card"><summary><b>Pengaturan</b></summary>
+<label for="api">Alamat API explorer</label><input id="api" value="https://explorer.nusacoin.org" autocomplete="off" spellcheck="false">
+<p class="mut">Format potongan yang dikenali: PDF1{id 7}{i}{n}, WPIN{id 7}{i}{n}, GB1{id 7}{i}{n}, NX{id 8}{i}{n} (angka base62, lebar 3), plus gambar base64 berantai.</p></details>
+</main>
+<script>
+const $=id=>document.getElementById(id),API=()=>$('api').value.trim().replace(/\/+$/,'');
+const B62='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',MAGIC=['/9j/','iVBOR','UklGR','R0lGOD','JVBER'],FMT=[['pdf','PDF1',7],['pdf','WPIN',7],['img','GB1',7],['img','NX',8]],B64=/^[A-Za-z0-9+/]+={0,2}$/;
+const say=(m,c)=>{$('st').className='mut '+(c||'');$('st').textContent=m},bar=p=>$('bar').style.width=Math.min(100,p)+'%';
+let SES={},RAW={},TXT=[],ITEMS=[],URLS=[],SCANNED=new Set(),FAIL=0,LAST='',CUR='',PREV=0;
+const dn=s=>{let v=0;for(const ch of s){const k=B62.indexOf(ch);if(k<0)return NaN;v=v*62+k}return v};
+const hexb=h=>{const u=new Uint8Array(h.length>>1);for(let i=0;i<u.length;i++)u[i]=parseInt(h.substr(i*2,2),16);return u};
+const tohex=u=>[...u].map(b=>b.toString(16).padStart(2,'0')).join('');
+const fmtT=t=>t?new Date(t*1000).toLocaleString('id-ID',{timeZone:'Asia/Jakarta',dateStyle:'medium',timeStyle:'short'})+' WIB':'';
+async function jget(u){const r=await fetch(u);if(!r.ok)throw Error('explorer HTTP '+r.status);return r.json()}
+async function blockHash(h){const r=await fetch(`${API()}/api/getblockhash?index=${h}`);if(!r.ok)throw Error(`getblockhash HTTP ${r.status} (tinggi ${h})`);const t=(await r.text()).trim();let v=t;try{const j=JSON.parse(t);v=typeof j==='string'?j:(j.result||j.hash||t)}catch(e){}v=String(v).replace(/"/g,'');if(!/^[0-9a-f]{64}$/i.test(v))throw Error(`Blok tinggi ${h} tidak ditemukan.`);return v}
+async function blockTxs(bh){const j=await jget(`${API()}/api/getblock?hash=${bh}`),B=j.result||j;return(B.tx||[]).map(x=>typeof x==='string'?x:x.txid).filter(Boolean)}
+async function getTx(id){let e;for(let t=0;t<3;t++){try{const j=await jget(`${API()}/api/getrawtransaction?txid=${id}&decrypt=1`);return j.result||j}catch(x){e=x;await new Promise(r=>setTimeout(r,600*(t+1)))}}throw e}
+function opdata(o){const sp=o.scriptPubKey||{},h=sp.hex;
+ if(!h||h.slice(0,2)!=='6a'){const m=/^OP_RETURN\s+([0-9a-f]+)/i.exec(sp.asm||'');return m?hexb(m[1]):null}
+ const op=parseInt(h.substr(2,2),16);let l,p;if(op<0x4c){l=op;p=4}else if(op===0x4c){l=parseInt(h.substr(4,2),16);p=6}else if(op===0x4d){l=parseInt(h.substr(4,2),16)+parseInt(h.substr(6,2),16)*256;p=8}else return null;return hexb(h.substr(p,l*2))}
+function proc(t){const prev=(t.vin||[]).map(v=>v.txid).filter(Boolean);
+ for(const o of t.vout||[]){const u=opdata(o);if(!u||!u.length)continue;const s=new TextDecoder('latin1').decode(u);let hit=false;
+  for(const[k,pre,il]of FMT){if(!s.startsWith(pre))continue;const m=new RegExp('^'+pre+'(.{'+il+'})(.{3})(.{3})([A-Za-z0-9+/=]+)$').exec(s);if(!m)continue;
+   const i=dn(m[2]),n=dn(m[3]);if(!(n>0&&i<n))continue;const key=pre+':'+m[1],S=SES[key]||(SES[key]={k,pre,sid:m[1],n,p:{},blocks:new Set()});S.p[i]=m[4];if(t.blockhash)S.blocks.add(t.blockhash);hit=true;break}
+  if(hit)continue;
+  if(s.length>=4&&B64.test(s))RAW[t.txid]={s,u,prev,bh:t.blockhash||null,time:t.time};else TXT.push({txid:t.txid,u,bh:t.blockhash,time:t.time})}}
+function describe(u){const pr=/^[\t\n\r\x20-\x7e\u00a0-\uffff]*$/,dec=b=>{try{const s=new TextDecoder('utf-8',{fatal:true}).decode(b);return pr.test(s)?s:null}catch(e){return null}};
+ const s=dec(u);if(s!==null)return{t:'Teks',v:s};
+ if(u.length>=32){const p=dec(u.slice(0,u.length-32));if(p!==null&&u.length>32)return{t:'Awalan + hash',v:p+'\n'+tohex(u.slice(-32))};if(u.length===32)return{t:'Hash SHA-256',v:tohex(u)}}
+ return{t:'Hex',v:tohex(u)}}
+function endOk(b){try{const bin=atob(b),n=bin.length,c=i=>bin.charCodeAt(n-i);if(b.startsWith('/9j/'))return c(2)===0xff&&c(1)===0xd9;if(b.startsWith('iVBOR'))return c(8)===0x49&&c(7)===0x45&&c(6)===0x4e&&c(5)===0x44;if(b.startsWith('JVBER'))return bin.slice(-1024).includes('%%EOF');return true}catch(e){return false}}
+function build(){ITEMS=[];const only=$('sid').value.trim();
+ for(const key in SES){const S=SES[key];if(only&&S.sid!==only)continue;const miss=[];let b64='';for(let i=0;i<S.n;i++)S.p[i]===undefined?miss.push(i):b64+=S.p[i];
+  ITEMS.push({key,k:b64.startsWith('JVBER')?'pdf':MAGIC.slice(0,4).some(m=>b64.startsWith(m))?'img':S.k,title:S.pre+' '+S.sid,n:S.n,have:S.n-miss.length,miss,b64:miss.length?'':b64,ok:!miss.length,S})}
+ if(!only){const nx={},hp=new Set(),used=new Set(),groups=[];for(const id in RAW)for(const p of RAW[id].prev)if(RAW[p]){nx[p]=id;hp.add(id)}
+  for(const h of Object.keys(RAW).filter(i=>!hp.has(i))){let cur=h,g=null;const seen=new Set();
+   while(cur&&!seen.has(cur)){seen.add(cur);const r=RAW[cur];if(MAGIC.some(m=>r.s.startsWith(m))){g={ids:[],b64:''};groups.push(g)}if(g){g.ids.push(cur);g.b64+=r.s;used.add(cur)}cur=nx[cur]}}
+  groups.forEach(g=>{const pdf=g.b64.startsWith('JVBER');ITEMS.push({key:'ch:'+g.ids[0],k:pdf?'pdf':'img',title:'Rantai '+g.ids[0].slice(0,10)+'...',n:g.ids.length,have:g.ids.length,miss:[],b64:g.b64,ok:endOk(g.b64),chain:true})});
+  for(const id in RAW)if(!used.has(id)){const r=RAW[id];TXT.push({txid:id,u:r.u,bh:r.bh,time:r.time})}
+  const seenT=new Set();for(const x of TXT){const key='t:'+x.txid+':'+tohex(x.u.slice(0,8));if(seenT.has(key))continue;seenT.add(key);ITEMS.push({key,k:'txt',title:x.txid.slice(0,10)+'...',x,d:describe(x.u),ok:true})}}
+ const ord={pdf:0,img:1,txt:2};ITEMS.sort((a,b)=>ord[a.k]-ord[b.k])}
+const KN={pdf:'PDF',img:'Gambar',txt:'Data'};
+function show(){const box=$('list'),f=$('flt').value,L=ITEMS.filter(i=>!f||i.k===f);box.textContent='';
+ L.slice(0,300).forEach(it=>{const d=document.createElement('div');d.className='s';const dd=document.createElement('div');dd.className='d';
+  const tg=document.createElement('span');tg.className='tag';tg.textContent=it.k==='txt'?it.d.t:KN[it.k];const b=document.createElement('b');b.textContent=it.title;const br=document.createElement('br'),sp=document.createElement('span');
+  if(it.k==='txt'){sp.className='mut';sp.textContent=it.d.v.replace(/\s+/g,' ').slice(0,70)}else{sp.className=it.ok?'ok':'er';sp.textContent=it.ok?`lengkap (${it.have} ${it.chain?'transaksi':'potongan'})`:(it.chain?'akhir file tidak ditemukan (mungkin terpotong)':`${it.have} dari ${it.n} potongan`)}
+  dd.append(tg,b,br,sp);const bt=document.createElement('button');bt.className='g';bt.textContent='Lihat';bt.onclick=()=>view(it);d.append(dd,bt);box.appendChild(d)});
+ if(L.length>300){const p=document.createElement('p');p.className='mut';p.textContent=`Menampilkan 300 dari ${L.length} temuan. Persempit rentang blok atau pakai filter.`;box.appendChild(p)}
+ if(!L.length)box.innerHTML='<p class="mut">Tidak ada temuan untuk filter ini.</p>';$('rc').hidden=false}
+$('flt').onchange=show;
+function dlink(url,name,txt,blank){const a=document.createElement('a');a.href=url;a.className='dl';a.textContent=txt;if(blank){a.target='_blank';a.rel='noopener'}else a.download=name;$('act').appendChild(a)}
+async function fill(it,btn){btn.disabled=true;try{const ids=[];for(const bh of it.S.blocks)(await blockTxs(bh)).forEach(t=>{if(!SCANNED.has(t))ids.push(t)});if(!ids.length)throw Error('Tidak ada transaksi baru di blok itu.');await scan(ids);build();show();const n=ITEMS.find(i=>i.key===it.key);if(n)view(n);say(FAIL?`${FAIL} transaksi gagal dibaca, coba lagi.`:'Pemindaian blok selesai.',FAIL?'er':'ok')}catch(e){say(e.message,'er');btn.disabled=false}}
+async function preview(u8,my){const box=$('pv');if(!window.pdfjsLib){box.innerHTML='<p class="mut">Pratinjau tidak tersedia (PDF.js gagal dimuat). Gunakan Unduh.</p>';return 0}
+ try{pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';const doc=await pdfjsLib.getDocument({data:u8.slice()}).promise,max=Math.min(doc.numPages,15),w=Math.min(box.clientWidth||600,900);
+  for(let i=1;i<=max;i++){if(my!==PREV)return 0;const pg=await doc.getPage(i),v0=pg.getViewport({scale:1}),v=pg.getViewport({scale:w/v0.width*(devicePixelRatio||1)}),c=document.createElement('canvas');c.width=Math.floor(v.width);c.height=Math.floor(v.height);box.appendChild(c);await pg.render({canvasContext:c.getContext('2d'),viewport:v}).promise}
+  return doc.numPages}catch(e){box.innerHTML='<p class="mut er">Pratinjau gagal: '+e.message+'. PDF tetap bisa diunduh.</p>';return 0}}
+function view(it){CUR=it.key;PREV++;const my=PREV,info=$('info');$('vc').hidden=false;URLS.forEach(u=>URL.revokeObjectURL(u));URLS=[];$('act').textContent='';$('out').textContent='';$('pv').textContent='';
+ if(it.k==='txt'){const x=it.x;info.className='mut';info.textContent=`${it.d.t}, ${x.u.length} byte. TxID: ${x.txid}${x.time?'\n'+fmtT(x.time):''}`;
+  const pre=document.createElement('pre');pre.textContent=it.d.v;$('out').appendChild(pre);
+  const c=document.createElement('button');c.className='g';c.textContent='Salin';c.onclick=()=>navigator.clipboard.writeText(it.d.v).then(()=>c.textContent='Tersalin',()=>c.textContent='Gagal menyalin');$('act').appendChild(c);
+  const url=URL.createObjectURL(new Blob([it.d.v],{type:'text/plain'}));URLS.push(url);dlink(url,'nux-'+x.txid.slice(0,10)+'.txt','Unduh .txt');
+  const hx=document.createElement('p');hx.className='mut';hx.textContent='Hex: '+tohex(x.u);$('out').appendChild(hx);return}
+ if(!it.b64){if(it.S&&it.S.blocks.size){const f=document.createElement('button');f.textContent='Lengkapi dari blok';f.onclick=()=>fill(it,f);$('act').appendChild(f)}
+  info.className='mut er';info.textContent=`${it.title} belum utuh. Potongan hilang: ${it.miss.slice(0,20).join(', ')}${it.miss.length>20?'...':''}. Mungkin tersebar di blok lain atau belum terkonfirmasi; perluas rentang tinggi blok lalu telusuri lagi.`;return}
+ try{const bin=atob(it.b64),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);const b=it.b64;
+  const type=b.startsWith('JVBER')?'application/pdf':b.startsWith('iVBOR')?'image/png':b.startsWith('UklGR')?'image/webp':b.startsWith('R0lGOD')?'image/gif':'image/jpeg',ext={'application/pdf':'pdf','image/png':'png','image/webp':'webp','image/gif':'gif','image/jpeg':'jpg'}[type];
+  if(type==='application/pdf'&&!(u[0]===0x25&&u[1]===0x50))throw Error('data bukan PDF (header %PDF tidak ditemukan).');
+  const url=URL.createObjectURL(new Blob([u],{type}));URLS.push(url);const blk=it.S&&it.S.blocks.size>1?`, tersebar di ${it.S.blocks.size} blok`:'';
+  info.className='mut '+(it.ok?'ok':'er');info.textContent=`${it.title}: ${it.n} ${it.chain?'transaksi':'potongan'}, ${u.length} byte${blk}.`+(it.ok?'':' Peringatan: penanda akhir file tidak ditemukan, mungkin terpotong.')+' Jika unduh tidak bekerja di aplikasi, gunakan Buka di tab baru.';
+  dlink(url,`nux-${it.title.replace(/\W/g,'')}.${ext}`,'Unduh '+ext.toUpperCase());dlink(url,'','Buka di tab baru',true);
+  if(type==='application/pdf')preview(u,my).then(n=>{if(n&&my===PREV)info.textContent+=` ${n} halaman.`});
+  else{const im=document.createElement('img');im.alt='Gambar dari blockchain';im.onerror=()=>{info.className='mut er';info.textContent='Data terbaca ('+u.length+' byte) tetapi bukan gambar valid. Mungkin ada potongan salah urutan atau terpotong.'};im.src=url;$('out').appendChild(im)}}
+ catch(e){info.className='mut er';info.textContent='Data rusak: '+e.message}}
+async function scan(ids){const list=ids.filter(i=>!SCANNED.has(i));let k=0,d=0;
+ await Promise.all(Array.from({length:8},async()=>{while(k<list.length){const id=list[k++];try{proc(await getTx(id));SCANNED.add(id)}catch(e){FAIL++;LAST=e.message}d++;bar(d/list.length*100);say(`Memeriksa transaksi ${d} dari ${list.length}...`)}}))}
+$('go').onclick=async()=>{const b=$('go'),addr=$('addr').value.trim(),tx0=$('txid').value.trim(),h1=$('h1').value.trim(),h2=$('h2').value.trim();
+ if(!addr&&!tx0&&h1==='')return say('Isi TxID, tinggi blok, atau alamat dulu.','er');
+ if(tx0&&!/^[0-9a-f]{64}$/i.test(tx0))return say('TxID harus 64 karakter heksadesimal.','er');
+ b.disabled=true;SES={};RAW={};TXT=[];ITEMS=[];SCANNED=new Set();FAIL=0;LAST='';$('rc').hidden=$('vc').hidden=true;
+ try{const ids=new Set();
+  if(tx0){say('Mencari blok dari TxID...');const t=await getTx(tx0);if(!t.blockhash)throw Error('Transaksi itu belum terkonfirmasi di blok. Tunggu 1 blok lalu coba lagi.');(await blockTxs(t.blockhash)).forEach(i=>ids.add(i))}
+  if(addr){say('Mengambil daftar transaksi alamat...');for(let s=0;s<5000;s+=500){const raw=await jget(`${API()}/ext/getaddresstxs/${addr}/${s}/500`),arr=Array.isArray(raw)?raw:(raw.data||raw.records||[]);arr.forEach(i=>{const t=i.txid||(typeof i==='string'?i:null);if(t)ids.add(t)});if(arr.length<500)break}}
+  if(h1!==''){const a=Number(h1),z=h2===''?a:Number(h2);if(!Number.isInteger(a)||!Number.isInteger(z)||a<0||z<a)throw Error('Tinggi blok tidak valid (tinggi akhir harus ≥ tinggi awal).');if(z-a>=300)throw Error('Rentang maksimal 300 blok sekali telusuri.');
+   for(let h=a;h<=z;h++){say(`Mengambil blok ${h} (${h-a+1} dari ${z-a+1})...`);bar((h-a+1)/(z-a+1)*100);(await blockTxs(await blockHash(h))).forEach(i=>ids.add(i))}}
+  if(!ids.size)throw Error('Tidak ada transaksi untuk pencarian ini.');
+  await scan([...ids]);build();
+  if(!ITEMS.length)throw Error(FAIL?`${FAIL} transaksi gagal dibaca (${LAST}). Periksa koneksi lalu coba lagi.`:'Tidak ada data OP_RETURN yang ditemukan.');
+  show();const f=ITEMS.find(i=>i.ok&&i.k!=='txt')||ITEMS[0];view(f);
+  say(`Ditemukan ${ITEMS.length} temuan dari ${SCANNED.size} transaksi.`+(FAIL?` Peringatan: ${FAIL} transaksi gagal dibaca (${LAST}); telusuri lagi jika belum utuh.`:''),FAIL?'er':'ok')}
+ catch(e){say(e.message,'er')}finally{b.disabled=false}};
+</script></body></html>
